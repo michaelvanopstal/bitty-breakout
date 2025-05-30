@@ -1,0 +1,24 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: url('background.png') no-repeat center center fixed;
+  background-size: cover;
+}
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+}
+canvas {
+  border: 3px solid #00aaff;
+  background: rgba(0,0,0,0.6);
+}
+.sidebar {
+  margin-left: 20px;
+  color: white;
+}
+.sidebar h2 {
+  margin-top: 10px;
+  text-align: center;
+}
