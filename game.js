@@ -95,14 +95,19 @@ function collisionDetection() {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
       if (b.status === 1) {
-        if (x + ballRadius > b.x && x - ballRadius < b.x + brickWidth && y + ballRadius > b.y && y - ballRadius < b.y + brickHeight) {
-          
-      // Sterke en begrensde paddle-aansturing
-      let hitPoint = x - (paddleX + paddleWidth / 2);
-      dx = hitPoint * 0.3;
-      dx = Math.max(-6, Math.min(6, dx));
-      dy = -Math.abs(dy);
+        // Check op meerdere offsetposities voor betrouwbaarheid
+        const ballLeft = x - ballRadius;
+        const ballRight = x + ballRadius;
+        const ballTop = y - ballRadius;
+        const ballBottom = y + ballRadius;
 
+        if (
+          ballRight > b.x &&
+          ballLeft < b.x + brickWidth &&
+          ballBottom > b.y &&
+          ballTop < b.y + brickHeight
+        ) {
+          dy = -dy;
           b.status = 0;
           score += 10;
         }
@@ -152,10 +157,6 @@ function draw() {
 
   if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 7;
   else if (leftPressed && paddleX > 0) paddleX -= 7;
-
-  
-  dx = Math.max(-6, Math.min(6, dx));
-  dy = Math.max(-6, Math.min(6, dy));
 
   requestAnimationFrame(draw);
 }
