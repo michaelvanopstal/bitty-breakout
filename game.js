@@ -16,7 +16,7 @@ let leftPressed = false;
 
 const brickRowCount = 6;
 const brickColumnCount = 10;
-const brickWidth = 31;
+const brickWidth = 36;
 const brickHeight = 25;
 
 const bricks = [];
@@ -52,7 +52,7 @@ function drawBricks() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       if (bricks[c][r].status === 1) {
-        const brickX = c * (brickWidth + 2);
+        const brickX = c * brickWidth;
         const brickY = r * brickHeight;
         bricks[c][r].x = brickX;
         bricks[c][r].y = brickY;
@@ -70,7 +70,7 @@ function drawBall() {
 
 function drawPaddle() {
   ctx.beginPath();
-  ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+  ctx.rect(paddleX, canvas.height * 0.85, paddleWidth, paddleHeight);
   ctx.fillStyle = "#fff";
   ctx.fill();
   ctx.closePath();
@@ -109,14 +109,7 @@ function draw() {
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
   if (y + dy < ballRadius) dy = -dy;
   else if (y + dy > canvas.height - ballRadius) {
-    if (x > paddleX && x < paddleX + paddleWidth) {
-      let hitPoint = x - (paddleX + paddleWidth / 2);
-      hitPoint = hitPoint / (paddleWidth / 2);  // tussen -1 (links) en 1 (rechts)
-      const angle = hitPoint * Math.PI / 3; // max 60 graden links/rechts
-      const speed = Math.sqrt(dx * dx + dy * dy);
-      dx = speed * Math.sin(angle);
-      dy = -speed * Math.cos(angle);
-    }
+    if (x > paddleX && x < paddleX + paddleWidth) dy = -dy;
     else document.location.reload();
   }
 
