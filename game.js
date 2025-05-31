@@ -7,7 +7,6 @@ let ballRadius = 8;
 let dx = 8;
 let dy = -8;
 let ballLaunched = false;
-      score = 0;
 let x;
 let y;
 let paddleHeight = 10;
@@ -129,9 +128,17 @@ function draw() {
       dy = -dy;
     } else {
       
+      
       ballLaunched = false;
       score = 0;
+      for (let c = 0; c < brickColumnCount; c++) {
+        for (let r = 0; r < brickRowCount; r++) {
+          bricks[c][r].status = 1;
+        }
+      }
       x = paddleX + paddleWidth / 2;
+      y = canvas.height - paddleHeight - ballRadius - 2;
+
       y = canvas.height - paddleHeight - ballRadius - 2;
     
     }
