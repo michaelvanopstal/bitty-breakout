@@ -4,10 +4,11 @@ const ctx = canvas.getContext("2d");
 
 let score = 0;
 let ballRadius = 8;
-let x = canvas.width / 2;
-let y = canvas.height - 30;
+let x = paddleX + paddleWidth / 2;
+let y = canvas.height - 10 - ballRadius;
 let dx = 8;
 let dy = -8;
+let ballLaunched = false;
 let paddleHeight = 10;
 let paddleWidth = 100;
 let paddleX = (canvas.width - paddleWidth) / 2;
@@ -30,6 +31,11 @@ for (let c = 0; c < brickColumnCount; c++) {
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
+document.addEventListener("click", () => { if (!ballLaunched) ballLaunched = true; });
+document.addEventListener("keydown", (e) => {
+  if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) ballLaunched = true;
+});
+
 
 function keyDownHandler(e) {
   if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
@@ -113,8 +119,13 @@ function draw() {
     else document.location.reload();
   }
 
-  x += dx;
-  y += dy;
+  if (ballLaunched) {
+    x += dx;
+    y += dy;
+  } else {
+    x = paddleX + paddleWidth / 2;
+    y = canvas.height - 10 - ballRadius;
+  }
 
   if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 7;
   else if (leftPressed && paddleX > 0) paddleX -= 7;
