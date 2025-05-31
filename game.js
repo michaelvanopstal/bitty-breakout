@@ -95,18 +95,7 @@ function collisionDetection() {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
       if (b.status === 1) {
-        // Check op meerdere offsetposities voor betrouwbaarheid
-        const ballLeft = x - ballRadius;
-        const ballRight = x + ballRadius;
-        const ballTop = y - ballRadius;
-        const ballBottom = y + ballRadius;
-
-        if (
-          ballRight > b.x &&
-          ballLeft < b.x + brickWidth &&
-          ballBottom > b.y &&
-          ballTop < b.y + brickHeight
-        ) {
+        if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
           dy = -dy;
           b.status = 0;
           score += 10;
@@ -125,40 +114,45 @@ function draw() {
   drawScore();
 
   if (ballLaunched) {
-    x += dx;
-    y += dy;
-  } else {
-    x = paddleX + paddleWidth / 2;
-    y = canvas.height - paddleHeight - ballRadius - 2;
-  }
-
-  if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
-  if (y + dy < ballRadius) dy = -dy;
-  else if (y + dy > canvas.height - ballRadius) {
-    if (x > paddleX && x < paddleX + paddleWidth) {
-      dy = -dy;
+    // Beweeg in kleine stapjes om tunneling te voorkomen
+  let steps = 4;
+  for (let i = 0; i < steps; i++) {
+    if (ballLaunched) {
+      x += dx / steps;
+      y += dy / steps;
+      collisionDetection();
     } else {
-      
-      
-      ballLaunched = false;
-      score = 0;
-      for (let c = 0; c < brickColumnCount; c++) {
-        for (let r = 0; r < brickRowCount; r++) {
-          bricks[c][r].status = 1;
-        }
-      }
       x = paddleX + paddleWidth / 2;
       y = canvas.height - paddleHeight - ballRadius - 2;
-
-      y = canvas.height - paddleHeight - ballRadius - 2;
-    
     }
+
+    // Muurbotsing en onderkant check binnen stappen
+    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+    if (y + dy < ballRadius) dy = -dy;
+    else if (y + dy > canvas.height - ballRadius) {
+      if (x > paddleX && x < paddleX + paddleWidth) {
+        // Paddle hit met richtingcontrole
+        let hitPoint = x - (paddleX + paddleWidth / 2);
+        dx = hitPoint * 0.3;
+        dx = Math.max(-6, Math.min(6, dx));
+        dy = -Math.abs(dy);
+      } else {
+        ballLaunched = false;
+        score = 0;
+        for (let c = 0; c < brickColumnCount; c++) {
+          for (let r = 0; r < brickRowCount; r++) {
+            bricks[c][r].status = 1;
+          }
+        }
+        x = paddleX + paddleWidth / 2;
+        y = canvas.height - paddleHeight - ballRadius - 2;
+      }
+    }
+
+    // Beperk snelheid
+    dx = Math.max(-6, Math.min(6, dx));
+    dy = Math.max(-6, Math.min(6, dy));
   }
-
-  if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 7;
-  else if (leftPressed && paddleX > 0) paddleX -= 7;
-
-  requestAnimationFrame(draw);
 }
 
 draw();
