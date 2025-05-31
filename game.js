@@ -32,8 +32,17 @@ document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
 document.addEventListener("click", () => {
-  if (!ballLaunched) ballLaunched = true;
+  if (!ballLaunched) {
+    ballLaunched = true;
+    dx = 0;
+  }
 });
+document.addEventListener("keydown", (e) => {
+  if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) {
+    ballLaunched = true;
+    dx = 0;
+  }
+}););
 document.addEventListener("keydown", (e) => {
   if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) ballLaunched = true;
 });
@@ -122,7 +131,7 @@ function draw() {
   drawPaddle();
   drawScore();
 
-  let steps = 4;
+  let steps = 8;
   for (let i = 0; i < steps; i++) {
     if (ballLaunched) {
       x += dx / steps;
