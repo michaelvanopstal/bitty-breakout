@@ -10,11 +10,12 @@ body {
 
 #gameCanvas {
   position: absolute;
-  top: 60px;
-  left: 30px;
-  width: 310px;
-  height: 500px;
+  top: 50px;
+  left: 20px;
+  width: 420px;
+  height: 410px;
   background-color: transparent;
+  border: 3px solid #00aaff;
 }
 
 #scoreDisplay {

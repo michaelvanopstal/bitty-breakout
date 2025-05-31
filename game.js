@@ -125,7 +125,6 @@ function draw() {
 
 draw();
 
-
 function drawGameBorder() {
   ctx.beginPath();
   ctx.lineWidth = 3;
