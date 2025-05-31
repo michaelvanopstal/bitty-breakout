@@ -1,10 +1,25 @@
 
+let playerName = "";
+let highscores = JSON.parse(localStorage.getItem("highscores") || "[]");
+
+function promptForName() {
+  playerName = prompt("Enter your name:");
+  if (!playerName) playerName = "Anon";
+}
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 let score = 0;
+
+        // Update highscores
+        highscores.push({ name: playerName, score: score });
+        highscores.sort((a, b) => b.score - a.score);
+        highscores = highscores.slice(0, 10);
+        localStorage.setItem("highscores", JSON.stringify(highscores));
+
 let ballRadius = 8;
-let dx = 0;
+let dx = 4;
 let dy = -4;
 let ballLaunched = false;
 let x;
@@ -34,14 +49,12 @@ document.addEventListener("mousemove", mouseMoveHandler, false);
 document.addEventListener("click", () => {
   if (!ballLaunched) {
     dx = 0;
-    dy = -4;
     ballLaunched = true;
   }
 });
 document.addEventListener("keydown", (e) => {
   if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) {
     dx = 0;
-    dy = -4;
     ballLaunched = true;
   }
 }););
@@ -97,7 +110,7 @@ function drawPaddle() {
 function drawScore() {
   const scoreDiv = document.getElementById("scoreDisplay");
   if (scoreDiv) {
-    scoreDiv.innerHTML = "Score: " + score + " pxp";
+    scoreDiv.innerHTML = playerName + ": " + score + " pxp";
   }
 }
 
@@ -133,7 +146,7 @@ function draw() {
   drawPaddle();
   drawScore();
 
-  let steps = 12;
+  let steps = 8;
   for (let i = 0; i < steps; i++) {
     if (ballLaunched) {
       x += dx / steps;
@@ -155,6 +168,13 @@ function draw() {
       } else {
         ballLaunched = false;
         score = 0;
+
+        // Update highscores
+        highscores.push({ name: playerName, score: score });
+        highscores.sort((a, b) => b.score - a.score);
+        highscores = highscores.slice(0, 10);
+        localStorage.setItem("highscores", JSON.stringify(highscores));
+
         for (let c = 0; c < brickColumnCount; c++) {
           for (let r = 0; r < brickRowCount; r++) {
             bricks[c][r].status = 1;
@@ -175,4 +195,18 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
+promptForName();
+
+function drawHighscores() {
+  const scoreDiv = document.getElementById("scoreDisplay");
+  if (scoreDiv) {
+    let list = "<br><strong>🏆 High Scores</strong><br>";
+    highscores.forEach((entry, index) => {
+      list += (index + 1) + ". " + entry.name + ": " + entry.score + " pxp<br>";
+    });
+    scoreDiv.innerHTML += list;
+  }
+}
+
+promptForName();
 draw();
