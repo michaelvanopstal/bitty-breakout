@@ -16,7 +16,7 @@ let leftPressed = false;
 
 const brickRowCount = 6;
 const brickColumnCount = 10;
-const brickWidth = 57;
+const brickWidth = 31;
 const brickHeight = 25;
 
 const bricks = [];
@@ -52,7 +52,7 @@ function drawBricks() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       if (bricks[c][r].status === 1) {
-        const brickX = c * brickWidth;
+        const brickX = c * (brickWidth + 2);
         const brickY = r * brickHeight;
         bricks[c][r].x = brickX;
         bricks[c][r].y = brickY;
@@ -109,7 +109,14 @@ function draw() {
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
   if (y + dy < ballRadius) dy = -dy;
   else if (y + dy > canvas.height - ballRadius) {
-    if (x > paddleX && x < paddleX + paddleWidth) dy = -dy;
+    if (x > paddleX && x < paddleX + paddleWidth) {
+      let hitPoint = x - (paddleX + paddleWidth / 2);
+      hitPoint = hitPoint / (paddleWidth / 2);  // tussen -1 (links) en 1 (rechts)
+      const angle = hitPoint * Math.PI / 3; // max 60 graden links/rechts
+      const speed = Math.sqrt(dx * dx + dy * dy);
+      dx = speed * Math.sin(angle);
+      dy = -speed * Math.cos(angle);
+    }
     else document.location.reload();
   }
 
