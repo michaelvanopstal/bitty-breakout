@@ -33,16 +33,19 @@ document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
 document.addEventListener("click", () => {
   if (!ballLaunched) {
-    ballLaunched = true;
     dx = 0;
+    ballLaunched = true;
   }
 });
 document.addEventListener("keydown", (e) => {
   if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) {
-    ballLaunched = true;
     dx = 0;
+    ballLaunched = true;
   }
 }););
+document.addEventListener("keydown", (e) => {
+  if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) ballLaunched = true;
+});
 
 function keyDownHandler(e) {
   if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
