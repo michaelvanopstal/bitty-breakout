@@ -127,7 +127,11 @@ function draw() {
     if (x > paddleX && x < paddleX + paddleWidth) {
       dy = -dy;
     } else {
-      document.location.reload();
+      
+      ballLaunched = false;
+      x = paddleX + paddleWidth / 2;
+      y = canvas.height - paddleHeight - ballRadius - 2;
+    
     }
   }
 
