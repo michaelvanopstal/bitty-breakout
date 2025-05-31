@@ -97,9 +97,9 @@ function collisionDetection() {
       if (b.status === 1) {
         if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
           
-      // Controleer waar de bal het paddle raakt
+      // Richting aanpassen afhankelijk van waar de bal het paddle raakt
       let hitPoint = x - (paddleX + paddleWidth / 2);
-      dx = hitPoint * 0.2; // schaal het effect
+      dx = hitPoint * 0.2;
       dy = -Math.abs(dy);
     
           b.status = 0;
@@ -128,17 +128,17 @@ function draw() {
 
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
   if (y + dy < ballRadius) 
-      // Controleer waar de bal het paddle raakt
+      // Richting aanpassen afhankelijk van waar de bal het paddle raakt
       let hitPoint = x - (paddleX + paddleWidth / 2);
-      dx = hitPoint * 0.2; // schaal het effect
+      dx = hitPoint * 0.2;
       dy = -Math.abs(dy);
     
   else if (y + dy > canvas.height - ballRadius) {
     if (x > paddleX && x < paddleX + paddleWidth) {
       
-      // Controleer waar de bal het paddle raakt
+      // Richting aanpassen afhankelijk van waar de bal het paddle raakt
       let hitPoint = x - (paddleX + paddleWidth / 2);
-      dx = hitPoint * 0.2; // schaal het effect
+      dx = hitPoint * 0.2;
       dy = -Math.abs(dy);
     
     } else {
