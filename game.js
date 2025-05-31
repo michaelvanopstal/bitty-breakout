@@ -95,12 +95,12 @@ function collisionDetection() {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
       if (b.status === 1) {
-        if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+        if (x + ballRadius > b.x && x - ballRadius < b.x + brickWidth && y + ballRadius > b.y && y - ballRadius < b.y + brickHeight) {
           
-      // Richting en snelheid beperkt bij paddle-botsing
+      // Sterke en begrensde paddle-aansturing
       let hitPoint = x - (paddleX + paddleWidth / 2);
-      dx = (hitPoint / (paddleWidth / 2)) * 6;
-      dx = Math.max(-6, Math.min(6, dx)); // begrens dx
+      dx = hitPoint * 0.3;
+      dx = Math.max(-6, Math.min(6, dx));
       dy = -Math.abs(dy);
 
           b.status = 0;
@@ -154,9 +154,8 @@ function draw() {
   else if (leftPressed && paddleX > 0) paddleX -= 7;
 
   
-  // Snelheidslimiet
-  dx = Math.max(-8, Math.min(8, dx));
-  dy = Math.max(-8, Math.min(8, dy));
+  dx = Math.max(-6, Math.min(6, dx));
+  dy = Math.max(-6, Math.min(6, dy));
 
   requestAnimationFrame(draw);
 }
