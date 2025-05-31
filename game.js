@@ -96,7 +96,12 @@ function collisionDetection() {
       const b = bricks[c][r];
       if (b.status === 1) {
         if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
-          dy = -dy;
+          
+      // Controleer waar de bal het paddle raakt
+      let hitPoint = x - (paddleX + paddleWidth / 2);
+      dx = hitPoint * 0.2; // schaal het effect
+      dy = -Math.abs(dy);
+    
           b.status = 0;
           score += 10;
         }
@@ -122,10 +127,20 @@ function draw() {
   }
 
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
-  if (y + dy < ballRadius) dy = -dy;
+  if (y + dy < ballRadius) 
+      // Controleer waar de bal het paddle raakt
+      let hitPoint = x - (paddleX + paddleWidth / 2);
+      dx = hitPoint * 0.2; // schaal het effect
+      dy = -Math.abs(dy);
+    
   else if (y + dy > canvas.height - ballRadius) {
     if (x > paddleX && x < paddleX + paddleWidth) {
-      dy = -dy;
+      
+      // Controleer waar de bal het paddle raakt
+      let hitPoint = x - (paddleX + paddleWidth / 2);
+      dx = hitPoint * 0.2; // schaal het effect
+      dy = -Math.abs(dy);
+    
     } else {
       
       
