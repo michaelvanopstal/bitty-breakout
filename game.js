@@ -4,8 +4,8 @@ const ctx = canvas.getContext("2d");
 
 let score = 0;
 let ballRadius = 8;
-let dx = 8;
-let dy = -8;
+let dx = 4;
+let dy = -4;
 let ballLaunched = false;
 let x;
 let y;
