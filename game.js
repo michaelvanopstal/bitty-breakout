@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 
 let score = 0;
 let ballRadius = 8;
-let dx = 4;
+let dx = 0;
 let dy = -4;
 let ballLaunched = false;
 let x;
@@ -32,8 +32,19 @@ document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
 document.addEventListener("click", () => {
-  if (!ballLaunched) ballLaunched = true;
+  if (!ballLaunched) {
+    dx = 0;
+    dy = -4;
+    ballLaunched = true;
+  }
 });
+document.addEventListener("keydown", (e) => {
+  if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) {
+    dx = 0;
+    dy = -4;
+    ballLaunched = true;
+  }
+}););
 document.addEventListener("keydown", (e) => {
   if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) ballLaunched = true;
 });
@@ -122,7 +133,7 @@ function draw() {
   drawPaddle();
   drawScore();
 
-  let steps = 4;
+  let steps = 12;
   for (let i = 0; i < steps; i++) {
     if (ballLaunched) {
       x += dx / steps;
