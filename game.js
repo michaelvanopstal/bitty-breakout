@@ -43,9 +43,6 @@ document.addEventListener("keydown", (e) => {
     dx = 0;
   }
 }););
-document.addEventListener("keydown", (e) => {
-  if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) ballLaunched = true;
-});
 
 function keyDownHandler(e) {
   if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
