@@ -208,5 +208,8 @@ function drawHighscores() {
   }
 }
 
-promptForName();
+window.onload = function() {
+  promptForName();
 draw();
+  drawHighscores();
+};
