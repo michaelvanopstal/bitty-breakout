@@ -17,7 +17,7 @@ let leftPressed = false;
 const brickRowCount = 5;
 const brickColumnCount = 9;
 const brickWidth = canvas.width / brickColumnCount;
-const brickHeight = 45;
+const brickHeight = 60;
 
 const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
