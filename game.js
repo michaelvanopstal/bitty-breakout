@@ -16,7 +16,7 @@ let leftPressed = false;
 
 const brickRowCount = 6;
 const brickColumnCount = 10;
-const brickWidth = 36;
+const brickWidth = 31;
 const brickHeight = 25;
 
 const bricks = [];
@@ -70,7 +70,7 @@ function drawBall() {
 
 function drawPaddle() {
   ctx.beginPath();
-  ctx.rect(paddleX, canvas.height * 0.85, paddleWidth, paddleHeight);
+  ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
   ctx.fillStyle = "#fff";
   ctx.fill();
   ctx.closePath();
@@ -105,6 +105,7 @@ function draw() {
   drawPaddle();
   collisionDetection();
   drawScore();
+  drawGameBorder();
 
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
   if (y + dy < ballRadius) dy = -dy;
@@ -123,3 +124,13 @@ function draw() {
 }
 
 draw();
+
+
+function drawGameBorder() {
+  ctx.beginPath();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#00aaff";
+  ctx.rect(0, 0, canvas.width, canvas.height);
+  ctx.stroke();
+  ctx.closePath();
+}
