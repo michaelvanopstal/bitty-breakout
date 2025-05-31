@@ -7,6 +7,7 @@ let ballRadius = 8;
 let dx = 8;
 let dy = -8;
 let ballLaunched = false;
+      score = 0;
 let x;
 let y;
 let paddleHeight = 10;
@@ -129,6 +130,7 @@ function draw() {
     } else {
       
       ballLaunched = false;
+      score = 0;
       x = paddleX + paddleWidth / 2;
       y = canvas.height - paddleHeight - ballRadius - 2;
     
