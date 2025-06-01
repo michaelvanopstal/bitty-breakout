@@ -15,7 +15,7 @@ body {
   width: 645px;
   height: 600px;
   background-color: transparent;
-  border: 3px solid #00aaff;
+  border: 3px solid "transparent"
 }
 
 #scoreDisplay {
