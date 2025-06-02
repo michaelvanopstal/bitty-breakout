@@ -1,7 +1,9 @@
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+let elapsedTime = 0;
+let timerInterval = null;
+let timerRunning = false;
 let score = 0;
 let ballRadius = 8;
 let dx = 4;
@@ -31,11 +33,19 @@ for (let c = 0; c < brickColumnCount; c++) {
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
+
 document.addEventListener("click", () => {
-  if (!ballLaunched) ballLaunched = true;
+  if (!ballLaunched && window.playerName) {
+    ballLaunched = true;
+    if (!timerRunning) startTimer();
+  }
 });
+
 document.addEventListener("keydown", (e) => {
-  if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) ballLaunched = true;
+  if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched && window.playerName) {
+    ballLaunched = true;
+    if (!timerRunning) startTimer();
+  }
 });
 
 function keyDownHandler(e) {
@@ -142,6 +152,7 @@ function draw() {
         dx = Math.max(-6, Math.min(6, dx));
         dy = -Math.abs(dy);
       } else {
+        stopTimer();
         ballLaunched = false;
         score = 0;
         for (let c = 0; c < brickColumnCount; c++) {
@@ -166,21 +177,59 @@ function draw() {
 
 draw();
 
-let playerName = "";
-const input = document.getElementById("playerName");
-input.addEventListener("keydown", function (e) {
-  if (e.key === "Enter") {
-    playerName = input.value;
-    input.style.display = "none";
-  }
-});
+function startTimer() {
+  elapsedTime = 0;
+  timerRunning = true;
+  timerInterval = setInterval(() => {
+    elapsedTime++;
+    updateTimerDisplay();
+  }, 1000);
+}
 
-const originalDraw = draw;
-draw = function() {
-  originalDraw();
-  if (playerName) {
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("Player: " + playerName, canvas.width - 250, 20);
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+}
+
+function updateTimerDisplay() {
+  const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+  const seconds = String(elapsedTime % 60).padStart(2, '0');
+  document.getElementById("timeDisplay").textContent = `${minutes}:${seconds}`;
+}
+
+
+function saveHighscore(name, points, time) {
+  const highscoreList = JSON.parse(localStorage.getItem("highscores")) || [];
+  highscoreList.push({ name, points, time });
+
+  highscoreList.sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    return a.time - b.time;
+  });
+
+  highscoreList.splice(10);
+  localStorage.setItem("highscores", JSON.stringify(highscoreList));
+  renderHighscores();
+}
+
+
+function renderHighscores() {
+  const highscoreList = JSON.parse(localStorage.getItem("highscores")) || [];
+  const listItems = document.querySelectorAll("#highscore-list li");
+
+  highscoreList.forEach((entry, index) => {
+    const timeStr = formatTime(entry.time);
+    listItems[index].textContent = `${entry.name} - ${entry.points} pxp - ${timeStr}`;
+  });
+
+  for (let i = highscoreList.length; i < 10; i++) {
+    listItems[i].textContent = ""; // Laat nummering in HTML staan
   }
-};
+}
+
+
+function formatTime(seconds) {
+  const minutes = String(Math.floor(seconds / 60)).padStart(2, '0');
+  const secs = String(seconds % 60).padStart(2, '0');
+  return `${minutes}:${secs}`;
+}
