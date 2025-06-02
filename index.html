@@ -1,0 +1,36 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PointPay Breakout</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="loginContainer">
+  <label for="playerName">login</label>
+  <input type="text" id="playerName" placeholder="your name" />
+</div>
+<div id="playerNameDisplay"></div>
+
+
+<div id="loginContainer">
+  <label for="playerName">Login:</label>
+  <input type="text" id="playerName" placeholder="Your name..." />
+</div>
+
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <div id="scoreDisplay">Score: 0 pxp</div>
+  <script src="game.js">
+  const input = document.getElementById("playerName");
+  const nameDisplay = document.getElementById("playerNameDisplay");
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && input.value.trim() !== "") {
+      nameDisplay.textContent = "player " + input.value;
+      input.style.display = "none";
+    }
+  });
+</script>
+</body>
+</html>
