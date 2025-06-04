@@ -17,11 +17,14 @@
     <canvas id="gameCanvas" width="645" height="600"></canvas>
 
     <div id="login-overlay">
-      <div id="login-box">
-        <label for="player-name">Inlog:</label><br />
-        <input type="text" id="player-name" placeholder="Voer je naam in" />
-        <button onclick="submitName()">Bevestig</button>
-      </div>
+      
+<div id="login-box">
+  <label for="player-name">Inlog:</label><br />
+  <input type="text" id="player-name" placeholder="Voer je naam in" />
+  <button id="login-btn">Login</button>
+  <button id="logout-btn" style="display: none;">Logout</button>
+</div>
+
     </div>
 
     <div id="highscore-overlay">
@@ -36,5 +39,45 @@
 
   <script src="login.js"></script>
   <script src="game.js"></script>
+
+<script>
+  let highscores = JSON.parse(localStorage.getItem("highscores")) || [
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" }
+  ];
+
+  function updateHighscoreBoard() {
+    const highscoreList = document.getElementById("highscore-list");
+    if (!highscoreList) return;
+    highscoreList.innerHTML = "";
+    highscores.forEach((entry, index) => {
+      const li = document.createElement("li");
+      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} PXP — ${entry.time}`;
+      highscoreList.appendChild(li);
+    });
+  }
+
+  function checkAndUpdateHighscores(name, score, time) {
+    const newEntry = { name, score, time };
+    highscores.push(newEntry);
+    highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
+    highscores = highscores.slice(0, 10);
+    localStorage.setItem("highscores", JSON.stringify(highscores));
+    updateHighscoreBoard();
+  }
+
+  window.addEventListener("load", () => {
+    updateHighscoreBoard();
+  });
+</script>
+
 </body>
 </html>
