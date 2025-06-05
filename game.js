@@ -43,6 +43,8 @@ document.addEventListener("mousemove", mouseMoveHandler, false);
 document.addEventListener("keydown", (e) => {
   if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched && window.readyToLaunch) {
     ballLaunched = true;
+    dx = 0;
+    dy = -4;
     if (!timerRunning) startTimer();score = 0;
     document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
   
@@ -206,13 +208,13 @@ function draw() {
     if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
     if (y + dy < ballRadius) dy = -dy;
 
-    if (
-      y + dy > canvas.height - paddleHeight - ballRadius &&
-      x > paddleX &&
-      x < paddleX + paddleWidth
-    ) {
-      dy = -dy;
-    }
+    if (y + dy > canvas.height - paddleHeight - ballRadius && x > paddleX && x < paddleX + paddleWidth) {
+      const hitPos = (x - paddleX) / paddleWidth; // 0 = links, 1 = rechts
+      const angle = (hitPos - 0.5) * Math.PI / 2; // van -45° tot 45°
+      const speed = Math.sqrt(dx * dx + dy * dy);
+      dx = speed * Math.sin(angle);
+      dy = -Math.abs(speed * Math.cos(angle)); // omhoog
+}
 
     if (y + dy > canvas.height - ballRadius) {
       saveHighscore();
