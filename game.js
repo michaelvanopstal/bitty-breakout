@@ -17,6 +17,18 @@ let paddleWidth = 100;
 let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
+let flagsOnPaddle = false;
+let flagTimer = 0;
+let powerBlockUsed = false;
+let flyingCoins = [];
+let powerBlockRespawnTime = 100000; // 3 minuten in ms
+let powerBlockHitTime = null;
+let lives = 3;
+let level = 1;
+let gameOver = false;
+let ballMoving = false;
+
+
 
 const brickRowCount = 5;
 const brickColumnCount = 9;
@@ -35,6 +47,15 @@ const blockImg = new Image();
 blockImg.src = "block_logo.png";
 const ballImg = new Image();
 ballImg.src = "ball_logo.png";
+const vlagImgLeft = new Image();
+vlagImgLeft.src = "vlaggetje1.png";
+
+const vlagImgRight = new Image();
+vlagImgRight.src = "vlaggetje2.png";
+const shootCoinImg = new Image();
+shootCoinImg.src = "3.png"; 
+
+
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -48,6 +69,20 @@ document.addEventListener("keydown", (e) => {
     if (!timerRunning) startTimer();score = 0;
     document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
   
+  }
+});
+
+document.addEventListener("keydown", function (e) {
+  if (flagsOnPaddle) {
+    if (e.code === "Space" || e.code === "ArrowUp") {
+      shootFromFlags(); 
+    }
+  }
+});
+
+document.addEventListener("mousedown", function () {
+  if (flagsOnPaddle) {
+    shootFromFlags();
   }
 });
 
@@ -90,7 +125,60 @@ function drawPaddle() {
   ctx.fillStyle = "#0095DD";
   ctx.fill();
   ctx.closePath();
+} 
+
+
+function drawPaddleFlags() {
+  if (flagsOnPaddle && Date.now() - flagTimer < 20000) {
+    ctx.drawImage(vlagImgLeft, paddleX - 5, canvas.height - paddleHeight - 40, 45, 45);
+    ctx.drawImage(vlagImgRight, paddleX + paddleWidth - 31, canvas.height - paddleHeight - 40, 45, 45);
+  } else if (flagsOnPaddle && Date.now() - flagTimer >= 20000) {
+    flagsOnPaddle = false;
+  }
 }
+function shootFromFlags() {
+  const coinSpeed = 8;
+
+  // Linkervlag
+  flyingCoins.push({
+    x: paddleX - 5 + 12,
+    y: canvas.height - paddleHeight - 40,
+    dy: -coinSpeed,
+    active: true
+  });
+
+  // Rechtervlag
+  flyingCoins.push({
+    x: paddleX + paddleWidth - 19 + 12,
+    y: canvas.height - paddleHeight - 40,
+    dy: -coinSpeed,
+    active: true
+  });
+}
+function checkFlyingCoinHits() {
+  flyingCoins.forEach((coin) => {
+    if (!coin.active) return;
+
+    for (let c = 0; c < brickColumnCount; c++) {
+      for (let r = 0; r < brickRowCount; r++) {
+        const b = bricks[c][r];
+        if (b.status === 1 &&
+            coin.x > b.x &&
+            coin.x < b.x + brickWidth &&
+            coin.y > b.y &&
+            coin.y < b.y + brickHeight) {
+          b.status = 0;
+          coin.active = false;    
+          score += 10;
+          document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+          return; 
+        }
+      }
+    }
+  });
+}
+
+
 
 function startTimer() {
   timerRunning = true;
@@ -103,6 +191,7 @@ function startTimer() {
 }
 
 function collisionDetection() {
+
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       let b = bricks[c][r];
@@ -120,6 +209,34 @@ function collisionDetection() {
           document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
         }
       }
+    }
+  }
+
+  
+  if (powerBlock.active && powerBlock.visible) {
+  if (
+    x > powerBlock.x &&
+    x < powerBlock.x + powerBlock.width &&
+    y > powerBlock.y &&
+    y < powerBlock.y + powerBlock.height
+  ) {
+    dy = -dy;
+    powerBlock.active = false;
+    powerBlock.visible = false;
+    clearInterval(blinkInterval); 
+    powerBlockUsed = true;
+    flagsOnPaddle = true;
+    flagTimer = Date.now();
+    powerBlockHitTime = Date.now(); 
+
+     if (bricks[powerBlockCol] && bricks[powerBlockCol][powerBlockRow]) {
+        bricks[powerBlockCol][powerBlockRow].status = 0;
+      }
+
+      score += 10;
+      document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+
+    
     }
   }
 }
@@ -166,6 +283,17 @@ function drawCoins() {
   });
 }
 
+function drawFlyingCoins() {
+  flyingCoins.forEach((coin) => {
+    if (coin.active) {
+      ctx.drawImage(shootCoinImg, coin.x - 12, coin.y - 12, 24, 24);
+      coin.y += coin.dy;
+    }
+  });
+  
+  flyingCoins = flyingCoins.filter(coin => coin.y > -24 && coin.active);
+}
+
 function checkCoinCollision() {
   coins.forEach(coin => {
     if (
@@ -177,6 +305,7 @@ function checkCoinCollision() {
       coin.active = false;
       score += 5;
       document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+  
     }
   });
 }
@@ -189,14 +318,78 @@ function resetBricks() {
   }
 }
 
+
+
+
+const powerBlockImg = new Image();
+powerBlockImg.src = "power_block_logo.png";
+
+let powerBlock = {
+  x: 0,
+  y: 0,
+  width: brickWidth,
+  height: brickHeight,
+  active: false,
+  visible: true
+};
+
+let powerBlockTimer = 0;
+let powerBlockInterval = 10000;
+let powerBlockHit = false;
+let blinkInterval;
+let powerBlockRow = 0;
+let powerBlockCol = 0;
+
+
+function spawnPowerBlock() {
+  const randCol = Math.floor(Math.random() * brickColumnCount);
+  const randRow = Math.floor(Math.random() * brickRowCount);
+  powerBlockCol = randCol;
+  powerBlockRow = randRow;
+  powerBlock.x = randCol * brickWidth;
+  powerBlock.y = randRow * brickHeight;
+  powerBlock.active = true;
+  powerBlock.visible = true;
+
+  clearInterval(blinkInterval);
+  blinkInterval = setInterval(() => {
+    if (powerBlock.active) {
+      powerBlock.visible = !powerBlock.visible;
+    } else {
+      clearInterval(blinkInterval);
+    }
+  }, 300); 
+}
+
+   function startPowerBlockJumping() {
+  setInterval(() => {
+    if (powerBlock.active) {
+      spawnPowerBlock(); // Verspring elke 15 seconden
+    }
+  }, 25000);
+}
+
+
+
+function drawPowerBlock() {
+  if (powerBlock.active && powerBlock.visible) {
+    ctx.drawImage(powerBlockImg, powerBlock.x, powerBlock.y, powerBlock.width, powerBlock.height);
+  }
+}
+
+
 function draw() {
-  collisionDetection();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  collisionDetection();
   drawCoins();
   checkCoinCollision();
   drawBricks();
+  drawPowerBlock();
   drawBall();
   drawPaddle();
+  drawPaddleFlags();
+  drawFlyingCoins();
+  checkFlyingCoinHits();
 
   if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 7;
   else if (leftPressed && paddleX > 0) paddleX -= 7;
@@ -214,6 +407,11 @@ function draw() {
       const speed = Math.sqrt(dx * dx + dy * dy);
       dx = speed * Math.sin(angle);
       dy = -Math.abs(speed * Math.cos(angle)); // omhoog
+    if (powerBlockHit) {
+      spawnPowerBlock();
+      powerBlockHit = false;
+    }
+
 }
 
     if (y + dy > canvas.height - ballRadius) {
@@ -224,12 +422,32 @@ function draw() {
       elapsedTime = 0;
       timerRunning = false;
       clearInterval(timerInterval);
+      flagsOnPaddle = false;    // vlaggetjes verdwijnen
+      flyingCoins = []; 
     }
+
+    
   } else {
     x = paddleX + paddleWidth / 2 - ballRadius;
     resetBricks();
     y = canvas.height - paddleHeight - ballRadius * 2;
   }
+
+  
+  if (Date.now() - powerBlockTimer > powerBlockInterval && !powerBlock.active && ballLaunched && !powerBlockUsed) {
+  spawnPowerBlock();
+  powerBlockTimer = Date.now();
+}
+
+  if (
+  powerBlockHitTime &&
+  Date.now() - powerBlockHitTime > powerBlockRespawnTime
+) {
+  spawnPowerBlock();
+  powerBlockUsed = false;
+  powerBlockHitTime = null;
+}
+
 
   requestAnimationFrame(draw);
 }
@@ -237,30 +455,50 @@ function draw() {
 let imagesLoaded = 0;
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 2) {
+  if (imagesLoaded === 3) {
     x = paddleX + paddleWidth / 2 - ballRadius;
-    y = canvas.height - paddleHeight - ballRadius * 2;
+    y = canvas.height - paddleHeight - ballRadius * 2
+    ;startPowerBlockJumping(); 
     draw();
   }
 }
+
+document.addEventListener("mousedown", function () {
+  if (flagsOnPaddle) {
+    shootFromFlags();
+  }
+});
+
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
+powerBlockImg.onload = onImageLoad;
 document.addEventListener("keydown", function (e) {
   if (!ballMoving && (e.code === "ArrowUp" || e.code === "Space")) {
     if (lives <= 0) {
-      lives = 3;
-      score = 0;
-      level = 1;
-      resetBricks();
-      resetBall();
-      resetPaddle();
-      startTime = new Date();
-      gameOver = false;
-      updateScoreDisplay();
-      updateTimeDisplay();
-      score = 0;
+  lives = 3;
+  score = 0;
+  level = 1;
+  resetBricks();
+  resetBall();
+  resetPaddle();
+  startTime = new Date();
+  gameOver = false;
+  updateScoreDisplay();
+  updateTimeDisplay();
 
-    }
+  // ✅ PowerBlock reset toevoegen:
+  powerBlockUsed = false;
+  powerBlockHitTime = null;
+  powerBlock.active = false;
+  powerBlock.visible = false;
+  clearInterval(blinkInterval);
+      
+      
+  flagsOnPaddle = false;
+  flyingCoins = [];
+  
+}
+    
     ballMoving = true;
-  }
+  } 
 });
