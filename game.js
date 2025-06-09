@@ -40,11 +40,13 @@ let smokeParticles = [];
 let explosions = [];
 
 
-
-const brickRowCount = 5;
+const customBrickWidth = 70;   // pas aan zoals jij wilt
+const customBrickHeight = 25;  // pas aan zoals jij wilt
+const brickRowCount = 15;
 const brickColumnCount = 9;
-const brickWidth = canvas.width / brickColumnCount;
-const brickHeight = 60;
+const brickWidth = customBrickWidth;
+const brickHeight = customBrickHeight;
+
 
 const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
@@ -150,18 +152,25 @@ function mouseMoveHandler(e) {
 }
 
 function drawBricks() {
+  const totalBricksWidth = brickColumnCount * brickWidth;
+  const offsetX = (canvas.width - totalBricksWidth) / 2; // midden uitlijnen
+
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       if (bricks[c][r].status === 1) {
-        const brickX = c * brickWidth;
+        const brickX = offsetX + c * brickWidth;  // gecentreerd
         const brickY = r * brickHeight;
         bricks[c][r].x = brickX;
         bricks[c][r].y = brickY;
+
+        // tijdelijke rode blokken (vervangen voor je afbeelding als je wilt)
         ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
+
       }
     }
   }
 }
+
 
 function drawBall() {
   ctx.drawImage(ballImg, x, y, ballRadius * 2, ballRadius * 2);
@@ -466,7 +475,11 @@ function spawnPowerBlock() {
   const randRow = Math.floor(Math.random() * brickRowCount);
   powerBlockCol = randCol;
   powerBlockRow = randRow;
-  powerBlock.x = randCol * brickWidth;
+
+  const totalBricksWidth = brickColumnCount * brickWidth;
+  const offsetX = (canvas.width - totalBricksWidth) / 2;
+
+  powerBlock.x = offsetX + randCol * brickWidth;
   powerBlock.y = randRow * brickHeight;
   powerBlock.active = true;
   powerBlock.visible = true;
@@ -481,6 +494,7 @@ function spawnPowerBlock() {
   }, 300); 
 }
 
+
    function startPowerBlockJumping() {
   setInterval(() => {
     if (powerBlock.active) {
@@ -492,10 +506,13 @@ function spawnPowerBlock() {
 
 function spawnPowerBlock2() {
   const randCol = Math.floor(Math.random() * brickColumnCount);
-  const randRow = Math.floor(Math.random() * brickRowCount);
+  const randRow = Math.floor(Math.random() * brickRowCount); 
+  const totalBricksWidth = brickColumnCount * brickWidth;
+  const offsetX = (canvas.width - totalBricksWidth) / 2;
+
   powerBlock2Col = randCol;
   powerBlock2Row = randRow;
-  powerBlock2.x = randCol * brickWidth;
+  powerBlock2.x = offsetX + randCol * brickWidth;
   powerBlock2.y = randRow * brickHeight;
   powerBlock2.active = true;
   powerBlock2.visible = true;
