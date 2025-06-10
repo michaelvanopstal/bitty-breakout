@@ -38,12 +38,6 @@ let rocketFired = false;
 let rocketSpeed = 10;
 let smokeParticles = [];
 let explosions = [];
-let x2 = null;
-let y2 = null;
-let dx2 = 0;
-let dy2 = 0;
-let doubleBallActive = false;
-
 
 
 const customBrickWidth = 70;   // pas aan zoals jij wilt
@@ -58,43 +52,26 @@ const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
   for (let r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = { x: 0, y: 0, status: 1 }; // ← deze regel vervangen
+    bricks[c][r] = { x: 0, y: 0, status: 1 };
   }
 }
 
-// 🔄 Afbeeldingen laden
 const blockImg = new Image();
 blockImg.src = "block_logo.png";
-blockImg.onload = onImageLoad;
-
 const ballImg = new Image();
 ballImg.src = "ball_logo.png";
-ballImg.onload = onImageLoad;
-
 const vlagImgLeft = new Image();
 vlagImgLeft.src = "vlaggetje1.png";
-vlagImgLeft.onload = onImageLoad;
 
 const vlagImgRight = new Image();
 vlagImgRight.src = "vlaggetje2.png";
-vlagImgRight.onload = onImageLoad;
-
 const shootCoinImg = new Image();
-shootCoinImg.src = "3.png";
-shootCoinImg.onload = onImageLoad;
-
+shootCoinImg.src = "3.png"; 
 const powerBlock2Img = new Image();
 powerBlock2Img.src = "signalblock2.png";
 powerBlock2Img.onload = onImageLoad;
-
 const rocketImg = new Image();
 rocketImg.src = "raket1.png";
-rocketImg.onload = onImageLoad;
-
-const doubleBallImg = new Image();
-doubleBallImg.src = "2 balls.png";
-doubleBallImg.onload = onImageLoad;
-
 
 let rocketActive = false; // Voor nu altijd zichtbaar om te testen
 let rocketX = 0;
@@ -176,46 +153,19 @@ function mouseMoveHandler(e) {
 
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
-  const offsetX = (canvas.width - totalBricksWidth) / 2;
+  const offsetX = (canvas.width - totalBricksWidth) / 2; // midden uitlijnen
 
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       if (bricks[c][r].status === 1) {
-        const brickX = offsetX + c * brickWidth;
+        const brickX = offsetX + c * brickWidth;  // gecentreerd
         const brickY = r * brickHeight;
-
         bricks[c][r].x = brickX;
         bricks[c][r].y = brickY;
 
-        switch (bricks[c][r].type) {
-          case "power":
-            if (blinkingBlocks["power"]) {
-              ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
-            }
-            break;
+        // tijdelijke rode blokken (vervangen voor je afbeelding als je wilt)
+        ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
 
-          case "rocket":
-            if (blinkingBlocks["rocket"]) {
-              ctx.drawImage(powerBlock2Img, brickX + brickWidth * 0.05, brickY + brickHeight * 0.05, brickWidth * 0.9, brickHeight * 0.9);
-            }
-            break;
-
-          case "freeze":
-            if (blinkingBlocks["freeze"]) {
-              ctx.fillStyle = "#00FFFF";
-              ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-            }
-            break;
-
-          case "doubleball":
-            if (blinkingBlocks["doubleball"]) {
-              ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
-            }
-            break;
-
-          default:
-            ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
-        }
       }
     }
   }
@@ -224,12 +174,7 @@ function drawBricks() {
 
 function drawBall() {
   ctx.drawImage(ballImg, x, y, ballRadius * 2, ballRadius * 2);
-  if (doubleBallActive && x2 !== null && y2 !== null) {
-    ctx.drawImage(ballImg, x2, y2, ballRadius * 2, ballRadius * 2);
-  }
 }
-
-
 
 function drawPaddle() {
   ctx.beginPath();
@@ -276,7 +221,6 @@ function shootFromFlags() {
     active: true
   });
 }
-
 function checkFlyingCoinHits() {
   flyingCoins.forEach((coin) => {
     if (!coin.active) return;
@@ -324,38 +268,7 @@ function collisionDetection() {
           y < b.y + brickHeight
         ) {
           dy = -dy;
-
-          // Check type en activeer gedrag
-          switch (b.type) {
-            case "power":
-              flagsOnPaddle = true;
-              flagTimer = Date.now();
-              break;
-
-            case "rocket":
-              rocketActive = true;
-              break;
-
-            case "freeze":
-              dx = 0;
-              setTimeout(() => { dx = 4; }, 1000); // tijdelijk effect
-              break;
-
-            case "doubleball":
-  if (!doubleBallActive) {
-    doubleBallActive = true;
-    x2 = x; // tweede bal start op plek van eerste
-    y2 = y;
-    dx2 = dx * 0.9; // iets andere richting
-    dy2 = dy * 0.9;
-    console.log("🎯 Doubleball geactiveerd!");
-  }
-  break;
-
-         
-
           b.status = 0;
-          b.type = "normal";
           score += 10;
           spawnCoin(b.x, b.y);
           document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
@@ -364,7 +277,6 @@ function collisionDetection() {
     }
   }
 
-  // powerBlock-botsing
   if (powerBlock.active && powerBlock.visible) {
     if (
       x > powerBlock.x &&
@@ -390,7 +302,7 @@ function collisionDetection() {
     }
   }
 
-  // powerBlock2-botsing
+  
   if (powerBlock2.active && powerBlock2.visible) {
     if (
       x > powerBlock2.x &&
@@ -411,13 +323,12 @@ function collisionDetection() {
   }
 }
 
- 
-function saveHighscore() {
+  function saveHighscore() {
   const timeText = document.getElementById("timeDisplay").textContent.replace("time ", "");
   const highscore = {
     name: window.currentPlayer || "Unknown",
     score: score,
-    time: timeText
+   time: timeText
     
   };
 
@@ -531,28 +442,7 @@ function checkCoinCollision() {
 function resetBricks() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
-      bricks[c][r] = { x: 0, y: 0, status: 1, type: "normal" };
-    }
-  }
-  placeBonusBlocks(level);
-}
-
-
-const bonusTypes = ["power", "rocket", "freeze", "doubleball"];
-const bonusBlockCount = 3; // Aantal bonusblokken per level (schaalbaar)
-
-function placeBonusBlocks(level) {
-  let placed = 0;
-
-  while (placed < bonusBlockCount) {
-    const col = Math.floor(Math.random() * brickColumnCount);
-    const row = Math.floor(Math.random() * brickRowCount);
-
-    const brick = bricks[col][row];
-
-    if (brick.status === 1 && brick.type === "normal") {
-      brick.type = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
-      placed++;
+      bricks[c][r].status = 1;
     }
   }
 }
@@ -672,84 +562,48 @@ function draw() {
   drawFlyingCoins();
   checkFlyingCoinHits();
 
+  
   if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 7;
-else if (leftPressed && paddleX > 0) paddleX -= 7;
+  else if (leftPressed && paddleX > 0) paddleX -= 7;
 
-if (ballLaunched) {
-  // 🟠 Eerste bal
-  x += dx;
-  y += dy;
+  if (ballLaunched) {
+    x += dx;
+    y += dy;
 
-  if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
-  if (y + dy < ballRadius) dy = -dy;
+    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+    if (y + dy < ballRadius) dy = -dy;
 
-  // 🎯 Paddle-botsing eerste bal
-  if (
-    y + dy > canvas.height - paddleHeight - ballRadius &&
-    x > paddleX &&
-    x < paddleX + paddleWidth
-  ) {
-    const hitPos = (x - paddleX) / paddleWidth;
-    const angle = (hitPos - 0.5) * Math.PI / 2;
-    const speed = Math.sqrt(dx * dx + dy * dy);
-    dx = speed * Math.sin(angle);
-    dy = -Math.abs(speed * Math.cos(angle));
-  }
-
-  // 💥 Eerste bal mist paddle
-  if (y + dy > canvas.height - ballRadius) {
-    saveHighscore();
-    ballLaunched = false;
-    dx = 4;
-    dy = -4;
-    elapsedTime = 0;
-    timerRunning = false;
-    clearInterval(timerInterval);
-    flagsOnPaddle = false;
-    flyingCoins = [];
-
-    placingStarted = false;
-    bonusSearching = false;
-    resetBonusBlocks();
-  }
-
-  // 🟣 Tweede bal (doubleball)
-  if (doubleBallActive && x2 !== null && y2 !== null) {
-    x2 += dx2;
-    y2 += dy2;
-
-    // Bounce muren
-    if (x2 + dx2 > canvas.width - ballRadius || x2 + dx2 < ballRadius) dx2 = -dx2;
-    if (y2 + dy2 < ballRadius) dy2 = -dy2;
-
-    // Paddle-botsing
-    if (
-      y2 + dy2 > canvas.height - paddleHeight - ballRadius &&
-      x2 > paddleX &&
-      x2 < paddleX + paddleWidth
-    ) {
-      const hitPos2 = (x2 - paddleX) / paddleWidth;
-      const angle2 = (hitPos2 - 0.5) * Math.PI / 2;
-      const speed2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-      dx2 = speed2 * Math.sin(angle2);
-      dy2 = -Math.abs(speed2 * Math.cos(angle2));
+    if (y + dy > canvas.height - paddleHeight - ballRadius && x > paddleX && x < paddleX + paddleWidth) {
+      const hitPos = (x - paddleX) / paddleWidth; // 0 = links, 1 = rechts
+      const angle = (hitPos - 0.5) * Math.PI / 2; // van -45° tot 45°
+      const speed = Math.sqrt(dx * dx + dy * dy);
+      dx = speed * Math.sin(angle);
+      dy = -Math.abs(speed * Math.cos(angle)); // omhoog
+    if (powerBlockHit) {
+      spawnPowerBlock();
+      powerBlockHit = false;
     }
 
-    // Mist paddle
-    if (y2 + dy2 > canvas.height - ballRadius) {
-      // Verwijder alleen tweede bal, niet het hele spel
-      doubleBallActive = false;
-      x2 = null;
-      y2 = null;
-    }
-  }
-} else {
-  // Positie bijhouden terwijl bal nog niet gelanceerd is
-  x = paddleX + paddleWidth / 2 - ballRadius;
-  y = canvas.height - paddleHeight - ballRadius * 2;
-}
 }
 
+    if (y + dy > canvas.height - ballRadius) {
+      saveHighscore();
+      ballLaunched = false;
+      dx = 4;
+      dy = -4;
+      elapsedTime = 0;
+      timerRunning = false;
+      clearInterval(timerInterval);
+      flagsOnPaddle = false;    // vlaggetjes verdwijnen
+      flyingCoins = []; 
+    }
+
+    
+  } else {
+    x = paddleX + paddleWidth / 2 - ballRadius;
+    resetBricks();
+    y = canvas.height - paddleHeight - ballRadius * 2;
+  }
 
   
   if (Date.now() - powerBlockTimer > powerBlockInterval && !powerBlock.active && ballLaunched && !powerBlockUsed) {
@@ -757,7 +611,7 @@ if (ballLaunched) {
   powerBlockTimer = Date.now();
 }
 
-if (
+  if (
   powerBlockHitTime &&
   Date.now() - powerBlockHitTime > powerBlockRespawnTime
 ) {
@@ -765,7 +619,7 @@ if (
   powerBlockUsed = false;
   powerBlockHitTime = null;
 }
-
+  
   if (
     powerBlock2HitTime &&
     Date.now() - powerBlock2HitTime > powerBlock2RespawnDelay
@@ -774,15 +628,6 @@ if (
     powerBlock2HitTime = null;
   }
   
-
-// Initialiseer knipperstatus per type
-for (const type of bonusTypes) {
-  blinkingBlocks[type] = true;
-  setInterval(() => {
-    blinkingBlocks[type] = !blinkingBlocks[type];
-  }, blinkSpeeds[type]);
-}
-
  if (rocketActive && !rocketFired) {
   // Volgt paddle, nog niet afgevuurd
   rocketX = paddleX + paddleWidth / 2 - 12;
@@ -839,32 +684,14 @@ smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
 }
 
-// 🔁 Knipperlogica voor bonusblokken
-const blinkingBlocks = {};
 
-const blinkSpeeds = {
-  power: 3,
-  rocket: 3,
-  freeze: 3,
-  doubleball: 3
-};
-
-for (const type of bonusTypes) {
-  blinkingBlocks[type] = true;
-  setInterval(() => {
-    blinkingBlocks[type] = !blinkingBlocks[type];
-  }, blinkSpeeds[type]);
-}
-
-
-// 📥 Laden van afbeeldingen en spel starten
-let imagesLoaded = 0;
+let imagesLoaded = 0; 
 
 function onImageLoad() {
   imagesLoaded++;
-  console.log("Afbeelding geladen:", imagesLoaded);
+  console.log("Afbeelding geladen:", imagesLoaded); // ← mag hier
 
-  if (imagesLoaded === 9) {
+  if (imagesLoaded === 5) {
     x = paddleX + paddleWidth / 2 - ballRadius;
     y = canvas.height - paddleHeight - ballRadius * 2;
     startPowerBlockJumping();
@@ -874,18 +701,12 @@ function onImageLoad() {
 }
 
 
-
 // Koppel alle images aan onImageLoad
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
 powerBlockImg.onload = onImageLoad;
 powerBlock2Img.onload = onImageLoad;
 rocketImg.onload = onImageLoad;
-vlagImgLeft.onload = onImageLoad;
-vlagImgRight.onload = onImageLoad;
-shootCoinImg.onload = onImageLoad;
-doubleBallImg.onload = onImageLoad;
-
 
 document.addEventListener("mousedown", function () {
   if (rocketActive && !rocketFired) {
