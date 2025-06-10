@@ -52,9 +52,10 @@ const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
   for (let r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = { x: 0, y: 0, status: 1 };
+    bricks[c][r] = { x: 0, y: 0, status: 1 }; // ← deze regel vervangen
   }
 }
+
 
 const blockImg = new Image();
 blockImg.src = "block_logo.png";
@@ -158,14 +159,31 @@ function drawBricks() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       if (bricks[c][r].status === 1) {
-        const brickX = offsetX + c * brickWidth;  // gecentreerd
+        const brickX = offsetX + c * brickWidth;
         const brickY = r * brickHeight;
         bricks[c][r].x = brickX;
         bricks[c][r].y = brickY;
 
-        // tijdelijke rode blokken (vervangen voor je afbeelding als je wilt)
-        ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
-
+        switch (bricks[c][r].type) {
+          case "power":
+            if (blinkingBlocks["power"]) {
+              ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
+            }
+            break;
+          case "rocket":
+            if (blinkingBlocks["rocket"]) {
+              ctx.drawImage(powerBlock2Img, brickX + brickWidth * 0.05, brickY + brickHeight * 0.05, brickWidth * 0.9, brickHeight * 0.9);
+            }
+            break;
+          case "freeze":
+            if (blinkingBlocks["freeze"]) {
+              ctx.fillStyle = "#00FFFF";
+              ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+            }
+            break;
+          default:
+            ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
+        }
       }
     }
   }
@@ -221,6 +239,7 @@ function shootFromFlags() {
     active: true
   });
 }
+
 function checkFlyingCoinHits() {
   flyingCoins.forEach((coin) => {
     if (!coin.active) return;
@@ -268,7 +287,24 @@ function collisionDetection() {
           y < b.y + brickHeight
         ) {
           dy = -dy;
+
+          // Check type en activeer gedrag
+          switch (b.type) {
+            case "power":
+              flagsOnPaddle = true;
+              flagTimer = Date.now();
+              break;
+            case "rocket":
+              rocketActive = true;
+              break;
+            case "freeze":
+              dx = 0;
+              setTimeout(() => { dx = 4; }, 1000);
+              break;
+          }
+
           b.status = 0;
+          b.type = "normal";
           score += 10;
           spawnCoin(b.x, b.y);
           document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
@@ -302,7 +338,6 @@ function collisionDetection() {
     }
   }
 
-  
   if (powerBlock2.active && powerBlock2.visible) {
     if (
       x > powerBlock2.x &&
@@ -321,14 +356,15 @@ function collisionDetection() {
       document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
     }
   }
-}
+} // ✅ ENKEL HIER wordt de functie afgesloten — niet eerder, niet later
 
-  function saveHighscore() {
+ 
+function saveHighscore() {
   const timeText = document.getElementById("timeDisplay").textContent.replace("time ", "");
   const highscore = {
     name: window.currentPlayer || "Unknown",
     score: score,
-   time: timeText
+    time: timeText
     
   };
 
@@ -442,7 +478,28 @@ function checkCoinCollision() {
 function resetBricks() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
-      bricks[c][r].status = 1;
+      bricks[c][r] = { x: 0, y: 0, status: 1, type: "normal" };
+    }
+  }
+  placeBonusBlocks(level);
+}
+
+
+const bonusTypes = ["power", "rocket", "freeze"]; // Voeg hier eenvoudig nieuwe types toe
+const bonusBlockCount = 3; // Aantal bonusblokken per level (schaalbaar)
+
+function placeBonusBlocks(level) {
+  let placed = 0;
+
+  while (placed < bonusBlockCount) {
+    const col = Math.floor(Math.random() * brickColumnCount);
+    const row = Math.floor(Math.random() * brickRowCount);
+
+    const brick = bricks[col][row];
+
+    if (brick.status === 1 && brick.type === "normal") {
+      brick.type = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
+      placed++;
     }
   }
 }
@@ -627,7 +684,21 @@ function draw() {
     spawnPowerBlock2();
     powerBlock2HitTime = null;
   }
-  
+  const blinkingBlocks = {}; // Houd bij of het blok zichtbaar is per type
+const blinkSpeeds = {
+  power: 300,   // ms
+  rocket: 500,  // ms
+  freeze: 700   // ms
+};
+
+// Initialiseer knipperstatus per type
+for (const type of bonusTypes) {
+  blinkingBlocks[type] = true;
+  setInterval(() => {
+    blinkingBlocks[type] = !blinkingBlocks[type];
+  }, blinkSpeeds[type]);
+}
+
  if (rocketActive && !rocketFired) {
   // Volgt paddle, nog niet afgevuurd
   rocketX = paddleX + paddleWidth / 2 - 12;
@@ -685,11 +756,27 @@ smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 }
 
 
-let imagesLoaded = 0; 
+// 🔁 Knipperlogica voor bonusblokken
+const blinkingBlocks = {};
+const blinkSpeeds = {
+  power: 300,
+  rocket: 500,
+  freeze: 700
+};
+
+for (const type of bonusTypes) {
+  blinkingBlocks[type] = true;
+  setInterval(() => {
+    blinkingBlocks[type] = !blinkingBlocks[type];
+  }, blinkSpeeds[type]);
+}
+
+// 📥 Laden van afbeeldingen en spel starten
+let imagesLoaded = 0;
 
 function onImageLoad() {
   imagesLoaded++;
-  console.log("Afbeelding geladen:", imagesLoaded); // ← mag hier
+  console.log("Afbeelding geladen:", imagesLoaded);
 
   if (imagesLoaded === 5) {
     x = paddleX + paddleWidth / 2 - ballRadius;
@@ -699,6 +786,7 @@ function onImageLoad() {
     draw();
   }
 }
+
 
 
 // Koppel alle images aan onImageLoad
