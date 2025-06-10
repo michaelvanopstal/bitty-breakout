@@ -160,9 +160,9 @@ function keyDownHandler(e) {
 
       flagsOnPaddle = false;
       flyingCoins = [];
-    }
-    ballMoving = true;
-  }
+   }
+   ballMoving = true;
+} // ✅ Alleen deze afsluiten, géén extra
 
  
 function keyUpHandler(e) {
