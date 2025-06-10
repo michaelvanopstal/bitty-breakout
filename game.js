@@ -38,6 +38,7 @@ let rocketFired = false;
 let rocketSpeed = 10;
 let smokeParticles = [];
 let explosions = [];
+let gameStarted = false;  // Alles is bevroren tot eerste toetsaanslag
 
 
 const customBrickWidth = 70;   // pas aan zoals jij wilt
@@ -110,9 +111,17 @@ document.addEventListener("keyup", keyUpHandler);
 document.addEventListener("mousemove", mouseMoveHandler);
 
 function keyDownHandler(e) {
+  if (!gameStarted && (e.code === "ArrowLeft" || e.code === "ArrowRight" || e.code === "ArrowUp" || e.code === "Space")) {
+    gameStarted = true;
+    console.log("▶️ Eerste toetsaanslag: game komt tot leven");
+    return; // voorkomt dat andere handlers meteen afgaan
+  }
+
   if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
   else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
- 
+
+  // hier komt eventueel de rest (zoals bonuszoekfase starten enz.)
+}
   if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) {
     ballLaunched = true;
     dx = 0;
@@ -764,11 +773,20 @@ explosions.forEach(e => {
   e.radius += 2;       // explosie wordt groter
   e.alpha -= 0.05;     // en vervaagt
 });
+  
+  function draw() {
+  if (!gameStarted) {
+    requestAnimationFrame(draw);
+    return;
+  }
+    explosions = explosions.filter(e => e.alpha > 0); // alleen zichtbare explosies blijven
 
-explosions = explosions.filter(e => e.alpha > 0); // alleen zichtbare explosies blijven
+   // 🚀 Nieuwe frame tekenen
+   requestAnimationFrame(draw);
 
-// 🚀 Nieuwe frame tekenen
-requestAnimationFrame(draw);
+  }
+
+  // Hier pas begint alles echt
 
   
   smokeParticles.forEach(p => {
