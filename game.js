@@ -559,6 +559,35 @@ function spawnPowerBlock() {
     }
   }, 25000);
 }
+function isImageLoaded(img) {
+  return img.complete && img.naturalWidth > 0;
+}
+
+function placeBonusBlocks(level) {
+  let placed = 0;
+
+  while (placed < bonusBlockCount) {
+    const col = Math.floor(Math.random() * brickColumnCount);
+    const row = Math.floor(Math.random() * brickRowCount);
+    const brick = bricks[col][row];
+
+    const loadedTypes = bonusTypes.filter(type => {
+      switch (type) {
+        case "power": return isImageLoaded(powerBlockImg);
+        case "rocket": return isImageLoaded(powerBlock2Img);
+        case "doubleball": return isImageLoaded(doubleBallImg);
+        case "freeze": return true; // geen afbeelding nodig
+        default: return false;
+      }
+    });
+
+    if (brick.status === 1 && brick.type === "normal" && loadedTypes.length > 0) {
+      const chosenType = loadedTypes[Math.floor(Math.random() * loadedTypes.length)];
+      brick.type = chosenType;
+      placed++;
+    }
+  }
+}
 
 
 function spawnPowerBlock2() {
