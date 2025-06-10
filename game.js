@@ -685,7 +685,6 @@ function draw() {
     return;
   }
 
-function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   collisionDetection();
   drawCoins();
