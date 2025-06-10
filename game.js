@@ -596,6 +596,36 @@ function spawnPowerBlock() {
 }
 
 
+function startBonusSearchAnimation() {
+  bonusSearchInterval = setInterval(() => {
+    if (gameStarted && bonusSearching) {
+      // Verwijder tijdelijke bonusblokken
+      for (let c = 0; c < brickColumnCount; c++) {
+        for (let r = 0; r < brickRowCount; r++) {
+          const brick = bricks[c][r];
+          if (brick.status === 1 && bonusTypes.includes(brick.type)) {
+            brick.type = "normal";
+          }
+        }
+      }
+
+      // Plaats tijdelijk nieuwe bonusblokken
+      let placed = 0;
+      while (placed < bonusBlockCount) {
+        const col = Math.floor(Math.random() * brickColumnCount);
+        const row = Math.floor(Math.random() * brickRowCount);
+        const brick = bricks[col][row];
+
+        if (brick.status === 1 && brick.type === "normal") {
+          brick.type = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
+          placed++;
+        }
+      }
+    }
+  }, 400);
+}
+
+
    function startPowerBlockJumping() {
   setInterval(() => {
     if (powerBlock.active) {
