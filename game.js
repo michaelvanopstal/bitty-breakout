@@ -605,6 +605,12 @@ function drawPowerBlock2() {
   }
 }
 
+function draw() {
+  if (!gameStarted) {
+    requestAnimationFrame(draw);
+    return;
+  }
+
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -740,6 +746,15 @@ explosions = explosions.filter(e => e.alpha > 0); // alleen zichtbare explosies 
 
 // 🚀 Nieuwe frame tekenen
 requestAnimationFrame(draw);
+
+  
+  document.getElementById("startBtn").addEventListener("click", () => {
+  document.getElementById("startOverlay").style.display = "none";
+  gameStarted = true;
+  placingStarted = false;
+  bonusSearching = false;
+  console.log("🎮 Speler is klaar — nu pas mag alles starten.");
+});
 
   
   smokeParticles.forEach(p => {
