@@ -59,20 +59,49 @@ for (let c = 0; c < brickColumnCount; c++) {
 
 const blockImg = new Image();
 blockImg.src = "block_logo.png";
+blockImg.onload = () => console.log("✅ blockImg geladen");
+blockImg.onerror = () => console.warn("❌ blockImg NIET geladen");
+
 const ballImg = new Image();
 ballImg.src = "ball_logo.png";
+ballImg.onload = () => console.log("✅ ballImg geladen");
+ballImg.onerror = () => console.warn("❌ ballImg NIET geladen");
+
 const vlagImgLeft = new Image();
 vlagImgLeft.src = "vlaggetje1.png";
+vlagImgLeft.onload = () => console.log("✅ vlagImgLeft geladen");
+vlagImgLeft.onerror = () => console.warn("❌ vlagImgLeft NIET geladen");
 
 const vlagImgRight = new Image();
 vlagImgRight.src = "vlaggetje2.png";
+vlagImgRight.onload = () => console.log("✅ vlagImgRight geladen");
+vlagImgRight.onerror = () => console.warn("❌ vlagImgRight NIET geladen");
+
 const shootCoinImg = new Image();
-shootCoinImg.src = "3.png"; 
+shootCoinImg.src = "3.png";
+shootCoinImg.onload = () => console.log("✅ shootCoinImg geladen");
+shootCoinImg.onerror = () => console.warn("❌ shootCoinImg NIET geladen");
+
+const powerBlockImg = new Image();
+powerBlockImg.src = "power_block_logo.png";
+powerBlockImg.onload = () => console.log("✅ powerBlockImg geladen");
+powerBlockImg.onerror = () => console.warn("❌ powerBlockImg NIET geladen");
+
 const powerBlock2Img = new Image();
 powerBlock2Img.src = "signalblock2.png";
-powerBlock2Img.onload = onImageLoad;
+powerBlock2Img.onload = () => console.log("✅ powerBlock2Img geladen");
+powerBlock2Img.onerror = () => console.warn("❌ powerBlock2Img NIET geladen");
+
 const rocketImg = new Image();
 rocketImg.src = "raket1.png";
+rocketImg.onload = () => console.log("✅ rocketImg geladen");
+rocketImg.onerror = () => console.warn("❌ rocketImg NIET geladen");
+
+const doubleBallImg = new Image();
+doubleBallImg.src = "2 balls.png";
+doubleBallImg.onload = () => console.log("✅ doubleBallImg geladen");
+doubleBallImg.onerror = () => console.warn("❌ doubleBallImg NIET geladen");
+
 
 let rocketActive = false; // Voor nu altijd zichtbaar om te testen
 let rocketX = 0;
