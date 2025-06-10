@@ -824,19 +824,19 @@ smokeParticles.forEach(p => {
   p.radius += 0.3;
   p.alpha -= 0.02;
 });
-smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
-// 🚀 Nieuwe frame tekenen
-requestAnimationFrame(draw);
+  smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
-}
+  // 🚀 Nieuwe frame tekenen
+  requestAnimationFrame(draw);
+} // ✅ correcte afsluiter van function draw()
 
 // 🔁 Knipperlogica voor bonusblokken
 const blinkingBlocks = {};
 
 const blinkSpeeds = {
   power: 0,
-  rocket:0,
+  rocket: 0,
   freeze: 0,
   doubleball: 0
 };
@@ -847,7 +847,6 @@ for (const type of bonusTypes) {
     blinkingBlocks[type] = !blinkingBlocks[type];
   }, blinkSpeeds[type]);
 }
-
 
 // 📥 Laden van afbeeldingen en spel starten
 let imagesLoaded = 0;
@@ -865,8 +864,6 @@ function onImageLoad() {
   }
 }
 
-
-
 // Koppel alle images aan onImageLoad
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
@@ -878,7 +875,6 @@ vlagImgRight.onload = onImageLoad;
 shootCoinImg.onload = onImageLoad;
 doubleBallImg.onload = onImageLoad;
 
-
 document.addEventListener("mousedown", function () {
   if (rocketActive && !rocketFired) {
     rocketFired = true;
@@ -886,4 +882,3 @@ document.addEventListener("mousedown", function () {
     shootFromFlags();
   }
 });
-
