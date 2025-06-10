@@ -1,4 +1,3 @@
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -861,5 +860,3 @@ document.addEventListener("mousedown", function () {
     shootFromFlags();
   }
 });
-
-
