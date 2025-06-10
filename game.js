@@ -757,7 +757,7 @@ if (ballLaunched) {
   powerBlockTimer = Date.now();
 }
 
-  if (
+if (
   powerBlockHitTime &&
   Date.now() - powerBlockHitTime > powerBlockRespawnTime
 ) {
@@ -765,7 +765,7 @@ if (ballLaunched) {
   powerBlockUsed = false;
   powerBlockHitTime = null;
 }
-  
+
   if (
     powerBlock2HitTime &&
     Date.now() - powerBlock2HitTime > powerBlock2RespawnDelay
