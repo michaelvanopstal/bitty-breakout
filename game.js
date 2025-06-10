@@ -163,7 +163,7 @@ function keyDownHandler(e) {
     }
     ballMoving = true;
   }
-}
+
  
 function keyUpHandler(e) {
   if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
