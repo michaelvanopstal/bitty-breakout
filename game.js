@@ -38,6 +38,7 @@ let rocketFired = false;
 let rocketSpeed = 10;
 let smokeParticles = [];
 let explosions = [];
+let gameStarted = false;
 
 
 const customBrickWidth = 70;   // pas aan zoals jij wilt
