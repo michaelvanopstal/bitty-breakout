@@ -680,6 +680,12 @@ function drawPowerBlock2() {
 
 
 function draw() {
+  if (!gameStarted) {
+    requestAnimationFrame(draw);
+    return;
+  }
+
+function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   collisionDetection();
   drawCoins();
@@ -804,22 +810,12 @@ explosions.forEach(e => {
   e.alpha -= 0.05;     // en vervaagt
 });
   
-  function draw() {
-  if (!gameStarted) {
-    requestAnimationFrame(draw);
-    return;
-  }
-    explosions = explosions.filter(e => e.alpha > 0); // alleen zichtbare explosies blijven
+ 
+   // 🔥 Explosies filteren
+explosions = explosions.filter(e => e.alpha > 0);
 
-   // 🚀 Nieuwe frame tekenen
-   requestAnimationFrame(draw);
-
-  }
-
-  // Hier pas begint alles echt
-
-  
-  smokeParticles.forEach(p => {
+// 💨 Rook tekenen
+smokeParticles.forEach(p => {
   ctx.beginPath();
   ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
   ctx.fillStyle = `rgba(150, 150, 150, ${p.alpha})`;
@@ -828,8 +824,10 @@ explosions.forEach(e => {
   p.radius += 0.3;
   p.alpha -= 0.02;
 });
-  
 smokeParticles = smokeParticles.filter(p => p.alpha > 0);
+
+// 🚀 Nieuwe frame tekenen
+requestAnimationFrame(draw);
 
 }
 
