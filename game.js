@@ -799,7 +799,7 @@ if (rocketY < -48) {
   }
 }
 
-// 🔥 Explosies tekenen
+
 explosions.forEach(e => {
   ctx.beginPath();
   ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
@@ -810,10 +810,10 @@ explosions.forEach(e => {
 });
   
  
-   // 🔥 Explosies filteren
+   
 explosions = explosions.filter(e => e.alpha > 0);
 
-// 💨 Rook tekenen
+
 smokeParticles.forEach(p => {
   ctx.beginPath();
   ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -826,11 +826,10 @@ smokeParticles.forEach(p => {
 
   smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
-  // 🚀 Nieuwe frame tekenen
+ 
   requestAnimationFrame(draw);
-} // ✅ correcte afsluiter van function draw()
+} 
 
-// 🔁 Knipperlogica voor bonusblokken
 const blinkingBlocks = {};
 
 const blinkSpeeds = {
@@ -847,7 +846,7 @@ for (const type of bonusTypes) {
   }, blinkSpeeds[type]);
 }
 
-// 📥 Laden van afbeeldingen en spel starten
+
 let imagesLoaded = 0;
 
 function onImageLoad() {
@@ -877,7 +876,7 @@ doubleBallImg.onload = onImageLoad;
 document.addEventListener("mousedown", function () {
   if (rocketActive && !rocketFired) {
     rocketFired = true;
-  } else if (flagsOnPaddle) {
+   else if (flagsOnPaddle)
     shootFromFlags();
   }
 });
