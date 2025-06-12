@@ -38,8 +38,9 @@
   </div>
 
   <!-- Biker-elementen -->
-  <img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" style="position:absolute; display:none; width:180px;" />
-  <img id="balloonFlyby" src="luchtballon.png" alt="Luchtballon" style="position:absolute; display:none; width:100px;" />
+ <img id="bikeFlyer" src="bike-wobble.png" style="position:absolute; display:none; width:180px;" />
+<img id="bikeFlyby" src="bike-flyby.png" style="position:absolute; display:none; width:180px;" />
+<img id="balloonFlyby" src="luchtballon.png" style="position:absolute; display:none; width:100px;" />
 
   <!-- Coin Banner -->
   <div id="pxp-banner-overlay">
@@ -70,87 +71,112 @@
       });
     }
 
-    function checkAndUpdateHighscores(name, score, time) {
-      const newEntry = { name, score, time };
-      highscores.push(newEntry);
-      highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
-      highscores = highscores.slice(0, 10);
-      localStorage.setItem("highscores", JSON.stringify(highscores));
-      updateHighscoreBoard();
-    }
-
-    window.addEventListener("load", () => {
-      updateHighscoreBoard();
-    });
-  </script>
-
   <script>
-    function startBikeAnimation() {
-      const bike = document.getElementById("bikeFlyer");
-      bike.style.display = "block";
+  function checkAndUpdateHighscores(name, score, time) {
+    const newEntry = { name, score, time };
+    highscores.push(newEntry);
+    highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
+    highscores = highscores.slice(0, 10);
+    localStorage.setItem("highscores", JSON.stringify(highscores));
+    updateHighscoreBoard();
+  }
 
-      const startX = window.innerWidth + 100;
-      const endX = -200;
-      const startY = window.innerHeight + 100;
-      const endY = -150;
-      const duration = 25000;
-      let startTime = null;
+  window.addEventListener("load", () => {
+    updateHighscoreBoard();
+  });
+</script>
 
-      function animateBike(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const step = elapsed / 16;
+<script>
+  // 🚲 Bike met wobble-effect
+  function startBikeAnimation() {
+    const bike = document.getElementById("bikeFlyer");
+    bike.style.display = "block";
 
-        const baseX = startX + (endX - startX) * progress;
-        const baseY = startY + (endY - startY) * progress;
+    const startX = window.innerWidth + 100;
+    const endX = -200;
+    const startY = window.innerHeight + 100;
+    const endY = -150;
+    const duration = 25000;
+    let startTime = null;
 
-        const wobbleX = Math.sin(step / 10) * 3;
-        const wobbleY = Math.cos(step / 15) * 3;
+    function animateBike(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const step = elapsed / 16;
 
-        const x = baseX + wobbleX;
-        const y = baseY + wobbleY;
+      const baseX = startX + (endX - startX) * progress;
+      const baseY = startY + (endY - startY) * progress;
 
-        bike.style.left = `${x}px`;
-        bike.style.top = `${y}px`;
+      const wobbleX = Math.sin(step / 10) * 3;
+      const wobbleY = Math.cos(step / 15) * 3;
 
-        if (progress < 1) {
-          requestAnimationFrame(animateBike);
-        } else {
-          bike.style.display = "none";
-        }
+      const x = baseX + wobbleX;
+      const y = baseY + wobbleY;
+
+      bike.style.left = `${x}px`;
+      bike.style.top = `${y}px`;
+
+      if (progress < 1) {
+        requestAnimationFrame(animateBike);
+      } else {
+        bike.style.display = "none";
       }
-
-      requestAnimationFrame(animateBike);
     }
 
-    function startFlybyAnimation() {
-      const bike = document.getElementById("bikeFlyby");
-      bike.style.display = "block";
+    requestAnimationFrame(animateBike);
+  }
 
-      let x = window.innerWidth;
-      let y = window.innerHeight;
-      const interval = setInterval(() => {
-        x -= 4;
-        y -= 2;
+  // 🔁 Simpele flyby-bike
+  function startFlybyAnimation() {
+    const bike = document.getElementById("bikeFlyby");
+    bike.style.display = "block";
 
-        bike.style.left = x + "px";
-        bike.style.top = y + "px";
+    let x = window.innerWidth;
+    let y = window.innerHeight;
+    const interval = setInterval(() => {
+      x -= 4;
+      y -= 2;
+      bike.style.left = x + "px";
+      bike.style.top = y + "px";
 
-        if (x < -150 || y < -100) {
-          clearInterval(interval);
-          bike.style.display = "none";
-        }
-      }, 30);
-    }
+      if (x < -150 || y < -100) {
+        clearInterval(interval);
+        bike.style.display = "none";
+      }
+    }, 30);
+  }
 
-    // Start beide animaties na 1 seconde
-    setTimeout(startBikeAnimation, 100000);
-    setTimeout(startFlybyAnimation, 50000); // delay zodat ze niet tegelijk starten
+  // 🎈 Ballon-animatie
+  function startBalloonFlyby() {
+    const balloon = document.getElementById("balloonFlyby");
+    balloon.style.display = "block";
 
-    // Herhaal beide animaties
-    setInterval(startBikeAnimation, 30000);   // elke 2 min
-    setInterval(startFlybyAnimation, 20000);  // elke 2 min
-  </script>
+    let x = window.innerWidth;
+    let y = window.innerHeight;
+    const interval = setInterval(() => {
+      x -= 2.5;
+      y -= 1.2;
+      balloon.style.left = x + "px";
+      balloon.style.top = y + "px";
+
+      if (x < -150 || y < -150) {
+        clearInterval(interval);
+        balloon.style.display = "none";
+      }
+    }, 30);
+  }
+
+  // ⏱️ Start alle animaties met vertraging
+  setTimeout(startBikeAnimation, 100000);      // bike met wobble start na 100 sec
+  setTimeout(startFlybyAnimation, 50000);      // gewone flyby-bike start na 50 sec
+  setTimeout(startBalloonFlyby, 80000);        // ballon start na 80 sec
+
+  // 🔁 Herhaal elke X seconden
+  setInterval(startBikeAnimation, 30000);
+  setInterval(startFlybyAnimation, 20000);
+  setInterval(startBalloonFlyby, 60000);
+</script>
 </body>
 </html>
+
