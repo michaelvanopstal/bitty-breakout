@@ -19,7 +19,7 @@
 
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="600"></canvas>
-<body><img id="bikeFlyer" src="pointpay-bike.png" style="position:absolute; display:none; width:180px;" />
+
 
     <div id="login-overlay">
       
@@ -83,7 +83,55 @@
     updateHighscoreBoard();
   });
 </script>
+<img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" />
 
+<script>
+  function startBikeAnimation() {
+    const bike = document.getElementById("bikeFlyer");
+    bike.style.display = "block";
+
+    const startX = window.innerWidth + 100;   // vanaf rechts
+    const endX = -200;                        // naar links uit beeld
+    const startY = window.innerHeight + 100;  // onderkant
+    const endY = -150;                        // boven uit beeld
+    const duration = 20000;                   // 20 sec
+    let startTime = null;
+
+    function animateBike(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const step = elapsed / 16;
+
+      const baseX = startX + (endX - startX) * progress;
+      const baseY = startY + (endY - startY) * progress;
+
+      const wobbleX = Math.sin(step / 10) * 3;
+      const wobbleY = Math.cos(step / 15) * 3;
+
+      const x = baseX + wobbleX;
+      const y = baseY + wobbleY;
+
+      bike.style.left = `${x}px`;
+      bike.style.top = `${y}px`;
+
+      if (progress < 1) {
+        requestAnimationFrame(animateBike);
+      } else {
+        bike.style.display = "none";
+      }
+    }
+
+    requestAnimationFrame(animateBike);
+  }
+
+  // Start na 1 sec
+  setTimeout(startBikeAnimation, 1000);
+
+  // Herhaal elke 2 minuten (120000 ms)
+  setInterval(startBikeAnimation, 30000);
+
+</script>
 
 <!-- PXP Coin Banner -->
 <div id="pxp-banner-overlay">
