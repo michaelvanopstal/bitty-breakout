@@ -81,7 +81,9 @@
 
   window.addEventListener("load", () => {
     updateHighscoreBoard();
-  });
+ });
+
+
 </script>
 <img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" />
 
@@ -131,7 +133,35 @@
   // Herhaal elke 2 minuten (120000 ms)
   setInterval(startBikeAnimation, 30000);
 
+</script><script>
+  function startFlybyAnimation() {
+    const bike = document.getElementById("bikeFlyby");
+    bike.style.display = "block";
+
+    let x = window.innerWidth;
+    let y = window.innerHeight;
+    const interval = setInterval(() => {
+      x -= 4;
+      y -= 2;
+
+      bike.style.left = x + "px";
+      bike.style.top = y + "px";
+
+      if (x < -150 || y < -100) {
+        clearInterval(interval);
+        bike.style.display = "none";
+      }
+    }, 30);
+  }
+
+  // Start direct of met delay
+  setTimeout(startFlybyAnimation, 1000); // bijvoorbeeld 1 seconde na laden
+  setInterval(startFlybyAnimation, 120000); // herhaal elke 2 minuten
 </script>
+
+  
+
+
 
 <!-- PXP Coin Banner -->
 <div id="pxp-banner-overlay">
