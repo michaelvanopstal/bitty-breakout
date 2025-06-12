@@ -651,28 +651,6 @@ if (secondBallActive) {
 }
 
 
-function startFlybyAnimation() {
-  const bike = document.getElementById("bikeFlyby");
-  bike.style.display = "block";
-
-  let x = window.innerWidth;
-  let y = window.innerHeight;
-  const interval = setInterval(() => {
-    x -= 4;
-    y -= 2;
-
-    bike.style.left = x + "px";
-    bike.style.top = y + "px";
-
-    if (x < -150 || y < -100) {
-      clearInterval(interval);
-      bike.style.display = "none";
-    }
-  }, 30);
-}
-
-
-
 
 let imagesLoaded = 0;
 
