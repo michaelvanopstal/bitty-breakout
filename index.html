@@ -6,8 +6,6 @@
   <title>PointPay Breakout</title>
   <link rel="preload" href="vlaggetje1.png" as="image">
   <link rel="preload" href="vlaggetje2.png" as="image">
-
-
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,16 +18,13 @@
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="600"></canvas>
 
-
     <div id="login-overlay">
-      
-<div id="login-box">
-  <label for="player-name">Inlog:</label><br />
-  <input type="text" id="player-name" placeholder="Voer je naam in" />
-  <button id="login-btn">Login</button>
-  <button id="logout-btn" style="display: none;">Logout</button>
-</div>
-
+      <div id="login-box">
+        <label for="player-name">Inlog:</label><br />
+        <input type="text" id="player-name" placeholder="Voer je naam in" />
+        <button id="login-btn">Login</button>
+        <button id="logout-btn" style="display: none;">Logout</button>
+      </div>
     </div>
 
     <div id="highscore-overlay">
@@ -42,54 +37,53 @@
     </div>
   </div>
 
-  <script src="login.js"></script>
-  <script src="game.js"></script>
-
-<script>
-  let highscores = JSON.parse(localStorage.getItem("highscores")) || [
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" }
-  ];
-
-  function updateHighscoreBoard() {
-    const highscoreList = document.getElementById("highscore-list");
-    if (!highscoreList) return;
-    highscoreList.innerHTML = "";
-    highscores.forEach((entry, index) => {
-      const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} PXP — ${entry.time}`;
-      highscoreList.appendChild(li);
-    });
-  }
-
-  function checkAndUpdateHighscores(name, score, time) {
-    const newEntry = { name, score, time };
-    highscores.push(newEntry);
-    highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
-    highscores = highscores.slice(0, 10);
-    localStorage.setItem("highscores", JSON.stringify(highscores));
-    updateHighscoreBoard();
-  }
-
-  window.addEventListener("load", () => {
-    updateHighscoreBoard();
- });
-
-
-<body>
   <!-- Biker-elementen -->
   <img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" style="position:absolute; display:none; width:180px;" />
   <img id="bikeFlyby" src="pointpay-bike.png" alt="Flyby Bike" style="position:absolute; display:none; width:180px;" />
 
-  <!-- Animatie scripts -->
+  <!-- Coin Banner -->
+  <div id="pxp-banner-overlay">
+    <div id="pxp-scroll-text">
+      $0.01731 <span class="positive">+2.91%</span> &nbsp;
+      Market Cap: $517.92K &nbsp;
+      Volume: $145.52K &nbsp;
+      Total Supply: 100M PXP &nbsp;
+      Circulating: 30M PXP;
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="login.js"></script>
+  <script src="game.js"></script>
+
+  <script>
+    let highscores = JSON.parse(localStorage.getItem("highscores")) || Array(10).fill({ name: "—", score: 0, time: "00:00" });
+
+    function updateHighscoreBoard() {
+      const highscoreList = document.getElementById("highscore-list");
+      if (!highscoreList) return;
+      highscoreList.innerHTML = "";
+      highscores.forEach((entry, index) => {
+        const li = document.createElement("li");
+        li.textContent = `${index + 1}. ${entry.name} — ${entry.score} PXP — ${entry.time}`;
+        highscoreList.appendChild(li);
+      });
+    }
+
+    function checkAndUpdateHighscores(name, score, time) {
+      const newEntry = { name, score, time };
+      highscores.push(newEntry);
+      highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
+      highscores = highscores.slice(0, 10);
+      localStorage.setItem("highscores", JSON.stringify(highscores));
+      updateHighscoreBoard();
+    }
+
+    window.addEventListener("load", () => {
+      updateHighscoreBoard();
+    });
+  </script>
+
   <script>
     function startBikeAnimation() {
       const bike = document.getElementById("bikeFlyer");
@@ -152,22 +146,11 @@
 
     // Start beide animaties na 1 seconde
     setTimeout(startBikeAnimation, 1000);
-    setTimeout(startFlybyAnimation, 2000); // lichte delay zodat ze niet tegelijk starten
+    setTimeout(startFlybyAnimation, 2000); // delay zodat ze niet tegelijk starten
 
     // Herhaal beide animaties
-    setInterval(startBikeAnimation, 120000);
-    setInterval(startFlybyAnimation, 120000);
+    setInterval(startBikeAnimation, 120000);   // elke 2 min
+    setInterval(startFlybyAnimation, 120000);  // elke 2 min
   </script>
-
-  <!-- PXP Coin Banner -->
-  <div id="pxp-banner-overlay">
-    <div id="pxp-scroll-text">
-      $0.01731 <span class="positive">+2.91%</span> &nbsp;
-      Market Cap: $517.92K &nbsp;
-      Volume: $145.52K &nbsp;
-      Total Supply: 100M PXP &nbsp;
-      Circulating: 30M PXP;
-    </div>
-  </div>
 </body>
 </html>
