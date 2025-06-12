@@ -31,9 +31,6 @@ let secondBallActive = false;
 let secondBall = { x: 0, y: 0, dx: 0, dy: 0 };
 let secondBallDuration = 60000; // 1 minuut in ms
 let rocketAmmo = 0; // aantal raketten dat nog afgevuurd mag worden
-let balloonX = canvas.width - 150; // rechts van het scherm
-let balloonY = canvas.height; // start onderaan
-let balloonSpeed = 0.5; // la
 
 
 const bonusBricks = [
@@ -75,8 +72,6 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
-const balloonImg = new Image();
-balloonImg.src = 'luchtballon.png';
 
 const doubleBallImg = new Image();
 doubleBallImg.src = "2 balls.png";  // upload dit naar dezelfde map
@@ -498,8 +493,7 @@ function draw() {
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
-  updateBalloon();
-  drawBalloon();
+ 
 
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
     paddleX += 7;
@@ -547,17 +541,6 @@ function draw() {
   elapsedTime = 0;
   resetBall();
   resetBricks();
-}
-
-  function drawBalloon() {
-    ctx.drawImage(balloonImg, balloonX, balloonY, 100, 150); // grootte aanpassen
-}
-
-function updateBalloon() {
-    balloonY -= balloonSpeed;
-    if (balloonY < -150) {
-        balloonY = canvas.height; // reset onderaan als boven verdwenen
-    }
 }
 
 
