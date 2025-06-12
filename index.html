@@ -84,134 +84,139 @@
 
     window.addEventListener("load", updateHighscoreBoard);
   </script>
+<!-- Rookstijl -->
+<style>
+  .smoke-puff {
+    position: absolute;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    opacity: 1;
+    pointer-events: none;
+    transition: transform 2s ease-out, opacity 2s ease-out;
+    z-index: 9;
+    filter: blur(1.2px);
+  }
+</style>
 
-  <!-- Rookstijl -->
-  <style>
-    .smoke-puff {
-      position: absolute;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      opacity: 1;
-      pointer-events: none;
-      transition: transform 2s ease-out, opacity 2s ease-out;
-      z-index: 9;
-      filter: blur(1.2px);
-    }
-  </style>
+<!-- Animaties + rook -->
+<script>
+  function setupSmokeFor(elementId, offset, intervalTime = 3000, label = "PointPay") {
+    const el = document.getElementById(elementId);
+    const smokeContainer = document.getElementById("rocket-smoke-container");
 
-  <!-- Animaties -->
-  <script>
-    function startBikeAnimation() {
-      const bike = document.getElementById("bikeFlyer");
-      const smokeContainer = document.getElementById("rocket-smoke-container");
-      bike.style.display = "block";
+    const interval = setInterval(() => {
+      if (el.style.display === "none") return;
+      const rect = el.getBoundingClientRect();
+      const puff = document.createElement("div");
+      puff.className = "smoke-puff";
+      puff.textContent = label;
+      puff.style.left = rect.left + offset.x + "px";
+      puff.style.top = rect.top + offset.y + "px";
+      smokeContainer.appendChild(puff);
 
-      const startX = window.innerWidth + 100;
-      const endX = -200;
-      const startY = window.innerHeight + 100;
-      const endY = -150;
-      const duration = 25000;
-      let startTime = null;
+      setTimeout(() => {
+        puff.style.opacity = 0;
+        puff.style.transform = "translateY(-30px)";
+      }, 100);
+      setTimeout(() => puff.remove(), 2500);
+    }, intervalTime);
 
-      const smokeInterval = setInterval(() => {
-        if (bike.style.display === "none") return;
+    return interval; // om later te kunnen stoppen
+  }
 
-        const rect = bike.getBoundingClientRect();
-        const puff = document.createElement("div");
-        puff.className = "smoke-puff";
-        puff.textContent = "PointPay";
-        puff.style.left = rect.left - 30 + "px";
-        puff.style.top = rect.top + 60 + "px";
-        smokeContainer.appendChild(puff);
+  function startBikeAnimation() {
+    const bike = document.getElementById("bikeFlyer");
+    bike.style.display = "block";
+    const bikeSmoke = setupSmokeFor("bikeFlyer", { x: -30, y: 60 }, 3000);
 
-        setTimeout(() => {
-          puff.style.opacity = 0;
-          puff.style.transform = "translateY(-30px)";
-        }, 100);
+    const startX = window.innerWidth + 100;
+    const endX = -200;
+    const startY = window.innerHeight + 100;
+    const endY = -150;
+    const duration = 25000;
+    let startTime = null;
 
-        setTimeout(() => {
-          puff.remove();
-        }, 2500);
-      }, 3000);
+    function animateBike(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const step = elapsed / 16;
 
-      function animateBike(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const step = elapsed / 16;
+      const baseX = startX + (endX - startX) * progress;
+      const baseY = startY + (endY - startY) * progress;
+      const wobbleX = Math.sin(step / 10) * 3;
+      const wobbleY = Math.cos(step / 15) * 3;
 
-        const baseX = startX + (endX - startX) * progress;
-        const baseY = startY + (endY - startY) * progress;
+      const x = baseX + wobbleX;
+      const y = baseY + wobbleY;
+      bike.style.left = `${x}px`;
+      bike.style.top = `${y}px`;
 
-        const wobbleX = Math.sin(step / 10) * 3;
-        const wobbleY = Math.cos(step / 15) * 3;
-
-        const x = baseX + wobbleX;
-        const y = baseY + wobbleY;
-
-        bike.style.left = `${x}px`;
-        bike.style.top = `${y}px`;
-
-        if (progress < 1) {
-          requestAnimationFrame(animateBike);
-        } else {
-          bike.style.display = "none";
-          clearInterval(smokeInterval);
-        }
+      if (progress < 1) {
+        requestAnimationFrame(animateBike);
+      } else {
+        bike.style.display = "none";
+        clearInterval(bikeSmoke);
       }
-
-      requestAnimationFrame(animateBike);
     }
 
-    function startFlybyAnimation() {
-      const bike = document.getElementById("bikeFlyby");
-      bike.style.display = "block";
+    requestAnimationFrame(animateBike);
+  }
 
-      let x = window.innerWidth;
-      let y = window.innerHeight;
-      const interval = setInterval(() => {
-        x -= 4;
-        y -= 2;
-        bike.style.left = x + "px";
-        bike.style.top = y + "px";
+  function startFlybyAnimation() {
+    const rocket = document.getElementById("rocket1");
+    rocket.style.display = "block";
+    const smoke = setupSmokeFor("rocket1", { x: 5, y: 50 }, 2000, "💨");
 
-        if (x < -150 || y < -100) {
-          clearInterval(interval);
-          bike.style.display = "none";
-        }
-      }, 30);
-    }
+    let x = window.innerWidth;
+    let y = window.innerHeight - 40;
+    const interval = setInterval(() => {
+      x -= 4;
+      y -= 1.5;
+      rocket.style.left = x + "px";
+      rocket.style.top = y + "px";
 
-    function startBalloonFlyby() {
-      const balloon = document.getElementById("balloonFlyby");
-      balloon.style.display = "block";
+      if (x < -150 || y < -100) {
+        clearInterval(interval);
+        rocket.style.display = "none";
+        clearInterval(smoke);
+      }
+    }, 30);
+  }
 
-      let x = window.innerWidth;
-      let y = window.innerHeight - 50;
-      const interval = setInterval(() => {
-        x -= 2.5;
-        y -= 1.2;
-        balloon.style.left = x + "px";
-        balloon.style.top = y + "px";
+  function startBalloonFlyby() {
+    const balloon = document.getElementById("balloonFlyby");
+    balloon.style.display = "block";
+    const smoke = setupSmokeFor("balloonFlyby", { x: 5, y: 60 }, 2500, "🎈");
 
-        if (x < -150 || y < -150) {
-          clearInterval(interval);
-          balloon.style.display = "none";
-        }
-      }, 30);
-    }
+    let x = window.innerWidth;
+    let y = window.innerHeight - 100;
+    const interval = setInterval(() => {
+      x -= 2.5;
+      y -= 1.2;
+      balloon.style.left = x + "px";
+      balloon.style.top = y + "px";
 
-    // Start animaties met vertraging
-    setTimeout(startBikeAnimation, 100000);
-    setTimeout(startFlybyAnimation, 50000);
-    setTimeout(startBalloonFlyby, 60000);
+      if (x < -150 || y < -150) {
+        clearInterval(interval);
+        balloon.style.display = "none";
+        clearInterval(smoke);
+      }
+    }, 30);
+  }
 
-    // Herhaal ze periodiek
-    setInterval(startBikeAnimation, 30000);
-    setInterval(startFlybyAnimation, 50000);
-    setInterval(startBalloonFlyby, 60000);
-  </script>
+  // Start animaties met vertraging
+  setTimeout(startBikeAnimation, 100000);
+  setTimeout(startFlybyAnimation, 50000);
+  setTimeout(startBalloonFlyby, 60000);
+
+  // Herhalen
+  setInterval(startBikeAnimation, 30000);
+  setInterval(startFlybyAnimation, 50000);
+  setInterval(startBalloonFlyby, 60000);
+</script>
+
 
   <!-- Game scripts (op het allerlaatst) -->
   <script src="login.js"></script>
