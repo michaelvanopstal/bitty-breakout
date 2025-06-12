@@ -85,96 +85,89 @@
 
 
 <body>
-<img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" style="position:absolute; display:none; width:180px;" />
-<img id="bikeFlyby" src="pointpay-bike.png" alt="Flyby Bike" style="position:absolute; display:none; width:180px;" />
+  <!-- Biker-elementen -->
+  <img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" style="position:absolute; display:none; width:180px;" />
+  <img id="bikeFlyby" src="pointpay-bike.png" alt="Flyby Bike" style="position:absolute; display:none; width:180px;" />
 
+  <!-- Animatie scripts -->
+  <script>
+    function startBikeAnimation() {
+      const bike = document.getElementById("bikeFlyer");
+      bike.style.display = "block";
 
-<script>
-  function startBikeAnimation() {
-    const bike = document.getElementById("bikeFlyer");
-    bike.style.display = "block";
+      const startX = window.innerWidth + 100;
+      const endX = -200;
+      const startY = window.innerHeight + 100;
+      const endY = -150;
+      const duration = 20000;
+      let startTime = null;
 
-    const startX = window.innerWidth + 100;
-    const endX = -200;
-    const startY = window.innerHeight + 100;
-    const endY = -150;
-    const duration = 20000;
-    let startTime = null;
+      function animateBike(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const step = elapsed / 16;
 
-    function animateBike(timestamp) {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const step = elapsed / 16;
+        const baseX = startX + (endX - startX) * progress;
+        const baseY = startY + (endY - startY) * progress;
 
-      const baseX = startX + (endX - startX) * progress;
-      const baseY = startY + (endY - startY) * progress;
+        const wobbleX = Math.sin(step / 10) * 3;
+        const wobbleY = Math.cos(step / 15) * 3;
 
-      const wobbleX = Math.sin(step / 10) * 3;
-      const wobbleY = Math.cos(step / 15) * 3;
+        const x = baseX + wobbleX;
+        const y = baseY + wobbleY;
 
-      const x = baseX + wobbleX;
-      const y = baseY + wobbleY;
+        bike.style.left = `${x}px`;
+        bike.style.top = `${y}px`;
 
-      bike.style.left = `${x}px`;
-      bike.style.top = `${y}px`;
-
-      if (progress < 1) {
-        requestAnimationFrame(animateBike);
-      } else {
-        bike.style.display = "none";
+        if (progress < 1) {
+          requestAnimationFrame(animateBike);
+        } else {
+          bike.style.display = "none";
+        }
       }
+
+      requestAnimationFrame(animateBike);
     }
 
-    requestAnimationFrame(animateBike);
-  }
+    function startFlybyAnimation() {
+      const bike = document.getElementById("bikeFlyby");
+      bike.style.display = "block";
 
-  function startFlybyAnimation() {
-    const bike = document.getElementById("bikeFlyby");
-    bike.style.display = "block";
+      let x = window.innerWidth;
+      let y = window.innerHeight;
+      const interval = setInterval(() => {
+        x -= 4;
+        y -= 2;
 
-    let x = window.innerWidth;
-    let y = window.innerHeight;
-    const interval = setInterval(() => {
-      x -= 4;
-      y -= 2;
+        bike.style.left = x + "px";
+        bike.style.top = y + "px";
 
-      bike.style.left = x + "px";
-      bike.style.top = y + "px";
+        if (x < -150 || y < -100) {
+          clearInterval(interval);
+          bike.style.display = "none";
+        }
+      }, 30);
+    }
 
-      if (x < -150 || y < -100) {
-        clearInterval(interval);
-        bike.style.display = "none";
-      }
-    }, 30);
-  }
+    // Start beide animaties na 1 seconde
+    setTimeout(startBikeAnimation, 1000);
+    setTimeout(startFlybyAnimation, 2000); // lichte delay zodat ze niet tegelijk starten
 
-  // Start beide animaties na 1 seconde
-  setTimeout(startBikeAnimation, 1000);
-  setTimeout(startFlybyAnimation, 2000); // lichte delay zodat ze niet exact tegelijk starten
+    // Herhaal beide animaties
+    setInterval(startBikeAnimation, 120000);
+    setInterval(startFlybyAnimation, 120000);
+  </script>
 
-  // Herhaal beide animaties
-  setInterval(startBikeAnimation, 120000);   // elke 2 min
-  setInterval(startFlybyAnimation, 120000);  // elke 2 min
-</script>
-
-
-  
-
-
-
-<!-- PXP Coin Banner -->
-<div id="pxp-banner-overlay">
-  <div id="pxp-scroll-text"> $0.01731 <span class="positive">+2.91%</span> &nbsp;
-    Market Cap: $517.92K &nbsp;
-    Volume: $145.52K &nbsp;
-    Total Supply: 100M PXP &nbsp;
-    Circulating: 30M PXP;   $0.01731 <span class="positive">+2.91%</span> &nbsp;
-    Market Cap: $517.92K &nbsp;
-    Volume: $145.52K &nbsp;
-    Total Supply: 100M PXP &nbsp;
-    Circulating: 30M PXP
+  <!-- PXP Coin Banner -->
+  <div id="pxp-banner-overlay">
+    <div id="pxp-scroll-text">
+      $0.01731 <span class="positive">+2.91%</span> &nbsp;
+      Market Cap: $517.92K &nbsp;
+      Volume: $145.52K &nbsp;
+      Total Supply: 100M PXP &nbsp;
+      Circulating: 30M PXP;
+    </div>
   </div>
-</div>
-<script>
- 
+</body>
+</html>
