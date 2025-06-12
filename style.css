@@ -15,7 +15,7 @@ body {
   height: 595px;
   background-color: transparent;
   border: 3px solid transparent;
-  z-index: 10; /* komt boven achtergrond, onder overlays */
+  z-index: 12; /* komt boven achtergrond, onder overlays */
 }
 
 #scoreDisplay {
@@ -23,7 +23,7 @@ body {
   top: 72px;
   right: 110px;
   margin-right: 15px;
-  color: white;
+  color:white;
   font-size: 20px;
   font-family: Arial, sans-serif;
 }
@@ -87,8 +87,7 @@ body {
 }
 
 
-
- #login-overlay {
+#login-overlay {
   position: absolute;
   top: 20px;
   right: 30px;
@@ -101,11 +100,14 @@ body {
   display: inline-block;
 }
   
+
+
+ 
 #playerName {
   position: absolute;
   top: 20px;
   right: 100px; 
-  color: white;
+  color:#008CFF;
   font-size: 20px;
   font-family: Arial, sans-serif;
   z-index: 999;
@@ -158,6 +160,10 @@ body {
   border-radius: 6px;
   z-index: 1020;
 }
+.positive { color: #00ff77; }
+.negative { color: #ff4444; }
+
+}
 
 
 #pxp-scroll-text {
@@ -171,26 +177,12 @@ body {
   to   { transform: translateX(-100%); }
 }
 
-.positive { color: #00ff77; }
-.negative { color: #ff4444; }
-#login-btn,
-#logout-btn {
 
-{
-  background-color: #007bff;     /* helder blauw */
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  font-size: 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 5px;
-}
 
 #bikeFlyby {
   width: 120px; /* pas aan naar grootte */
   height: auto;
-  z-index: 1;
+  z-index: 10;
 }
 
 #bikeFlyer {
@@ -199,7 +191,7 @@ body {
   height: auto;
   display: none;
   will-change: transform, left, top;
-  z-index: 1; /* hoger dan andere lagen */
+  z-index: 10; /* hoger dan andere lagen */
   pointer-events: none;
 }
 
@@ -213,13 +205,4 @@ body {
 #bike-layer {
   pointer-events: none;
   overflow: hidden;
-}
-
-
-
-
-
-#login-btn:hover,
-#logout-btn:hover {
-  background-color: #0056b3;  /* donkerder blauw bij hover */
 }
