@@ -17,7 +17,7 @@ loginBtn.style.marginTop = "5px";
 
 // Styling voor logout knop
 logoutBtn.style.backgroundColor = "#008CFF"; // PointPay-blauw
-logoutBtn.style.color = "#white";
+logoutBtn.style.color = "white";
 logoutBtn.style.border = "none";
 logoutBtn.style.borderRadius = "6px";
 logoutBtn.style.padding = "6px 12px";
