@@ -195,7 +195,7 @@ function drawBricks() {
                 
          switch (b.type) {
          case "rocket":
-         ctx.drawImage(rocketImg, brickX, brickY, brickWidth, brickHeight);
+         ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
          break;
          case "power":
          ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
