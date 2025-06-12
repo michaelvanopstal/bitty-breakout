@@ -35,9 +35,9 @@
         <li></li><li></li><li></li><li></li><li></li>
       </ol>
     </div>
-  </div>
+ 
 
-  <!-- Biker-elementen -->
+<img id="bikeFlyer" src="pointpay-bike.png" style="position:absolute; display:none; width:180px;" />
 <img id="rocket1" src="raket1.png" style="position:absolute; display:none; width:60px; z-index:15;" />
 <img id="rocket2" src="raket2.png" style="position:absolute; display:none; width:60px; z-index:15;" />
 <img id="balloonFlyby" src="luchtballon.png" style="position:absolute; display:none; width:100px;" />
@@ -53,25 +53,26 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="login.js"></script>
-  <script src="game.js"></script>
+    
+<!-- Scripts -->
+<script src="login.js"></script>
+<script src="game.js"></script>
 
-  <script>
-    let highscores = JSON.parse(localStorage.getItem("highscores")) || Array(10).fill({ name: "—", score: 0, time: "00:00" });
+<!-- Highscore script -->
+<script>
+  let highscores = JSON.parse(localStorage.getItem("highscores")) || Array(10).fill({ name: "—", score: 0, time: "00:00" });
 
-    function updateHighscoreBoard() {
-      const highscoreList = document.getElementById("highscore-list");
-      if (!highscoreList) return;
-      highscoreList.innerHTML = "";
-      highscores.forEach((entry, index) => {
-        const li = document.createElement("li");
-        li.textContent = `${index + 1}. ${entry.name} — ${entry.score} PXP — ${entry.time}`;
-        highscoreList.appendChild(li);
-      });
-    }
+  function updateHighscoreBoard() {
+    const highscoreList = document.getElementById("highscore-list");
+    if (!highscoreList) return;
+    highscoreList.innerHTML = "";
+    highscores.forEach((entry, index) => {
+      const li = document.createElement("li");
+      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} PXP — ${entry.time}`;
+      highscoreList.appendChild(li);
+    });
+  }
 
-  <script>
   function checkAndUpdateHighscores(name, score, time) {
     const newEntry = { name, score, time };
     highscores.push(newEntry);
@@ -85,6 +86,7 @@
     updateHighscoreBoard();
   });
 </script>
+
 
 <script>
   // 🚲 Bike met wobble-effect
