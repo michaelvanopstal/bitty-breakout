@@ -84,19 +84,21 @@
  });
 
 
-</script>
-<img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" />
+<!-- Biker-elementen -->
+<img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" style="position:absolute; display:none; width:180px;" />
+<img id="bikeFlyby" src="pointpay-bike.png" alt="Flyby Bike" style="position:absolute; display:none; width:180px;" />
 
+<!-- Animatie scripts -->
 <script>
   function startBikeAnimation() {
     const bike = document.getElementById("bikeFlyer");
     bike.style.display = "block";
 
-    const startX = window.innerWidth + 100;   // vanaf rechts
-    const endX = -200;                        // naar links uit beeld
-    const startY = window.innerHeight + 100;  // onderkant
-    const endY = -150;                        // boven uit beeld
-    const duration = 20000;                   // 20 sec
+    const startX = window.innerWidth + 100;
+    const endX = -200;
+    const startY = window.innerHeight + 100;
+    const endY = -150;
+    const duration = 20000;
     let startTime = null;
 
     function animateBike(timestamp) {
@@ -127,13 +129,6 @@
     requestAnimationFrame(animateBike);
   }
 
-  // Start na 1 sec
-  setTimeout(startBikeAnimation, 1000);
-
-  // Herhaal elke 2 minuten (120000 ms)
-  setInterval(startBikeAnimation, 30000);
-
-</script><script>
   function startFlybyAnimation() {
     const bike = document.getElementById("bikeFlyby");
     bike.style.display = "block";
@@ -154,10 +149,15 @@
     }, 30);
   }
 
-  // Start direct of met delay
-  setTimeout(startFlybyAnimation, 1000); // bijvoorbeeld 1 seconde na laden
-  setInterval(startFlybyAnimation, 120000); // herhaal elke 2 minuten
+  // Start beide animaties na 1 seconde
+  setTimeout(startBikeAnimation, 1000);
+  setTimeout(startFlybyAnimation, 2000); // lichte delay zodat ze niet exact tegelijk starten
+
+  // Herhaal beide animaties
+  setInterval(startBikeAnimation, 120000);   // elke 2 min
+  setInterval(startFlybyAnimation, 120000);  // elke 2 min
 </script>
+
 
   
 
