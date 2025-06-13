@@ -743,6 +743,7 @@ function draw() {
     e.radius += 2;
     e.alpha -= 0.05;
   });
+  
   explosions = explosions.filter(e => e.alpha > 0);
 
   smokeParticles.forEach(p => {
@@ -754,6 +755,7 @@ function draw() {
     p.radius += 0.3;
     p.alpha -= 0.02;
   });
+  
   smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
   drawBall();
