@@ -833,7 +833,7 @@ checkFlyingCoinHits();
 
   
   requestAnimationFrame(draw);
-}
+
 
 
 let imagesLoaded = 0;
