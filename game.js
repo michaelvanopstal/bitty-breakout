@@ -817,6 +817,7 @@ function draw() {
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
+  drawWaterOverlay(); // 👈 water VOOR de boot, lijkt alsof boot erin ligt
 
   requestAnimationFrame(draw);
 }
