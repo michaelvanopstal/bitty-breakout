@@ -632,7 +632,7 @@ function drawWaterBackground() {
 
 }function drawWaterOverlay() {
   let waterWobble = Math.sin(Date.now() / 200) * 4; // zelfde als in background
-  const overlayHeight = 50; // hoogte van het bovenste waterstuk
+  const overlayHeight = 80; // hoogte van het bovenste waterstuk
   const visualOverlayOffset = -6; // 👈
 
   ctx.save();
