@@ -716,11 +716,18 @@ function onImageLoad() {
 }
 
 // Koppel alle images aan onImageLoad
+boatImage.onload = onImageLoad;
+doubleBallImg.onload = onImageLoad;
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
+vlagImgLeft.onload = onImageLoad;
+vlagImgRight.onload = onImageLoad;
+shootCoinImg.onload = onImageLoad;
 powerBlockImg.onload = onImageLoad;
 powerBlock2Img.onload = onImageLoad;
 rocketImg.onload = onImageLoad;
+coinImg.onload = onImageLoad;
+
 
 document.addEventListener("mousedown", function () {
   if (rocketActive && rocketAmmo > 0 && !rocketFired) {
