@@ -571,7 +571,7 @@ function resetBricks() {
 function drawWaves() {
   ctx.save();
   ctx.lineWidth = 2;
-  ctx.globalAlpha = 0.5;
+  ctx.globalAlpha = 0;
 
   const now = Date.now();
 
