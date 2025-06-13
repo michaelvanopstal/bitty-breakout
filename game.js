@@ -268,6 +268,12 @@ function drawPaddle() {
 }
 
 
+
+function drawWaterBackground() {
+  let waterWobble = Math.sin(Date.now() / 300) * 4; // lichte golving
+  ctx.drawImage(waterBg, 0, currentWaterHeight + waterWobble, canvas.width, canvas.height - currentWaterHeight);
+}
+
 function resetBall() {
   x = paddleX + paddleWidth / 2 - ballRadius;
   y = canvas.height - paddleHeight - ballRadius * 2;
@@ -614,6 +620,8 @@ function draw() {
   // 🌊 Golven tekenen tijdens bootmodus
   if (boatPhase !== "inactive") {
     drawWaves();
+    drawWaterBackground(); // ✅ juiste plek
+  
   }
 
   // 🚤 Paddle-beweging met aangepaste snelheid in bootmodus
@@ -795,3 +803,4 @@ powerBlockImg.onload = onImageLoad;
 powerBlock2Img.onload = onImageLoad;
 rocketImg.onload = onImageLoad;
 coinImg.onload = onImageLoad;
+waterBg.onload = onImageLoad; // als je afbeeldingloader gebruikt
