@@ -818,10 +818,11 @@ function draw() {
     drawBall();
   }
 
-  drawPaddle();
-  drawPaddleFlags();
-  drawFlyingCoins();
-  checkFlyingCoinHits();
+drawWaterOverlay();             // 👈 water eerst tekenen
+drawPaddle();                   // 👈 daarna pas de boot erachter
+drawPaddleFlags();
+drawFlyingCoins();
+checkFlyingCoinHits();
 
   
   requestAnimationFrame(draw);
