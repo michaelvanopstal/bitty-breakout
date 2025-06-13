@@ -649,24 +649,21 @@ function draw() {
   checkCoinCollision();
   drawBricks();
 
-  // 🌊 Golven tekenen tijdens bootmodus
+  // 🌊 Water tekenen tijdens bootmodus
   if (boatPhase !== "inactive") {
     drawWaves();
     drawWaterBackground(); // ✅ juiste plek
-
   }
 
-  
-
-  // 🚤 Paddle-beweging met aangepaste snelheid in bootmodus
-  let currentSpeed = (boatPhase !== "inactive") ? 3 * boatSpeedFactor :3;
+  // 🚤 Paddle-beweging (boot = sneller)
+  let currentSpeed = (boatPhase !== "inactive") ? 7 * boatSpeedFactor : 7;
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
     paddleX += currentSpeed;
   } else if (leftPressed && paddleX > 0) {
     paddleX -= currentSpeed;
   }
 
-  // 🟠 Ball physics
+  // 🟠 Hoofdbal bewegen
   if (ballLaunched) {
     x += dx;
     y += dy;
@@ -675,11 +672,11 @@ function draw() {
     y = canvas.height - paddleHeight - ballRadius * 2;
   }
 
-  // Randen botsing
+  // 🧱 Botsing wanden
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
   if (y + dy < ballRadius) dy = -dy;
 
-  // Paddle of boot botsing
+  // 🎯 Paddle/boot botsing
   const paddleTopY = (boatPhase !== "inactive") ? currentWaterHeight : canvas.height - paddleHeight;
   if (
     y + dy > paddleTopY - ballRadius &&
@@ -694,7 +691,7 @@ function draw() {
     dy = -Math.abs(speed * Math.cos(angle));
   }
 
-  // Bal onderin geraakt
+  // 🧨 Hoofdbal valt onderin
   if (y + dy > canvas.height - ballRadius) {
     saveHighscore();
     ballLaunched = false;
@@ -706,7 +703,7 @@ function draw() {
     resetBricks();
   }
 
-  // Tweede bal logic
+  // 🔵 Tweede bal logica
   if (secondBallActive) {
     secondBall.x += secondBall.dx;
     secondBall.y += secondBall.dy;
@@ -730,7 +727,7 @@ function draw() {
       secondBall.dy = -Math.abs(speed * Math.cos(angle));
     }
 
-    // Botsing met bricks
+    // 🧱 Botsing met blokken
     for (let c = 0; c < brickColumnCount; c++) {
       for (let r = 0; r < brickRowCount; r++) {
         const b = bricks[c][r];
@@ -751,10 +748,13 @@ function draw() {
       }
     }
 
-    ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
+    // Alleen tonen als tweede bal boven water is
+    if (secondBall.y < currentWaterHeight - ballRadius) {
+      ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
+    }
   }
 
-  // 🔥 Raket logica
+  // 🔥 Raket
   if (rocketActive && !rocketFired) {
     rocketX = paddleX + paddleWidth / 2 - 12;
     rocketY = canvas.height - paddleHeight - 48;
@@ -800,14 +800,15 @@ function draw() {
   });
   smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
-  // 🎯 Overige tekenen
- // 🎯 Overige tekenen
-drawBall();
-drawPaddle();           // Eerst de boot tekenen
-drawWaterOverlay();     // Dan het overlay-water er net overheen
-drawPaddleFlags();
-drawFlyingCoins();
-checkFlyingCoinHits();
+  // 🔘 Hoofdbal tekenen (alleen boven water)
+  if (y < currentWaterHeight - ballRadius) {
+    drawBall();
+  }
+
+  drawPaddle();
+  drawPaddleFlags();
+  drawFlyingCoins();
+  checkFlyingCoinHits();
 
   requestAnimationFrame(draw);
 }
