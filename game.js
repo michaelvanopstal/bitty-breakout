@@ -609,6 +609,7 @@ function drawWaves() {
   ctx.restore();
 }
 
+
 function drawWaterBackground() {
   let waterWobble = Math.sin(Date.now() / 300) * 4;
   ctx.save();
@@ -617,7 +618,26 @@ function drawWaterBackground() {
   ctx.clip();
   ctx.drawImage(waterBg, 0, currentWaterHeight + waterWobble, canvas.width, canvas.height - currentWaterHeight);
   ctx.restore();
+}function drawWaterOverlay() {
+  let waterWobble = Math.sin(Date.now() / 300) * 4; // zelfde als in background
+  const overlayHeight = 30; // hoogte van het bovenste waterstuk
+
+  ctx.save();
+  ctx.globalAlpha = 0.5; // transparant watergevoel
+  ctx.drawImage(
+    waterBg,                    // gebruik dezelfde water.png
+    0,                          // vanaf links
+    0,                          // vanaf bovenkant van het plaatje
+    canvas.width,               // breedte hele canvas
+    overlayHeight,              // alleen bovenste 30px van water.png
+    0,                          // teken vanaf links op canvas
+    currentWaterHeight + waterWobble,  // waar het water is
+    canvas.width,
+    overlayHeight
+  );
+  ctx.restore();
 }
+
 
 
 
@@ -781,11 +801,13 @@ function draw() {
   smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
   // 🎯 Overige tekenen
-  drawBall();
-  drawPaddle();
-  drawPaddleFlags();
-  drawFlyingCoins();
-  checkFlyingCoinHits();
+ // 🎯 Overige tekenen
+drawBall();
+drawPaddle();           // Eerst de boot tekenen
+drawWaterOverlay();     // Dan het overlay-water er net overheen
+drawPaddleFlags();
+drawFlyingCoins();
+checkFlyingCoinHits();
 
   requestAnimationFrame(draw);
 }
