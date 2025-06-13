@@ -768,13 +768,15 @@ function draw() {
     }
   }
 
+  requestAnimationFrame(draw);
+}
 
 
     // Alleen tonen als tweede bal boven water is
     if (secondBall.y < currentWaterHeight - ballRadius) {
       ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
+   
     }
-  }
 
   // 🔥 Raket
   if (rocketActive && !rocketFired) {
