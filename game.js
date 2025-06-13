@@ -88,6 +88,8 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
+const waterBg = new Image();
+waterBg.src = "water.png";
 
 const boatBlockImg = new Image();
 boatBlockImg.src = "boot_block_logo.png";
