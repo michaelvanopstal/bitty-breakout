@@ -379,13 +379,6 @@ function collisionDetection() {
   }
 }
 
-
-let boatPhase = "inactive"; // 'rising', 'holding', 'falling'
-let currentWaterHeight = canvas.height - paddleHeight;
-let boatRiseDuration = 5000;   // 5 sec omhoog
-let boatHoldDuration = 3000;   // 3 sec vasthouden boven
-let boatFallDuration = 5000;   // 5 sec omlaag
-
 function activateBoatMode() {
   isBoatMode = true;
   boatPhase = "rising";
