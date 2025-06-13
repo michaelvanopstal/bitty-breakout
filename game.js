@@ -552,6 +552,46 @@ function resetBricks() {
   }
 }
 
+function drawWaves() {
+  ctx.save();
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.4;
+
+  // 🌊 Eerste (lichte) golf
+  ctx.strokeStyle = "#66ccff";
+  ctx.beginPath();
+  for (let x = 0; x <= canvas.width; x++) {
+    let y = Math.sin((x + Date.now() / 120) / 10) * 4 + currentWaterHeight + 10;
+    if (x === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // 🌊 Tweede (donkere) golf, iets vertraagd en lager
+  ctx.strokeStyle = "#3399ff";
+  ctx.beginPath();
+  for (let x = 0; x <= canvas.width; x++) {
+    let y = Math.sin((x + Date.now() / 100 + 1000) / 12) * 5 + currentWaterHeight + 15;
+    if (x === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // 🌊 Derde (diepe) golf
+  ctx.strokeStyle = "#0077cc";
+  ctx.beginPath();
+  for (let x = 0; x <= canvas.width; x++) {
+    let y = Math.sin((x + Date.now() / 90 + 2000) / 14) * 3 + currentWaterHeight + 20;
+    if (x === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+
+
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
