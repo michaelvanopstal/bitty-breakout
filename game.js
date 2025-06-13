@@ -709,6 +709,10 @@ function draw() {
     ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
   }
 
+  function drawBall() {
+  ctx.drawImage(ballImg, x, y, ballRadius * 2, ballRadius * 2);
+}
+
   if (rocketActive && !rocketFired) {
     rocketX = paddleX + paddleWidth / 2 - 12;
     rocketY = canvas.height - paddleHeight - 48;
