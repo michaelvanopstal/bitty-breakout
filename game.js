@@ -43,6 +43,7 @@ let boatFallDuration = 5000;     // omlaag
 let maxWaterHeight = 50;         // max hoogte boven paddle (pixels)
 let currentWaterHeight = canvas.height - paddleHeight; // actuele hoogte waterlijn
 let boatImageSize = { width: 120, height: 30 }; // alleen nodig als je boot niet paddleWidth gebruikt
+let boatSpeedFactor = 1; // of een andere gewenste waarde zoals 1.2 voor versnelling
 
 const bonusBricks = [
   { col: 6, row: 8, type: "rocket" },
