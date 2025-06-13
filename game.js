@@ -274,7 +274,7 @@ function drawPaddle() {
 
 function drawWaterBackground() {
   let waterWobble = Math.sin(Date.now() / 300) * 2; // lichte golving
-  ctx.drawImage(waterBg, 0, currentWaterHeight + waterWobble 1 , canvas.width, canvas.height);
+  ctx.drawImage(waterBg, 0, currentWaterHeight + waterWobble + 1 , canvas.width, canvas.height);
 
 }
 
