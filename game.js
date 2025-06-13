@@ -36,8 +36,9 @@ let isBoatMode = false;
 let boatStartTime = 0;
 let showWaves = false;
 
-let waveStartDelay = 2000; // in ms: golven verschijnen na 2 seconden
-let boatDuration = 4000;   // in ms: totale boot-modusduur (4 sec)
+
+let waveStartDelay = 1000; // in ms: golven verschijnen na 2 seconden
+let boatDuration = 8000;   // in ms: totale boot-modusduur (4 sec)
 let boatSpeedFactor = 0.7; // paddle snelheid tijdens bootmodus (70%)
 let waveHeight = 10;       // hoogte van de golven (in pixels)
 let basePaddleY = canvas.height - 30; // standaard paddle-hoogte
