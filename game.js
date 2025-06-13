@@ -662,10 +662,18 @@ function draw() {
   checkCoinCollision();
   drawBricks();
 
-  // 🌊 Water tekenen tijdens bootmodus
-  if (boatPhase !== "inactive") {
-    drawWaves();
-    drawWaterBackground(); // ✅ juiste plek
+ // 🌊 Water tekenen tijdens bootmodus
+if (boatPhase !== "inactive") {
+  drawWaves();
+  drawWaterBackground(); 
+}
+
+// 🚤 Paddle tekenen
+drawPaddle();
+
+// ✨ Overlay altijd tekenen, zodat hij voor de boot komt
+drawWaterOverlay(); 
+
      
   }
   // 🚤 Paddle-beweging (boot = sneller)
