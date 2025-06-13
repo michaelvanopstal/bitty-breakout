@@ -282,7 +282,9 @@ function resetBall() {
 
 function resetPaddle() {
   paddleX = (canvas.width - paddleWidth) / 2;
+  boatSpeedFactor = 1; // ← ✅ ook hier terugzetten
 }
+
 
 
 function drawPaddleFlags() {
@@ -422,11 +424,14 @@ function activateBoatMode() {
       const t = Math.min(elapsed / boatFallDuration, 1);
       currentWaterHeight = canvas.height - paddleHeight - (1 - t) * maxWaterHeight;
       if (t >= 1) {
-        boatPhase = "inactive";
-        isBoatMode = false;
-        currentWaterHeight = canvas.height - paddleHeight;
-        return;
+      boatPhase = "inactive";
+     isBoatMode = false;
+     currentWaterHeight = canvas.height - paddleHeight;
+     boatSpeedFactor = 1;  // ← ✅ zet paddle snelheid terug naar normaal
+     return;
+   
       }
+
     }
 
     requestAnimationFrame(updateWaterLevel);
