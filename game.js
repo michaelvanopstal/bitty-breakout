@@ -251,7 +251,7 @@ function drawBall() {
 function drawPaddle() {
   if (boatPhase !== "inactive") {
     let wobble = Math.sin(Date.now() / 120) * 6;
-    let visualOffset = -12; // 👈 boot begint iets hoger maar stijgt niet verder
+    let visualOffset = 0; // 👈 boot begint iets hoger maar stijgt niet verder
     ctx.drawImage(
       boatPaddleImg,
       paddleX - 10,
