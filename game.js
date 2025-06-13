@@ -629,13 +629,14 @@ function drawWaterBackground() {
   ctx.clip();
   ctx.drawImage(waterBg, 0, currentWaterHeight + waterWobble, canvas.width, canvas.height - currentWaterHeight);
   ctx.restore();
+
 }function drawWaterOverlay() {
   let waterWobble = Math.sin(Date.now() / 200) * 4; // zelfde als in background
   const overlayHeight = 50; // hoogte van het bovenste waterstuk
   const visualOverlayOffset = -6; // 👈
 
   ctx.save();
-  ctx.globalAlpha = 0.5; // transparant watergevoel
+  ctx.globalAlpha = 1; // transparant watergevoel
   ctx.drawImage(
     waterBg,                    // gebruik dezelfde water.png
     0,                          // vanaf links
