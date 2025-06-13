@@ -227,7 +227,7 @@ function drawBricks() {
          ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
          break;
          case "boot":
-         ctx.drawImage(boatImage, brickX, brickY, brickWidth, brickHeight);
+         ctx.drawImage(boatBlockImg, brickX, brickY, brickWidth, brickHeight);
          break;
          default:
          ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
@@ -240,14 +240,10 @@ function drawBricks() {
 }
 
 
-function drawBall() {
-  ctx.drawImage(ballImg, x, y, ballRadius * 2, ballRadius * 2);
-}
-
 function drawPaddle() {
   if (boatPhase !== "inactive") {
     let wobble = Math.sin(Date.now() / 150) * 2;
-    ctx.drawImage(boatImage,
+    ctx.drawImage(boatPaddleImg,
                   paddleX,
                   currentWaterHeight + wobble,
                   paddleWidth,
@@ -782,6 +778,7 @@ function onImageLoad() {
 }
 
 // Koppel alle images aan onImageLoad
+boatPaddleImg.onload = onImageLoad;
 boatImage.onload = onImageLoad;
 doubleBallImg.onload = onImageLoad;
 blockImg.onload = onImageLoad;
