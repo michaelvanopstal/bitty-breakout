@@ -248,12 +248,13 @@ function drawBall() {
 
 function drawPaddle() {
   if (boatPhase !== "inactive") {
-    let wobble = Math.sin(Date.now() / 150) * 2;
+    let wobble = Math.sin(Date.now() / 120) * 6;
     ctx.drawImage(boatPaddleImg,
-                  paddleX,
-                  currentWaterHeight + wobble,
-                  paddleWidth,
-                  paddleHeight + 10);
+              paddleX - 10,                       // Iets breder
+              currentWaterHeight + wobble - 10,   // Iets hoger
+              paddleWidth + 20,                   // Breder
+              paddleHeight + 30);                 // Hoger
+
   } else {
     ctx.beginPath();
     ctx.rect(paddleX, canvas.height - paddleHeight,
@@ -557,36 +558,39 @@ function resetBricks() {
   }
 }
 
+
 function drawWaves() {
   ctx.save();
   ctx.lineWidth = 2;
-  ctx.globalAlpha = 0.4;
+  ctx.globalAlpha = 0.5;
 
-  // 🌊 Eerste (lichte) golf
+  const now = Date.now();
+
+  // 🌊 Golf 1
   ctx.strokeStyle = "#66ccff";
   ctx.beginPath();
   for (let x = 0; x <= canvas.width; x++) {
-    let y = Math.sin((x + Date.now() / 120) / 10) * 4 + currentWaterHeight + 10;
+    let y = Math.sin((x + now / 50)) * 5 + currentWaterHeight + 10;
     if (x === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   }
   ctx.stroke();
 
-  // 🌊 Tweede (donkere) golf, iets vertraagd en lager
+  // 🌊 Golf 2 (sneller, lager)
   ctx.strokeStyle = "#3399ff";
   ctx.beginPath();
   for (let x = 0; x <= canvas.width; x++) {
-    let y = Math.sin((x + Date.now() / 100 + 1000) / 12) * 5 + currentWaterHeight + 15;
+    let y = Math.sin((x + now / 35)) * 3 + currentWaterHeight + 18;
     if (x === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   }
   ctx.stroke();
 
-  // 🌊 Derde (diepe) golf
+  // 🌊 Golf 3 (dieper, trager)
   ctx.strokeStyle = "#0077cc";
   ctx.beginPath();
   for (let x = 0; x <= canvas.width; x++) {
-    let y = Math.sin((x + Date.now() / 90 + 2000) / 14) * 3 + currentWaterHeight + 20;
+    let y = Math.sin((x + now / 70)) * 2 + currentWaterHeight + 24;
     if (x === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   }
