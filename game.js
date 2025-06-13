@@ -523,7 +523,6 @@ function resetBricks() {
   }
 }
 
-
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -531,152 +530,121 @@ function draw() {
   drawCoins();
   checkCoinCollision();
   drawBricks();
-  
+
+  // 🌊 Golven tekenen tijdens bootmodus
   if (showWaves) {
-  drawWaves();
-}
-
-  drawBall();
-  drawPaddle();
-  drawPaddleFlags();
-  drawFlyingCoins();
-  checkFlyingCoinHits();
-}
-
-function drawWaves() {
-  ctx.save();
-  ctx.strokeStyle = "#3399ff";
-  ctx.lineWidth = 2;
-  ctx.globalAlpha = 0.5; // lichte transparantie
-
-  ctx.beginPath();
-  for (let x = 0; x <= canvas.width; x++) {
-    let y = Math.sin((x + Date.now() / 100) / 10) * waveHeight + canvas.height - 50;
-    if (x === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
-    }
+    drawWaves();
   }
-  ctx.stroke();
 
-  ctx.globalAlpha = 1; // zet transparantie terug naar normaal
-  ctx.restore();
-}
-
-
+  // 🚤 Paddle-beweging met aangepaste snelheid in bootmodus
   let currentSpeed = isBoatMode ? 7 * boatSpeedFactor : 7;
+  if (rightPressed && paddleX < canvas.width - paddleWidth) {
+    paddleX += currentSpeed;
+  } else if (leftPressed && paddleX > 0) {
+    paddleX -= currentSpeed;
+  }
 
-if (rightPressed && paddleX < canvas.width - paddleWidth) {
-  paddleX += currentSpeed;
-} else if (leftPressed && paddleX > 0) {
-  paddleX -= currentSpeed;
-}
-
-
+  // 🟠 Ball physics
   if (ballLaunched) {
-  x += dx;
-  y += dy;
-} else {
-  x = paddleX + paddleWidth / 2 - ballRadius;
-  y = canvas.height - paddleHeight - ballRadius * 2;
-}
+    x += dx;
+    y += dy;
+  } else {
+    x = paddleX + paddleWidth / 2 - ballRadius;
+    y = canvas.height - paddleHeight - ballRadius * 2;
+  }
 
-
+  // Randen botsing
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
     dx = -dx;
   }
-
   if (y + dy < ballRadius) {
     dy = -dy;
   }
 
- if (
-  y + dy > canvas.height - paddleHeight - ballRadius &&
-  y + dy < canvas.height + 2 && // iets meer speling
-  x > paddleX &&
-  x < paddleX + paddleWidth
-) {
-  const hitPos = (x - paddleX) / paddleWidth;
-  const angle = (hitPos - 0.5) * Math.PI / 2;
-  const speed = Math.sqrt(dx * dx + dy * dy);
-  dx = speed * Math.sin(angle);
-  dy = -Math.abs(speed * Math.cos(angle));
-}
-
-
-  if (y + dy > canvas.height - ballRadius) {
-  saveHighscore();
-  ballLaunched = false;
-  ballMoving = false;
-  dx = 4;
-  dy = -4;
-  elapsedTime = 0;
-  resetBall();
-  resetBricks();
-}
-
-
-
-if (secondBallActive) {
-  secondBall.x += secondBall.dx;
-  secondBall.y += secondBall.dy;
-
-  // Randen
-  if (secondBall.x + secondBall.dx > canvas.width - ballRadius || secondBall.x + secondBall.dx < ballRadius) {
-    secondBall.dx = -secondBall.dx;
-  }
-
-  if (secondBall.y + secondBall.dy < ballRadius) {
-    secondBall.dy = -secondBall.dy;
-  }
-
-  
+  // Paddle botsing
   if (
-    secondBall.y + secondBall.dy > canvas.height - paddleHeight - ballRadius &&
-    secondBall.y + secondBall.dy < canvas.height - ballRadius &&
-    secondBall.x > paddleX &&
-    secondBall.x < paddleX + paddleWidth
+    y + dy > canvas.height - paddleHeight - ballRadius &&
+    y + dy < canvas.height + 2 &&
+    x > paddleX &&
+    x < paddleX + paddleWidth
   ) {
-    const hitPos = (secondBall.x - paddleX) / paddleWidth;
+    const hitPos = (x - paddleX) / paddleWidth;
     const angle = (hitPos - 0.5) * Math.PI / 2;
-    const speed = Math.sqrt(secondBall.dx * secondBall.dx + secondBall.dy * secondBall.dy);
-    secondBall.dx = speed * Math.sin(angle);
-    secondBall.dy = -Math.abs(speed * Math.cos(angle));
+    const speed = Math.sqrt(dx * dx + dy * dy);
+    dx = speed * Math.sin(angle);
+    dy = -Math.abs(speed * Math.cos(angle));
   }
 
-  // Onderaan geraakt
-  if (secondBall.y + secondBall.dy > canvas.height - ballRadius) {
-    secondBallActive = false;
+  // Bal onderin geraakt
+  if (y + dy > canvas.height - ballRadius) {
+    saveHighscore();
+    ballLaunched = false;
+    ballMoving = false;
+    dx = 4;
+    dy = -4;
+    elapsedTime = 0;
+    resetBall();
+    resetBricks();
   }
 
-  // Blokken-botsing
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      const b = bricks[c][r];
-      if (
-        b.status === 1 &&
-        secondBall.x > b.x &&
-        secondBall.x < b.x + brickWidth &&
-        secondBall.y > b.y &&
-        secondBall.y < b.y + brickHeight
-      ) {
-        secondBall.dy = -secondBall.dy;
-        b.status = 0;
-        b.type = "normal";
-        score += 10;
-        spawnCoin(b.x, b.y);
-        document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+  // Tweede bal logic
+  if (secondBallActive) {
+    secondBall.x += secondBall.dx;
+    secondBall.y += secondBall.dy;
+
+    // Tweede bal: randen
+    if (secondBall.x + secondBall.dx > canvas.width - ballRadius || secondBall.x + secondBall.dx < ballRadius) {
+      secondBall.dx = -secondBall.dx;
+    }
+    if (secondBall.y + secondBall.dy < ballRadius) {
+      secondBall.dy = -secondBall.dy;
+    }
+
+    // Tweede bal: paddle botsing
+    if (
+      secondBall.y + secondBall.dy > canvas.height - paddleHeight - ballRadius &&
+      secondBall.y + secondBall.dy < canvas.height - ballRadius &&
+      secondBall.x > paddleX &&
+      secondBall.x < paddleX + paddleWidth
+    ) {
+      const hitPos = (secondBall.x - paddleX) / paddleWidth;
+      const angle = (hitPos - 0.5) * Math.PI / 2;
+      const speed = Math.sqrt(secondBall.dx * secondBall.dx + secondBall.dy * secondBall.dy);
+      secondBall.dx = speed * Math.sin(angle);
+      secondBall.dy = -Math.abs(speed * Math.cos(angle));
+    }
+
+    // Tweede bal: onder geraakt
+    if (secondBall.y + secondBall.dy > canvas.height - ballRadius) {
+      secondBallActive = false;
+    }
+
+    // Tweede bal: blokken raken
+    for (let c = 0; c < brickColumnCount; c++) {
+      for (let r = 0; r < brickRowCount; r++) {
+        const b = bricks[c][r];
+        if (
+          b.status === 1 &&
+          secondBall.x > b.x &&
+          secondBall.x < b.x + brickWidth &&
+          secondBall.y > b.y &&
+          secondBall.y < b.y + brickHeight
+        ) {
+          secondBall.dy = -secondBall.dy;
+          b.status = 0;
+          b.type = "normal";
+          score += 10;
+          spawnCoin(b.x, b.y);
+          document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+        }
       }
     }
+
+    // Teken tweede bal
+    ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
   }
 
-  // Teken tweede bal
-  ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
-}
-
-
-
+  // 🚀 Raket tekenen of afvuren
   if (rocketActive && !rocketFired) {
     rocketX = paddleX + paddleWidth / 2 - 12;
     rocketY = canvas.height - paddleHeight - 48;
@@ -699,6 +667,7 @@ if (secondBallActive) {
     }
   }
 
+  // 💥 Explosies
   explosions.forEach(e => {
     ctx.beginPath();
     ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
@@ -709,6 +678,7 @@ if (secondBallActive) {
   });
   explosions = explosions.filter(e => e.alpha > 0);
 
+  // 💨 Rook
   smokeParticles.forEach(p => {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -719,6 +689,13 @@ if (secondBallActive) {
     p.alpha -= 0.02;
   });
   smokeParticles = smokeParticles.filter(p => p.alpha > 0);
+
+  // 🎯 Teken alle visuele objecten
+  drawBall();
+  drawPaddle();
+  drawPaddleFlags();
+  drawFlyingCoins();
+  checkFlyingCoinHits();
 
   requestAnimationFrame(draw);
 }
