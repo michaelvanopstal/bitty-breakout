@@ -47,7 +47,7 @@ const bonusBricks = [
   { col: 6, row: 8, type: "rocket" },
   { col: 8, row: 6, type: "power" },
   { col: 2, row: 9, type: "doubleball" },
-
+  { row: 2, col: 3, type: "boot" }
 ];
 
 
@@ -59,6 +59,10 @@ const brickWidth = customBrickWidth;
 const brickHeight = customBrickHeight;
 
 
+
+
+
+// BRICKS AANMAKEN
 const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
@@ -81,6 +85,7 @@ for (let c = 0; c < brickColumnCount; c++) {
     };
   }
 }
+
 
 let boatImage = new Image();
 boatImage.src = "pointpay_bood.png"; 
@@ -232,12 +237,18 @@ function drawBall() {
 }
 
 function drawPaddle() {
-  ctx.beginPath();
-  ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-  ctx.fillStyle = "#0095DD";
-  ctx.fill();
-  ctx.closePath();
-} 
+  if (isBoatMode) {
+    let paddleY = basePaddleY + Math.sin(Date.now() / 150) * 4;
+    ctx.drawImage(boatImage, paddleX, paddleY, paddleWidth, paddleHeight + 10);
+  } else {
+    ctx.beginPath();
+    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
+  }
+}
+
 
 function resetBall() {
   x = paddleX + paddleWidth / 2 - ballRadius;
@@ -276,6 +287,7 @@ function shootFromFlags() {
     active: true
   });
 }
+
 function checkFlyingCoinHits() {
   flyingCoins.forEach((coin) => {
     if (!coin.active) return;
@@ -332,19 +344,21 @@ function collisionDetection() {
               break;
             case "rocket":
               rocketActive = true;
-              rocketAmmo = 3; // geef 3 raketten
+              rocketAmmo = 3;
               break;
-              case "freeze":
+            case "freeze":
               dx = 0;
               setTimeout(() => { dx = 4; }, 1000);
               break;
-              case "doubleball":
+            case "doubleball":
               spawnSecondBall();
               setTimeout(() => {
-              secondBallActive = false;
-           }, secondBallDuration);
+                secondBallActive = false;
+              }, secondBallDuration);
               break;
-
+            case "boot":
+              activateBoatMode();
+              break;
           }
 
           b.status = 0;
@@ -358,7 +372,24 @@ function collisionDetection() {
   }
 }
 
-  
+
+function activateBoatMode() {
+  isBoatMode = true;
+  boatStartTime = Date.now();
+  showWaves = false;
+
+  // Start golven na vertraging
+  setTimeout(() => {
+    showWaves = true;
+  }, waveStartDelay);
+
+  // Stop bootmodus en golven na totale duur
+  setTimeout(() => {
+    isBoatMode = false;
+    showWaves = false;
+  }, waveStartDelay + boatDuration);
+}
+
 
   function saveHighscore() {
   const timeText = document.getElementById("timeDisplay").textContent.replace("time ", "");
@@ -500,18 +531,48 @@ function draw() {
   drawCoins();
   checkCoinCollision();
   drawBricks();
+  
+  if (showWaves) {
+  drawWaves();
+}
+
   drawBall();
   drawPaddle();
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
- 
+}
 
-  if (rightPressed && paddleX < canvas.width - paddleWidth) {
-    paddleX += 7;
-  } else if (leftPressed && paddleX > 0) {
-    paddleX -= 7;
+function drawWaves() {
+  ctx.save();
+  ctx.strokeStyle = "#3399ff";
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.5; // lichte transparantie
+
+  ctx.beginPath();
+  for (let x = 0; x <= canvas.width; x++) {
+    let y = Math.sin((x + Date.now() / 100) / 10) * waveHeight + canvas.height - 50;
+    if (x === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
   }
+  ctx.stroke();
+
+  ctx.globalAlpha = 1; // zet transparantie terug naar normaal
+  ctx.restore();
+}
+
+
+  let currentSpeed = isBoatMode ? 7 * boatSpeedFactor : 7;
+
+if (rightPressed && paddleX < canvas.width - paddleWidth) {
+  paddleX += currentSpeed;
+} else if (leftPressed && paddleX > 0) {
+  paddleX -= currentSpeed;
+}
+
 
   if (ballLaunched) {
   x += dx;
