@@ -240,6 +240,11 @@ function drawBricks() {
 }
 
 
+function drawBall() {
+  ctx.drawImage(ballImg, x, y, ballRadius * 2, ballRadius * 2);
+}
+
+
 function drawPaddle() {
   if (boatPhase !== "inactive") {
     let wobble = Math.sin(Date.now() / 150) * 2;
