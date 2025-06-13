@@ -251,12 +251,14 @@ function drawBall() {
 function drawPaddle() {
   if (boatPhase !== "inactive") {
     let wobble = Math.sin(Date.now() / 120) * 6;
-    ctx.drawImage(boatPaddleImg,
-              paddleX - 10,                       // Iets breder
-              currentWaterHeight + wobble +2,   // Iets hoger
-              paddleWidth + 20,                   // Breder
-              paddleHeight + 30);                 // Hoger
-
+    let visualOffset = -12; // 👈 boot begint iets hoger maar stijgt niet verder
+    ctx.drawImage(
+      boatPaddleImg,
+      paddleX - 10,
+      currentWaterHeight + wobble + visualOffset,
+      paddleWidth + 20,
+      paddleHeight + 30
+    );
   } else {
     ctx.beginPath();
     ctx.rect(paddleX, canvas.height - paddleHeight,
@@ -266,6 +268,7 @@ function drawPaddle() {
     ctx.closePath();
   }
 }
+
 
 
 
