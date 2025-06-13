@@ -298,6 +298,8 @@ function drawPaddleFlags() {
     flagsOnPaddle = false;
   }
 }
+
+
 function shootFromFlags() {
   const coinSpeed = 8;
 
