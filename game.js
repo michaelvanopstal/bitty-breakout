@@ -622,13 +622,26 @@ function drawWaves() {
 
 
 function drawWaterBackground() {
-  let waterWobble = Math.sin(Date.now() / 200) * 4;
-  ctx.save();
+  const waveHeight = 10;
+  const waveLength = 100;
+  const waveSpeed = 0.03;
+
   ctx.beginPath();
-  ctx.rect(0, currentWaterHeight + waterWobble, canvas.width, canvas.height - (currentWaterHeight + waterWobble));
-  ctx.clip();
-  ctx.drawImage(waterBg, 0, currentWaterHeight + waterWobble, canvas.width, canvas.height - currentWaterHeight);
-  ctx.restore();
+  ctx.moveTo(0, currentWaterHeight);
+
+  for (let x = 0; x <= canvas.width; x++) {
+    let y = currentWaterHeight + Math.sin(x * 0.05 + Date.now() * waveSpeed) * waveHeight;
+    ctx.lineTo(x, y);
+  }
+
+  ctx.lineTo(canvas.width, canvas.height);
+  ctx.lineTo(0, canvas.height);
+  ctx.closePath();
+
+  ctx.fillStyle = "rgba(0, 119, 190, 0.4)"; // semi-transparant blauw water
+  ctx.fill();
+}
+
 
 }function drawWaterOverlay() {
   let waterWobble = Math.sin(Date.now() / 200) * 4; // zelfde als in background
@@ -662,9 +675,14 @@ function draw() {
 
   // 🌊 Water tijdens bootmodus
   if (boatPhase !== "inactive") {
-    drawWaves();
     drawWaterBackground();
   }
+
+  if (boatPhase === "rising") {
+  currentWaterHeight -= 0.5;
+} else if (boatPhase === "falling") {
+  currentWaterHeight += 0.5;
+}
 
   drawPaddle();
   drawWaterOverlay();
