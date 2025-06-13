@@ -87,7 +87,7 @@ for (let c = 0; c < brickColumnCount; c++) {
 }
 
 
-let boatImage = new Image();
+const boatImage = new Image();
 boatImage.src = "pointpay_bood.png"; 
 
 const doubleBallImg = new Image();
