@@ -779,7 +779,7 @@ function onImageLoad() {
 
 // Koppel alle images aan onImageLoad
 boatPaddleImg.onload = onImageLoad;
-boatImage.onload = onImageLoad;
+boatBlockImg.onload = onImageLoad;
 doubleBallImg.onload = onImageLoad;
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
