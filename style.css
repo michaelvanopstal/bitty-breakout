@@ -15,7 +15,7 @@ body {
   height: 595px;
   background-color: transparent;
   border: 3px solid transparent;
-  z-index: 6; /* komt boven achtergrond, onder overlays */
+  z-index: 18; /* komt boven achtergrond, onder overlays */
 }
 
 #scoreDisplay {
