@@ -607,6 +607,16 @@ function drawWaves() {
   ctx.restore();
 }
 
+function drawWaterBackground() {
+  let waterWobble = Math.sin(Date.now() / 300) * 4;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, currentWaterHeight + waterWobble, canvas.width, canvas.height - (currentWaterHeight + waterWobble));
+  ctx.clip();
+  ctx.drawImage(waterBg, 0, currentWaterHeight + waterWobble, canvas.width, canvas.height - currentWaterHeight);
+  ctx.restore();
+}
+
 
 
 function draw() {
@@ -621,8 +631,10 @@ function draw() {
   if (boatPhase !== "inactive") {
     drawWaves();
     drawWaterBackground(); // ✅ juiste plek
-  
+
   }
+
+  
 
   // 🚤 Paddle-beweging met aangepaste snelheid in bootmodus
   let currentSpeed = (boatPhase !== "inactive") ? 7 * boatSpeedFactor : 7;
