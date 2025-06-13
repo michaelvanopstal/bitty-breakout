@@ -220,17 +220,21 @@ function drawBricks() {
          ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
          break;
          case "signal":
-         ctx.drawImage(signalBlockImg, brickX, brickY, brickWidth, brickHeight);
+         ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
+         break;
+         case "boot":
+         ctx.drawImage(boatImage, brickX, brickY, brickWidth, brickHeight);
          break;
          default:
          ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
          break;
-        
+    
         }
       }
     }
   }
 }
+
 
 function drawBall() {
   ctx.drawImage(ballImg, x, y, ballRadius * 2, ballRadius * 2);
