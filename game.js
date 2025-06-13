@@ -586,7 +586,8 @@ function drawWaves() {
   ctx.stroke();
 
   // 🌊 Golf 2 (sneller, lager)
-  ctx.strokeStyle = "#3399ff";
+  ctx.strokeStyle =   "#3399ff";
+
   ctx.beginPath();
   for (let x = 0; x <= canvas.width; x++) {
     let y = Math.sin((x + now / 35)) * 3 + currentWaterHeight + 18;
@@ -638,7 +639,7 @@ function draw() {
   
 
   // 🚤 Paddle-beweging met aangepaste snelheid in bootmodus
-  let currentSpeed = (boatPhase !== "inactive") ? 7 * boatSpeedFactor : 7;
+  let currentSpeed = (boatPhase !== "inactive") ? 5 * boatSpeedFactor : 5;
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
     paddleX += currentSpeed;
   } else if (leftPressed && paddleX > 0) {
