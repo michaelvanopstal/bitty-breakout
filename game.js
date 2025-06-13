@@ -611,7 +611,7 @@ function drawWaves() {
 
 
 function drawWaterBackground() {
-  let waterWobble = Math.sin(Date.now() / 300) * 4;
+  let waterWobble = Math.sin(Date.now() / 200) * 4;
   ctx.save();
   ctx.beginPath();
   ctx.rect(0, currentWaterHeight + waterWobble, canvas.width, canvas.height - (currentWaterHeight + waterWobble));
@@ -619,7 +619,7 @@ function drawWaterBackground() {
   ctx.drawImage(waterBg, 0, currentWaterHeight + waterWobble, canvas.width, canvas.height - currentWaterHeight);
   ctx.restore();
 }function drawWaterOverlay() {
-  let waterWobble = Math.sin(Date.now() / 300) * 4; // zelfde als in background
+  let waterWobble = Math.sin(Date.now() / 200) * 4; // zelfde als in background
   const overlayHeight = 30; // hoogte van het bovenste waterstuk
 
   ctx.save();
@@ -659,7 +659,7 @@ function draw() {
   
 
   // 🚤 Paddle-beweging met aangepaste snelheid in bootmodus
-  let currentSpeed = (boatPhase !== "inactive") ? 5 * boatSpeedFactor : 5;
+  let currentSpeed = (boatPhase !== "inactive") ? 3 * boatSpeedFactor :3;
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
     paddleX += currentSpeed;
   } else if (leftPressed && paddleX > 0) {
