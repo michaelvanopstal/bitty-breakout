@@ -720,63 +720,64 @@ function draw() {
     resetBricks();
   }
 
-  // 🔵 Tweede bal logica
-  if (secondBallActive) {
-    secondBall.x += secondBall.dx;
-    secondBall.y += secondBall.dy;
-
+  // 🧱 Tweede bal tegen blokken
+for (let c = 0; c < brickColumnCount; c++) {
+  for (let r = 0; r < brickRowCount; r++) {
+    const b = bricks[c][r];
     if (
-      secondBall.x + secondBall.dx > canvas.width - ballRadius ||
-      secondBall.x + secondBall.dx < ballRadius
-    ) secondBall.dx = -secondBall.dx;
-
-    if (secondBall.y + secondBall.dy < ballRadius) secondBall.dy = -secondBall.dy;
-
-    const paddleY2 = (boatPhase !== "inactive") ? currentWaterHeight : canvas.height - paddleHeight;
-    if (
-      secondBall.y + secondBall.dy > paddleY2 - ballRadius &&
-      secondBall.y + secondBall.dy < paddleY2 + paddleHeight &&
-      secondBall.x > paddleX &&
-      secondBall.x < paddleX + paddleWidth
+      b.status === 1 &&
+      secondBall.x > b.x &&
+      secondBall.x < b.x + brickWidth &&
+      secondBall.y > b.y &&
+      secondBall.y < b.y + brickHeight
     ) {
-      const hitPos = (secondBall.x - paddleX) / paddleWidth;
-      const angle = (hitPos - 0.5) * Math.PI / 2;
-      const speed = Math.sqrt(secondBall.dx * secondBall.dx + secondBall.dy * secondBall.dy);
-      secondBall.dx = speed * Math.sin(angle);
-      secondBall.dy = -Math.abs(speed * Math.cos(angle));
-    }
-
-    // 🧱 Tweede bal tegen blokken
-    for (let c = 0; c < brickColumnCount; c++) {
-      for (let r = 0; r < brickRowCount; r++) {
-        const b = bricks[c][r];
-        if (
-          b.status === 1 &&
-          secondBall.x > b.x &&
-          secondBall.x < b.x + brickWidth &&
-          secondBall.y > b.y &&
-          secondBall.y < b.y + brickHeight
-        ) {
-          secondBall.dy = -secondBall.dy;
-          b.status = 0;
-          b.type = "normal";
-          score += 10;
-          spawnCoin(b.x, b.y);
-          document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
-        }
-      }
+      secondBall.dy = -secondBall.dy;
+      b.status = 0;
+      b.type = "normal";
+      score += 10;
+      spawnCoin(b.x, b.y);
+      document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
     }
   }
-
-  requestAnimationFrame(draw);
 }
+
+// ✅ Alleen tonen als tweede bal boven water is
+if (secondBall.y < currentWaterHeight - ballRadius) {
+  ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
+}
+
+// 🔥 Raket
+if (rocketActive && !rocketFired) {
+  rocketX = paddleX + paddleWidth / 2 - 12;
+  rocketY = canvas.height - paddleHeight - 48;
+  ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
+} else if (rocketFired) {
+  rocketY -= rocketSpeed;
+  smokeParticles.push({
+    x: rocketX + 15,
+    y: rocketY + 65,
+    radius: Math.random() * 6 + 4,
+    alpha: 1
+  });
+
+  if (rocketY < -48) {
+    rocketFired = false;
+    rocketActive = false;
+  } else {
+    ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
+    checkRocketCollision();
+  }
+}
+
+// ✅ PAS ALS LAATSTE:
+requestAnimationFrame(draw);
+
 
 
     // Alleen tonen als tweede bal boven water is
     if (secondBall.y < currentWaterHeight - ballRadius) {
       ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
-   
-    }
+   }
 
   // 🔥 Raket
   if (rocketActive && !rocketFired) {
@@ -822,6 +823,7 @@ function draw() {
     p.radius += 0.3;
     p.alpha -= 0.02;
   });
+  
   smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
   // 🔘 Hoofdbal tekenen (alleen boven water)
