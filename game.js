@@ -253,7 +253,7 @@ function drawPaddle() {
     let wobble = Math.sin(Date.now() / 120) * 6;
     ctx.drawImage(boatPaddleImg,
               paddleX - 10,                       // Iets breder
-              currentWaterHeight + wobble - 10,   // Iets hoger
+              currentWaterHeight + wobble +2,   // Iets hoger
               paddleWidth + 20,                   // Breder
               paddleHeight + 30);                 // Hoger
 
