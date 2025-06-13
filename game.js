@@ -666,8 +666,8 @@ function draw() {
   if (boatPhase !== "inactive") {
     drawWaves();
     drawWaterBackground(); // ✅ juiste plek
+    drawWaterOverlay();   
   }
-
   // 🚤 Paddle-beweging (boot = sneller)
   let currentSpeed = (boatPhase !== "inactive") ? 7 * boatSpeedFactor : 7;
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
@@ -822,8 +822,8 @@ function draw() {
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
-  drawWaterOverlay(); // 👈 water VOOR de boot, lijkt alsof boot erin ligt
 
+  
   requestAnimationFrame(draw);
 }
 
