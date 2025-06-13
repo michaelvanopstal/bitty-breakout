@@ -243,13 +243,16 @@ function drawBall() {
 
 function drawPaddle() {
   if (boatPhase !== "inactive") {
-    // Bootmodus actief → boot deint zachtjes mee op het water
     let wobble = Math.sin(Date.now() / 150) * 2;
-    ctx.drawImage(boatImage, paddleX, currentWaterHeight + wobble, paddleWidth, paddleHeight + 10);
+    ctx.drawImage(boatImage,
+                  paddleX,
+                  currentWaterHeight + wobble,
+                  paddleWidth,
+                  paddleHeight + 10);
   } else {
-    // Normale paddle tekenen
     ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    ctx.rect(paddleX, canvas.height - paddleHeight,
+             paddleWidth, paddleHeight);
     ctx.fillStyle = "#0095DD";
     ctx.fill();
     ctx.closePath();
@@ -385,12 +388,12 @@ function activateBoatMode() {
   boatStartTime = Date.now();
 
   function updateWaterLevel() {
-    let now = Date.now();
-    let elapsed = now - boatStartTime;
+    const now = Date.now();
+    const elapsed = now - boatStartTime;
 
     if (boatPhase === "rising") {
-      let t = Math.min(elapsed / boatRiseDuration, 1);
-      currentWaterHeight = canvas.height - paddleHeight - t * 50;
+      const t = Math.min(elapsed / boatRiseDuration, 1);
+      currentWaterHeight = canvas.height - paddleHeight - t * maxWaterHeight;
       if (t >= 1) {
         boatPhase = "holding";
         boatStartTime = now;
@@ -401,8 +404,8 @@ function activateBoatMode() {
         boatStartTime = now;
       }
     } else if (boatPhase === "falling") {
-      let t = Math.min(elapsed / boatFallDuration, 1);
-      currentWaterHeight = canvas.height - paddleHeight - (1 - t) * 50;
+      const t = Math.min(elapsed / boatFallDuration, 1);
+      currentWaterHeight = canvas.height - paddleHeight - (1 - t) * maxWaterHeight;
       if (t >= 1) {
         boatPhase = "inactive";
         isBoatMode = false;
@@ -416,7 +419,6 @@ function activateBoatMode() {
 
   updateWaterLevel();
 }
-
 
   function saveHighscore() {
   const timeText = document.getElementById("timeDisplay").textContent.replace("time ", "");
