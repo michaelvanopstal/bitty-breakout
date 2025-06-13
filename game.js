@@ -652,8 +652,6 @@ function drawWaterBackground() {
 }
 
 
-
-
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -662,21 +660,19 @@ function draw() {
   checkCoinCollision();
   drawBricks();
 
- // 🌊 Water tekenen tijdens bootmodus
-if (boatPhase !== "inactive") {
-  drawWaves();
-  drawWaterBackground(); 
-}
-
-// 🚤 Paddle tekenen
-drawPaddle();
-
-// ✨ Overlay altijd tekenen, zodat hij voor de boot komt
-drawWaterOverlay(); 
-
-     
+  // 🌊 Water tekenen tijdens bootmodus
+  if (boatPhase !== "inactive") {
+    drawWaves();
+    drawWaterBackground();
   }
-  // 🚤 Paddle-beweging (boot = sneller)
+
+  drawPaddle();
+  drawWaterOverlay();
+  drawPaddleFlags();
+  drawFlyingCoins();
+  checkFlyingCoinHits();
+
+  // 🚤 Paddle-beweging
   let currentSpeed = (boatPhase !== "inactive") ? 7 * boatSpeedFactor : 7;
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
     paddleX += currentSpeed;
@@ -729,10 +725,12 @@ drawWaterOverlay();
     secondBall.x += secondBall.dx;
     secondBall.y += secondBall.dy;
 
-    if (secondBall.x + secondBall.dx > canvas.width - ballRadius || secondBall.x + secondBall.dx < ballRadius)
-      secondBall.dx = -secondBall.dx;
-    if (secondBall.y + secondBall.dy < ballRadius)
-      secondBall.dy = -secondBall.dy;
+    if (
+      secondBall.x + secondBall.dx > canvas.width - ballRadius ||
+      secondBall.x + secondBall.dx < ballRadius
+    ) secondBall.dx = -secondBall.dx;
+
+    if (secondBall.y + secondBall.dy < ballRadius) secondBall.dy = -secondBall.dy;
 
     const paddleY2 = (boatPhase !== "inactive") ? currentWaterHeight : canvas.height - paddleHeight;
     if (
@@ -748,7 +746,7 @@ drawWaterOverlay();
       secondBall.dy = -Math.abs(speed * Math.cos(angle));
     }
 
-    // 🧱 Botsing met blokken
+    // 🧱 Tweede bal tegen blokken
     for (let c = 0; c < brickColumnCount; c++) {
       for (let r = 0; r < brickRowCount; r++) {
         const b = bricks[c][r];
@@ -768,6 +766,10 @@ drawWaterOverlay();
         }
       }
     }
+  }
+
+  requestAnimationFrame(draw);
+}
 
     // Alleen tonen als tweede bal boven water is
     if (secondBall.y < currentWaterHeight - ballRadius) {
