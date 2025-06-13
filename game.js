@@ -31,6 +31,16 @@ let secondBallActive = false;
 let secondBall = { x: 0, y: 0, dx: 0, dy: 0 };
 let secondBallDuration = 60000; // 1 minuut in ms
 let rocketAmmo = 0; // aantal raketten dat nog afgevuurd mag worden
+// BOOT BONUS VARIABELEN
+let isBoatMode = false;
+let boatStartTime = 0;
+let showWaves = false;
+
+let waveStartDelay = 2000; // in ms: golven verschijnen na 2 seconden
+let boatDuration = 4000;   // in ms: totale boot-modusduur (4 sec)
+let boatSpeedFactor = 0.7; // paddle snelheid tijdens bootmodus (70%)
+let waveHeight = 10;       // hoogte van de golven (in pixels)
+let basePaddleY = canvas.height - 30; // standaard paddle-hoogte
 
 
 const bonusBricks = [
@@ -72,6 +82,8 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
+let boatImage = new Image();
+boatImage.src = "pointpay_bood.png"; 
 
 const doubleBallImg = new Image();
 doubleBallImg.src = "2 balls.png";  // upload dit naar dezelfde map
