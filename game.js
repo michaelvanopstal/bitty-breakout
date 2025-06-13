@@ -31,18 +31,18 @@ let secondBallActive = false;
 let secondBall = { x: 0, y: 0, dx: 0, dy: 0 };
 let secondBallDuration = 60000; // 1 minuut in ms
 let rocketAmmo = 0; // aantal raketten dat nog afgevuurd mag worden
+
 // BOOT BONUS VARIABELEN
+
 let isBoatMode = false;
+let boatPhase = "inactive"; // "rising", "holding", "falling"
 let boatStartTime = 0;
-let showWaves = false;
-
-
-let waveStartDelay = 1000; // in ms: golven verschijnen na 2 seconden
-let boatDuration = 8000;   // in ms: totale boot-modusduur (4 sec)
-let boatSpeedFactor = 0.7; // paddle snelheid tijdens bootmodus (70%)
-let waveHeight = 10;       // hoogte van de golven (in pixels)
-let basePaddleY = canvas.height - 30; // standaard paddle-hoogte
-
+let boatRiseDuration = 5000;     // omhoog
+let boatHoldDuration = 3000;     // blijven hangen
+let boatFallDuration = 5000;     // omlaag
+let maxWaterHeight = 50;         // max hoogte boven paddle (pixels)
+let currentWaterHeight = canvas.height - paddleHeight; // actuele hoogte waterlijn
+let boatImageSize = { width: 120, height: 30 }; // alleen nodig als je boot niet paddleWidth gebruikt
 
 const bonusBricks = [
   { col: 6, row: 8, type: "rocket" },
@@ -242,10 +242,12 @@ function drawBall() {
 }
 
 function drawPaddle() {
-  if (isBoatMode) {
-    let paddleY = basePaddleY + Math.sin(Date.now() / 150) * 4;
-    ctx.drawImage(boatImage, paddleX, paddleY, paddleWidth, paddleHeight + 10);
+  if (boatPhase !== "inactive") {
+    // Bootmodus actief → boot deint zachtjes mee op het water
+    let wobble = Math.sin(Date.now() / 150) * 2;
+    ctx.drawImage(boatImage, paddleX, currentWaterHeight + wobble, paddleWidth, paddleHeight + 10);
   } else {
+    // Normale paddle tekenen
     ctx.beginPath();
     ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
     ctx.fillStyle = "#0095DD";
@@ -378,21 +380,48 @@ function collisionDetection() {
 }
 
 
+let boatPhase = "inactive"; // 'rising', 'holding', 'falling'
+let currentWaterHeight = canvas.height - paddleHeight;
+let boatRiseDuration = 5000;   // 5 sec omhoog
+let boatHoldDuration = 3000;   // 3 sec vasthouden boven
+let boatFallDuration = 5000;   // 5 sec omlaag
+
 function activateBoatMode() {
   isBoatMode = true;
+  boatPhase = "rising";
   boatStartTime = Date.now();
-  showWaves = false;
 
-  // Start golven na vertraging
-  setTimeout(() => {
-    showWaves = true;
-  }, waveStartDelay);
+  function updateWaterLevel() {
+    let now = Date.now();
+    let elapsed = now - boatStartTime;
 
-  // Stop bootmodus en golven na totale duur
-  setTimeout(() => {
-    isBoatMode = false;
-    showWaves = false;
-  }, waveStartDelay + boatDuration);
+    if (boatPhase === "rising") {
+      let t = Math.min(elapsed / boatRiseDuration, 1);
+      currentWaterHeight = canvas.height - paddleHeight - t * 50;
+      if (t >= 1) {
+        boatPhase = "holding";
+        boatStartTime = now;
+      }
+    } else if (boatPhase === "holding") {
+      if (elapsed >= boatHoldDuration) {
+        boatPhase = "falling";
+        boatStartTime = now;
+      }
+    } else if (boatPhase === "falling") {
+      let t = Math.min(elapsed / boatFallDuration, 1);
+      currentWaterHeight = canvas.height - paddleHeight - (1 - t) * 50;
+      if (t >= 1) {
+        boatPhase = "inactive";
+        isBoatMode = false;
+        currentWaterHeight = canvas.height - paddleHeight;
+        return;
+      }
+    }
+
+    requestAnimationFrame(updateWaterLevel);
+  }
+
+  updateWaterLevel();
 }
 
 
@@ -537,12 +566,12 @@ function draw() {
   drawBricks();
 
   // 🌊 Golven tekenen tijdens bootmodus
-  if (showWaves) {
+  if (boatPhase !== "inactive") {
     drawWaves();
   }
 
   // 🚤 Paddle-beweging met aangepaste snelheid in bootmodus
-  let currentSpeed = isBoatMode ? 7 * boatSpeedFactor : 7;
+  let currentSpeed = (boatPhase !== "inactive") ? 7 * boatSpeedFactor : 7;
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
     paddleX += currentSpeed;
   } else if (leftPressed && paddleX > 0) {
@@ -566,10 +595,11 @@ function draw() {
     dy = -dy;
   }
 
-  // Paddle botsing
+  // Paddle of boot botsing
+  const paddleTopY = (boatPhase !== "inactive") ? currentWaterHeight : canvas.height - paddleHeight;
   if (
-    y + dy > canvas.height - paddleHeight - ballRadius &&
-    y + dy < canvas.height + 2 &&
+    y + dy > paddleTopY - ballRadius &&
+    y + dy < paddleTopY + paddleHeight &&
     x > paddleX &&
     x < paddleX + paddleWidth
   ) {
@@ -597,7 +627,6 @@ function draw() {
     secondBall.x += secondBall.dx;
     secondBall.y += secondBall.dy;
 
-    // Tweede bal: randen
     if (secondBall.x + secondBall.dx > canvas.width - ballRadius || secondBall.x + secondBall.dx < ballRadius) {
       secondBall.dx = -secondBall.dx;
     }
@@ -605,10 +634,10 @@ function draw() {
       secondBall.dy = -secondBall.dy;
     }
 
-    // Tweede bal: paddle botsing
+    const paddleY2 = (boatPhase !== "inactive") ? currentWaterHeight : canvas.height - paddleHeight;
     if (
-      secondBall.y + secondBall.dy > canvas.height - paddleHeight - ballRadius &&
-      secondBall.y + secondBall.dy < canvas.height - ballRadius &&
+      secondBall.y + secondBall.dy > paddleY2 - ballRadius &&
+      secondBall.y + secondBall.dy < paddleY2 + paddleHeight &&
       secondBall.x > paddleX &&
       secondBall.x < paddleX + paddleWidth
     ) {
@@ -619,12 +648,10 @@ function draw() {
       secondBall.dy = -Math.abs(speed * Math.cos(angle));
     }
 
-    // Tweede bal: onder geraakt
     if (secondBall.y + secondBall.dy > canvas.height - ballRadius) {
       secondBallActive = false;
     }
 
-    // Tweede bal: blokken raken
     for (let c = 0; c < brickColumnCount; c++) {
       for (let r = 0; r < brickRowCount; r++) {
         const b = bricks[c][r];
@@ -645,11 +672,9 @@ function draw() {
       }
     }
 
-    // Teken tweede bal
     ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
   }
 
-  // 🚀 Raket tekenen of afvuren
   if (rocketActive && !rocketFired) {
     rocketX = paddleX + paddleWidth / 2 - 12;
     rocketY = canvas.height - paddleHeight - 48;
@@ -672,7 +697,6 @@ function draw() {
     }
   }
 
-  // 💥 Explosies
   explosions.forEach(e => {
     ctx.beginPath();
     ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
@@ -683,7 +707,6 @@ function draw() {
   });
   explosions = explosions.filter(e => e.alpha > 0);
 
-  // 💨 Rook
   smokeParticles.forEach(p => {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -695,7 +718,6 @@ function draw() {
   });
   smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
-  // 🎯 Teken alle visuele objecten
   drawBall();
   drawPaddle();
   drawPaddleFlags();
@@ -704,6 +726,7 @@ function draw() {
 
   requestAnimationFrame(draw);
 }
+
 
 
 
