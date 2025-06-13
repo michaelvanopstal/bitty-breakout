@@ -622,12 +622,8 @@ function draw() {
   }
 
   // Randen botsing
-  if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-    dx = -dx;
-  }
-  if (y + dy < ballRadius) {
-    dy = -dy;
-  }
+  if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+  if (y + dy < ballRadius) dy = -dy;
 
   // Paddle of boot botsing
   const paddleTopY = (boatPhase !== "inactive") ? currentWaterHeight : canvas.height - paddleHeight;
@@ -661,12 +657,10 @@ function draw() {
     secondBall.x += secondBall.dx;
     secondBall.y += secondBall.dy;
 
-    if (secondBall.x + secondBall.dx > canvas.width - ballRadius || secondBall.x + secondBall.dx < ballRadius) {
+    if (secondBall.x + secondBall.dx > canvas.width - ballRadius || secondBall.x + secondBall.dx < ballRadius)
       secondBall.dx = -secondBall.dx;
-    }
-    if (secondBall.y + secondBall.dy < ballRadius) {
+    if (secondBall.y + secondBall.dy < ballRadius)
       secondBall.dy = -secondBall.dy;
-    }
 
     const paddleY2 = (boatPhase !== "inactive") ? currentWaterHeight : canvas.height - paddleHeight;
     if (
@@ -682,10 +676,7 @@ function draw() {
       secondBall.dy = -Math.abs(speed * Math.cos(angle));
     }
 
-    if (secondBall.y + secondBall.dy > canvas.height - ballRadius) {
-      secondBallActive = false;
-    }
-
+    // Botsing met bricks
     for (let c = 0; c < brickColumnCount; c++) {
       for (let r = 0; r < brickRowCount; r++) {
         const b = bricks[c][r];
@@ -709,10 +700,7 @@ function draw() {
     ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
   }
 
-  function drawBall() {
-  ctx.drawImage(ballImg, x, y, ballRadius * 2, ballRadius * 2);
-}
-
+  // 🔥 Raket logica
   if (rocketActive && !rocketFired) {
     rocketX = paddleX + paddleWidth / 2 - 12;
     rocketY = canvas.height - paddleHeight - 48;
@@ -735,6 +723,7 @@ function draw() {
     }
   }
 
+  // 💥 Explosies
   explosions.forEach(e => {
     ctx.beginPath();
     ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
@@ -743,9 +732,9 @@ function draw() {
     e.radius += 2;
     e.alpha -= 0.05;
   });
-  
   explosions = explosions.filter(e => e.alpha > 0);
 
+  // 🌫️ Rook
   smokeParticles.forEach(p => {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -755,9 +744,9 @@ function draw() {
     p.radius += 0.3;
     p.alpha -= 0.02;
   });
-  
   smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
+  // 🎯 Overige tekenen
   drawBall();
   drawPaddle();
   drawPaddleFlags();
@@ -766,8 +755,6 @@ function draw() {
 
   requestAnimationFrame(draw);
 }
-
-
 
 
 let imagesLoaded = 0;
@@ -779,11 +766,11 @@ function onImageLoad() {
   if (imagesLoaded === 12) {
     x = paddleX + paddleWidth / 2 - ballRadius;
     y = canvas.height - paddleHeight - ballRadius * 2;
-    draw();
+    draw(); // Start het spel pas als alle 12 plaatjes geladen zijn
   }
 }
 
-// Koppel alle images aan onImageLoad
+// ✅ Koppel alle images aan onImageLoad
 boatPaddleImg.onload = onImageLoad;
 boatBlockImg.onload = onImageLoad;
 doubleBallImg.onload = onImageLoad;
@@ -796,14 +783,3 @@ powerBlockImg.onload = onImageLoad;
 powerBlock2Img.onload = onImageLoad;
 rocketImg.onload = onImageLoad;
 coinImg.onload = onImageLoad;
-
-
-document.addEventListener("mousedown", function () {
-  if (rocketActive && rocketAmmo > 0 && !rocketFired) {
-    rocketFired = true;
-    rocketAmmo--;
-  } else if (flagsOnPaddle) {
-    shootFromFlags();
-  }
-}); 
-
