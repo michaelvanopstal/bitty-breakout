@@ -88,8 +88,11 @@ for (let c = 0; c < brickColumnCount; c++) {
 }
 
 
-const boatImage = new Image();
-boatImage.src = "pointpay_bood.png"; 
+const boatBlockImg = new Image();
+boatBlockImg.src = "boot_block_logo.png";
+
+const boatPaddleImg = new Image();
+boatPaddleImg.src = "boot_paddle_logo.png";
 
 const doubleBallImg = new Image();
 doubleBallImg.src = "2 balls.png";  // upload dit naar dezelfde map
