@@ -82,14 +82,8 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
-const waterBg = new Image();
-waterBg.src = "water.png";
-
 const boatBlockImg = new Image();
 boatBlockImg.src = "boot_block_logo.png";
-
-const boatPaddleImg = new Image();
-boatPaddleImg.src = "boot_paddle_logo.png";
 
 const doubleBallImg = new Image();
 doubleBallImg.src = "2 balls.png";  // upload dit naar dezelfde map
@@ -593,7 +587,7 @@ function draw() {
   checkFlyingCoinHits();
 
   // 🚤 Paddle-beweging
-  let currentSpeed = (boatPhase !== "inactive") ? 7 * boatSpeedFactor : 7;
+  let currentSpeed = inBoatMode ? boatSpeed : normalSpeed;
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
     paddleX += currentSpeed;
   } else if (leftPressed && paddleX > 0) {
@@ -614,7 +608,7 @@ function draw() {
   if (y + dy < ballRadius) dy = -dy;
 
   // 🎯 Paddle/boot botsing
-  const paddleTopY = (boatPhase !== "inactive") ? currentWaterHeight : canvas.height - paddleHeight;
+  const paddleTopY = canvas.height - paddleHeight;
   if (
     y + dy > paddleTopY - ballRadius &&
     y + dy < paddleTopY + paddleHeight &&
@@ -638,60 +632,77 @@ function draw() {
     elapsedTime = 0;
     resetBall();
     resetBricks();
+  
   }
 
   // 🔵 Tweede bal bewegen + botsing
-  if (secondBallActive) {
-    secondBall.x += secondBall.dx;
-    secondBall.y += secondBall.dy;
+if (secondBallActive) {
+  secondBall.x += secondBall.dx;
+  secondBall.y += secondBall.dy;
 
-    if (secondBall.x + secondBall.dx > canvas.width - ballRadius || secondBall.x + secondBall.dx < ballRadius) {
-      secondBall.dx = -secondBall.dx;
-    }
-    if (secondBall.y + secondBall.dy < ballRadius) {
-      secondBall.dy = -secondBall.dy;
-    }
+  if (
+    secondBall.x + secondBall.dx > canvas.width - ballRadius ||
+    secondBall.x + secondBall.dx < ballRadius
+  ) {
+    secondBall.dx = -secondBall.dx;
+  }
 
-    const paddleY2 = (boatPhase !== "inactive") ? currentWaterHeight : canvas.height - paddleHeight;
-    if (
-      secondBall.y + secondBall.dy > paddleY2 - ballRadius &&
-      secondBall.y + secondBall.dy < paddleY2 + paddleHeight &&
-      secondBall.x > paddleX &&
-      secondBall.x < paddleX + paddleWidth
-    ) {
-      const hitPos = (secondBall.x - paddleX) / paddleWidth;
-      const angle = (hitPos - 0.5) * Math.PI / 2;
-      const speed = Math.sqrt(secondBall.dx * secondBall.dx + secondBall.dy * secondBall.dy);
-      secondBall.dx = speed * Math.sin(angle);
-      secondBall.dy = -Math.abs(speed * Math.cos(angle));
-    }
+  if (secondBall.y + secondBall.dy < ballRadius) {
+    secondBall.dy = -secondBall.dy;
+  }
 
-    // 🧱 Tweede bal tegen blokken
-    for (let c = 0; c < brickColumnCount; c++) {
-      for (let r = 0; r < brickRowCount; r++) {
-        const b = bricks[c][r];
-        if (
-          b.status === 1 &&
-          secondBall.x > b.x &&
-          secondBall.x < b.x + brickWidth &&
-          secondBall.y > b.y &&
-          secondBall.y < b.y + brickHeight
-        ) {
-          secondBall.dy = -secondBall.dy;
-          b.status = 0;
-          b.type = "normal";
-          score += 10;
-          spawnCoin(b.x, b.y);
-          document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
-        }
+  // ✅ Gewijzigde regel: geen boatPhase meer nodig
+  const paddleY2 = canvas.height - paddleHeight;
+
+  if (
+    secondBall.y + secondBall.dy > paddleY2 - ballRadius &&
+    secondBall.y + secondBall.dy < paddleY2 + paddleHeight &&
+    secondBall.x > paddleX &&
+    secondBall.x < paddleX + paddleWidth
+  ) {
+    const hitPos = (secondBall.x - paddleX) / paddleWidth;
+    const angle = (hitPos - 0.5) * Math.PI / 2;
+    const speed = Math.sqrt(
+      secondBall.dx * secondBall.dx + secondBall.dy * secondBall.dy
+    );
+    secondBall.dx = speed * Math.sin(angle);
+    secondBall.dy = -Math.abs(speed * Math.cos(angle));
+  }
+
+  // 🧱 Tweede bal tegen blokken
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const b = bricks[c][r];
+      if (
+        b.status === 1 &&
+        secondBall.x > b.x &&
+        secondBall.x < b.x + brickWidth &&
+        secondBall.y > b.y &&
+        secondBall.y < b.y + brickHeight
+      ) {
+        secondBall.dy = -secondBall.dy;
+        b.status = 0;
+        b.type = "normal";
+        score += 10;
+        spawnCoin(b.x, b.y);
+        document.getElementById("scoreDisplay").textContent =
+          "score " + score + " pxp.";
       }
     }
-
-    // 🔘 Tweede bal tekenen (boven water)
-    if (secondBall.y < currentWaterHeight - ballRadius) {
-      ctx.drawImage(ballImg, secondBall.x, secondBall.y, ballRadius * 2, ballRadius * 2);
-    }
   }
+
+  // 🔘 Tweede bal tekenen (boven water)
+  if (secondBall.active !== false) {
+    ctx.drawImage(
+      ballImg,
+      secondBall.x,
+      secondBall.y,
+      ballRadius * 2,
+      ballRadius * 2
+    );
+  }
+}
+
 
   // 🔥 Raket logica
   if (rocketActive && !rocketFired) {
@@ -744,12 +755,12 @@ function draw() {
     p.radius += 0.3;
     p.alpha -= 0.02;
   });
+ 
   smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
-  // 🔘 Hoofdbal tekenen (alleen boven water)
-  if (y < currentWaterHeight - ballRadius) {
-    drawBall();
-  }
+ 
+  drawBall(); // bal altijd zichtbaar
+
 
   // ✅ Als allerlaatste: herhaal draw-loop
   requestAnimationFrame(draw);
