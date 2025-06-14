@@ -182,7 +182,7 @@ body {
 #bikeFlyby {
   width: 120px; /* pas aan naar grootte */
   height: auto;
-  z-index: 10;
+  z-index: 1;
 }
 
 #bikeFlyer {
@@ -191,7 +191,7 @@ body {
   height: auto;
   display: none;
   will-change: transform, left, top;
-  z-index: 10; /* hoger dan andere lagen */
+  z-index: 1; /* hoger dan andere lagen */
   pointer-events: none;
 }
 
