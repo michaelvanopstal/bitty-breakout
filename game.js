@@ -806,3 +806,5 @@ rocketImg.onload = onImageLoad;
 coinImg.onload = onImageLoad;
 waterBg.onload = onImageLoad; // telt mee voor imagesLoaded
 
+}
+
