@@ -733,15 +733,17 @@ if (secondBallActive) {
     }
   
 
-  if (inBoatMode) {
+    if (inBoatMode) {
+  // 1. Eerst water tekenen op canvas
+  ctx.drawImage(waterBg, 0, canvas.height - 100, canvas.width, 100);
+
+  // 2. Dan HTML-boot boven het water positioneren
   const boot = document.getElementById("bootImg");
   const wobble = Math.sin(Date.now() / 200) * 4;
   boot.style.left = `${paddleX + paddleWidth / 2}px`;
-  boot.style.bottom = `${60 + wobble}px`;
-   
-    if (inBoatMode) {
-  ctx.drawImage(waterBg, 0, canvas.height - 100, canvas.width, 100);
+  boot.style.bottom = `${100 - 40 + wobble}px`; // boot 'drijft' op het water
 }
+
 
 
   // 💥 Explosies
