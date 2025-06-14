@@ -214,7 +214,7 @@ body {
   width: 800px;
   height: 600px;
   pointer-events: none;
-  z-index: 20; /* lager dan canvas */
+  z-index: 1030; /* lager dan canvas */
 }
 
 #waterLayer {
@@ -228,7 +228,7 @@ body {
   background-repeat: no-repeat;
   background-position: bottom;
   transition: height 3s ease-in-out;
-  z-index: 10;
+  z-index: 1030;
 }
 
 #bootImg {
@@ -237,7 +237,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   width: 120px;
-  z-index: 20;
+  z-index:1030;
 }
 
 
@@ -248,7 +248,7 @@ body {
   transform: translateX(-50%);
   width: 120px;
   height: 10px;
-  z-index: 20;
+  z-index:1030;
   pointer-events: none;
 }
 .splash {
