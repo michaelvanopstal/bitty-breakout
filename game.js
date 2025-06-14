@@ -660,7 +660,7 @@ function drawWaterBackground() {
     currentWaterHeight + waterWobble,  // waar het water is
     canvas.width,
     overlayHeight
-  );
+ 
   ctx.restore();
 }
 
