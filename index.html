@@ -29,16 +29,19 @@
 
     
 <div id="bootBonus" style="position: absolute; top: 0; left: 0; width: 800px; height: 600px; pointer-events: none; z-index: 7;">
+  
   <div id="waterLayer"
-       style="position: absolute; bottom: 0; width: 100%; height: 100px; background: url('water.png') repeat-x bottom;
-              background-size: cover; transition: height 1.5s ease-in-out; z-index: 6;">
+       style="position: absolute; bottom: 0; width: 100%; height: 100px;
+              background: url('water.png') repeat-x bottom;
+              background-size: cover; transition: height 1.5s ease-in-out;
+              z-index: 6; display: none;"> <!-- ⛔ voeg toe: display: none -->
   </div>
 
   <img id="bootImg"
        src="boot_paddle_logo.png"
        alt="Boot"
-       style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); width: 120px;
-              display: none; z-index: 8;" />
+       style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+              width: 120px; display: none; z-index: 8;" /> <!-- ✅ dit is al goed -->
 
   <div id="splashContainer"
        style="position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%);
