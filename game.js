@@ -699,17 +699,22 @@ if (secondBallActive) {
     }
   }
 
-  // 🔘 Tweede bal tekenen (boven water)
-  if (secondBall.active !== false) {
-    ctx.drawImage(
-      ballImg,
-      secondBall.x,
-      secondBall.y,
-      ballRadius * 2,
-      ballRadius * 2
+
+  if (inBoatMode) {
+  ctx.drawImage(waterBg, 0, canvas.height - 100, canvas.width, 100);
+}
+
+if (secondBall.active !== false) {
+  ctx.drawImage(
+    ballImg,
+    secondBall.x,
+    secondBall.y,
+    ballRadius * 2,
+    ballRadius * 2
+   
     );
   }
-}
+
 
 
   // 🔥 Raket logica
@@ -734,11 +739,7 @@ if (secondBallActive) {
       checkRocketCollision();
     }
   
-
-    if (inBoatMode) {
-  // 1. Eerst water tekenen op canvas
-  ctx.drawImage(waterBg, 0, canvas.height - 100, canvas.width, 100);
-
+      
   // 2. Dan HTML-boot boven het water positioneren
   const boot = document.getElementById("bootImg");
   const wobble = Math.sin(Date.now() / 200) * 4;
