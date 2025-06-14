@@ -27,13 +27,14 @@
       </div>
     </div>
 
-    
-<div id="bootBonus">
-  <div id="waterLayer"></div>
-  <img id="bootImg" src="boot_paddle_logo.png" alt="Boot">
-  <div id="splashContainer"></div>
+    <!-- Boot bonus container -->
+    <div id="bootBonus">
+      <div id="waterLayer"></div>
+      <img id="bootImg" src="boot_paddle_logo.png" alt="Boot">
+      <div id="splashContainer"></div>
+    </div>
 
-
+    <!-- Highscore overlay -->
     <div id="highscore-overlay">
       <img src="beker_clipped_rev_2.png" id="trophy" alt="Trophy" />
       <h2>High score</h2>
@@ -193,7 +194,7 @@
       balloon.style.display = "block";
 
       let x = window.innerWidth;
-      let y = window.innerHeight - "50";
+      let y = window.innerHeight - 50;
       const interval = setInterval(() => {
         x -= 2.5;
         y -= 1.2;
@@ -207,19 +208,18 @@
       }, 30);
     }
 
-    // Start animaties met vertraging
     setTimeout(startBikeAnimation, 100000);
     setTimeout(startFlybyAnimation, 50000);
     setTimeout(startBalloonFlyby, 80000);
 
-    // Herhaal ze periodiek
     setInterval(startBikeAnimation, 30000);
     setInterval(startFlybyAnimation, 50000);
     setInterval(startBalloonFlyby, 80000);
   </script>
 
-  <!-- Game scripts (op het allerlaatst) -->
+  <!-- Game scripts -->
   <script src="login.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
+
