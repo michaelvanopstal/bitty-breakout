@@ -286,7 +286,7 @@ function resetBall() {
 
 function resetPaddle() {
   paddleX = (canvas.width - paddleWidth) / 2;
-  boatSpeedFactor = 1; // ← ✅ ook hier terugzetten
+
 }
 
 
