@@ -536,16 +536,16 @@ function resetBricks() {
     }
   }
 }
-
 function triggerBoatBonus() {
   const water = document.getElementById("waterLayer");
   const boot = document.getElementById("bootImg");
 
+  // ⏫ laat ze verschijnen
+  water.style.display = "block";
   boot.style.display = "block";
   water.style.height = "100px";
-  inBoatMode = true;
 
-  // Start splash effect
+  inBoatMode = true;
   startSplashEffect();
 
   setTimeout(() => {
@@ -553,6 +553,7 @@ function triggerBoatBonus() {
       water.style.height = "0px";
 
       setTimeout(() => {
+        water.style.display = "none";  // ⏬ verberg weer
         boot.style.display = "none";
         inBoatMode = false;
         stopSplashEffect();
@@ -560,6 +561,7 @@ function triggerBoatBonus() {
     }, 5000);
   }, 5000);
 }
+
 
 function startSplashEffect() {
   const splashContainer = document.getElementById("splashContainer");
