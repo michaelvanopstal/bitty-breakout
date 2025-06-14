@@ -2,12 +2,66 @@ body {
   margin: 0;
   background: url('wandljk_kl_png_V1.jpeg') no-repeat center center;
   background-size: cover;
-  background-attachment: fixed;
-  font-family: Arial, sans-serif;
   overflow: hidden;
   position: relative;
 }
 
+/* Canvas = speelscherm op middenlaag */
+#gameCanvas {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 650px;
+  height: 595px;
+  background-color: transparent;
+  border: 3px solid transparent;
+  z-index: 12; /* komt boven achtergrond, onder overlays */
+}
+
+#scoreDisplay {
+  position: absolute;
+  top: 72px;
+  right: 110px;
+  margin-right: 15px;
+  color:white;
+  font-size: 20px;
+  font-family: Arial, sans-serif;
+}
+
+
+
+body {
+  background-attachment: fixed;
+  background-size: cover;
+  font-family: Arial, sans-serif;
+}
+
+#highscore-overlay {
+  position: absolute;
+  top: 70px;
+  left: 675px;
+  width: 200px;
+  border-radius: 10px;
+  padding: 10px;
+  color: white;
+  font-size: 16px;
+  z-index: 99;
+}
+#highscore-overlay h2 {
+  text-align: center;
+  margin: 5px 0;
+}
+#highscore-overlay ol {
+  list-style-type: none;
+  padding-left: 0;
+  padding-left: 20px;
+  margin: 0;
+}
+#trophy {
+  width: 60px;
+  display: block;
+  margin: 0 auto 10px auto;
+}
 
 #game-container {
   position: relative;
@@ -19,41 +73,17 @@ body {
   margin-top: 60px;
 }
 
-#gameCanvas {
+
+#top-info {
   position: absolute;
   top: 10px;
-  left: 0;
-  width: 650px;
-  height: 595px;
-  background-color: transparent;
-  z-index: 50; /* Belangrijk: canvas boven alles behalve overlay */
-}
-
-
-#scoreDisplay,
-#timerDisplay,
-#playerName {
-  position: absolute;
-  font-size: 20px;
-  font-family: Arial, sans-serif;
+  right: 60px;
+  width: fit-content;
+  text-align: right;
+  font-size: 18px;
   color: white;
-  z-index: 100;
-}
-
-#scoreDisplay {
-  top: 72px;
-  right: 110px;
-}
-
-#timerDisplay {
-  top: 72px;
-  right: 20px;
-}
-
-#playerName {
-  top: 20px;
-  right: 100px;
-  color: #008CFF;
+  font-family: Arial, sans-serif;
+  z-index: 200;
 }
 
 
@@ -61,6 +91,7 @@ body {
   position: absolute;
   top: 20px;
   right: 30px;
+  left: auto;
   text-align: right;
   z-index: 999;
 }
@@ -68,44 +99,52 @@ body {
 #login-box {
   display: inline-block;
 }
+  
 
-#highscore-overlay {
+
+ 
+#playerName {
   position: absolute;
-  top: 70px;
-  left: 675px;
-  width: 200px;
-  padding: 10px;
+  top: 20px;
+  right: 100px; 
+  color:#008CFF;
+  font-size: 20px;
+  font-family: Arial, sans-serif;
+  z-index: 999;
+}
+
+#timerDisplay {
+  position: absolute;
+  top: 72px;
+  right: 20px; 
   color: white;
-  font-size: 16px;
-  border-radius: 10px;
-  z-index: 110;
+  font-size: 20px;
+  font-family: Arial, sans-serif;
+  z-index: 999;
 }
 
-#highscore-overlay h2 {
-  text-align: center;
-  margin: 5px 0;
+#player-display {
+  margin-right: 15px;
 }
 
-#highscore-overlay ol {
-  list-style-type: none;
-  padding-left: 20px;
-  margin: 0;
+
+#timeDisplay {
+  margin-left: 5px;
 }
+
+
+
 
 #highscore-overlay ol li {
   margin-bottom: 10px;
   white-space: nowrap;
 }
 
-#trophy {
-  width: 60px;
-  display: block;
-  margin: 0 auto 10px auto;
-}
-
+/* PXP Banner Overlay */
 #pxp-banner-overlay {
   position: fixed;
   bottom: 10px;
+  right: 0px;
   left: 685px;
   width: 770px;
   height: 36px;
@@ -119,11 +158,13 @@ body {
   white-space: nowrap;
   overflow: hidden;
   border-radius: 6px;
-  z-index: 150;
+  z-index: 1020;
 }
-
 .positive { color: #00ff77; }
 .negative { color: #ff4444; }
+
+
+
 
 #pxp-scroll-text {
   display: inline-block;
@@ -137,85 +178,37 @@ body {
 }
 
 
-#bootBonus {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 800px;
-  height: 600px;
-  pointer-events: none;
-  z-index: 45; /* lager dan canvas */
-}
-
-#waterLayer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 0;
-  background-image: url("water.png");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: bottom;
-  transition: height 3s ease-in-out;
-  display: none;
-  z-index: 46;
-}
-
-#bootImg {
-  position: absolute;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  display: none;
-  z-index: 47;
-}
-
-#splashContainer {
-  position: absolute;
-  bottom: 58px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 10px;
-  pointer-events: none;
-  z-index: 48;
-}
-
-.splash {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
-  animation: splashAnim 0.6s linear forwards;
-}
-
-@keyframes splashAnim {
-  0% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(10px) scale(0.2); opacity: 0; }
-}
-
-#bikeFlyby,
-#bikeFlyer,
-#balloonFlyby {
-  position: absolute;
-  display: none;
-  pointer-events: none;
-  z-index: 70;
-}
 
 #bikeFlyby {
-  width: 120px;
+  width: 120px; /* pas aan naar grootte */
+  height: auto;
+  z-index: 10;
 }
 
 #bikeFlyer {
+  position: absolute;
   width: 150px;
+  height: auto;
+  display: none;
+  will-change: transform, left, top;
+  z-index: 10; /* hoger dan andere lagen */
+  pointer-events: none;
 }
 
-#balloonFlyby {
-  width: 100px;
+#bikeFlyer {
+  position: absolute;
+  width: 150px;
+  height: auto;
+  display: none;
 }
+
+#bike-layer {
+  pointer-events: none;
+  overflow: hidden;
+}
+
+
+
+
 
 

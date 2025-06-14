@@ -6,6 +6,9 @@
   <title>PointPay Breakout</title>
   <link rel="preload" href="vlaggetje1.png" as="image">
   <link rel="preload" href="vlaggetje2.png" as="image">
+ <link rel="preload" href="signalblock2.png" as="image">
+
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,26 +20,19 @@
 
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="600"></canvas>
+<img id="bikeFlyer" src="pointpay-bike.png" style="position:absolute; display:none; width:180px;" />
 
     <div id="login-overlay">
-      <div id="login-box">
-        <label for="player-name">Inlog:</label><br />
-        <input type="text" id="player-name" placeholder="Voer je naam in" />
-        <button id="login-btn">Login</button>
-        <button id="logout-btn" style="display: none;">Logout</button>
-      </div>
-    </div>
-
-    
-<div id="bootBonus">
-  <div id="waterLayer"></div>
-
-  <img id="bootImg" src="boot_paddle_logo.png" alt="Boot" />
-
-  <div id="splashContainer"></div>
+      
+<div id="login-box">
+  <label for="player-name">Inlog:</label><br />
+  <input type="text" id="player-name" placeholder="Voer je naam in" />
+  <button id="login-btn">Login</button>
+  <button id="logout-btn" style="display: none;">Logout</button>
 </div>
 
-    <!-- Highscore overlay -->
+    </div>
+
     <div id="highscore-overlay">
       <img src="beker_clipped_rev_2.png" id="trophy" alt="Trophy" />
       <h2>High score</h2>
@@ -47,181 +43,130 @@
     </div>
   </div>
 
-  <!-- Animatie-elementen -->
-  <img id="bikeFlyer" src="pointpay-bike.png" style="position:absolute; display:none; width:180px; z-index:10;" />
-  <img id="balloonFlyby" src="luchtballon.png" style="position:absolute; display:none; width:100px;" />
-  <img id="bikeFlyby" src="pointpay-bike.png" style="position:absolute; display:none; width:160px;" />
-
-  <!-- Rookcontainer -->
-  <div id="rocket-smoke-container"></div>
-
-  <!-- Coin Banner -->
-  <div id="pxp-banner-overlay">
-    <div id="pxp-scroll-text">
-      $0.01731 <span class="positive">+2.91%</span> &nbsp;
-      Market Cap: $517.92K &nbsp;
-      Volume: $145.52K &nbsp;
-      Total Supply: 100M PXP &nbsp;
-      Circulating: 30M PXP;
-    </div>
-  </div>
-
-  <!-- Highscore Script -->
-  <script>
-    let highscores = JSON.parse(localStorage.getItem("highscores")) || Array(10).fill({ name: "—", score: 0, time: "00:00" });
-
-    function updateHighscoreBoard() {
-      const highscoreList = document.getElementById("highscore-list");
-      if (!highscoreList) return;
-      highscoreList.innerHTML = "";
-      highscores.forEach((entry, index) => {
-        const li = document.createElement("li");
-        li.textContent = `${index + 1}. ${entry.name} — ${entry.score} PXP — ${entry.time}`;
-        highscoreList.appendChild(li);
-      });
-    }
-
-    function checkAndUpdateHighscores(name, score, time) {
-      const newEntry = { name, score, time };
-      highscores.push(newEntry);
-      highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
-      highscores = highscores.slice(0, 10);
-      localStorage.setItem("highscores", JSON.stringify(highscores));
-      updateHighscoreBoard();
-    }
-
-    window.addEventListener("load", updateHighscoreBoard);
-  </script>
-
-  <!-- Rookstijl -->
-  <style>
-    .smoke-puff {
-      position: absolute;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      opacity: 1;
-      pointer-events: none;
-      transition: transform 2s ease-out, opacity 2s ease-out;
-      z-index: 7;
-      filter: blur(1.2px);
-    }
-  </style>
-
-  <!-- Animaties -->
-  <script>
-    function startBikeAnimation() {
-      const bike = document.getElementById("bikeFlyer");
-      const smokeContainer = document.getElementById("rocket-smoke-container");
-      bike.style.display = "block";
-
-      const startX = window.innerWidth + 100;
-      const endX = -200;
-      const startY = window.innerHeight + 100;
-      const endY = -150;
-      const duration = 25000;
-      let startTime = null;
-
-      const smokeInterval = setInterval(() => {
-        if (bike.style.display === "none") return;
-
-        const rect = bike.getBoundingClientRect();
-        const puff = document.createElement("div");
-        puff.className = "smoke-puff";
-        puff.textContent = "PointPay";
-        puff.style.left = rect.left - 30 + "px";
-        puff.style.top = rect.top + 60 + "px";
-        smokeContainer.appendChild(puff);
-
-        setTimeout(() => {
-          puff.style.opacity = 0;
-          puff.style.transform = "translateY(-30px)";
-        }, 100);
-
-        setTimeout(() => {
-          puff.remove();
-        }, 2500);
-      }, 3000);
-
-      function animateBike(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const step = elapsed / 16;
-
-        const baseX = startX + (endX - startX) * progress;
-        const baseY = startY + (endY - startY) * progress;
-
-        const wobbleX = Math.sin(step / 10) * 3;
-        const wobbleY = Math.cos(step / 15) * 3;
-
-        const x = baseX + wobbleX;
-        const y = baseY + wobbleY;
-
-        bike.style.left = `${x}px`;
-        bike.style.top = `${y}px`;
-
-        if (progress < 1) {
-          requestAnimationFrame(animateBike);
-        } else {
-          bike.style.display = "none";
-          clearInterval(smokeInterval);
-        }
-      }
-
-      requestAnimationFrame(animateBike);
-    }
-
-    function startFlybyAnimation() {
-      const bike = document.getElementById("bikeFlyby");
-      bike.style.display = "block";
-
-      let x = window.innerWidth;
-      let y = window.innerHeight;
-      const interval = setInterval(() => {
-        x -= 4;
-        y -= 2;
-        bike.style.left = x + "px";
-        bike.style.top = y + "px";
-
-        if (x < -150 || y < -100) {
-          clearInterval(interval);
-          bike.style.display = "none";
-        }
-      }, 30);
-    }
-
-    function startBalloonFlyby() {
-      const balloon = document.getElementById("balloonFlyby");
-      balloon.style.display = "block";
-
-      let x = window.innerWidth;
-      let y = window.innerHeight - 50;
-      const interval = setInterval(() => {
-        x -= 2.5;
-        y -= 1.2;
-        balloon.style.left = x + "px";
-        balloon.style.top = y + "px";
-
-        if (x < -150 || y < -150) {
-          clearInterval(interval);
-          balloon.style.display = "none";
-        }
-      }, 30);
-    }
-
-    setTimeout(startBikeAnimation, 100000);
-    setTimeout(startFlybyAnimation, 50000);
-    setTimeout(startBalloonFlyby, 80000);
-
-    setInterval(startBikeAnimation, 30000);
-    setInterval(startFlybyAnimation, 50000);
-    setInterval(startBalloonFlyby, 80000);
-  </script>
-
-  <!-- Game scripts -->
   <script src="login.js"></script>
   <script src="game.js"></script>
-</body>
-</html>
 
+<script>
+  let highscores = JSON.parse(localStorage.getItem("highscores")) || [
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" },
+    { name: "—", score: 0, time: "00:00" }
+  ];
+
+  function updateHighscoreBoard() {
+    const highscoreList = document.getElementById("highscore-list");
+    if (!highscoreList) return;
+    highscoreList.innerHTML = "";
+    highscores.forEach((entry, index) => {
+      const li = document.createElement("li");
+      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} PXP — ${entry.time}`;
+      highscoreList.appendChild(li);
+    });
+  }
+
+  function checkAndUpdateHighscores(name, score, time) {
+    const newEntry = { name, score, time };
+    highscores.push(newEntry);
+    highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
+    highscores = highscores.slice(0, 10);
+    localStorage.setItem("highscores", JSON.stringify(highscores));
+    updateHighscoreBoard();
+  }
+
+  window.addEventListener("load", () => {
+    updateHighscoreBoard();
+  });
+</script>
+<style>
+  #game-container {
+    position: relative; /* nodig voor absolute positionering binnenin */
+  }
+
+  #gameCanvas {
+    position: relative;
+    z-index: 1;
+  }
+
+  #bikeFlyer {
+    position: absolute;
+    left: 100%;  /* buiten scherm starten */
+    top: 100%;   /* buiten onderkant starten */
+    width: 180px;
+    display: none;
+    z-index: 2; /* boven canvas, onder blokken */
+    pointer-events: none; /* niet klikbaar */
+  }
+</style>
+
+<img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" />
+
+<script>
+  function startBikeAnimation() {
+    const bike = document.getElementById("bikeFlyer");
+    bike.style.display = "block";
+
+    const startX = window.innerWidth + 100;   // vanaf rechts
+    const endX = -200;                        // naar links uit beeld
+    const startY = window.innerHeight + 100;  // onderkant
+    const endY = -150;                        // boven uit beeld
+    const duration = 20000;                   // 20 sec
+    let startTime = null;
+
+    function animateBike(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const step = elapsed / 16;
+
+      const baseX = startX + (endX - startX) * progress;
+      const baseY = startY + (endY - startY) * progress;
+
+      const wobbleX = Math.sin(step / 10) * 3;
+      const wobbleY = Math.cos(step / 15) * 3;
+
+      const x = baseX + wobbleX;
+      const y = baseY + wobbleY;
+
+      bike.style.left = `${x}px`;
+      bike.style.top = `${y}px`;
+
+      if (progress < 1) {
+        requestAnimationFrame(animateBike);
+      } else {
+        bike.style.display = "none";
+      }
+    }
+
+    requestAnimationFrame(animateBike);
+  }
+
+  // Start na 1 sec
+  setTimeout(startBikeAnimation, 1000);
+
+  // Herhaal elke 2 minuten (120000 ms)
+  setInterval(startBikeAnimation, 30000);
+</script>
+
+
+<!-- PXP Coin Banner -->
+<div id="pxp-banner-overlay">
+  <div id="pxp-scroll-text"> $0.01731 <span class="positive">+2.91%</span> &nbsp;
+    Market Cap: $517.92K &nbsp;
+    Volume: $145.52K &nbsp;
+    Total Supply: 100M PXP &nbsp;
+    Circulating: 30M PXP;   $0.01731 <span class="positive">+2.91%</span> &nbsp;
+    Market Cap: $517.92K &nbsp;
+    Volume: $145.52K &nbsp;
+    Total Supply: 100M PXP &nbsp;
+    Circulating: 30M PXP
+  </div>
+</div>
+<script>
+ 
