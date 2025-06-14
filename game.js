@@ -791,7 +791,8 @@ function onImageLoad() {
   }
 }
 
-// ✅ Koppel alle images aan onImageLoad
+// ✅ Koppel alle images 
+waterBg.onload = onImageLoad; 
 boatPaddleImg.onload = onImageLoad;
 boatBlockImg.onload = onImageLoad;
 doubleBallImg.onload = onImageLoad;
@@ -804,7 +805,7 @@ powerBlockImg.onload = onImageLoad;
 powerBlock2Img.onload = onImageLoad;
 rocketImg.onload = onImageLoad;
 coinImg.onload = onImageLoad;
-waterBg.onload = onImageLoad; // telt mee voor imagesLoaded
+
 
 }
 
