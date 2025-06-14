@@ -82,6 +82,8 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
+const waterBg = new Image();
+waterBg.src = "water.png";
 
 const boatPaddleImg = new Image();
 boatPaddleImg.src = "boot_paddle_logo.png";
@@ -729,14 +731,18 @@ if (secondBallActive) {
       ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
       checkRocketCollision();
     }
-  }
+  
 
   if (inBoatMode) {
   const boot = document.getElementById("bootImg");
   const wobble = Math.sin(Date.now() / 200) * 4;
   boot.style.left = `${paddleX + paddleWidth / 2}px`;
   boot.style.bottom = `${60 + wobble}px`;
+   
+    if (inBoatMode) {
+  ctx.drawImage(waterBg, 0, canvas.height - 100, canvas.width, 100);
 }
+
 
   // 💥 Explosies
   explosions.forEach(e => {
@@ -776,7 +782,7 @@ function onImageLoad() {
   imagesLoaded++;
   console.log("Afbeelding geladen:", imagesLoaded);
 
-  if (imagesLoaded === 11) {
+  if (imagesLoaded === 12) {
     x = paddleX + paddleWidth / 2 - ballRadius;
     y = canvas.height - paddleHeight - ballRadius * 2;
     draw(); // Start het spel pas als alle 12 plaatjes geladen zijn
@@ -796,4 +802,5 @@ powerBlockImg.onload = onImageLoad;
 powerBlock2Img.onload = onImageLoad;
 rocketImg.onload = onImageLoad;
 coinImg.onload = onImageLoad;
+waterBg.onload = onImageLoad; // telt mee voor imagesLoaded
 
