@@ -82,6 +82,10 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
+
+const boatPaddleImg = new Image();
+boatPaddleImg.src = "boot_paddle_logo.png";
+
 const boatBlockImg = new Image();
 boatBlockImg.src = "boot_block_logo.png";
 
