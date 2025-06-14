@@ -2,66 +2,12 @@ body {
   margin: 0;
   background: url('wandljk_kl_png_V1.jpeg') no-repeat center center;
   background-size: cover;
+  background-attachment: fixed;
+  font-family: Arial, sans-serif;
   overflow: hidden;
   position: relative;
 }
 
-/* Canvas = speelscherm op middenlaag */
-#gameCanvas {
-  position: absolute;
-  top: 10px;
-  left: 0;
-  width: 650px;
-  height: 595px;
-  background-color: transparent;
-  border: 3px solid transparent;
-  z-index: 4; /* komt boven achtergrond, onder overlays */
-}
-
-#scoreDisplay {
-  position: absolute;
-  top: 72px;
-  right: 110px;
-  margin-right: 15px;
-  color:white;
-  font-size: 20px;
-  font-family: Arial, sans-serif;
-}
-
-
-
-body {
-  background-attachment: fixed;
-  background-size: cover;
-  font-family: Arial, sans-serif;
-}
-
-#highscore-overlay {
-  position: absolute;
-  top: 70px;
-  left: 675px;
-  width: 200px;
-  border-radius: 10px;
-  padding: 10px;
-  color: white;
-  font-size: 16px;
-  z-index: 99;
-}
-#highscore-overlay h2 {
-  text-align: center;
-  margin: 5px 0;
-}
-#highscore-overlay ol {
-  list-style-type: none;
-  padding-left: 0;
-  padding-left: 20px;
-  margin: 0;
-}
-#trophy {
-  width: 60px;
-  display: block;
-  margin: 0 auto 10px auto;
-}
 
 #game-container {
   position: relative;
@@ -73,17 +19,41 @@ body {
   margin-top: 60px;
 }
 
-
-#top-info {
+#gameCanvas {
   position: absolute;
   top: 10px;
-  right: 60px;
-  width: fit-content;
-  text-align: right;
-  font-size: 18px;
-  color: white;
+  left: 0;
+  width: 650px;
+  height: 595px;
+  background-color: transparent;
+  z-index: 50; /* Belangrijk: canvas boven alles behalve overlay */
+}
+
+
+#scoreDisplay,
+#timerDisplay,
+#playerName {
+  position: absolute;
+  font-size: 20px;
   font-family: Arial, sans-serif;
-  z-index: 200;
+  color: white;
+  z-index: 100;
+}
+
+#scoreDisplay {
+  top: 72px;
+  right: 110px;
+}
+
+#timerDisplay {
+  top: 72px;
+  right: 20px;
+}
+
+#playerName {
+  top: 20px;
+  right: 100px;
+  color: #008CFF;
 }
 
 
@@ -91,7 +61,6 @@ body {
   position: absolute;
   top: 20px;
   right: 30px;
-  left: auto;
   text-align: right;
   z-index: 999;
 }
@@ -99,52 +68,44 @@ body {
 #login-box {
   display: inline-block;
 }
-  
 
-
- 
-#playerName {
+#highscore-overlay {
   position: absolute;
-  top: 20px;
-  right: 100px; 
-  color:#008CFF;
-  font-size: 20px;
-  font-family: Arial, sans-serif;
-  z-index: 999;
-}
-
-#timerDisplay {
-  position: absolute;
-  top: 72px;
-  right: 20px; 
+  top: 70px;
+  left: 675px;
+  width: 200px;
+  padding: 10px;
   color: white;
-  font-size: 20px;
-  font-family: Arial, sans-serif;
-  z-index: 999;
+  font-size: 16px;
+  border-radius: 10px;
+  z-index: 110;
 }
 
-#player-display {
-  margin-right: 15px;
+#highscore-overlay h2 {
+  text-align: center;
+  margin: 5px 0;
 }
 
-
-#timeDisplay {
-  margin-left: 5px;
+#highscore-overlay ol {
+  list-style-type: none;
+  padding-left: 20px;
+  margin: 0;
 }
-
-
-
 
 #highscore-overlay ol li {
   margin-bottom: 10px;
   white-space: nowrap;
 }
 
-/* PXP Banner Overlay */
+#trophy {
+  width: 60px;
+  display: block;
+  margin: 0 auto 10px auto;
+}
+
 #pxp-banner-overlay {
   position: fixed;
   bottom: 10px;
-  right: 0px;
   left: 685px;
   width: 770px;
   height: 36px;
@@ -158,13 +119,11 @@ body {
   white-space: nowrap;
   overflow: hidden;
   border-radius: 6px;
-  z-index: 1020;
+  z-index: 150;
 }
+
 .positive { color: #00ff77; }
 .negative { color: #ff4444; }
-
-
-
 
 #pxp-scroll-text {
   display: inline-block;
@@ -178,35 +137,6 @@ body {
 }
 
 
-
-#bikeFlyby {
-  width: 120px; /* pas aan naar grootte */
-  height: auto;
-  z-index: 10;
-}
-
-#bikeFlyer {
-  position: absolute;
-  width: 150px;
-  height: auto;
-  display: none;
-  will-change: transform, left, top;
-  z-index: 10; /* hoger dan andere lagen */
-  pointer-events: none;
-}
-
-#bikeFlyer {
-  position: absolute;
-  width: 150px;
-  height: auto;
-  display: none;
-}
-
-#bike-layer {
-  pointer-events: none;
-  overflow: hidden;
-}
-
 #bootBonus {
   position: absolute;
   top: 0;
@@ -214,7 +144,7 @@ body {
   width: 800px;
   height: 600px;
   pointer-events: none;
-  z-index: 19; /* lager dan canvas */
+  z-index: 45; /* lager dan canvas */
 }
 
 #waterLayer {
@@ -228,18 +158,19 @@ body {
   background-repeat: no-repeat;
   background-position: bottom;
   transition: height 3s ease-in-out;
-  z-index: 17;
+  display: none;
+  z-index: 46;
 }
 
 #bootImg {
   position: absolute;
-  bottom: 60px; /* dynamisch via JS */
+  bottom: 60px;
   left: 50%;
   transform: translateX(-50%);
   width: 120px;
-  z-index:15;
+  display: none;
+  z-index: 47;
 }
-
 
 #splashContainer {
   position: absolute;
@@ -248,9 +179,10 @@ body {
   transform: translateX(-50%);
   width: 120px;
   height: 10px;
-  z-index:16;
   pointer-events: none;
+  z-index: 48;
 }
+
 .splash {
   position: absolute;
   width: 6px;
@@ -259,8 +191,31 @@ body {
   border-radius: 50%;
   animation: splashAnim 0.6s linear forwards;
 }
+
 @keyframes splashAnim {
   0% { transform: translateY(0) scale(1); opacity: 1; }
   100% { transform: translateY(10px) scale(0.2); opacity: 0; }
 }
+
+#bikeFlyby,
+#bikeFlyer,
+#balloonFlyby {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  z-index: 70;
+}
+
+#bikeFlyby {
+  width: 120px;
+}
+
+#bikeFlyer {
+  width: 150px;
+}
+
+#balloonFlyby {
+  width: 100px;
+}
+
 
