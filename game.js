@@ -34,16 +34,10 @@ let rocketAmmo = 0; // aantal raketten dat nog afgevuurd mag worden
 
 // BOOT BONUS VARIABELEN
 
-let isBoatMode = false;
-let boatPhase = "inactive"; // "rising", "holding", "falling"
-let boatStartTime = 0;
-let boatRiseDuration = 5000;     // omhoog
-let boatHoldDuration = 5000;     // blijven hangen
-let boatFallDuration = 5000;     // omlaag
-let maxWaterHeight = 60;         // max hoogte boven paddle (pixels)
-let currentWaterHeight = canvas.height - paddleHeight; // actuele hoogte waterlijn
-let boatImageSize = { width: 120, height: 30 }; // alleen nodig als je boot niet paddleWidth gebruikt
-let boatSpeedFactor = 1; // of een andere gewenste waarde zoals 1.2 voor versnelling
+let inBoatMode = false;
+let boatSpeed = 9;
+let normalSpeed = 7;
+let splashInterval;
 
 const bonusBricks = [
   { col: 6, row: 8, type: "rocket" },
@@ -140,9 +134,14 @@ document.addEventListener("mousemove", mouseMoveHandler);
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
-  if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
-  else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
+  // Beweging rechts/links
+  if (e.key === "Right" || e.key === "ArrowRight") {
+    rightPressed = true;
+  } else if (e.key === "Left" || e.key === "ArrowLeft") {
+    leftPressed = true;
+  }
 
+  // Bal lanceren bij start
   if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) {
     ballLaunched = true;
     ballMoving = true;
@@ -153,38 +152,48 @@ function keyDownHandler(e) {
     document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
   }
 
+  // Raket afvuren
   if ((e.code === "ArrowUp" || e.code === "Space") && rocketActive && rocketAmmo > 0 && !rocketFired) {
-  rocketFired = true;
-  rocketAmmo--;
-}
+    rocketFired = true;
+    rocketAmmo--;
+  }
 
+  // Coin schieten van vlaggen
   if (flagsOnPaddle && (e.code === "Space" || e.code === "ArrowUp")) {
     shootFromFlags();
   }
 
+  // Bal opnieuw activeren bij leven reset
   if (!ballMoving && (e.code === "ArrowUp" || e.code === "Space")) {
-  if (lives <= 0) {
-    lives = 3;
-    score = 0;
-    level = 1;
-    resetBricks();
-    resetBall();    // ✅ Zorg dat dit hier staat
-    resetPaddle();
-    startTime = new Date();
-    gameOver = false;
-    document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
-    document.getElementById("timeDisplay").textContent = "time 00:00";
-
-    flagsOnPaddle = false;
-    flyingCoins = [];
+    if (lives <= 0) {
+      lives = 3;
+      score = 0;
+      level = 1;
+      resetBricks();
+      resetBall();
+      resetPaddle();
+      startTime = new Date();
+      gameOver = false;
+      document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+      document.getElementById("timeDisplay").textContent = "time 00:00";
+      flagsOnPaddle = false;
+      flyingCoins = [];
+    }
+    ballMoving = true;
   }
-  ballMoving = true;
-}
+
+  // ✅ Bootbonus handmatig activeren via 'b'
+  if (e.key === "b") {
+    triggerBoatBonus();
+  }
 }
 
 function keyUpHandler(e) {
-  if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
-  else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
+  if (e.key === "Right" || e.key === "ArrowRight") {
+    rightPressed = false;
+  } else if (e.key === "Left" || e.key === "ArrowLeft") {
+    leftPressed = false;
+  }
 }
 
 function spawnSecondBall() {
@@ -201,6 +210,7 @@ function mouseMoveHandler(e) {
     paddleX = relativeX - paddleWidth / 2;
   }
 }
+
 
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
@@ -247,37 +257,23 @@ function drawBall() {
   ctx.drawImage(ballImg, x, y, ballRadius * 2, ballRadius * 2);
 }
 
-
 function drawPaddle() {
-  if (boatPhase !== "inactive") {
-    let wobble = Math.sin(Date.now() / 120) * 6;
-    let visualOffset = 0; // 👈 boot begint iets hoger maar stijgt niet verder
-    ctx.drawImage(
-      boatPaddleImg,
-      paddleX - 10,
-      currentWaterHeight + wobble + visualOffset,
-      paddleWidth + 20,
-      paddleHeight + 30
-    );
-  } else {
-    ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight,
-             paddleWidth, paddleHeight);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
-  }
+  ctx.beginPath();
+  ctx.rect(paddleX, canvas.height - paddleHeight,
+           paddleWidth, paddleHeight);
+  ctx.fillStyle = "#0095DD";
+  ctx.fill();
+  ctx.closePath();
+}
+// 🚤 HTML-boot synchroon met paddle
+if (inBoatMode) {
+  const boot = document.getElementById("bootImg");
+  const wobble = Math.sin(Date.now() / 200) * 4;
+  boot.style.left = `${paddleX + paddleWidth / 2}px`;
+  boot.style.bottom = `${60 + wobble}px`;
 }
 
 
-
-
-function drawWaterBackground() {
-  let waterWobble = Math.sin(Date.now() / 300) * 2; // lichte golving
-  ctx.drawImage(waterBg, 0, currentWaterHeight + waterWobble -1, canvas.width, canvas.height);
-
-
-}
 
 function resetBall() {
   x = paddleX + paddleWidth / 2 - ballRadius;
@@ -286,7 +282,7 @@ function resetBall() {
 
 function resetPaddle() {
   paddleX = (canvas.width - paddleWidth) / 2;
-  boatSpeedFactor = 1; // ← ✅ ook hier terugzetten
+  
 }
 
 
@@ -405,46 +401,9 @@ function collisionDetection() {
   }
 }
 
-function activateBoatMode() {
-  isBoatMode = true;
-  boatPhase = "rising";
-  boatStartTime = Date.now();
 
-  function updateWaterLevel() {
-    const now = Date.now();
-    const elapsed = now - boatStartTime;
+    
 
-    if (boatPhase === "rising") {
-      const t = Math.min(elapsed / boatRiseDuration, 1);
-      currentWaterHeight = canvas.height - paddleHeight - t * maxWaterHeight;
-      if (t >= 1) {
-        boatPhase = "holding";
-        boatStartTime = now;
-      }
-    } else if (boatPhase === "holding") {
-      if (elapsed >= boatHoldDuration) {
-        boatPhase = "falling";
-        boatStartTime = now;
-      }
-    } else if (boatPhase === "falling") {
-      const t = Math.min(elapsed / boatFallDuration, 1);
-      currentWaterHeight = canvas.height - paddleHeight - (1 - t) * maxWaterHeight;
-      if (t >= 1) {
-      boatPhase = "inactive";
-     isBoatMode = false;
-     currentWaterHeight = canvas.height - paddleHeight;
-     boatSpeedFactor = 1;  // ← ✅ zet paddle snelheid terug naar normaal
-     return;
-   
-      }
-
-    }
-
-    requestAnimationFrame(updateWaterLevel);
-  }
-
-  updateWaterLevel();
-}
 
   function saveHighscore() {
   const timeText = document.getElementById("timeDisplay").textContent.replace("time ", "");
@@ -578,78 +537,47 @@ function resetBricks() {
   }
 }
 
+function triggerBoatBonus() {
+  const water = document.getElementById("waterLayer");
+  const boot = document.getElementById("bootImg");
 
-function drawWaves() {
-  ctx.save();
-  ctx.lineWidth = 2;
-  ctx.globalAlpha = 0;
+  boot.style.display = "block";
+  water.style.height = "100px";
+  inBoatMode = true;
 
-  const now = Date.now();
+  // Start splash effect
+  startSplashEffect();
 
-  // 🌊 Golf 1
-  ctx.strokeStyle = "#66ccff";
-  ctx.beginPath();
-  for (let x = 0; x <= canvas.width; x++) {
-    let y = Math.sin((x + now / 50)) * 5 + currentWaterHeight + 10;
-    if (x === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
+  setTimeout(() => {
+    setTimeout(() => {
+      water.style.height = "0px";
 
-  // 🌊 Golf 2 (sneller, lager)
-  ctx.strokeStyle =   "#3399ff";
+      setTimeout(() => {
+        boot.style.display = "none";
+        inBoatMode = false;
+        stopSplashEffect();
+      }, 5000);
+    }, 5000);
+  }, 5000);
+}
 
-  ctx.beginPath();
-  for (let x = 0; x <= canvas.width; x++) {
-    let y = Math.sin((x + now / 35)) * 3 + currentWaterHeight + 18;
-    if (x === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
+function startSplashEffect() {
+  const splashContainer = document.getElementById("splashContainer");
+  splashInterval = setInterval(() => {
+    const splash = document.createElement("div");
+    splash.className = "splash";
+    splash.style.left = `${Math.random() * 100}px`;
+    splashContainer.appendChild(splash);
 
-  // 🌊 Golf 3 (dieper, trager)
-  ctx.strokeStyle = "#0077cc";
-  ctx.beginPath();
-  for (let x = 0; x <= canvas.width; x++) {
-    let y = Math.sin((x + now / 70)) * 2 + currentWaterHeight + 24;
-    if (x === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
+    setTimeout(() => splash.remove(), 600); // remove na animatie
+  }, 150); // meer/minder spetters? verander dit
+}
 
-  ctx.restore();
+function stopSplashEffect() {
+  clearInterval(splashInterval);
 }
 
 
-function drawWaterBackground() {
-  let waterWobble = Math.sin(Date.now() / 200) * 4;
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, currentWaterHeight + waterWobble, canvas.width, canvas.height - (currentWaterHeight + waterWobble));
-  ctx.clip();
-  ctx.drawImage(waterBg, 0, currentWaterHeight + waterWobble, canvas.width, canvas.height - currentWaterHeight);
-  ctx.restore();
-
-}function drawWaterOverlay() {
-  let waterWobble = Math.sin(Date.now() / 200) * 4; // zelfde als in background
-  const overlayHeight = 80; // hoogte van het bovenste waterstuk
-  const visualOverlayOffset = -20; // 👈
-
-  ctx.save();
-  ctx.globalAlpha = 1; // transparant watergevoel
-  ctx.drawImage(
-    waterBg,                    // gebruik dezelfde water.png
-    0,                          // vanaf links
-    0,                          // vanaf bovenkant van het plaatje
-    canvas.width,               // breedte hele canvas
-    overlayHeight,              // alleen bovenste 30px van water.png
-    0,                          // teken vanaf links op canvas
-    currentWaterHeight + waterWobble,  // waar het water is
-    canvas.width,
-    overlayHeight
-  );
-  ctx.restore();
-}
 
 
 function draw() {
@@ -659,15 +587,7 @@ function draw() {
   drawCoins();
   checkCoinCollision();
   drawBricks();
-
-  // 🌊 Water tijdens bootmodus
-  if (boatPhase !== "inactive") {
-    drawWaves();
-    drawWaterBackground();
-  }
-
   drawPaddle();
-  drawWaterOverlay();
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
@@ -795,6 +715,13 @@ function draw() {
       checkRocketCollision();
     }
   }
+
+  if (inBoatMode) {
+  const boot = document.getElementById("bootImg");
+  const wobble = Math.sin(Date.now() / 200) * 4;
+  boot.style.left = `${paddleX + paddleWidth / 2}px`;
+  boot.style.bottom = `${60 + wobble}px`;
+}
 
   // 💥 Explosies
   explosions.forEach(e => {
