@@ -796,4 +796,4 @@ powerBlockImg.onload = onImageLoad;
 powerBlock2Img.onload = onImageLoad;
 rocketImg.onload = onImageLoad;
 coinImg.onload = onImageLoad;
-waterBg.onload = onImageLoad; // als je afbeeldingloader gebruikt
+
