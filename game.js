@@ -594,7 +594,7 @@ function draw() {
   drawFlyingCoins();
   checkFlyingCoinHits();
 
-  // 🚤 Paddle-beweging
+  // Paddle-beweging
   let currentSpeed = inBoatMode ? boatSpeed : normalSpeed;
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
     paddleX += currentSpeed;
@@ -602,7 +602,7 @@ function draw() {
     paddleX -= currentSpeed;
   }
 
-  // 🟠 Hoofdbal bewegen
+  // Hoofdbal bewegen
   if (ballLaunched) {
     x += dx;
     y += dy;
@@ -611,11 +611,11 @@ function draw() {
     y = canvas.height - paddleHeight - ballRadius * 2;
   }
 
-  // 🧱 Botsing wanden
+  // Botsing met randen
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
   if (y + dy < ballRadius) dy = -dy;
 
-  // 🎯 Paddle/boot botsing
+  // Paddle-botsing
   const paddleTopY = canvas.height - paddleHeight;
   if (
     y + dy > paddleTopY - ballRadius &&
@@ -630,7 +630,7 @@ function draw() {
     dy = -Math.abs(speed * Math.cos(angle));
   }
 
-  // 🧨 Hoofdbal valt onderin
+  // Hoofdbal onderin
   if (y + dy > canvas.height - ballRadius) {
     saveHighscore();
     ballLaunched = false;
@@ -640,84 +640,76 @@ function draw() {
     elapsedTime = 0;
     resetBall();
     resetBricks();
-  
   }
 
-  // 🔵 Tweede bal bewegen + botsing
-if (secondBallActive) {
-  secondBall.x += secondBall.dx;
-  secondBall.y += secondBall.dy;
+  // Tweede bal logica
+  if (secondBallActive) {
+    secondBall.x += secondBall.dx;
+    secondBall.y += secondBall.dy;
 
-  if (
-    secondBall.x + secondBall.dx > canvas.width - ballRadius ||
-    secondBall.x + secondBall.dx < ballRadius
-  ) {
-    secondBall.dx = -secondBall.dx;
-  }
+    if (
+      secondBall.x + secondBall.dx > canvas.width - ballRadius ||
+      secondBall.x + secondBall.dx < ballRadius
+    ) {
+      secondBall.dx = -secondBall.dx;
+    }
 
-  if (secondBall.y + secondBall.dy < ballRadius) {
-    secondBall.dy = -secondBall.dy;
-  }
+    if (secondBall.y + secondBall.dy < ballRadius) {
+      secondBall.dy = -secondBall.dy;
+    }
 
-  // ✅ Gewijzigde regel: geen boatPhase meer nodig
-  const paddleY2 = canvas.height - paddleHeight;
+    const paddleY2 = canvas.height - paddleHeight;
+    if (
+      secondBall.y + secondBall.dy > paddleY2 - ballRadius &&
+      secondBall.y + secondBall.dy < paddleY2 + paddleHeight &&
+      secondBall.x > paddleX &&
+      secondBall.x < paddleX + paddleWidth
+    ) {
+      const hitPos = (secondBall.x - paddleX) / paddleWidth;
+      const angle = (hitPos - 0.5) * Math.PI / 2;
+      const speed = Math.sqrt(secondBall.dx ** 2 + secondBall.dy ** 2);
+      secondBall.dx = speed * Math.sin(angle);
+      secondBall.dy = -Math.abs(speed * Math.cos(angle));
+    }
 
-  if (
-    secondBall.y + secondBall.dy > paddleY2 - ballRadius &&
-    secondBall.y + secondBall.dy < paddleY2 + paddleHeight &&
-    secondBall.x > paddleX &&
-    secondBall.x < paddleX + paddleWidth
-  ) {
-    const hitPos = (secondBall.x - paddleX) / paddleWidth;
-    const angle = (hitPos - 0.5) * Math.PI / 2;
-    const speed = Math.sqrt(
-      secondBall.dx * secondBall.dx + secondBall.dy * secondBall.dy
-    );
-    secondBall.dx = speed * Math.sin(angle);
-    secondBall.dy = -Math.abs(speed * Math.cos(angle));
-  }
-
-  // 🧱 Tweede bal tegen blokken
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      const b = bricks[c][r];
-      if (
-        b.status === 1 &&
-        secondBall.x > b.x &&
-        secondBall.x < b.x + brickWidth &&
-        secondBall.y > b.y &&
-        secondBall.y < b.y + brickHeight
-      ) {
-        secondBall.dy = -secondBall.dy;
-        b.status = 0;
-        b.type = "normal";
-        score += 10;
-        spawnCoin(b.x, b.y);
-        document.getElementById("scoreDisplay").textContent =
-          "score " + score + " pxp.";
+    for (let c = 0; c < brickColumnCount; c++) {
+      for (let r = 0; r < brickRowCount; r++) {
+        const b = bricks[c][r];
+        if (
+          b.status === 1 &&
+          secondBall.x > b.x &&
+          secondBall.x < b.x + brickWidth &&
+          secondBall.y > b.y &&
+          secondBall.y < b.y + brickHeight
+        ) {
+          secondBall.dy = -secondBall.dy;
+          b.status = 0;
+          b.type = "normal";
+          score += 10;
+          spawnCoin(b.x, b.y);
+          document.getElementById("scoreDisplay").textContent =
+            "score " + score + " pxp.";
+        }
       }
+    }
+
+    if (secondBall.active !== false) {
+      ctx.drawImage(
+        ballImg,
+        secondBall.x,
+        secondBall.y,
+        ballRadius * 2,
+        ballRadius * 2
+      );
     }
   }
 
-
+  // Water tekenen bij bootmodus
   if (inBoatMode) {
-  ctx.drawImage(waterBg, 0, canvas.height - 100, canvas.width, 100);
-}
-
-if (secondBall.active !== false) {
-  ctx.drawImage(
-    ballImg,
-    secondBall.x,
-    secondBall.y,
-    ballRadius * 2,
-    ballRadius * 2
-   
-    );
+    ctx.drawImage(waterBg, 0, canvas.height - 100, canvas.width, 100);
   }
 
-
-
-  // 🔥 Raket logica
+  // Raket tekenen
   if (rocketActive && !rocketFired) {
     rocketX = paddleX + paddleWidth / 2 - 12;
     rocketY = canvas.height - paddleHeight - 48;
@@ -728,7 +720,7 @@ if (secondBall.active !== false) {
       x: rocketX + 15,
       y: rocketY + 65,
       radius: Math.random() * 6 + 4,
-      alpha: 1
+      alpha: 1,
     });
 
     if (rocketY < -48) {
@@ -738,19 +730,18 @@ if (secondBall.active !== false) {
       ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
       checkRocketCollision();
     }
-  
-      
-  // 2. Dan HTML-boot boven het water positioneren
-  const boot = document.getElementById("bootImg");
-  const wobble = Math.sin(Date.now() / 200) * 4;
-  boot.style.left = `${paddleX + paddleWidth / 2}px`;
-  boot.style.bottom = `${100 - 40 + wobble}px`; // boot 'drijft' op het water
-}
+  }
 
+  // Boot bewegen (HTML-positie)
+  if (inBoatMode) {
+    const boot = document.getElementById("bootImg");
+    const wobble = Math.sin(Date.now() / 200) * 4;
+    boot.style.left = `${paddleX + paddleWidth / 2}px`;
+    boot.style.bottom = `${100 - 40 + wobble}px`;
+  }
 
-
-  // 💥 Explosies
-  explosions.forEach(e => {
+  // Explosies
+  explosions.forEach((e) => {
     ctx.beginPath();
     ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(255, 165, 0, ${e.alpha})`;
@@ -758,10 +749,10 @@ if (secondBall.active !== false) {
     e.radius += 2;
     e.alpha -= 0.05;
   });
-  explosions = explosions.filter(e => e.alpha > 0);
+  explosions = explosions.filter((e) => e.alpha > 0);
 
-  // 🌫️ Rook
-  smokeParticles.forEach(p => {
+  // Rook
+  smokeParticles.forEach((p) => {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(150, 150, 150, ${p.alpha})`;
@@ -770,16 +761,15 @@ if (secondBall.active !== false) {
     p.radius += 0.3;
     p.alpha -= 0.02;
   });
- 
-  smokeParticles = smokeParticles.filter(p => p.alpha > 0);
+  smokeParticles = smokeParticles.filter((p) => p.alpha > 0);
 
- 
-  drawBall(); // bal altijd zichtbaar
+  // Hoofdbal
+  drawBall();
 
-
-  // ✅ Als allerlaatste: herhaal draw-loop
+  // Loop
   requestAnimationFrame(draw);
 }
+
 
 let imagesLoaded = 0;
 
