@@ -784,8 +784,7 @@ function onImageLoad() {
   }
 }
 
-// ✅ Koppel alle images 
-waterBg.onload = onImageLoad; 
+// ✅ Koppel alle images  
 boatPaddleImg.onload = onImageLoad;
 boatBlockImg.onload = onImageLoad;
 doubleBallImg.onload = onImageLoad;
