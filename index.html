@@ -91,7 +91,7 @@
 
   #gameCanvas {
     position: relative;
-    z-index: 1;
+    z-index: 99;
   }
 
   #bikeFlyer {
@@ -104,56 +104,59 @@
     pointer-events: none; /* niet klikbaar */
   }
 </style>
-
+  
+<img id="balloonFlyer" src="luchtballon.png" alt="Flying Balloon" style="display:none; position:absolute; width:20%;" />
 <img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" />
 
 <script>
-  function startBikeAnimation() {
-    const bike = document.getElementById("bikeFlyer");
-    bike.style.display = "block";
+  function animateFlyer(flyerId, duration, delay) {
+    setTimeout(() => {
+      const flyer = document.getElementById(flyerId);
+      flyer.style.display = "block";
 
-    const startX = window.innerWidth + 100;   // vanaf rechts
-    const endX = -200;                        // naar links uit beeld
-    const startY = window.innerHeight + 100;  // onderkant
-    const endY = -150;                        // boven uit beeld
-    const duration = 20000;                   // 20 sec
-    let startTime = null;
+      const startX = window.innerWidth + 100;
+      const endX = -200;
+      const startY = window.innerHeight + 100;
+      const endY = -150;
+      let startTime = null;
 
-    function animateBike(timestamp) {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const step = elapsed / 16;
+      function animate(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const step = elapsed / 16;
 
-      const baseX = startX + (endX - startX) * progress;
-      const baseY = startY + (endY - startY) * progress;
+        const baseX = startX + (endX - startX) * progress;
+        const baseY = startY + (endY - startY) * progress;
 
-      const wobbleX = Math.sin(step / 10) * 3;
-      const wobbleY = Math.cos(step / 15) * 3;
+        const wobbleX = Math.sin(step / 10) * 3;
+        const wobbleY = Math.cos(step / 15) * 3;
 
-      const x = baseX + wobbleX;
-      const y = baseY + wobbleY;
+        const x = baseX + wobbleX;
+        const y = baseY + wobbleY;
 
-      bike.style.left = `${x}px`;
-      bike.style.top = `${y}px`;
+        flyer.style.left = `${x}px`;
+        flyer.style.top = `${y}px`;
 
-      if (progress < 1) {
-        requestAnimationFrame(animateBike);
-      } else {
-        bike.style.display = "none";
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          flyer.style.display = "none";
+        }
       }
-    }
 
-    requestAnimationFrame(animateBike);
+      requestAnimationFrame(animate);
+    }, delay);
   }
 
-  // Start na 1 sec
-  setTimeout(startBikeAnimation, 1000);
+  // Start eerste run
+  animateFlyer("bikeFlyer", 20000, 1000);     // fiets na 1 sec, 20 sec lang
+  animateFlyer("balloonFlyer", 30000, 2000);  // ballon na 2 sec, 28 sec lang
 
-  // Herhaal elke 2 minuten (120000 ms)
-  setInterval(startBikeAnimation, 30000);
+  // Herhaal elke 30 sec
+  setInterval(() => animateFlyer("bikeFlyer",  20000, 1000); 
+  setInterval(() => animateFlyer("balloonFlyer",  30000, 0), 1000);
 </script>
-
 
 <!-- PXP Coin Banner -->
 <div id="pxp-banner-overlay">
