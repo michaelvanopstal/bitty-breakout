@@ -100,12 +100,12 @@
     top: 100%;   /* buiten onderkant starten */
     width: 180px;
     display: none;
-    z-index: 2; /* boven canvas, onder blokken */
+    z-index: 100; /* boven canvas, onder blokken */
     pointer-events: none; /* niet klikbaar */
   }
 </style>
   
-<img id="balloonFlyer" src="luchtballon.png" alt="Flying Balloon" style="display:none; position:absolute; width:20%;" />
+<img id="balloonFlyer" src="luchtballon.png" alt="Flying Balloon" style="display:none; position:absolute; width:15%;" />
 <img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" />
 
 <script>
@@ -151,7 +151,7 @@
 
   // Start eerste run
   animateFlyer("bikeFlyer", 20000, 1000);     // fiets na 1 sec, 20 sec lang
-  animateFlyer("balloonFlyer", 30000, 2000);  // ballon na 2 sec, 28 sec lang
+  animateFlyer("balloonFlyer", 30000, 1000);  // ballon na 2 sec, 28 sec lang
 
   // Herhaal elke 30 sec
   setInterval(() => animateFlyer("bikeFlyer",  20000, 1000); 
