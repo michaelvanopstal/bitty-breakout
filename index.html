@@ -20,7 +20,6 @@
 
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="600"></canvas>
-<img id="bikeFlyer" src="pointpay-bike.png" style="position:absolute; display:none; width:180px;" />
 
     <div id="login-overlay">
       
@@ -106,7 +105,8 @@
 </style>
   
 <img id="balloonFlyer" src="luchtballon.png" alt="Flying Balloon" style="display:none; position:absolute; width:15%;" />
-<img id="bikeFlyer" src="pointpay-bike.png" alt="Flying Bike" />
+<img id="bikeFlyer" src="pointpay-bike.png" style="position:absolute; display:none; width:180px;" />
+
 
 <script>
   function animateFlyer(flyerId, duration, delay) {
@@ -154,8 +154,8 @@
   animateFlyer("balloonFlyer", 30000, 1000);  // ballon na 2 sec, 28 sec lang
 
   // Herhaal elke 30 sec
-  setInterval(() => animateFlyer("bikeFlyer",  20000, 1000); 
-  setInterval(() => animateFlyer("balloonFlyer",  30000, 0), 1000);
+  setInterval(() => animateFlyer("bikeFlyer", 20000, 1000), 30000);
+setInterval(() => animateFlyer("balloonFlyer", 30000, 0), 30000);
 </script>
 
 <!-- PXP Coin Banner -->

@@ -520,9 +520,9 @@ function draw() {
 
  if (
   y + dy > canvas.height - paddleHeight - ballRadius &&
-  y + dy < canvas.height + 2 && // iets meer speling
-  x > paddleX &&
-  x < paddleX + paddleWidth
+  y + dy < canvas.height + 2 &&
+  x + ballRadius > paddleX &&
+  x - ballRadius < paddleX + paddleWidth
 ) {
   const hitPos = (x - paddleX) / paddleWidth;
   const angle = (hitPos - 0.5) * Math.PI / 2;
@@ -530,6 +530,7 @@ function draw() {
   dx = speed * Math.sin(angle);
   dy = -Math.abs(speed * Math.cos(angle));
 }
+
 
 
   if (y + dy > canvas.height - ballRadius) {
@@ -649,28 +650,6 @@ if (secondBallActive) {
 
   requestAnimationFrame(draw);
 }
-
-
-function startFlybyAnimation() {
-  const bike = document.getElementById("bikeFlyby");
-  bike.style.display = "block";
-
-  let x = window.innerWidth;
-  let y = window.innerHeight;
-  const interval = setInterval(() => {
-    x -= 4;
-    y -= 2;
-
-    bike.style.left = x + "px";
-    bike.style.top = y + "px";
-
-    if (x < -150 || y < -100) {
-      clearInterval(interval);
-      bike.style.display = "none";
-    }
-  }, 30);
-}
-
 
 
 
