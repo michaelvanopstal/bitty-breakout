@@ -874,9 +874,18 @@ document.addEventListener("mousedown", function () {
     rocketFired = true;
     rocketAmmo--;
 
-    
     rocketLaunchSound.currentTime = 0;
     rocketLaunchSound.play();
   }
 });
 
+// ✅ StartTimer-functie los hieronder
+function startTimer() {
+  timerRunning = true;
+  timerInterval = setInterval(() => {
+    elapsedTime++;
+    const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+    const seconds = String(elapsedTime % 60).padStart(2, '0');
+    document.getElementById("timeDisplay").textContent = "time " + minutes + ":" + seconds;
+  }, 1000);
+}
