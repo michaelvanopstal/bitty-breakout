@@ -626,6 +626,13 @@ function collisionDetection() {
 
           // Richting van bal omkeren
           ball.dy = -ball.dy;
+          // Voorkom dat de bal blijft hangen in blokje
+          if (ball.dy < 0) {
+          ball.y = b.y - ball.radius - 1;
+          } else {
+          ball.y = b.y + brickHeight + ball.radius + 1;
+         }
+
 
           // ➕ Activeer bonus indien van toepassing
           switch (b.type) {
@@ -653,6 +660,7 @@ function collisionDetection() {
           // Blok verwijderen
           b.status = 0;
           b.type = "normal";
+          
 
           // Score verhogen
           score += doublePointsActive ? 20 : 10;
