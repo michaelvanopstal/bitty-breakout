@@ -43,8 +43,8 @@ const speedBoostMultiplier = 1.5;
 balls.push({
   x: canvas.width / 2,
   y: canvas.height - paddleHeight - 10,
-  dx: 4,
-  dy: -4,
+  dx: 10,
+  dy: -10,
   radius: 8,
   isMain: true
 });
@@ -170,7 +170,7 @@ if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) {
   shootSound.play();
 
   balls[0].dx = 0;
-  balls[0].dy = -4;
+  balls[0].dy = -6;
   if (!timerRunning) startTimer();
   score = 0;
   document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
@@ -302,7 +302,7 @@ function resetBall() {
     x: paddleX + paddleWidth / 2 - ballRadius,
     y: canvas.height - paddleHeight - ballRadius * 2,
     dx: 0,
-    dy: -4,
+    dy: -10,
     radius: ballRadius,
     isMain: true
   }];
@@ -566,31 +566,40 @@ function checkRocketCollision() {
   }
 }
 
+
 function checkCoinCollision() {
-  coins.forEach((coin) => {
+  coins.forEach(coin => {
+    if (!coin.active) return;
+
+    const coinBottom = coin.y + coin.radius;
+    const paddleTop = canvas.height - paddleHeight;
+
+   
     if (
-      coin.active &&
-      coin.y + coin.radius > canvas.height - paddleHeight &&
-      coin.x > paddleX &&
+      coinBottom >= paddleTop &&
+      coinBottom <= canvas.height &&
+      coin.x + coin.radius > paddleX &&
       coin.x < paddleX + paddleWidth
     ) {
-      const earned = doublePointsActive ? 20 : 10;
-      score += earned;
       coin.active = false;
 
-      // 🎵 Speel geld-geluid
+      const earned = doublePointsActive ? 20 : 10;
+      score += earned;
+      document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+
       coinSound.currentTime = 0;
       coinSound.play();
 
-      // ✨ Toon +10 of +20 boven muntje
       pointPopups.push({
         x: coin.x,
         y: coin.y,
         value: "+" + earned,
         alpha: 1
       });
+    }
 
-      document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+    else if (coinBottom > canvas.height) {
+      coin.active = false;
     }
   });
 }
@@ -699,7 +708,7 @@ balls.forEach((ball, index) => {
   if (ballLaunched) {
     let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
       ? speedBoostMultiplier
-      : 1.5;
+      : 1;
     ball.x += ball.dx * speedMultiplier;
     ball.y += ball.dy * speedMultiplier;
   } else {
