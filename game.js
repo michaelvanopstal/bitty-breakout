@@ -8,7 +8,7 @@ let score = 0;
 let ballRadius = 8;
 let ballLaunched = false;
 let paddleHeight = 15;
-let paddleWidth = 120;
+let paddleWidth = 100;
 let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
@@ -43,8 +43,8 @@ const speedBoostMultiplier = 1.5;
 balls.push({
   x: canvas.width / 2,
   y: canvas.height - paddleHeight - 10,
-  dx: 6,
-  dy: -6,
+  dx: 4,
+  dy: -4,
   radius: 8,
   isMain: true
 });
@@ -141,7 +141,7 @@ pointpayPaddleImg.src = "balkje.png";
 
 
 
-let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration) ? speedBoostMultiplier : 1;
+let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration) ? speedBoostMultiplier : 1.5;
 
 let rocketActive = false; // Voor nu altijd zichtbaar om te testen
 let rocketX = 0;
@@ -170,7 +170,7 @@ if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) {
   shootSound.play();
 
   balls[0].dx = 0;
-  balls[0].dy = -6;
+  balls[0].dy = -4;
   if (!timerRunning) startTimer();
   score = 0;
   document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
@@ -302,7 +302,7 @@ function resetBall() {
     x: paddleX + paddleWidth / 2 - ballRadius,
     y: canvas.height - paddleHeight - ballRadius * 2,
     dx: 0,
-    dy: -6,
+    dy: -4,
     radius: ballRadius,
     isMain: true
   }];
