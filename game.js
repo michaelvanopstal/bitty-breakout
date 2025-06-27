@@ -176,75 +176,105 @@ let rocketActive = false; // Voor nu altijd zichtbaar om te testen
 let rocketX = 0;
 let rocketY = 0;
 
-  
+
 
 console.log("keydown-handler wordt nu actief");
 
+// 🔽 EVENTS VOOR TOETSEN EN MUIS
 document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 document.addEventListener("mousemove", mouseMoveHandler);
 
+// ✅ BAL AFVUREN MET KLIK OF TOUCHPAD
+document.addEventListener("click", function () {
+  if (!ballLaunched && !gameOver) {
+    ballLaunched = true;
+    ballMoving = true;
+    balls[0].dx = 0;
+    balls[0].dy = -6;
+
+    shootSound.currentTime = 0;
+    shootSound.play();
+
+    if (!timerRunning) startTimer();
+    document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+  }
+});
+
+// ✅ OPTIONEEL: RECHTERMUISKNOP GEBRUIKEN
+document.addEventListener("contextmenu", function (e) {
+  e.preventDefault(); // voorkomt rechtermuisklikmenu
+  if (!ballLaunched && !gameOver) {
+    ballLaunched = true;
+    ballMoving = true;
+    balls[0].dx = 0;
+    balls[0].dy = -6;
+
+    shootSound.currentTime = 0;
+    shootSound.play();
+
+    if (!timerRunning) startTimer();
+    document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+  }
+});
+
+// ✅ TOETS-INVOER
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
   if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
   else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
 
-if ((e.key === "ArrowUp" || e.key === "Up") && !ballLaunched) {
-  ballLaunched = true;
-  ballMoving = true;
+  // 🚀 Raket afvuren
+  if ((e.code === "ArrowUp" || e.code === "Space") && rocketActive && rocketAmmo > 0 && !rocketFired) {
+    rocketFired = true;
+    rocketAmmo--;
+    rocketLaunchSound.currentTime = 0;
+    rocketLaunchSound.play();
+  }
 
-  // 🎯 Speel schiet-geluid af
-  shootSound.currentTime = 0;
-  shootSound.play();
-
-  balls[0].dx = 0;
-  balls[0].dy = -6;
-  if (!timerRunning) startTimer();
-  score = 0;
-  document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
-}
-
- if ((e.code === "ArrowUp" || e.code === "Space") && rocketActive && rocketAmmo > 0 && !rocketFired) {
-  rocketFired = true;
-  rocketAmmo--;
-
-  // 🔊 Speel afvuurgeluid
-  rocketLaunchSound.currentTime = 0;
-  rocketLaunchSound.play();
-}
-
-
+  // 🏳️ Schieten vanaf vlaggen
   if (flagsOnPaddle && (e.code === "Space" || e.code === "ArrowUp")) {
     shootFromFlags();
   }
 
-  if (!ballMoving && (e.code === "ArrowUp" || e.code === "Space")) {
-  if (lives <= 0) {
-    lives = 3;
-    score = 0;
-    level = 1;
-    resetBricks();
-    resetBall();    // ✅ Zorg dat dit hier staat
-    resetPaddle();
-    startTime = new Date();
-    gameOver = false;
+  // ⬆️ Start spel of bal lanceren
+  if ((e.code === "ArrowUp" || e.code === "Space") && !ballMoving) {
+    if (lives <= 0) {
+      lives = 3;
+      score = 0;
+      level = 1;
+      resetBricks();
+      resetBall();
+      resetPaddle();
+      startTime = new Date();
+      gameOver = false;
+      document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+      document.getElementById("timeDisplay").textContent = "time 00:00";
+      flagsOnPaddle = false;
+      flyingCoins = [];
+    }
+
+    ballLaunched = true;
+    ballMoving = true;
+    balls[0].dx = 0;
+    balls[0].dy = -6;
+
+    shootSound.currentTime = 0;
+    shootSound.play();
+
+    if (!timerRunning) startTimer();
     document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
-    document.getElementById("timeDisplay").textContent = "time 00:00";
-
-    flagsOnPaddle = false;
-    flyingCoins = [];
   }
-  ballMoving = true;
-}
 }
 
+// 🔼 TOETS LOSLATEN
 function keyUpHandler(e) {
   if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
   else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
 }
 
-
+// 🎯 MUISTOETS VOLGEN
 function mouseMoveHandler(e) {
   const relativeX = e.clientX - canvas.offsetLeft;
   if (relativeX > 0 && relativeX < canvas.width) {
