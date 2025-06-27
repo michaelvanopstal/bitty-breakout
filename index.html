@@ -175,39 +175,34 @@ setInterval(() => animateFlyer("balloonFlyer", 30000, 0), 30000);
 <!-- Externe scripts -->
 <script src="login.js"></script>
 
-
 <!-- Muziekalbumscript -->
 <script>
   const albumTracks = [
     new Audio("track1.mp3"),
     new Audio("track2.mp3"),
-    new Audio("track3.mp3"),
-    new Audio("track4.mp3"),
-    new Audio("track5.mp3"),
-    new Audio("track6.mp3"),
-    new Audio("track7.mp3"),
-    new Audio("track8.mp3"),
-    new Audio("track9.mp3"),
-    new Audio("track10.mp3")
+    new Audio("track3.mp3")
   ];
 
   let currentTrackIndex = 0;
   let musicPlaying = false;
 
-  // 🔁 Zorg dat elke track zichzelf pas reset als die eindigt
+  // Zorg dat tracks automatisch doorspelen zonder herstart van track1
   albumTracks.forEach((track, index) => {
     track.loop = false;
 
     track.addEventListener("ended", () => {
-      currentTrackIndex = (currentTrackIndex + 1) % albumTracks.length;
+      currentTrackIndex++;
+      if (currentTrackIndex >= albumTracks.length) {
+        currentTrackIndex = 0; // ga terug naar begin als alles is afgespeeld
+      }
 
-      // Stop alle andere tracks (zekerheid)
+      // Stop alle andere tracks
       albumTracks.forEach(t => {
         t.pause();
         t.currentTime = 0;
       });
 
-      // Speel de volgende track als muziek nog aanstaat
+      // Speel de volgende track als muziek nog aan staat
       if (musicPlaying) {
         albumTracks[currentTrackIndex].play();
       }
@@ -218,12 +213,13 @@ setInterval(() => animateFlyer("balloonFlyer", 30000, 0), 30000);
     musicPlaying = !musicPlaying;
 
     if (musicPlaying) {
-      // Stop alle andere tracks eerst
+      // Stop alle tracks eerst
       albumTracks.forEach(track => {
         track.pause();
         track.currentTime = 0;
       });
 
+      // Start huidige track
       albumTracks[currentTrackIndex].play();
       document.getElementById("musicToggle").textContent = "🔇 Stop Music";
     } else {
@@ -232,10 +228,11 @@ setInterval(() => animateFlyer("balloonFlyer", 30000, 0), 30000);
         track.currentTime = 0;
       });
       document.getElementById("musicToggle").textContent = "🎵 Play Music";
-      currentTrackIndex = 0; // optioneel resetten naar begin
+      currentTrackIndex = 0;
     }
 
-    // 🛡️ Haal focus van knop zodat toetsen werken
+    // Haal focus van de knop zodat toetsenbord blijft werken
     document.getElementById("musicToggle").blur();
   });
 </script>
+
