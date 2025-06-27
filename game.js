@@ -53,22 +53,6 @@ balls.push({
   isMain: true
 });
 
-const backgroundMusic = new Audio("track1.mp3"); // Zet hier je MP3-bestand
-backgroundMusic.loop = true;
-
-document.getElementById("musicToggle").addEventListener("click", () => {
-  if (backgroundMusic.paused) {
-    backgroundMusic.play();
-    document.getElementById("musicToggle").textContent = "🔇 Stop Music";
-  } else {
-    backgroundMusic.pause();
-    document.getElementById("musicToggle").textContent = "🎵 Play Music";
-  }
-
-  // 🎯 Belangrijk: zorg dat knop focus verliest zodat toetsen blijven werken
-  document.getElementById("musicToggle").blur();
-});
-
 
 
 
