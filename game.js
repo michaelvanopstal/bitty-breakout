@@ -930,30 +930,27 @@ function draw() {
       wallSound.play();
     }
 
-    if (ball.y + ball.dy > canvas.height) {
-      balls.splice(index, 1);
+  if (balls.length === 0) {
+  speedBoostActive = false;
+  doublePointsActive = false;
+  flagsOnPaddle = false;
+  rocketActive = false;
+  rocketFired = false;
+  rocketAmmo = 0;
 
-      if (balls.length === 0) {
-        speedBoostActive = false;
-        doublePointsActive = false;
-        flagsOnPaddle = false;
-        rocketActive = false;
-        rocketFired = false;
-        rocketAmmo = 0;
-        flyingCoins = [];
-        smokeParticles = [];
-        explosions = [];
+  flyingCoins = [];
+  coins = [];
+  pxpBags = [];
+  explosions = [];
+  smokeParticles = [];
+  pointPopups = [];
 
-        saveHighscore();
-        resetBricks();
-        resetBall();
-        return;
-      } else if (ball.isMain) {
-        balls[0].isMain = true;
-      }
+  saveHighscore();
+  resetBricks();
+  resetBall();
+  return;
+}
 
-      return;
-    }
 
     ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
   });
