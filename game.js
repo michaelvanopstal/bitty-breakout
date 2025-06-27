@@ -31,6 +31,7 @@ let doublePointsStartTime = 0;
 let doublePointsDuration = 60000; // 1 minuut in millisecondenlet imagesLoaded = 0;
 let imagesLoaded = 0;
 let pointPopups = []; // voor 10+ of 20+ bij muntjes
+let pxpBags = [];
 
 
 
@@ -53,13 +54,24 @@ balls.push({
 
 
 const bonusBricks = [
-  { col: 6, row: 8, type: "rocket" },
-  { col: 8, row: 6, type: "power" },
-  { col: 2, row: 9, type: "doubleball" },
+  { col: 5, row: 3, type: "rocket" },
+  { col: 8, row: 4, type: "power" },
+  { col: 2, row: 7, type: "doubleball" },
   { col: 4, row: 7, type: "2x" },
-  { col: 5, row: 10, type: "speed" }
-
+  { col: 2, row: 3, type: "speed" },
+  { col: 3, row: 14, type: "stone" },
+  { col: 4, row: 14, type: "stone" },
+  { col: 5, row: 14, type: "stone" },
+  { col: 0, row: 8, type: "stone" },
+  { col: 1, row: 8, type: "stone" },
+  { col: 2, row: 8, type: "stone" },
+  { col: 8, row: 5, type: "stone" },
+  { col: 7, row: 6, type: "stone" },
+  { col: 6, row: 7, type: "stone" },
 ];
+
+const bricksSound = new Audio("bricks.mp3");
+const pxpBagSound = new Audio("pxpbagsound_mp3.mp3");
 
 const rocketLaunchSound = new Audio("launch.mp3");
 const rocketExplosionSound = new Audio("explosion.mp3"); // als dat de juiste is
@@ -101,6 +113,9 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
+const dollarPxpImg = new Image();
+dollarPxpImg.src = "dollarpxp.png";
+
 
 const doubleBallImg = new Image();
 doubleBallImg.src = "2 balls.png";  // upload dit naar dezelfde map
@@ -139,6 +154,14 @@ speedImg.src = "speed.png";
 const pointpayPaddleImg = new Image();
 pointpayPaddleImg.src = "balkje.png";
 
+const stone1Img = new Image();
+stone1Img.src = "stone1.png";
+
+const stone2Img = new Image();
+stone2Img.src = "stone2.png";
+
+const pxpBagImg = new Image();
+pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
 
 
 let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration) ? speedBoostMultiplier : 1.5;
@@ -223,6 +246,7 @@ function mouseMoveHandler(e) {
   }
 }
 
+
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
   const offsetX = (canvas.width - totalBricksWidth) / 2;
@@ -236,28 +260,35 @@ function drawBricks() {
 
         b.x = brickX;
         b.y = brickY;
-         
-         switch (b.type) {
-         case "2x":
-         ctx.drawImage(doublePointsImg, brickX, brickY, brickWidth, brickHeight);
-         break;
-         case "rocket":
-         ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
-         break;
-         case "power":
-         ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
-         break;
-         case "doubleball":
-         ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
-         break;
-         default:
-         ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
-         break;
-         case "speed":
-         ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
-         break;
 
-        
+        switch (b.type) {
+          case "2x":
+            ctx.drawImage(doublePointsImg, brickX, brickY, brickWidth, brickHeight);
+            break;
+          case "rocket":
+            ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
+            break;
+          case "power":
+            ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
+            break;
+          case "doubleball":
+            ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
+            break;
+          case "speed":
+            ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
+            break;
+          case "stone":
+            if (b.hits === 0) {
+              ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
+            } else if (b.hits === 1) {
+              ctx.drawImage(stone2Img, brickX, brickY, brickWidth, brickHeight);
+            } else {
+              ctx.drawImage(dollarPxpImg, brickX, brickY, brickWidth, brickHeight);
+            }
+            break;
+          default:
+            ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
+            break;
         }
       }
     }
@@ -265,16 +296,23 @@ function drawBricks() {
 }
 
 function drawPointPopups() {
-  pointPopups.forEach(p => {
-    ctx.font = "bold 24px Arial";
-    ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`; // goudkleurig + fading
+  pointPopups.forEach((p, index) => {
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`; // ✅ goudkleurig
+    ctx.font = "bold 18px Arial";
+    ctx.textAlign = "center";
     ctx.fillText(p.value, p.x, p.y);
-    p.y -= 1;
-    p.alpha -= 0.02;
+
+    // Animeren
+    p.y -= 0.5;
+    p.alpha -= 0.01;
+
+    if (p.alpha <= 0) {
+      pointPopups.splice(index, 1);
+    }
   });
 
-  // Verwijder vervaagde popups
-  pointPopups = pointPopups.filter(p => p.alpha > 0);
+  ctx.globalAlpha = 1; // Transparantie resetten
 }
 
 
@@ -283,12 +321,26 @@ function resetBricks() {
     for (let r = 0; r < brickRowCount; r++) {
       bricks[c][r].status = 1;
 
-      // Bonusblok opnieuw instellen
+      // Haal bonusinfo op (inclusief eventueel "stone")
       const bonus = bonusBricks.find(b => b.col === c && b.row === r);
-      bricks[c][r].type = bonus ? bonus.type : "normal";
+      const brickType = bonus ? bonus.type : "normal";
+
+      // Type instellen
+      bricks[c][r].type = brickType;
+
+      // Extra eigenschappen voor stone blokken
+      if (brickType === "stone") {
+        bricks[c][r].hits = 0;
+        bricks[c][r].hasDroppedBag = false;
+      } else {
+        delete bricks[c][r].hits;
+        delete bricks[c][r].hasDroppedBag;
+      }
     }
   }
 }
+
+
 
 
 function drawPaddle() {
@@ -373,6 +425,39 @@ function checkFlyingCoinHits() {
           coin.y > b.y &&
           coin.y < b.y + brickHeight
         ) {
+
+          // 🪨 Als het een stenen blok is
+          if (b.type === "stone") {
+            b.hits = (b.hits || 0) + 1;
+
+            if (b.hits === 1 || b.hits === 2) {
+              spawnCoin(b.x + brickWidth / 2, b.y);
+            }
+
+            if (b.hits >= 3) {
+              b.status = 0;
+
+              if (!b.hasDroppedBag) {
+                spawnPxpBag(b.x + brickWidth / 2, b.y + brickHeight);
+                b.hasDroppedBag = true;
+              }
+
+              const earned = doublePointsActive ? 120 : 60;
+              score += earned;
+              document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+
+              pointPopups.push({
+                x: b.x + brickWidth / 2,
+                y: b.y,
+                value: "+" + earned,
+                alpha: 1
+              });
+            }
+
+            coin.active = false;
+            return;
+          }
+
           // ➕ Activeer bonus indien van toepassing
           switch (b.type) {
             case "power":
@@ -426,6 +511,7 @@ function checkFlyingCoinHits() {
     }
   });
 }
+
 
 
 
@@ -513,6 +599,37 @@ function checkRocketCollision() {
           ) {
             const target = bricks[col][row];
 
+            // 🪨 Speciaal gedrag voor stenen blokken
+            if (target.type === "stone") {
+              target.hits = (target.hits || 0) + 1;
+
+              if (target.hits === 1 || target.hits === 2) {
+                spawnCoin(target.x + brickWidth / 2, target.y);
+              }
+
+              if (target.hits >= 3) {
+                target.status = 0;
+
+                if (!target.hasDroppedBag) {
+                  spawnPxpBag(target.x + brickWidth / 2, target.y + brickHeight);
+                  target.hasDroppedBag = true;
+                }
+
+                const earned = doublePointsActive ? 120 : 60;
+                score += earned;
+
+                pointPopups.push({
+                  x: target.x + brickWidth / 2,
+                  y: target.y,
+                  value: "+" + earned,
+                  alpha: 1
+                });
+              }
+
+              hitSomething = true;
+              return;
+            }
+
             // ➕ Activeer bonus als het een bonusblok is
             switch (target.type) {
               case "power":
@@ -528,6 +645,7 @@ function checkRocketCollision() {
                 break;
             }
 
+            // Normaal blok vernietigen
             target.status = 0;
             target.type = "normal";
             score += doublePointsActive ? 20 : 10;
@@ -535,27 +653,23 @@ function checkRocketCollision() {
           }
         });
 
-       
-            if (hitSomething) {
-             
-             rocketExplosionSound.currentTime = 0;
-              rocketExplosionSound.play();
+        if (hitSomething) {
+          rocketExplosionSound.currentTime = 0;
+          rocketExplosionSound.play();
 
-               document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
-               rocketFired = false;
+          document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+          rocketFired = false;
 
-               explosions.push({
-                x: rocketX + 12,
-                 y: rocketY,
-               radius: 10,
-               alpha: 1
-               });
-               } else {
-               rocketFired = false;
-              }
+          explosions.push({
+            x: rocketX + 12,
+            y: rocketY,
+            radius: 10,
+            alpha: 1
+          });
+        } else {
+          rocketFired = false;
+        }
 
-
-        // Stop bonus als ammo op is
         if (rocketAmmo <= 0) {
           rocketActive = false;
         }
@@ -574,7 +688,7 @@ function checkCoinCollision() {
     const coinBottom = coin.y + coin.radius;
     const paddleTop = canvas.height - paddleHeight;
 
-   
+    // Paddle vangt muntje
     if (
       coinBottom >= paddleTop &&
       coinBottom <= canvas.height &&
@@ -593,19 +707,17 @@ function checkCoinCollision() {
       pointPopups.push({
         x: coin.x,
         y: coin.y,
-        value: "+" + earned,
+        value: "+" + earned + " pxp",
         alpha: 1
       });
     }
 
+    // Coin valt uit beeld zonder vangst
     else if (coinBottom > canvas.height) {
       coin.active = false;
     }
   });
 }
-
-
-
 
 function collisionDetection() {
   balls.forEach(ball => {
@@ -626,13 +738,46 @@ function collisionDetection() {
 
           // Richting van bal omkeren
           ball.dy = -ball.dy;
-          // Voorkom dat de bal blijft hangen in blokje
           if (ball.dy < 0) {
-          ball.y = b.y - ball.radius - 1;
+            ball.y = b.y - ball.radius - 1;
           } else {
-          ball.y = b.y + brickHeight + ball.radius + 1;
-         }
+            ball.y = b.y + brickHeight + ball.radius + 1;
+          }
 
+          // 🪨 Speciaal gedrag voor "stone" blokken
+          if (b.type === "stone") {
+            // 🎵 Speel stenen blok-geluid
+            bricksSound.currentTime = 0;
+            bricksSound.play();
+
+            b.hits++;
+
+            if (b.hits === 1 || b.hits === 2) {
+              spawnCoin(b.x + brickWidth / 2, b.y);
+            }
+
+            if (b.hits === 3) {
+              b.status = 0;
+
+              if (!b.hasDroppedBag) {
+                spawnPxpBag(b.x + brickWidth / 2, b.y + brickHeight);
+                b.hasDroppedBag = true;
+              }
+
+              const earned = doublePointsActive ? 120 : 60;
+              score += earned;
+              document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+
+              pointPopups.push({
+                x: b.x + brickWidth / 2,
+                y: b.y,
+                value: "+" + earned,
+                alpha: 1
+              });
+            }
+
+            return; // Stop hier, zodat andere logica niet wordt uitgevoerd
+          }
 
           // ➕ Activeer bonus indien van toepassing
           switch (b.type) {
@@ -657,22 +802,23 @@ function collisionDetection() {
               break;
           }
 
-          // Blok verwijderen
+          // Normaal blok verwijderen
           b.status = 0;
           b.type = "normal";
-          
 
           // Score verhogen
-          score += doublePointsActive ? 20 : 10;
+          const earned = doublePointsActive ? 20 : 10;
+          score += earned;
           document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
 
-          // 💰 Muntje spawnen (zonder geluid hier)
+          // 💰 Muntje spawnen
           spawnCoin(b.x, b.y);
         }
       }
     }
   });
 }
+
 
 
 function spawnExtraBall(originBall) {
@@ -693,6 +839,15 @@ function spawnExtraBall(originBall) {
   });
 }
 
+function spawnPxpBag(x, y) {
+  pxpBags.push({
+    x: x,
+    y: y,
+    dy: 2,
+    caught: false
+  });
+}
+
 
 
 function draw() {
@@ -709,153 +864,176 @@ function draw() {
   drawPointPopups();
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
-  doublePointsActive = false;
-}
-balls.forEach((ball, index) => {
-  // Verplaats bal (met eventuele slow-motion)
-  if (ballLaunched) {
-    let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
-      ? speedBoostMultiplier
-      : 1;
-    ball.x += ball.dx * speedMultiplier;
-    ball.y += ball.dy * speedMultiplier;
-  } else {
-    ball.x = paddleX + paddleWidth / 2 - ballRadius;
-    ball.y = canvas.height - paddleHeight - ballRadius * 2;
+    doublePointsActive = false;
   }
 
-  // Muurbotsing
-  if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) {
-    ball.dx *= -1;
-    wallSound.currentTime = 0;
-    wallSound.play();
-  }
-  if (ball.y < ball.radius) {
-    ball.dy *= -1;
-    wallSound.currentTime = 0;
-    wallSound.play();
-  }
-
-  // Paddle-botsing
-  if (
-    ball.y + ball.dy > canvas.height - paddleHeight - ball.radius &&
-    ball.y + ball.dy < canvas.height + 2 &&
-    ball.x + ball.radius > paddleX &&
-    ball.x - ball.radius < paddleX + paddleWidth
-  ) {
-    const hitPos = (ball.x - paddleX) / paddleWidth;
-    const angle = (hitPos - 0.5) * Math.PI / 2;
-    const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-    ball.dx = speed * Math.sin(angle);
-    ball.dy = -Math.abs(speed * Math.cos(angle));
-
-   
-    wallSound.currentTime = 0;
-    wallSound.play();
-  }
-
-  // Bal uit beeld → leven verloren
-  if (ball.y + ball.dy > canvas.height) {
-    balls.splice(index, 1);
-
-    if (balls.length === 0) {
-      // 🔁 Reset bonussen en tijdelijke effecten
-      speedBoostActive = false;
-      doublePointsActive = false;
-      flagsOnPaddle = false;
-      rocketActive = false;
-      rocketFired = false;
-      rocketAmmo = 0;
-      flyingCoins = [];
-      smokeParticles = [];
-      explosions = [];
-
-      saveHighscore();
-      resetBricks();
-      resetBall();
-      return; // stop de draw-loop (wordt opnieuw gestart)
-    } else if (ball.isMain) {
-      balls[0].isMain = true;
+  balls.forEach((ball, index) => {
+    if (ballLaunched) {
+      let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
+        ? speedBoostMultiplier : 1;
+      ball.x += ball.dx * speedMultiplier;
+      ball.y += ball.dy * speedMultiplier;
+    } else {
+      ball.x = paddleX + paddleWidth / 2 - ballRadius;
+      ball.y = canvas.height - paddleHeight - ballRadius * 2;
     }
 
-    return; // skip deze bal (hij is verwijderd)
-  }
+    if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) {
+      ball.dx *= -1;
+      wallSound.currentTime = 0;
+      wallSound.play();
+    }
+    if (ball.y < ball.radius) {
+      ball.dy *= -1;
+      wallSound.currentTime = 0;
+      wallSound.play();
+    }
 
-  
-  ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
-});
+    if (
+      ball.y + ball.dy > canvas.height - paddleHeight - ball.radius &&
+      ball.y + ball.dy < canvas.height + 2 &&
+      ball.x + ball.radius > paddleX &&
+      ball.x - ball.radius < paddleX + paddleWidth
+    ) {
+      const hitPos = (ball.x - paddleX) / paddleWidth;
+      const angle = (hitPos - 0.5) * Math.PI / 2;
+      const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+      ball.dx = speed * Math.sin(angle);
+      ball.dy = -Math.abs(speed * Math.cos(angle));
 
+      wallSound.currentTime = 0;
+      wallSound.play();
+    }
 
- // Paddle bewegen
-if (rightPressed && paddleX < canvas.width - paddleWidth) {
-  paddleX += 7;
-} else if (leftPressed && paddleX > 0) {
-  paddleX -= 7;
-}
+    if (ball.y + ball.dy > canvas.height) {
+      balls.splice(index, 1);
 
+      if (balls.length === 0) {
+        speedBoostActive = false;
+        doublePointsActive = false;
+        flagsOnPaddle = false;
+        rocketActive = false;
+        rocketFired = false;
+        rocketAmmo = 0;
+        flyingCoins = [];
+        smokeParticles = [];
+        explosions = [];
 
+        saveHighscore();
+        resetBricks();
+        resetBall();
+        return;
+      } else if (ball.isMain) {
+        balls[0].isMain = true;
+      }
 
+      return;
+    }
 
-
-if (rocketActive && !rocketFired && rocketAmmo > 0) {
-  rocketX = paddleX + paddleWidth / 2 - 12;
-  rocketY = canvas.height - paddleHeight - 48;
-  ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
-}
-
-if (rocketFired) {
-  rocketY -= rocketSpeed;
-
-  smokeParticles.push({
-    x: rocketX + 15,
-    y: rocketY + 65,
-    radius: Math.random() * 6 + 4,
-    alpha: 1
+    ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
   });
 
-  if (rocketY < -48) {
-    rocketFired = false;
-    if (rocketAmmo <= 0) {
-      rocketActive = false;
-    }
-  } else {
-    ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
-    checkRocketCollision();
+  // Paddle bewegen
+  if (rightPressed && paddleX < canvas.width - paddleWidth) {
+    paddleX += 7;
+  } else if (leftPressed && paddleX > 0) {
+    paddleX -= 7;
   }
-}
 
-// Explosies tekenen
-explosions.forEach(e => {
-  ctx.beginPath();
-  ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
-  ctx.fillStyle = `rgba(255, 165, 0, ${e.alpha})`;
-  ctx.fill();
-  e.radius += 2;
-  e.alpha -= 0.05;
-});
-explosions = explosions.filter(e => e.alpha > 0);
+  if (rocketActive && !rocketFired && rocketAmmo > 0) {
+    rocketX = paddleX + paddleWidth / 2 - 12;
+    rocketY = canvas.height - paddleHeight - 48;
+    ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
+  }
 
-// Rook tekenen
-smokeParticles.forEach(p => {
-  ctx.beginPath();
-  ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-  ctx.fillStyle = `rgba(150, 150, 150, ${p.alpha})`;
-  ctx.fill();
-  p.y += 1;
-  p.radius += 0.3;
-  p.alpha -= 0.02;
-});
-  
-if (speedBoostActive && Date.now() - speedBoostStart >= speedBoostDuration) {
+  if (rocketFired) {
+    rocketY -= rocketSpeed;
+
+    smokeParticles.push({
+      x: rocketX + 15,
+      y: rocketY + 65,
+      radius: Math.random() * 6 + 4,
+      alpha: 1
+    });
+
+    if (rocketY < -48) {
+      rocketFired = false;
+      if (rocketAmmo <= 0) {
+        rocketActive = false;
+      }
+    } else {
+      ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
+      checkRocketCollision();
+    }
+  }
+
+  // Explosies tekenen
+  explosions.forEach(e => {
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 165, 0, ${e.alpha})`;
+    ctx.fill();
+    e.radius += 2;
+    e.alpha -= 0.05;
+  });
+  explosions = explosions.filter(e => e.alpha > 0);
+
+  // Rook tekenen
+  smokeParticles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(150, 150, 150, ${p.alpha})`;
+    ctx.fill();
+    p.y += 1;
+    p.radius += 0.3;
+    p.alpha -= 0.02;
+  });
+
+  if (speedBoostActive && Date.now() - speedBoostStart >= speedBoostDuration) {
   speedBoostActive = false;
 }
 
-smokeParticles = smokeParticles.filter(p => p.alpha > 0);
+// Zakjes tekenen en vangen
+for (let i = pxpBags.length - 1; i >= 0; i--) {
+  let bag = pxpBags[i];
+  bag.y += bag.dy;
 
+  ctx.drawImage(pxpBagImg, bag.x - 20, bag.y, 40, 40);
 
-requestAnimationFrame(draw);
+  const bagBottom = bag.y + 40;
+  const paddleTop = canvas.height - paddleHeight;
+
+  if (
+    bagBottom >= paddleTop &&
+    bagBottom <= canvas.height &&
+    bag.x > paddleX &&
+    bag.x < paddleX + paddleWidth
+  ) {
+    pxpBagSound.currentTime = 0;
+    pxpBagSound.play(); // 🎵 Speel geluid als zakje wordt gevangen
+
+    const earned = doublePointsActive ? 160 : 80;
+    score += earned;
+    document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+
+    pointPopups.push({
+      x: bag.x,
+      y: bag.y,
+      value: "+" + earned + " pxp",
+      alpha: 1
+    });
+
+    pxpBags.splice(i, 1);
+  } else if (bag.y > canvas.height) {
+    pxpBags.splice(i, 1);
+  }
 }
 
+// Extra updates onderaan draw()
+smokeParticles = smokeParticles.filter(p => p.alpha > 0);
+
+requestAnimationFrame(draw);
+} // ⬅️ Deze sluit de draw() functie correct af
 
 
 
@@ -863,7 +1041,8 @@ function onImageLoad() {
   imagesLoaded++;
   console.log("Afbeelding geladen:", imagesLoaded);
 
-  if (imagesLoaded === 12) {
+  if (imagesLoaded === 16) {
+    resetBricks();  // <-- deze toevoegen!
     draw();
   }
 }
@@ -882,8 +1061,10 @@ vlagImgRight.onload = onImageLoad;
 shootCoinImg.onload = onImageLoad;
 speedImg.onload = onImageLoad;
 pointpayPaddleImg.onload = onImageLoad;
-
-
+stone1Img.onload = onImageLoad;
+stone2Img.onload = onImageLoad;
+pxpBagImg.onload = onImageLoad;
+dollarPxpImg.onload = onImageLoad;
 
 
 document.addEventListener("mousedown", function () {
@@ -896,7 +1077,6 @@ document.addEventListener("mousedown", function () {
   }
 });
 
-// ✅ StartTimer-functie los hieronder
 function startTimer() {
   timerRunning = true;
   timerInterval = setInterval(() => {
