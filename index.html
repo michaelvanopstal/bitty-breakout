@@ -31,7 +31,7 @@
 </div>
 
     </div>
-
+      <button id="musicToggle">🎵 Play Music</button>
     <div id="highscore-overlay">
       <img src="beker_clipped_rev_2.png" id="trophy" alt="Trophy" />
       <h2>High score</h2>
@@ -171,5 +171,71 @@ setInterval(() => animateFlyer("balloonFlyer", 30000, 0), 30000);
     Circulating: 30M PXP
   </div>
 </div>
+
+<!-- Externe scripts -->
+<script src="login.js"></script>
+
+
+<!-- Muziekalbumscript -->
 <script>
- 
+  const albumTracks = [
+    new Audio("track1.mp3"),
+    new Audio("track2.mp3"),
+    new Audio("track3.mp3"),
+    new Audio("track4.mp3"),
+    new Audio("track5.mp3"),
+    new Audio("track6.mp3"),
+    new Audio("track7.mp3"),
+    new Audio("track8.mp3"),
+    new Audio("track9.mp3"),
+    new Audio("track10.mp3")
+  ];
+
+  let currentTrackIndex = 0;
+  let musicPlaying = false;
+
+  // 🔁 Zorg dat elke track zichzelf pas reset als die eindigt
+  albumTracks.forEach((track, index) => {
+    track.loop = false;
+
+    track.addEventListener("ended", () => {
+      currentTrackIndex = (currentTrackIndex + 1) % albumTracks.length;
+
+      // Stop alle andere tracks (zekerheid)
+      albumTracks.forEach(t => {
+        t.pause();
+        t.currentTime = 0;
+      });
+
+      // Speel de volgende track als muziek nog aanstaat
+      if (musicPlaying) {
+        albumTracks[currentTrackIndex].play();
+      }
+    });
+  });
+
+  document.getElementById("musicToggle").addEventListener("click", () => {
+    musicPlaying = !musicPlaying;
+
+    if (musicPlaying) {
+      // Stop alle andere tracks eerst
+      albumTracks.forEach(track => {
+        track.pause();
+        track.currentTime = 0;
+      });
+
+      albumTracks[currentTrackIndex].play();
+      document.getElementById("musicToggle").textContent = "🔇 Stop Music";
+    } else {
+      albumTracks.forEach(track => {
+        track.pause();
+        track.currentTime = 0;
+      });
+      document.getElementById("musicToggle").textContent = "🎵 Play Music";
+      currentTrackIndex = 0; // optioneel resetten naar begin
+    }
+
+    // 🛡️ Haal focus van knop zodat toetsen werken
+    document.getElementById("musicToggle").blur();
+  });
+</script>
