@@ -225,6 +225,29 @@ body {
   background-color: #0056b3; /* donkerder blauw op hover */
 }
 
+#rocketFlame {
+  position: absolute;
+  width: 20px;
+  height: 40px;
+  background: radial-gradient(ellipse at center, orange 0%, red 60%, transparent 100%);
+  border-radius: 50% 50% 50% 50%;
+  display: none;
+  z-index: 1;
+  filter: blur(1px);
+  animation: flameFlicker 0.15s infinite alternate;
+}
+
+@keyframes flameFlicker {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.2) rotate(5deg);
+    opacity: 0.5;
+  }
+}
+
 
 
 
