@@ -175,34 +175,34 @@ setInterval(() => animateFlyer("balloonFlyer", 30000, 0), 30000);
 <!-- Externe scripts -->
 <script src="login.js"></script>
 
+
 <!-- Muziekalbumscript -->
 <script>
   const albumTracks = [
     new Audio("track1.mp3"),
     new Audio("track2.mp3"),
-    new Audio("track3.mp3")
+    new Audio("track3.mp3"),
+    new Audio("track4.mp3"),
+
   ];
 
   let currentTrackIndex = 0;
   let musicPlaying = false;
 
-  // Zorg dat tracks automatisch doorspelen zonder herstart van track1
+  // 🔁 Zorg dat elke track zichzelf pas reset als die eindigt
   albumTracks.forEach((track, index) => {
     track.loop = false;
 
     track.addEventListener("ended", () => {
-      currentTrackIndex++;
-      if (currentTrackIndex >= albumTracks.length) {
-        currentTrackIndex = 0; // ga terug naar begin als alles is afgespeeld
-      }
+      currentTrackIndex = (currentTrackIndex + 1) % albumTracks.length;
 
-      // Stop alle andere tracks
+      // Stop alle andere tracks (zekerheid)
       albumTracks.forEach(t => {
         t.pause();
         t.currentTime = 0;
       });
 
-      // Speel de volgende track als muziek nog aan staat
+      // Speel de volgende track als muziek nog aanstaat
       if (musicPlaying) {
         albumTracks[currentTrackIndex].play();
       }
@@ -213,13 +213,12 @@ setInterval(() => animateFlyer("balloonFlyer", 30000, 0), 30000);
     musicPlaying = !musicPlaying;
 
     if (musicPlaying) {
-      // Stop alle tracks eerst
+      // Stop alle andere tracks eerst
       albumTracks.forEach(track => {
         track.pause();
         track.currentTime = 0;
       });
 
-      // Start huidige track
       albumTracks[currentTrackIndex].play();
       document.getElementById("musicToggle").textContent = "🔇 Stop Music";
     } else {
@@ -228,11 +227,10 @@ setInterval(() => animateFlyer("balloonFlyer", 30000, 0), 30000);
         track.currentTime = 0;
       });
       document.getElementById("musicToggle").textContent = "🎵 Play Music";
-      currentTrackIndex = 0;
+      currentTrackIndex = 0; // optioneel resetten naar begin
     }
 
-    // Haal focus van de knop zodat toetsenbord blijft werken
+    // 🛡️ Haal focus van knop zodat toetsen werken
     document.getElementById("musicToggle").blur();
   });
 </script>
-
