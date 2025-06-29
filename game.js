@@ -36,6 +36,9 @@ let paddleExploding = false;
 let paddleExplosionParticles = [];
 let stoneDebris = [];
 let animationFrameId = null;
+let showGameOver = false;
+let gameOverAlpha = 0;
+let gameOverTimer = 0;
 
 // 🌟 Level 2 overgang
 let levelTransitionActive = false;
@@ -1191,6 +1194,29 @@ function draw() {
   }
 }
 
+if (showGameOver) {
+  ctx.save();
+  ctx.globalAlpha = gameOverAlpha;
+  ctx.fillStyle = "#ff4444";
+  ctx.font = "bold 48px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
+  ctx.restore();
+
+  if (gameOverTimer < 60) {
+    gameOverAlpha += 0.05; // fade-in
+  } else if (gameOverTimer >= 60 && gameOverTimer < 120) {
+    gameOverAlpha -= 0.05; // fade-out
+  }
+
+  gameOverTimer++;
+
+  if (gameOverTimer >= 120) {
+    showGameOver = false;
+  }
+}
+
+
 
   // 🎇 Paddle-explosie tekenen
   if (paddleExploding) {
@@ -1411,6 +1437,9 @@ function triggerPaddleExplosion() {
       explosions = [];
       coins = [];
       pxpBags = [];
+      showGameOver = true;
+      gameOverAlpha = 0;
+      gameOverTimer = 0;
 
       resetBricks();
       resetBall();
@@ -1461,4 +1490,3 @@ function updateLivesDisplay() {
     display.appendChild(img);
   }
 }
-
