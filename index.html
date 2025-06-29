@@ -19,10 +19,11 @@
   </div>
 
   <div id="game-container">
-    <canvas id="gameCanvas" width="650" height="600"></canvas>
+    <canvas id="gameCanvas" width="645" height="600"></canvas>
 
     <div id="login-overlay">
-      
+    
+
 <div id="login-box">
   <label for="player-name">Inlog:</label><br />
   <input type="text" id="player-name" placeholder="Voer je naam in" />
@@ -41,31 +42,37 @@
       </ol>
     </div>
   </div>
+<div id="hud" style="position: absolute; top: 40px; left: 715px; z-index: 10;">
+  <div id="livesDisplay" style="display: flex; gap: 6px;"></div>
+</div>
+
 
   <script src="login.js"></script>
   <script src="game.js"></script>
 
 <script>
   let highscores = JSON.parse(localStorage.getItem("highscores")) || [
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" },
-    { name: "—", score: 0, time: "00:00" }
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 }
   ];
 
   function updateHighscoreBoard() {
     const highscoreList = document.getElementById("highscore-list");
     if (!highscoreList) return;
+
     highscoreList.innerHTML = "";
     highscores.forEach((entry, index) => {
+      const levelText = entry.level ? `— Level ${entry.level}` : "";
       const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} PXP — ${entry.time}`;
+      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} PXP — ${entry.time} ${levelText}`;
       highscoreList.appendChild(li);
     });
   }
@@ -83,6 +90,7 @@
     updateHighscoreBoard();
   });
 </script>
+
 <style>
   #game-container {
     position: relative; /* nodig voor absolute positionering binnenin */
@@ -150,11 +158,9 @@
 
   // Start eerste run
   animateFlyer("bikeFlyer", 20000, 1000);     // fiets na 1 sec, 20 sec lang
-  animateFlyer("balloonFlyer", 30000, 1000);  // ballon na 2 sec, 28 sec lang
-
   // Herhaal elke 30 sec
   setInterval(() => animateFlyer("bikeFlyer", 20000, 1000), 30000);
-setInterval(() => animateFlyer("balloonFlyer", 30000, 0), 30000);
+
 </script>
 
 <!-- PXP Coin Banner -->

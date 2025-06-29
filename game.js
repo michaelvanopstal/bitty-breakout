@@ -35,6 +35,15 @@ let pxpBags = [];
 let paddleExploding = false;
 let paddleExplosionParticles = [];
 let stoneDebris = [];
+let animationFrameId = null;
+
+// 🌟 Level 2 overgang
+let levelTransitionActive = false;
+let transitionOffsetY = -300;
+
+let levelMessageAlpha = 0;
+let levelMessageTimer = 0;
+let levelMessageVisible = false;
 
 
 
@@ -47,11 +56,12 @@ const speedBoostMultiplier = 1.5;
 balls.push({
   x: canvas.width / 2,
   y: canvas.height - paddleHeight - 10,
-  dx: 10,
-  dy: -10,
+  dx: 0,
+  dy: -6,
   radius: 8,
   isMain: true
 });
+
 
 
 
@@ -72,6 +82,19 @@ const bonusBricks = [
   { col: 8, row: 5, type: "stone" },
   { col: 7, row: 6, type: "stone" },
   { col: 6, row: 7, type: "stone" },
+];
+// 📦 PXP layout voor level 2 (alleen steen-blokken)
+const pxpMap = [
+  { col: 0, row: 5 },   { col: 0, row: 8 },      { col: 0, row: 14 },   { col: 0, row: 13 },   { col: 5, row: 3, type: "rocket" }, 
+  { col: 1, row: 5 },   { col: 1, row: 8 },      { col: 1, row: 14 },   { col: 1, row: 13 },   { col: 8, row: 4, type: "power" },        
+  { col: 2, row: 5 },   { col: 2, row: 8 },      { col: 2, row: 14 },   { col: 2, row: 13 },   { col: 2, row: 3, type: "speed" },         
+  { col: 3, row: 5 },   { col: 3, row: 8 },      { col: 3, row: 14 },   { col: 3, row: 13 },   { col: 4, row: 7, type: "2x" },
+  { col: 4, row: 5 },   { col: 4, row: 8 },      { col: 4, row: 14 },   { col: 4, row: 13 },   { col: 2, row: 7, type: "doubleball" },         
+  { col: 5, row: 5 },   { col: 5, row: 8 },      { col: 5, row: 14 },   { col: 5, row: 13 },               
+  { col: 6, row: 5 },   { col: 6, row: 8 },      { col: 6, row: 14 },   { col: 6, row: 13 },                   
+  { col: 7, row: 5 },   { col: 7, row: 8 },      { col: 7, row: 14 },   { col: 7, row: 13 },                                       
+  { col: 8, row: 5 },   { col: 8, row: 8 },      { col: 8, row: 14 },   { col: 8, row: 13 },                              
+                                                                  
 ];
 
 
@@ -126,6 +149,10 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
+
+const lifeImg = new Image();
+lifeImg.src = "level.png";
+
 const dollarPxpImg = new Image();
 dollarPxpImg.src = "dollarpxp.png";
 
@@ -177,7 +204,7 @@ const pxpBagImg = new Image();
 pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
 
 
-let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration) ? speedBoostMultiplier : 1.5;
+
 
 let rocketActive = false; // Voor nu altijd zichtbaar om te testen
 let rocketX = 0;
@@ -202,22 +229,18 @@ function keyDownHandler(e) {
     leftPressed = true;
   }
 
-  if ((e.key === "ArrowUp" || e.key === "Up" || e.code === "Space") && !ballLaunched) {
-    ballLaunched = true;
-    ballMoving = true;
+if ((e.key === "ArrowUp" || e.key === "Up" || e.code === "Space") && !ballLaunched) {
+  ballLaunched = true;
+  ballMoving = true;
 
-    // 🎯 Speel schiet-geluid af
-    shootSound.currentTime = 0;
-    shootSound.play();
+  shootSound.currentTime = 0;
+  shootSound.play();
 
-    balls[0].dx = 0;
-    balls[0].dy = -6;
+  balls[0].dx = 0;
+  balls[0].dy = -6;
 
-    if (!timerRunning) startTimer(); // ✅ Timer starten bij eerste afschot
-
-    score = 0;
-    document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
-  }
+  if (!timerRunning) startTimer(); // ✅ Start timer bij eerste afschot
+}
 
   if ((e.code === "ArrowUp" || e.code === "Space") && rocketActive && rocketAmmo > 0 && !rocketFired) {
     rocketFired = true;
@@ -270,7 +293,7 @@ function mouseMoveHandler(e) {
 
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
-const offsetX = (canvas.width - totalBricksWidth) / 2 - 3;
+const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
 
 
   for (let c = 0; c < brickColumnCount; c++) {
@@ -278,7 +301,8 @@ const offsetX = (canvas.width - totalBricksWidth) / 2 - 3;
       const b = bricks[c][r];
       if (b.status === 1) {
         const brickX = offsetX + c * brickWidth;
-        const brickY = r * brickHeight;
+        const brickY = r * brickHeight + (levelTransitionActive ? transitionOffsetY : 0);
+
 
         b.x = brickX;
         b.y = brickY;
@@ -343,11 +367,17 @@ function resetBricks() {
     for (let r = 0; r < brickRowCount; r++) {
       bricks[c][r].status = 1;
 
-      // Haal bonusinfo op (inclusief eventueel "stone")
-      const bonus = bonusBricks.find(b => b.col === c && b.row === r);
-      const brickType = bonus ? bonus.type : "normal";
+      let brickType = "normal"; // ✅ slechts één keer
 
-      // Type instellen
+      const bonus = bonusBricks.find(b => b.col === c && b.row === r);
+      const isStone = level === 2 && pxpMap.some(p => p.col === c && p.row === r);
+
+      if (isStone) {
+        brickType = "stone";
+      } else if (bonus) {
+        brickType = bonus.type;
+      }
+
       bricks[c][r].type = brickType;
 
       // Extra eigenschappen voor stone blokken
@@ -364,6 +394,7 @@ function resetBricks() {
 
 
 
+
 function drawPaddle() {
   if (paddleExploding) return; // Verberg paddle tijdens explosie
   ctx.drawImage(pointpayPaddleImg, paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
@@ -376,20 +407,35 @@ function resetBall() {
     x: paddleX + paddleWidth / 2 - ballRadius,
     y: canvas.height - paddleHeight - ballRadius * 2,
     dx: 0,
-    dy: -10,
+    dy: -6,
     radius: ballRadius,
     isMain: true
   }];
   ballLaunched = false;
   ballMoving = false;
-}
 
+  // 🧱 Zorg dat bij level 1 blokken direct zichtbaar zijn
+  if (level === 1) {
+    levelTransitionActive = false;
+    transitionOffsetY = 0;
+  }
+}
 
 function resetPaddle() {
   paddleX = (canvas.width - paddleWidth) / 2;
   resetBall();  // maakt de eerste bal aan
-  draw();
+ 
+}
 
+function drawLivesOnCanvas() {
+  for (let i = 0; i < lives; i++) {
+    const iconSize = 30;
+    const spacing = 10;
+    const x = 10 + i * (iconSize + spacing); // linksboven
+    const y = 10;
+
+    ctx.drawImage(lifeImg, x, y, iconSize, iconSize);
+  }
 }
 
 
@@ -544,6 +590,7 @@ function checkFlyingCoinHits() {
 
 function saveHighscore() {
   const playerName = window.currentPlayer || "Unknown";
+
   const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
   const seconds = String(elapsedTime % 60).padStart(2, '0');
   const timeFormatted = `${minutes}:${seconds}`;
@@ -551,15 +598,25 @@ function saveHighscore() {
   const newScore = {
     name: playerName,
     score: score,
-    time: timeFormatted
+    time: timeFormatted,
+    level: level || 1  // fallback naar level 1 als het niet gedefinieerd is
   };
 
   let highscores = JSON.parse(localStorage.getItem("highscores")) || [];
 
-  if (!highscores.some(h => h.name === newScore.name && h.score === newScore.score && h.time === newScore.time)) {
+  // 🔒 Voeg alleen toe als deze combinatie nog niet bestaat
+  const isDuplicate = highscores.some(h =>
+    h.name === newScore.name &&
+    h.score === newScore.score &&
+    h.time === newScore.time &&
+    h.level === newScore.level
+  );
+
+  if (!isDuplicate) {
     highscores.push(newScore);
   }
 
+  // 🏆 Sorteer op score, daarna op snelste tijd
   highscores.sort((a, b) => {
     if (b.score === a.score) {
       const [amin, asec] = a.time.split(":").map(Number);
@@ -569,15 +626,18 @@ function saveHighscore() {
     return b.score - a.score;
   });
 
+  // ✂️ Beperk tot top 10
   highscores = highscores.slice(0, 10);
   localStorage.setItem("highscores", JSON.stringify(highscores));
 
+  // 📋 Toon in de highscorelijst
   const list = document.getElementById("highscore-list");
   if (list) {
     list.innerHTML = "";
     highscores.forEach((entry, index) => {
+      const lvl = entry.level || 1;
       const li = document.createElement("li");
-      li.textContent = `${index + 1} ${entry.name} - ${entry.score} pxp - ${entry.time}`;
+      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} pxp — ${entry.time} — Level ${lvl}`;
       list.appendChild(li);
     });
   }
@@ -901,18 +961,16 @@ function collisionDetection() {
 
 
 function spawnExtraBall(originBall) {
-  const speed = Math.sqrt(originBall.dx ** 2 + originBall.dy ** 2);
-
   // Huidige bal krijgt een lichte afwijking
   originBall.dx = -1;
-  originBall.dy = -Math.abs(speed);
+  originBall.dy = -6;
 
-  // Tweede bal gaat recht omhoog
+  // Tweede bal gaat recht omhoog met vaste snelheid
   balls.push({
     x: originBall.x,
     y: originBall.y,
     dx: 0,
-    dy: -speed,
+    dy: -6,
     radius: ballRadius,
     isMain: false
   });
@@ -984,21 +1042,16 @@ function draw() {
       wallSound.play();
     }
 
-
-    
- if (ball.y + ball.dy > canvas.height) {
+    if (ball.y + ball.dy > canvas.height) {
    balls.splice(index, 1);
 
-  if (balls.length === 0 && !paddleExploding) {
-    triggerPaddleExplosion(); // 💥 start explosie + animatie + reset
+   if (ball.isMain && !paddleExploding) {
+    triggerPaddleExplosion();
     return;
-  } else if (ball.isMain && balls.length > 0) {
-    balls[0].isMain = true;
   }
 
   return;
 }
-
 
 
     ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
@@ -1036,6 +1089,11 @@ function draw() {
       ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
       checkRocketCollision();
     }
+  } // ✅ DIT is de juiste afsluitende accolade voor rocketFired-block
+
+  // 🔁 Start level 2 zodra alle blokjes weg zijn
+  if (bricks.every(col => col.every(b => b.status === 0)) && !levelTransitionActive) {
+    startLevelTransition();
   }
 
   // Explosies tekenen
@@ -1059,92 +1117,122 @@ function draw() {
     p.radius += 0.3;
     p.alpha -= 0.02;
   });
+  smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
   if (speedBoostActive && Date.now() - speedBoostStart >= speedBoostDuration) {
-  speedBoostActive = false;
-}
+    speedBoostActive = false;
+  }
 
-// Zakjes tekenen en vangen
-for (let i = pxpBags.length - 1; i >= 0; i--) {
-  let bag = pxpBags[i];
-  bag.y += bag.dy;
+  // Zakjes tekenen en vangen
+  for (let i = pxpBags.length - 1; i >= 0; i--) {
+    let bag = pxpBags[i];
+    bag.y += bag.dy;
 
-  ctx.drawImage(pxpBagImg, bag.x - 20, bag.y, 40, 40);
+    ctx.drawImage(pxpBagImg, bag.x - 20, bag.y, 40, 40);
 
-  const bagBottom = bag.y + 40;
-  const paddleTop = canvas.height - paddleHeight;
+    const bagBottom = bag.y + 40;
+    const paddleTop = canvas.height - paddleHeight;
 
-  if (
-    bagBottom >= paddleTop &&
-    bagBottom <= canvas.height &&
-    bag.x > paddleX &&
-    bag.x < paddleX + paddleWidth
-  ) {
-    pxpBagSound.currentTime = 0;
-    pxpBagSound.play(); // 🎵 Speel geluid als zakje wordt gevangen
+    if (
+      bagBottom >= paddleTop &&
+      bagBottom <= canvas.height &&
+      bag.x > paddleX &&
+      bag.x < paddleX + paddleWidth
+    ) {
+      pxpBagSound.currentTime = 0;
+      pxpBagSound.play();
 
-    const earned = doublePointsActive ? 160 : 80;
-    score += earned;
-    document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+      const earned = doublePointsActive ? 160 : 80;
+      score += earned;
+      document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
 
-    pointPopups.push({
-      x: bag.x,
-      y: bag.y,
-      value: "+" + earned + " pxp",
-      alpha: 1
+      pointPopups.push({
+        x: bag.x,
+        y: bag.y,
+        value: "+" + earned + " pxp",
+        alpha: 1
+      });
+
+      pxpBags.splice(i, 1);
+    } else if (bag.y > canvas.height) {
+      pxpBags.splice(i, 1);
+    }
+  }
+
+  // ✨ Level 2 tekst weergeven
+  if (levelMessageVisible) {
+    ctx.save();
+    ctx.globalAlpha = levelMessageAlpha;
+    ctx.fillStyle = "#00ffff";
+    ctx.font = "bold 36px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("PointPay Breakout Level 2", canvas.width / 2, canvas.height / 2);
+    ctx.restore();
+  }
+
+  if (levelTransitionActive) {
+    if (transitionOffsetY < 0) {
+      transitionOffsetY += 2;
+    } else {
+      transitionOffsetY = 0;
+    }
+
+    if (levelMessageAlpha < 1 && levelMessageTimer < 60) {
+      levelMessageAlpha += 0.05;
+      levelMessageTimer++;
+    } else if (levelMessageTimer >= 60 && levelMessageAlpha > 0) {
+      levelMessageAlpha -= 0.03;
+    } else if (levelMessageAlpha <= 0 && transitionOffsetY === 0) {
+      levelMessageVisible = false;
+      levelTransitionActive = false;
+    }
+  }
+
+  // 🎇 Paddle-explosie tekenen
+  if (paddleExploding) {
+    paddleExplosionParticles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 100, 0, ${p.alpha})`;
+      ctx.fill();
+      p.x += p.dx;
+      p.y += p.dy;
+      p.alpha -= 0.02;
     });
 
-    pxpBags.splice(i, 1);
-  } else if (bag.y > canvas.height) {
-    pxpBags.splice(i, 1);
+    paddleExplosionParticles = paddleExplosionParticles.filter(p => p.alpha > 0);
   }
-}
 
-// 🎇 Paddle-explosie tekenen
-if (paddleExploding) {
-  paddleExplosionParticles.forEach(p => {
+  // 🧱 Steenpuin tekenen
+  stoneDebris.forEach(p => {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255, 100, 0, ${p.alpha})`;
+    ctx.fillStyle = `rgba(140, 120, 100, ${p.alpha})`;
     ctx.fill();
     p.x += p.dx;
     p.y += p.dy;
     p.alpha -= 0.02;
   });
+  stoneDebris = stoneDebris.filter(p => p.alpha > 0);
 
-  paddleExplosionParticles = paddleExplosionParticles.filter(p => p.alpha > 0);
+
+animationFrameId = requestAnimationFrame(draw);
+
 }
 
-// 🧱 Steenpuin tekenen – altijd uitvoeren
-stoneDebris.forEach(p => {
-  ctx.beginPath();
-  ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-  ctx.fillStyle = `rgba(140, 120, 100, ${p.alpha})`; // Bruin-grijze kleur
-  ctx.fill();
-  p.x += p.dx;
-  p.y += p.dy;
-  p.alpha -= 0.02;
-});
-stoneDebris = stoneDebris.filter(p => p.alpha > 0);
-
-// Extra updates onderaan draw()
-smokeParticles = smokeParticles.filter(p => p.alpha > 0);
-
-requestAnimationFrame(draw);
-} // ⬅️ Deze sluit de draw() functie correct af
 
 
 
 
 function onImageLoad() {
   imagesLoaded++;
-  console.log("Afbeelding geladen:", imagesLoaded);
-
   if (imagesLoaded === 16) {
-    resetBricks();  // <-- deze toevoegen!
+    resetBricks();
+    updateLivesDisplay(); // ✅ laat bij start meteen levens zien
     draw();
   }
 }
+
 
 
 
@@ -1178,20 +1266,20 @@ document.addEventListener("mousedown", function (e) {
     rocketLaunchSound.play();
   }
 
-  // 🎯 Bal afschieten met muisklik (trackpad)
-  if (!ballLaunched && !ballMoving) {
-    ballLaunched = true;
-    ballMoving = true;
-    shootSound.currentTime = 0;
-    shootSound.play();
+ // 🎯 Bal afschieten met muisklik (trackpad)
+if (!ballLaunched && !ballMoving) {
+  ballLaunched = true;
+  ballMoving = true;
 
-    balls[0].dx = 0;
-    balls[0].dy = -6;
+  shootSound.currentTime = 0;
+  shootSound.play();
 
-    if (!timerRunning) startTimer();
-    score = 0;
-    document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
-  }
+  balls[0].dx = 0;
+  balls[0].dy = -6;
+
+  if (!timerRunning) startTimer(); // ✅ Alleen timer starten
+
+}
 });
 
 
@@ -1213,6 +1301,10 @@ function stopTimer() {
   elapsedTime = 0;
   document.getElementById("timeDisplay").textContent = "time 00:00";
 }
+function pauseTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+}
 
 function spawnStoneDebris(x, y) {
   for (let i = 0; i < 8; i++) {
@@ -1228,46 +1320,141 @@ function spawnStoneDebris(x, y) {
 }
 
 function triggerPaddleExplosion() {
-  paddleExploding = true;
-  paddleExplosionParticles = [];
-
-  // Maak 50 deeltjes aan die uit elkaar vliegen
-  for (let i = 0; i < 50; i++) {
-    paddleExplosionParticles.push({
-      x: paddleX + paddleWidth / 2,
-      y: canvas.height - paddleHeight / 2,
-      dx: (Math.random() - 0.5) * 10,
-      dy: (Math.random() - 0.5) * 10,
-      radius: Math.random() * 4 + 2,
-      alpha: 1
-    });
-  }
-
-  const paddleExplodeSound = new Audio("paddle_explode.mp3");
-  paddleExplodeSound.play();
-
-  // ⏱️ Na 1 seconde paddle resetten + alles wissen
-  setTimeout(() => {
-    stopTimer();               // ⏹️ Timer stoppen en terug op 00:00 zetten
-    ballReleased = false;      // ⛔ Timer pas starten bij volgende afvuuractie
-
-    paddleExploding = false;
+  if (lives > 1) {
+    lives--;
+    updateLivesDisplay();
+    pauseTimer(); 
+  
+    paddleExploding = true;
     paddleExplosionParticles = [];
 
-    speedBoostActive = false;
-    doublePointsActive = false;
-    flagsOnPaddle = false;
-    rocketActive = false;
-    rocketFired = false;
-    rocketAmmo = 0;
-    flyingCoins = [];
-    smokeParticles = [];
-    explosions = [];
-    coins = [];
-    pxpBags = [];
+    for (let i = 0; i < 50; i++) {
+      paddleExplosionParticles.push({
+        x: paddleX + paddleWidth / 2,
+        y: canvas.height - paddleHeight / 2,
+        dx: (Math.random() - 0.5) * 10,
+        dy: (Math.random() - 0.5) * 10,
+        radius: Math.random() * 4 + 2,
+        alpha: 1
+      });
+    }
 
-    saveHighscore();
-    resetBricks();
-    resetBall();
-  }, 1000);
+    paddleExplodeSound.currentTime = 0;
+    paddleExplodeSound.play();
+
+    setTimeout(() => {
+      paddleExploding = false;
+      paddleExplosionParticles = [];
+
+      balls = [{
+        x: paddleX + paddleWidth / 2 - ballRadius,
+        y: canvas.height - paddleHeight - ballRadius * 2,
+        dx: 0,
+        dy: -6,
+        radius: ballRadius,
+        isMain: true
+      }];
+
+      ballLaunched = false;
+      ballMoving = false;
+    }, 1000);
+
+  } else {
+    // ✅ Laatste leven: eerst paddle laten ontploffen
+    paddleExploding = true;
+    paddleExplosionParticles = [];
+
+    for (let i = 0; i < 50; i++) {
+      paddleExplosionParticles.push({
+        x: paddleX + paddleWidth / 2,
+        y: canvas.height - paddleHeight / 2,
+        dx: (Math.random() - 0.5) * 10,
+        dy: (Math.random() - 0.5) * 10,
+        radius: Math.random() * 4 + 2,
+        alpha: 1
+      });
+    }
+
+    paddleExplodeSound.currentTime = 0;
+    paddleExplodeSound.play();
+
+    // ⏱️ Wacht 1 seconde, daarna reset
+    setTimeout(() => {
+      saveHighscore();
+      stopTimer();
+
+      lives = 3;
+      updateLivesDisplay();
+
+      score = 0;
+      level = 1;
+      elapsedTime = 0;
+
+      paddleExploding = false;
+      paddleExplosionParticles = [];
+
+      // ✅ Essentiële resets
+      speedBoostActive = false;
+      speedBoostStart = 0;
+      doublePointsActive = false;
+      doublePointsStartTime = 0;
+      flagsOnPaddle = false;
+      rocketActive = false;
+      rocketFired = false;
+      rocketAmmo = 0;
+      flyingCoins = [];
+      smokeParticles = [];
+      explosions = [];
+      coins = [];
+      pxpBags = [];
+
+      resetBricks();
+      resetBall();
+      resetPaddle();
+
+      document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
+      document.getElementById("timeDisplay").textContent = "time 00:00";
+    }, 1000);
+  }
 }
+
+
+function startLevelTransition() {
+  level = 2; // 📈 Verhoog level
+  resetBricks(); // 🔁 Bouw nieuwe blokken voor het volgende level
+  transitionOffsetY = -300; // 📦 Laat ze van boven naar beneden komen
+
+  levelMessageAlpha = 0;
+  levelMessageTimer = 0;
+  levelMessageVisible = true;
+  levelTransitionActive = true;
+
+  // 🔄 Bal opnieuw positioneren op paddle, zonder reset van score of tijd
+  ballLaunched = false;
+  ballMoving = false;
+
+  balls = [{
+    x: paddleX + paddleWidth / 2 - ballRadius,
+    y: canvas.height - paddleHeight - ballRadius * 2,
+    dx: 0,
+    dy: -6,
+    radius: ballRadius,
+    isMain: true
+  }];
+}
+
+function updateLivesDisplay() {
+  const display = document.getElementById("livesDisplay");
+  if (!display) return;
+
+  display.innerHTML = "";
+
+  for (let i = 0; i < lives; i++) {
+    const img = document.createElement("img");
+    img.src = "level.png";
+    img.style.width = "28px";
+    img.style.height = "28px";
+    display.appendChild(img);
+  }
+}
+

@@ -248,6 +248,14 @@ body {
   }
 }
 
+#hud {
+  position: absolute;
+  top: 20px; /* pas aan tot boven de beker */
+  right: 30px; /* pas aan tot netjes rechts */
+  z-index: 20;
+}
+
+
 
 
 
