@@ -1170,23 +1170,27 @@ function draw() {
     ctx.restore();
   }
 
-  if (levelTransitionActive) {
-    if (transitionOffsetY < 0) {
-      transitionOffsetY += 2;
-    } else {
-      transitionOffsetY = 0;
-    }
-
-    if (levelMessageAlpha < 1 && levelMessageTimer < 60) {
-      levelMessageAlpha += 0.05;
-      levelMessageTimer++;
-    } else if (levelMessageTimer >= 60 && levelMessageAlpha > 0) {
-      levelMessageAlpha -= 0.03;
-    } else if (levelMessageAlpha <= 0 && transitionOffsetY === 0) {
-      levelMessageVisible = false;
-      levelTransitionActive = false;
-    }
+ if (levelTransitionActive) {
+  if (transitionOffsetY < 0) {
+    transitionOffsetY += 2;
+  } else {
+    transitionOffsetY = 0;
   }
+
+  if (levelMessageTimer < 60) {
+    levelMessageAlpha += 0.05; // fade-in
+  } else if (levelMessageTimer >= 60 && levelMessageTimer < 120) {
+    levelMessageAlpha -= 0.05; // fade-out
+  }
+
+  levelMessageTimer++;
+
+  if (levelMessageTimer >= 120 && levelMessageAlpha <= 0 && transitionOffsetY === 0) {
+    levelMessageVisible = false;
+    levelTransitionActive = false;
+  }
+}
+
 
   // 🎇 Paddle-explosie tekenen
   if (paddleExploding) {
