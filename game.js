@@ -100,8 +100,9 @@ const pxpMap = [
                                                                   
 ];
 
-
+const levelUpSound = new Audio("levelup.mp3");
 const paddleExplodeSound = new Audio("paddle_explode.mp3");
+const gameOverSound = new Audio("gameover.mp3");
 
 const doubleBallSound = new Audio("double_ball.mp3");
 const speedBoostSound = new Audio("speed_boost.mp3");
@@ -373,13 +374,13 @@ function resetBricks() {
       let brickType = "normal"; // ✅ slechts één keer
 
       const bonus = bonusBricks.find(b => b.col === c && b.row === r);
-      const isStone = level === 2 && pxpMap.some(p => p.col === c && p.row === r);
+      let pxp = pxpMap.find(p => p.col === c && p.row === r);
 
-      if (isStone) {
-        brickType = "stone";
-      } else if (bonus) {
-        brickType = bonus.type;
-      }
+        if (level === 2 && pxp) {
+        brickType = pxp.type || "stone"; // 👈 gebruik type indien aanwezig, anders "stone"
+        } else if (bonus) {
+         brickType = bonus.type;
+        }
 
       bricks[c][r].type = brickType;
 
@@ -1023,6 +1024,7 @@ function draw() {
       wallSound.currentTime = 0;
       wallSound.play();
     }
+
     if (ball.y < ball.radius) {
       ball.dy *= -1;
       wallSound.currentTime = 0;
@@ -1046,19 +1048,17 @@ function draw() {
     }
 
     if (ball.y + ball.dy > canvas.height) {
-   balls.splice(index, 1);
-
-   if (ball.isMain && !paddleExploding) {
-    triggerPaddleExplosion();
-    return;
-  }
-
-  return;
-}
-
+      balls.splice(index, 1); // verwijder bal zonder actie
+    }
 
     ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
   });
+
+  // ✅ Na de loop: check of alle ballen weg zijn
+  if (balls.length === 0 && !paddleExploding) {
+    triggerPaddleExplosion(); // pas nu verlies van leven
+  }
+
 
   // Paddle bewegen
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
@@ -1162,37 +1162,35 @@ function draw() {
     }
   }
 
-  // ✨ Level 2 tekst weergeven
-  if (levelMessageVisible) {
-    ctx.save();
-    ctx.globalAlpha = levelMessageAlpha;
-    ctx.fillStyle = "#00ffff";
-    ctx.font = "bold 36px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("PointPay Breakout Level 2", canvas.width / 2, canvas.height / 2);
-    ctx.restore();
+ // ✨ Leveltekst weergeven
+if (levelMessageVisible) {
+  ctx.save();
+  ctx.globalAlpha = levelMessageAlpha;
+  ctx.fillStyle = "#00ffff";
+  ctx.font = "bold 36px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(`PointPay Breakout Level ${level}`, canvas.width / 2, canvas.height / 2);
+  ctx.restore();
+}
+
+// 🎬 Overgangstimer & animatie
+if (levelTransitionActive) {
+  levelMessageAlpha = 1;
+
+  levelMessageTimer++;
+
+  if (levelMessageTimer >= 360) {
+    levelMessageVisible = false;
+    levelTransitionActive = false;
   }
 
- if (levelTransitionActive) {
   if (transitionOffsetY < 0) {
     transitionOffsetY += 2;
   } else {
     transitionOffsetY = 0;
   }
-
-  if (levelMessageTimer < 60) {
-    levelMessageAlpha += 0.05; // fade-in
-  } else if (levelMessageTimer >= 60 && levelMessageTimer < 120) {
-    levelMessageAlpha -= 0.05; // fade-out
-  }
-
-  levelMessageTimer++;
-
-  if (levelMessageTimer >= 120 && levelMessageAlpha <= 0 && transitionOffsetY === 0) {
-    levelMessageVisible = false;
-    levelTransitionActive = false;
-  }
 }
+
 
 if (showGameOver) {
   ctx.save();
@@ -1389,10 +1387,15 @@ function triggerPaddleExplosion() {
       ballMoving = false;
     }, 1000);
 
-  } else {
-    // ✅ Laatste leven: eerst paddle laten ontploffen
-    paddleExploding = true;
-    paddleExplosionParticles = [];
+ } else {
+  // ✅ Laatste leven: eerst paddle laten ontploffen
+  paddleExploding = true;
+
+  gameOverSound.currentTime = 0;
+  gameOverSound.play(); // 🔊 Speel "GAME OVER" geluid
+
+  paddleExplosionParticles = [];
+  // ...
 
     for (let i = 0; i < 50; i++) {
       paddleExplosionParticles.push({
@@ -1453,16 +1456,21 @@ function triggerPaddleExplosion() {
 
 
 function startLevelTransition() {
-  level = 2; // 📈 Verhoog level
-  resetBricks(); // 🔁 Bouw nieuwe blokken voor het volgende level
-  transitionOffsetY = -300; // 📦 Laat ze van boven naar beneden komen
+  level++;
 
+  // 🎧 Speel level-up geluid
+  levelUpSound.currentTime = 0;
+  levelUpSound.play();
+
+  // Toon de overgangstekst
   levelMessageAlpha = 0;
   levelMessageTimer = 0;
   levelMessageVisible = true;
   levelTransitionActive = true;
 
-  // 🔄 Bal opnieuw positioneren op paddle, zonder reset van score of tijd
+  resetBricks();
+  transitionOffsetY = -300;
+
   ballLaunched = false;
   ballMoving = false;
 
