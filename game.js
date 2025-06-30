@@ -39,6 +39,7 @@ let animationFrameId = null;
 let showGameOver = false;
 let gameOverAlpha = 0;
 let gameOverTimer = 0;
+let resetTriggered = false;
 
 // 🌟 Level 2 overgang
 let levelTransitionActive = false;
@@ -1369,8 +1370,11 @@ function spawnStoneDebris(x, y) {
 
 function triggerPaddleExplosion() {
   if (lives > 1) {
-    lives--;
-    updateLivesDisplay();
+    if (!resetTriggered) { // ✅ Alleen aftrekken als het GEEN reset is
+      lives--;
+      updateLivesDisplay();
+    }
+
     pauseTimer(); 
   
     paddleExploding = true;
@@ -1405,17 +1409,18 @@ function triggerPaddleExplosion() {
 
       ballLaunched = false;
       ballMoving = false;
+
+      resetTriggered = false; // ✅ reset na normale explosie
     }, 1000);
 
- } else {
-  // ✅ Laatste leven: eerst paddle laten ontploffen
-  paddleExploding = true;
+  } else {
+    // ✅ Laatste leven: eerst paddle laten ontploffen
+    paddleExploding = true;
 
-  gameOverSound.currentTime = 0;
-  gameOverSound.play(); // 🔊 Speel "GAME OVER" geluid
+    gameOverSound.currentTime = 0;
+    gameOverSound.play(); // 🔊 Speel "GAME OVER" geluid
 
-  paddleExplosionParticles = [];
-  // ...
+    paddleExplosionParticles = [];
 
     for (let i = 0; i < 50; i++) {
       paddleExplosionParticles.push({
@@ -1470,6 +1475,8 @@ function triggerPaddleExplosion() {
 
       document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
       document.getElementById("timeDisplay").textContent = "time 00:00";
+
+      resetTriggered = false; // ✅ reset ook hier voor zekerheid
     }, 1000);
   }
 }
@@ -1504,6 +1511,8 @@ function startLevelTransition() {
   }];
 }
 
+let resetTriggered = false; // 🔁 Bovenaan je script zetten als globaal!
+
 function updateLivesDisplay() {
   const display = document.getElementById("livesDisplay");
   if (!display) return;
@@ -1529,6 +1538,7 @@ function triggerBallReset() {
   resetBallSound.play();
 
   resetOverlayActive = true;
+  resetTriggered = true; // 🟢 activeer flag zodat paddleExplode() weet: niet aftrekken
 
   // ⏱️ 6.5 sec: bal weg + explosie
   setTimeout(() => {
@@ -1569,11 +1579,11 @@ function triggerBallReset() {
     resetOverlayActive = false;
     btn.disabled = false;
     btn.textContent = "RESET\nBALL";
+
+    resetTriggered = false; // ❗ reset de flag NA de paddle explode logic
   }, 10000);
 }
 
 
 // 🟢 BELANGRIJK: knop koppelen aan functie
 document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
-
-
