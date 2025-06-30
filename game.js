@@ -47,6 +47,7 @@ let transitionOffsetY = -300;
 let levelMessageAlpha = 0;
 let levelMessageTimer = 0;
 let levelMessageVisible = false;
+let resetOverlayActive = false;
 
 
 
@@ -99,6 +100,9 @@ const pxpMap = [
   { col: 8, row: 5 },   { col: 8, row: 8 },      { col: 8, row: 14 },   { col: 8, row: 13 },                              
                                                                   
 ];
+
+const resetBallSound = new Audio("resetball.mp3");
+
 
 const levelUpSound = new Audio("levelup.mp3");
 const paddleExplodeSound = new Audio("paddle_explode.mp3");
@@ -993,7 +997,6 @@ function spawnPxpBag(x, y) {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   collisionDetection();
   drawCoins();
   checkCoinCollision();
@@ -1003,6 +1006,8 @@ function draw() {
   drawFlyingCoins();
   checkFlyingCoinHits();
   drawPointPopups();
+
+
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
     doublePointsActive = false;
@@ -1053,6 +1058,15 @@ function draw() {
 
     ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
   });
+
+  // 🔴 Rode knipper-overlay bij reset
+  if (resetOverlayActive) {
+    if (Date.now() % 1000 < 500) {
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
 
   // ✅ Na de loop: check of alle ballen weg zijn
   if (balls.length === 0 && !paddleExploding) {
@@ -1215,7 +1229,6 @@ if (showGameOver) {
 }
 
 
-
   // 🎇 Paddle-explosie tekenen
   if (paddleExploding) {
     paddleExplosionParticles.forEach(p => {
@@ -1230,6 +1243,13 @@ if (showGameOver) {
 
     paddleExplosionParticles = paddleExplosionParticles.filter(p => p.alpha > 0);
   }
+  
+  if (resetOverlayActive) {
+  if (Date.now() % 1000 < 500) {
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+}
 
   // 🧱 Steenpuin tekenen
   stoneDebris.forEach(p => {
@@ -1498,3 +1518,62 @@ function updateLivesDisplay() {
     display.appendChild(img);
   }
 }
+
+
+function triggerBallReset() {
+  const btn = document.getElementById("resetBallBtn");
+  btn.disabled = true;
+  btn.textContent = "RESETTING...";
+
+  resetBallSound.currentTime = 0;
+  resetBallSound.play();
+
+  resetOverlayActive = true;
+
+  // ⏱️ 6.5 sec: bal weg + explosie
+  setTimeout(() => {
+    // 💣 Explosiegeluid
+    paddleExplodeSound.currentTime = 0;
+    paddleExplodeSound.play();
+
+    // 💥 Explosie-deeltjes op huidige balposities
+    balls.forEach(ball => {
+      for (let i = 0; i < 30; i++) {
+        stoneDebris.push({
+          x: ball.x + ball.radius,
+          y: ball.y + ball.radius,
+          dx: (Math.random() - 0.5) * 8,
+          dy: (Math.random() - 0.5) * 8,
+          radius: Math.random() * 4 + 2,
+          alpha: 1
+        });
+      }
+    });
+
+    // 🧨 Bal verwijderen (verdwijnt tijdens explosie)
+    balls = [];
+  }, 6500);
+
+  // ⏱️ 10 sec: bal reset op paddle
+  setTimeout(() => {
+    balls = [{
+      x: paddleX + paddleWidth / 2 - ballRadius,
+      y: canvas.height - paddleHeight - ballRadius * 2,
+      dx: 0,
+      dy: -6,
+      radius: ballRadius,
+      isMain: true
+    }];
+    ballLaunched = false;
+    ballMoving = false;
+    resetOverlayActive = false;
+    btn.disabled = false;
+    btn.textContent = "RESET\nBALL";
+  }, 10000);
+}
+
+
+// 🟢 BELANGRIJK: knop koppelen aan functie
+document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
+
+
