@@ -1511,8 +1511,6 @@ function startLevelTransition() {
   }];
 }
 
-let resetTriggered = false; // 🔁 Bovenaan je script zetten als globaal!
-
 function updateLivesDisplay() {
   const display = document.getElementById("livesDisplay");
   if (!display) return;
