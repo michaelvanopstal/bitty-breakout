@@ -226,18 +226,6 @@ document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 document.addEventListener("mousemove", mouseMoveHandler);
 
-// 🔽 Tooltip gedrag reset-knop
-const resetBtn = document.getElementById("resetBallBtn");
-const tooltip = document.getElementById("resetTooltip");
-
-resetBtn.addEventListener("mouseenter", () => {
-  tooltip.style.display = "block";
-});
-
-resetBtn.addEventListener("mouseleave", () => {
-  tooltip.style.display = "none";
-});
-
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
@@ -250,18 +238,18 @@ function keyDownHandler(e) {
     leftPressed = true;
   }
 
-  if ((e.key === "ArrowUp" || e.key === "Up" || e.code === "Space") && !ballLaunched) {
-    ballLaunched = true;
-    ballMoving = true;
+if ((e.key === "ArrowUp" || e.key === "Up" || e.code === "Space") && !ballLaunched) {
+  ballLaunched = true;
+  ballMoving = true;
 
-    shootSound.currentTime = 0;
-    shootSound.play();
+  shootSound.currentTime = 0;
+  shootSound.play();
 
-    balls[0].dx = 0;
-    balls[0].dy = -6;
+  balls[0].dx = 0;
+  balls[0].dy = -6;
 
-    if (!timerRunning) startTimer(); // ✅ Start timer bij eerste afschot
-  }
+  if (!timerRunning) startTimer(); // ✅ Start timer bij eerste afschot
+}
 
   if ((e.code === "ArrowUp" || e.code === "Space") && rocketActive && rocketAmmo > 0 && !rocketFired) {
     rocketFired = true;
@@ -297,7 +285,6 @@ function keyDownHandler(e) {
     ballMoving = true;
   }
 }
-
 
 function keyUpHandler(e) {
   if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
@@ -1549,20 +1536,15 @@ function triggerBallReset() {
   resetBallSound.play();
 
   resetOverlayActive = true;
-
-  // 🛡️ Als we maar 1 leven hebben, verhoog tijdelijk het leven naar 2 zodat paddleExplode geen Game Over triggert
-  const originalLives = lives;
-  if (lives === 1) {
-    lives = 2; // tijdelijk "faken"
-  }
-
-  resetTriggered = true; // 🟢 flag zodat paddleExplode weet: geen leven aftrekken
+  resetTriggered = true; // 🟢 activeer flag zodat paddleExplode() weet: niet aftrekken
 
   // ⏱️ 6.5 sec: bal weg + explosie
   setTimeout(() => {
+    // 💣 Explosiegeluid
     paddleExplodeSound.currentTime = 0;
     paddleExplodeSound.play();
 
+    // 💥 Explosie-deeltjes op huidige balposities
     balls.forEach(ball => {
       for (let i = 0; i < 30; i++) {
         stoneDebris.push({
@@ -1576,6 +1558,7 @@ function triggerBallReset() {
       }
     });
 
+    // 🧨 Bal verwijderen (verdwijnt tijdens explosie)
     balls = [];
   }, 6500);
 
@@ -1595,15 +1578,10 @@ function triggerBallReset() {
     btn.disabled = false;
     btn.textContent = "RESET\nBALL";
 
-    // 🧠 Zet leven weer terug als het tijdelijk op 2 stond
-    if (originalLives === 1) {
-      lives = 1;
-    }
-
-    resetTriggered = false; // ❗ flag weer uitzetten
+    resetTriggered = false; // ❗ reset de flag NA de paddle explode logic
   }, 10000);
 }
 
+
 // 🟢 BELANGRIJK: knop koppelen aan functie
 document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
-
