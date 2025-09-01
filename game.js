@@ -48,6 +48,7 @@ let paddleY = canvas.height - paddleHeight - 0; // beginpositie onderaan
 const paddleSpeed = 6;
 let downPressed = false;
 let upPressed = false;
+let paddleFreeMove = false; // ⛔ paddle zit eerst vast in verticale beweging
 
 // 🌟 Level 2 overgang
 let levelTransitionActive = false;
@@ -83,11 +84,22 @@ let heartPopupTimer = 0;               // timer voor popup “Wow! 10 hearts –
 let heartBoardX = 20;
 let heartBoardY = 20;
 
+let electricBursts = [];
+
 
 let speedBoostActive = false;
 let speedBoostStart = 0;
 const speedBoostDuration = 30000;
 const speedBoostMultiplier = 1.5;
+
+
+let thunder1 = new Audio("thunder1.mp3");
+let thunder2 = new Audio("thunder2.mp3");
+let thunder3 = new Audio("thunder3.mp3");
+let thunderSounds = [thunder1, thunder2, thunder3];
+
+
+
 
 balls.push({
   x: canvas.width / 2,
@@ -107,7 +119,10 @@ balls.push({
 const bonusBricks = [
   { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },
   { col: 8, row: 4, type: "power" },
-  { col: 2, row: 7, type: "doubleball" },
+  { col: 2, row: 7, type: "doubleball" }, { col: 7, row: 14, type: "silver" },{ col: 8, row: 14, type: "silver" },{ col: 6, row: 14, type: "silver" },
+  { col: 0, row: 14, type: "silver" }, { col: 1, row: 14, type: "silver" }, { col: 2, row: 14, type: "silver" },
+
+
   { col: 4, row: 7, type: "2x" },
   { col: 2, row: 3, type: "speed" },
   { col: 3, row: 14, type: "stone" },
@@ -122,15 +137,15 @@ const bonusBricks = [
 ];
 // 📦 PXP layout voor level 2 (alleen steen-blokken)
 const pxpMap = [
-  { col: 0, row: 5 },   { col: 0, row: 8 },      { col: 0, row: 14 },   { col: 0, row: 13 },   { col: 5, row: 3, type: "rocket" }, 
-  { col: 1, row: 5 },   { col: 1, row: 8 },      { col: 1, row: 14 },   { col: 1, row: 13 },   { col: 8, row: 4, type: "power" },        
-  { col: 2, row: 5 },   { col: 2, row: 8 },      { col: 2, row: 14 },   { col: 2, row: 13 },   { col: 2, row: 3, type: "speed" },         
-  { col: 3, row: 5 },   { col: 3, row: 8 },      { col: 3, row: 14 },   { col: 3, row: 13 },   { col: 4, row: 7, type: "2x" },
-  { col: 4, row: 5 },   { col: 4, row: 8 },      { col: 4, row: 14 },   { col: 4, row: 13 },   { col: 2, row: 7, type: "doubleball" },         
-  { col: 5, row: 5 },   { col: 5, row: 8 },      { col: 5, row: 14 },   { col: 5, row: 13 },               
-  { col: 6, row: 5 },   { col: 6, row: 8 },      { col: 6, row: 14 },   { col: 6, row: 13 },                   
-  { col: 7, row: 5 },   { col: 7, row: 8 },      { col: 7, row: 14 },   { col: 7, row: 13 },                                       
-  { col: 8, row: 5 },   { col: 8, row: 8 },      { col: 8, row: 14 },   { col: 8, row: 13 },                              
+  { col: 0, row: 4, type: "silver" }, { col: 0, row: 5 },   { col: 0, row: 8 },      { col: 0, row: 14 },   { col: 0, row: 13 },   { col: 5, row: 3, type: "rocket" }, 
+  { col: 1, row: 4, type: "silver" }, { col: 1, row: 5 },   { col: 1, row: 8 },      { col: 1, row: 14 },   { col: 1, row: 13 },   { col: 8, row: 4, type: "power" },        
+  { col: 2, row: 4, type: "silver" }, { col: 2, row: 5 },   { col: 2, row: 8 },      { col: 2, row: 14 },   { col: 2, row: 13 },   { col: 2, row: 3, type: "speed" },         
+  { col: 3, row: 4, type: "silver" }, { col: 3, row: 5 },   { col: 3, row: 8 },      { col: 3, row: 14 },   { col: 3, row: 13 },   { col: 4, row: 7, type: "2x" },
+  { col: 4, row: 4, type: "silver" }, { col: 4, row: 5 },   { col: 4, row: 8 },      { col: 4, row: 14 },   { col: 4, row: 13 },   { col: 2, row: 7, type: "doubleball" },         
+  { col: 5, row: 4, type: "silver" }, { col: 5, row: 5 },   { col: 5, row: 8 },      { col: 5, row: 14 },   { col: 5, row: 13 },               
+  { col: 6, row: 4, type: "silver" }, { col: 6, row: 5 },   { col: 6, row: 8 },      { col: 6, row: 14 },   { col: 6, row: 13 },                   
+  { col: 7, row: 4, type: "silver" }, { col: 7, row: 5 },   { col: 7, row: 8 },      { col: 7, row: 14 },   { col: 7, row: 13 },                                       
+  { col: 8, row: 4, type: "silver" }, { col: 8, row: 5 },   { col: 8, row: 8 },      { col: 8, row: 14 },   { col: 8, row: 13 },                              
                                                                   
 ];
 
@@ -189,6 +204,12 @@ for (let c = 0; c < brickColumnCount; c++) {
     };
   }
 }
+
+const silver1Img = new Image();
+silver1Img.src = "silver1.png";
+
+const silver2Img = new Image();
+silver2Img.src = "silver2.png";
 
 const heartBoardImg = new Image();
 heartBoardImg.src = "heart_board.png";
@@ -282,19 +303,31 @@ resetBtn.addEventListener("mouseleave", () => {
   tooltip.style.display = "none";
 });
 
+
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
   // 🛡️ Voorkom acties als gebruiker in een inputveld of knop zit
   if (["INPUT", "TEXTAREA", "BUTTON"].includes(document.activeElement.tagName)) return;
 
-  if (e.key === "Right" || e.key === "ArrowRight") {
+  if (
+    e.key === "Right" || e.key === "ArrowRight" || e.key === ">" || e.key === "."
+  ) {
     rightPressed = true;
-  } else if (e.key === "Left" || e.key === "ArrowLeft") {
+
+  } else if (
+    e.key === "Left" || e.key === "ArrowLeft" || e.key === "<" || e.key === ","
+  ) {
     leftPressed = true;
-  } else if (e.key === "Up" || e.key === "ArrowUp") {
+
+  } else if (
+    e.key === "Up" || e.key === "ArrowUp"
+  ) {
     upPressed = true;
-  } else if (e.key === "Down" || e.key === "ArrowDown") {
+
+  } else if (
+    e.key === "Down" || e.key === "ArrowDown"
+  ) {
     downPressed = true;
   }
 
@@ -302,6 +335,7 @@ function keyDownHandler(e) {
   if ((e.key === "ArrowUp" || e.code === "Space") && !ballLaunched) {
     ballLaunched = true;
     ballMoving = true;
+    paddleFreeMove = true; // ✅ Cruciaal: laat paddle vrij bewegen na eerste schot
 
     shootSound.currentTime = 0;
     shootSound.play();
@@ -309,9 +343,10 @@ function keyDownHandler(e) {
     balls[0].dx = 0;
     balls[0].dy = -6;
 
-    if (!timerRunning) startTimer(); // ✅ Start timer bij eerste afschot
+    if (!timerRunning) startTimer();
   }
 
+  // 🔫 Raket afvuren
   if ((e.code === "ArrowUp" || e.code === "Space") && rocketActive && rocketAmmo > 0 && !rocketFired) {
     rocketFired = true;
     rocketAmmo--;
@@ -319,44 +354,59 @@ function keyDownHandler(e) {
     rocketLaunchSound.play();
   }
 
+  // 🎯 Schieten met vlaggetjes
   if (flagsOnPaddle && (e.code === "Space" || e.code === "ArrowUp")) {
     shootFromFlags();
   }
 
- if (!ballMoving && (e.code === "ArrowUp" || e.code === "Space")) {
-  if (lives <= 0) {
-    lives = 3;
-    score = 0;
-    level = 1;
-    resetBricks();
-    resetBall();
-    resetPaddle();
-    startTime = new Date();
-    gameOver = false;
+  // 🧪 Extra beveiliging bij opnieuw starten na Game Over
+  if (!ballMoving && (e.code === "ArrowUp" || e.code === "Space")) {
+    if (lives <= 0) {
+      lives = 3;
+      score = 0;
+      level = 1;
+      resetBricks();
+      resetBall();
+      resetPaddle();
+      startTime = new Date();
+      gameOver = false;
 
-    updateScoreDisplay(); // 👈 juiste regel
-    document.getElementById("timeDisplay").textContent = "00:00";
+      updateScoreDisplay();
+      document.getElementById("timeDisplay").textContent = "00:00";
 
+      flagsOnPaddle = false;
+      flyingCoins = [];
+    }
 
-    flagsOnPaddle = false;
-    flyingCoins = [];
+    ballMoving = true;
   }
-
-  ballMoving = true;
- }
 }
 
+
+
 function keyUpHandler(e) {
-  if (e.key === "Right" || e.key === "ArrowRight") {
+  if (
+    e.key === "Right" || e.key === "ArrowRight" || e.key === ">" || e.key === "."
+  ) {
     rightPressed = false;
-  } else if (e.key === "Left" || e.key === "ArrowLeft") {
+
+  } else if (
+    e.key === "Left" || e.key === "ArrowLeft" || e.key === "<" || e.key === ","
+  ) {
     leftPressed = false;
-  } else if (e.key === "Up" || e.key === "ArrowUp") {
+
+  } else if (
+    e.key === "Up" || e.key === "ArrowUp"
+  ) {
     upPressed = false;
-  } else if (e.key === "Down" || e.key === "ArrowDown") {
+
+  } else if (
+    e.key === "Down" || e.key === "ArrowDown"
+  ) {
     downPressed = false;
   }
 }
+
 
 function updateScoreDisplay() {
   document.getElementById("scoreDisplay").textContent = score;
@@ -364,11 +414,33 @@ function updateScoreDisplay() {
 
 
 function mouseMoveHandler(e) {
-  const relativeX = e.clientX - canvas.offsetLeft;
-  if (relativeX > 0 && relativeX < canvas.width) {
-    paddleX = relativeX - paddleWidth / 2;
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+
+  // 🔁 Paddle X
+  if (mouseX > 0 && mouseX < canvas.width) {
+    const newX = mouseX - paddleWidth / 2;
+    if (!isPaddleBlockedHorizontally(newX)) {
+      paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, newX));
+    }
+  }
+
+  // 🔁 Paddle Y met beperking vóór paddleFreeMove
+  if (mouseY > 0 && mouseY < canvas.height) {
+    const newY = mouseY - paddleHeight / 2;
+
+    if (paddleFreeMove) {
+      // ✅ Volledige vrijheid zodra paddle is vrijgegeven
+      if (!isPaddleBlockedVertically(newY)) {
+        paddleY = Math.max(0, Math.min(canvas.height - paddleHeight, newY));
+      }
+    }
+    // ⛔ Anders geen Y-beweging toegestaan
   }
 }
+
+
 
 
 function drawBricks() {
@@ -406,6 +478,13 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
           case "speed":
             ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
             break;
+            case "silver":
+          if (!b.hits || b.hits === 0) {
+             ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
+           } else if (b.hits === 1) {
+             ctx.drawImage(silver2Img, brickX, brickY, brickWidth, brickHeight);
+           }
+           break;
           case "stone":
             if (b.hits === 0) {
               ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
@@ -570,7 +649,6 @@ function resetAllBonuses() {
 
 
 
-
 function resetBall() {
   balls = [{
     x: paddleX + paddleWidth / 2 - ballRadius,
@@ -583,12 +661,16 @@ function resetBall() {
   ballLaunched = false;
   ballMoving = false;
 
+  // 🔒 Paddle weer vergrendeld tot hernieuwde afschot
+  paddleFreeMove = false;
+
   // 🧱 Zorg dat bij level 1 blokken direct zichtbaar zijn
   if (level === 1) {
     levelTransitionActive = false;
     transitionOffsetY = 0;
   }
 }
+
 
 function resetPaddle(skipBallReset = false, skipCentering = false) {
   // 🎯 Zet paddle terug in het midden (alleen als NIET geskiped en NIET machinegun)
@@ -1121,7 +1203,7 @@ function collisionDetection() {
             ball.y = b.y + brickHeight + ball.radius + 1;
           }
 
-          // 💖 Hartje laten vallen als dit blokje er eentje heeft
+          // 💖 Hartje laten vallen
           if (b.hasHeart && !b.heartDropped) {
             fallingHearts.push({
               x: b.x + brickWidth / 2 - 12,
@@ -1134,14 +1216,12 @@ function collisionDetection() {
             b.heartDropped = true;
           }
 
-          // 🪨 Gedrag voor stenen blokken
+          // 🪨 Steen-blok gedrag
           if (b.type === "stone") {
             bricksSound.currentTime = 0;
             bricksSound.play();
-
             b.hits++;
 
-            // 🧱 Puin genereren
             for (let i = 0; i < 5; i++) {
               stoneDebris.push({
                 x: b.x + brickWidth / 2,
@@ -1167,7 +1247,7 @@ function collisionDetection() {
 
               const earned = doublePointsActive ? 120 : 60;
               score += earned;
-              updateScoreDisplay(); // 👈 aangepaste regel
+              updateScoreDisplay();
 
               pointPopups.push({
                 x: b.x + brickWidth / 2,
@@ -1180,7 +1260,33 @@ function collisionDetection() {
             return;
           }
 
-          // 🎁 Bonusacties met geluid
+          // 🪙 Gedrag voor silver blokken
+          if (b.type === "silver") {
+            b.hits = (b.hits || 0) + 1;
+
+            if (b.hits === 1) {
+              // toon silver2.png – gebeurt in drawBricks()
+            } else if (b.hits >= 2) {
+              b.status = 0;
+
+              triggerSilverExplosion(b.x + brickWidth / 2, b.y + brickHeight / 2);
+
+              const earned = doublePointsActive ? 150 : 75;
+              score += earned;
+              updateScoreDisplay();
+
+              pointPopups.push({
+                x: b.x + brickWidth / 2,
+                y: b.y,
+                value: "+" + earned,
+                alpha: 1
+              });
+            }
+
+            return;
+          }
+
+          // 🎁 Bonusacties
           switch (b.type) {
             case "power":
             case "flags":
@@ -1195,12 +1301,8 @@ function collisionDetection() {
               paddleDamageZones = [];
               machineGunLastShot = Date.now();
               machineGunStartTime = Date.now();
-
-              // Zet gun direct boven paddle met juiste offset
               machineGunGunX = paddleX + paddleWidth / 2 - 30;
-              const gunStartY = Math.max(paddleY - machineGunYOffset, minMachineGunY);
-              machineGunGunY = gunStartY;
-
+              machineGunGunY = Math.max(paddleY - machineGunYOffset, minMachineGunY);
               b.status = 0;
               b.type = "normal";
               break;
@@ -1226,18 +1328,19 @@ function collisionDetection() {
           }
 
           b.status = 0;
-          b.type = "normal";
 
-          const earned = doublePointsActive ? 20 : 10;
+          let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
           score += earned;
-          updateScoreDisplay(); // 👈 aangepaste regel
+          updateScoreDisplay();
 
+          b.type = "normal";
           spawnCoin(b.x, b.y);
         }
       }
     }
   });
 }
+
 
 function spawnExtraBall(originBall) {
   // Huidige bal krijgt een lichte afwijking
@@ -1326,6 +1429,9 @@ function isPaddleBlockedHorizontally(newX) {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawElectricBursts(); // 🔄 VOORAF tekenen, zodat het ONDER alles ligt
+
   collisionDetection();
   drawCoins();
   drawFallingHearts();
@@ -1335,6 +1441,7 @@ function draw() {
   drawFlyingCoins();
   checkFlyingCoinHits();
   drawPointPopups();
+
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
     doublePointsActive = false;
@@ -1480,7 +1587,8 @@ if (ball.trail.length >= 2) {
 
  drawBricks();
 
-  if (leftPressed) {
+  
+if (leftPressed) {
   const newX = paddleX - paddleSpeed;
   if (newX > 0 && !isPaddleBlockedHorizontally(newX)) {
     paddleX = newX;
@@ -1494,10 +1602,14 @@ if (rightPressed) {
   }
 }
 
+// 🔁 Alleen omhoogbeweging beperken tot na afschieten
 if (upPressed) {
   const newY = paddleY - paddleSpeed;
-  if (newY > 0 && !isPaddleBlockedVertically(newY)) {
-    paddleY = newY;
+
+  if (paddleFreeMove) {
+    if (newY > 0 && !isPaddleBlockedVertically(newY)) {
+      paddleY = newY;
+    }
   }
 }
 
@@ -1507,6 +1619,7 @@ if (downPressed) {
     paddleY = newY;
   }
 }
+
 
   drawPaddle();
 
@@ -1543,16 +1656,18 @@ if (downPressed) {
     startLevelTransition();
   }
 
-  // Explosies tekenen
-  explosions.forEach(e => {
-    ctx.beginPath();
-    ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255, 165, 0, ${e.alpha})`;
-    ctx.fill();
-    e.radius += 2;
-    e.alpha -= 0.05;
-  });
-  explosions = explosions.filter(e => e.alpha > 0);
+ // Explosies tekenen
+explosions.forEach(e => {
+  ctx.beginPath();
+  ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+  ctx.fillStyle = e.color === "white"
+    ? `rgba(255, 255, 255, ${e.alpha})`
+    : `rgba(255, 165, 0, ${e.alpha})`;
+  ctx.fill();
+  e.radius += 2;
+  e.alpha -= 0.05;
+});
+explosions = explosions.filter(e => e.alpha > 0);
 
   // Rook tekenen
   smokeParticles.forEach(p => {
@@ -1727,7 +1842,7 @@ if (levelMessageVisible) {
   ctx.fillStyle = "#00ffff";
   ctx.font = "bold 36px Arial";
   ctx.textAlign = "center";
-  ctx.fillText(`PointPay Breakout Level ${level}`, canvas.width / 2, canvas.height / 2);
+  ctx.fillText(`BrickShift Level ${level}`, canvas.width / 2, canvas.height / 2);
   ctx.restore();
 }
 
@@ -1814,7 +1929,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 21) {
+  if (imagesLoaded === 23) {
     resetBricks();
     updateLivesDisplay(); // ✅ laat bij start meteen levens zien
     resetPaddle(); // 🔥 paddletekening klaarzetten
@@ -1843,6 +1958,8 @@ machinegunGunImg.onload = onImageLoad;
 coinImg.onload = onImageLoad;
 heartImg.onload = onImageLoad; 
 heartBoardImg.onload = onImageLoad;
+silver1Img.onload = onImageLoad;
+silver2Img.onload = onImageLoad;
 
 
 document.addEventListener("mousedown", function (e) {
@@ -1857,22 +1974,21 @@ document.addEventListener("mousedown", function (e) {
     rocketLaunchSound.play();
   }
 
- // 🎯 Bal afschieten met muisklik (trackpad)
-if (!ballLaunched && !ballMoving) {
-  ballLaunched = true;
-  ballMoving = true;
+  // 🎯 Bal afschieten met muisklik (trackpad)
+  if (!ballLaunched && !ballMoving) {
+    ballLaunched = true;
+    ballMoving = true;
+    paddleFreeMove = true; // ✅ Na eerste schot mag paddle omhoog bewegen
 
-  shootSound.currentTime = 0;
-  shootSound.play();
+    shootSound.currentTime = 0;
+    shootSound.play();
 
-  balls[0].dx = 0;
-  balls[0].dy = -6;
+    balls[0].dx = 0;
+    balls[0].dy = -6;
 
-  if (!timerRunning) startTimer(); // ✅ Alleen timer starten
-
-}
+    if (!timerRunning) startTimer(); // ✅ Start timer bij eerste schot
+  }
 });
-
 
 
 function startTimer() {
@@ -1912,11 +2028,13 @@ function spawnStoneDebris(x, y) {
   }
 }
 
+
 function triggerPaddleExplosion() {
   if (lives > 1) {
-    if (!resetTriggered) { // ✅ Alleen aftrekken als het GEEN reset is
+    if (!resetTriggered) {
       lives--;
       updateLivesDisplay();
+      // 💖 Hartjes blijven behouden – reset alleen bij game over
     }
 
     pauseTimer(); 
@@ -1924,7 +2042,6 @@ function triggerPaddleExplosion() {
     paddleExploding = true;
     paddleExplosionParticles = [];
 
-    // ❌ Machinegun direct stoppen bij levenverlies
     machineGunActive = false;
     machineGunCooldownActive = false;
 
@@ -1949,7 +2066,6 @@ function triggerPaddleExplosion() {
       balls = [{
         x: paddleX + paddleWidth / 2 - ballRadius,
         y: paddleY - ballRadius * 2,
-
         dx: 0,
         dy: -6,
         radius: ballRadius,
@@ -1958,22 +2074,21 @@ function triggerPaddleExplosion() {
 
       ballLaunched = false;
       ballMoving = false;
+      paddleFreeMove = false; // ⛓️ paddle weer vergrendeld
 
-      resetTriggered = false; // ✅ reset na normale explosie
-
-      resetPaddle(); // visuele schade weg
+      resetTriggered = false;
+      resetPaddle();
     }, 1000);
 
   } else {
-    // ✅ Laatste leven: eerst paddle laten ontploffen
+    // Laatste leven → GAME OVER
     paddleExploding = true;
 
     machineGunActive = false;
     machineGunCooldownActive = false;
 
-
     gameOverSound.currentTime = 0;
-    gameOverSound.play(); // 🔊 Speel "GAME OVER" geluid
+    gameOverSound.play();
 
     paddleExplosionParticles = [];
 
@@ -1991,13 +2106,16 @@ function triggerPaddleExplosion() {
     paddleExplodeSound.currentTime = 0;
     paddleExplodeSound.play();
 
-    // ⏱️ Wacht 1 seconde, daarna reset
     setTimeout(() => {
       saveHighscore();
       stopTimer();
 
       lives = 3;
       updateLivesDisplay();
+
+      // 💖 Alleen hier hartjes resetten bij Game Over
+      heartsCollected = 0;
+      document.getElementById("heartCount").textContent = heartsCollected;
 
       score = 0;
       level = 1;
@@ -2006,7 +2124,6 @@ function triggerPaddleExplosion() {
       paddleExploding = false;
       paddleExplosionParticles = [];
 
-      // ✅ Essentiële resets
       speedBoostActive = false;
       speedBoostStart = 0;
       doublePointsActive = false;
@@ -2024,23 +2141,25 @@ function triggerPaddleExplosion() {
       gameOverAlpha = 0;
       gameOverTimer = 0;
 
+      paddleFreeMove = false; // ⛓️ paddle opnieuw vergrendeld
+
       resetBricks();
       resetBall();
       resetPaddle();
 
-      updateScoreDisplay(); // 👈 aangepaste regel
+      updateScoreDisplay();
       document.getElementById("timeDisplay").textContent = "00:00";
 
-
-      resetTriggered = false; // ✅ reset ook hier voor zekerheid
+      resetTriggered = false;
     }, 1000);
   }
 }
 
+
 function startLevelTransition() {
   level++;
 
-  resetAllBonuses(); // ⬅️ Voeg deze regel toe
+  resetAllBonuses();
 
   levelUpSound.currentTime = 0;
   levelUpSound.play();
@@ -2064,7 +2183,12 @@ function startLevelTransition() {
     radius: ballRadius,
     isMain: true
   }];
+
+  // ✅ Cruciaal bij 4+ levens
+  resetPaddle();
+  updateLivesDisplay();
 }
+
 
 function updateLivesDisplay() {
   const display = document.getElementById("livesDisplay");
@@ -2080,6 +2204,162 @@ function updateLivesDisplay() {
     display.appendChild(img);
   }
 }
+
+function drawElectricBursts() {
+  for (let i = electricBursts.length - 1; i >= 0; i--) {
+    const e = electricBursts[i];
+    const pts = e.points;
+    if (!pts || pts.length < 2) continue;
+
+    // Flikker-effect per straal (zoals stroboscoop)
+    const flicker = 0.7 + Math.sin(Date.now() * e.flickerSpeed + e.flickerPhase * 1000) * 0.3;
+
+    ctx.strokeStyle = e.color.replace("ALPHA", (e.alpha * flicker).toFixed(2));
+    ctx.lineWidth = e.width * flicker;
+
+    // Glow instellen
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = e.color.replace("ALPHA", "0.4");
+
+    // Hoofdstraal tekenen
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let p = 1; p < pts.length; p++) {
+      ctx.lineTo(pts[p].x, pts[p].y);
+    }
+    ctx.stroke();
+
+    // Vertakkingen tekenen (indien aanwezig)
+    if (e.forks) {
+      e.forks.forEach(fork => {
+        ctx.beginPath();
+        ctx.moveTo(pts[Math.floor(pts.length / 2)].x, pts[Math.floor(pts.length / 2)].y);
+        fork.forEach(fp => {
+          ctx.lineTo(fp.x, fp.y);
+        });
+        ctx.stroke();
+      });
+    }
+
+    // Glow uitschakelen voor volgende canvas-elementen
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+
+    // Langzaam vervagen
+    e.alpha -= 0.03;
+    if (e.alpha <= 0) {
+      electricBursts.splice(i, 1);
+    }
+  }
+}
+
+
+
+function getRandomElectricColor() {
+  const colors = [
+    "rgba(255, 255, 255, ALPHA)", // wit
+    "rgba(0, 200, 255, ALPHA)",   // neon blauw
+    "rgba(255, 50, 50, ALPHA)",   // roodachtig
+    "rgba(255, 255, 100, ALPHA)"  // geelachtig
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+
+function triggerSilverExplosion(x, y) {
+  // Zilveren steensplinters vanuit middelpunt
+  for (let i = 0; i < 20; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 5 + 2;
+
+    stoneDebris.push({
+      x: x,
+      y: y,
+      dx: Math.cos(angle) * speed,
+      dy: Math.sin(angle) * speed,
+      radius: Math.random() * 3 + 2,
+      alpha: 1,
+      type: "silver"
+    });
+  }
+
+  // 🎧 Dondergeluid direct bij start van de explosie
+ const sound = thunderSounds[Math.floor(Math.random() * thunderSounds.length)];
+ sound.currentTime = 0;
+ sound.volume = 0.8;
+ sound.play();
+
+
+  // Witte flitsen + elektriciteit over canvas
+  for (let i = 0; i < 15; i++) {
+    const burstX = Math.random() * canvas.width;
+    const burstY = Math.random() * canvas.height;
+
+    // Witte flits
+    explosions.push({
+      x: burstX,
+      y: burstY,
+      radius: Math.random() * 30 + 10,
+      alpha: 1,
+      color: "white"
+    });
+
+    // 6 stralen per flits
+    for (let j = 0; j < 6; j++) {
+      const angle = Math.random() * Math.PI * 2;
+      const length = 40 + Math.random() * 60;
+      const segments = 5 + Math.floor(Math.random() * 5);
+      const color = getRandomElectricColor();
+      const flickerSpeed = 0.02 + Math.random() * 0.05;
+
+      let points = [];
+      let prevX = burstX;
+      let prevY = burstY;
+
+      for (let s = 0; s < segments; s++) {
+        const segLen = length / segments;
+        const deviation = (Math.random() - 0.5) * 20;
+        const nextX = prevX + Math.cos(angle) * segLen + Math.cos(angle + Math.PI / 2) * deviation;
+        const nextY = prevY + Math.sin(angle) * segLen + Math.sin(angle + Math.PI / 2) * deviation;
+
+        points.push({ x: nextX, y: nextY });
+        prevX = nextX;
+        prevY = nextY;
+      }
+
+      // Optionele zijtak (fork)
+      let forks = [];
+      if (Math.random() < 0.5) {
+        const forkStart = points[Math.floor(points.length / 2)];
+        const forkAngle = angle + (Math.random() < 0.5 ? -1 : 1) * (Math.PI / 3);
+        let forkPoints = [];
+        let forkX = forkStart.x;
+        let forkY = forkStart.y;
+        for (let f = 0; f < 3; f++) {
+          const segLen = length / 6;
+          const dev = (Math.random() - 0.5) * 20;
+          const nx = forkX + Math.cos(forkAngle) * segLen + Math.cos(forkAngle + Math.PI / 2) * dev;
+          const ny = forkY + Math.sin(forkAngle) * segLen + Math.sin(forkAngle + Math.PI / 2) * dev;
+          forkPoints.push({ x: nx, y: ny });
+          forkX = nx;
+          forkY = ny;
+        }
+        forks.push(forkPoints);
+      }
+
+      electricBursts.push({
+        points: points,
+        forks: forks,
+        width: 1 + Math.random() * 1.5,
+        alpha: 1,
+        flickerSpeed: flickerSpeed,
+        flickerPhase: Math.random(),
+        color: color
+      });
+    }
+  }
+}
+
 
 
 function triggerBallReset() {
