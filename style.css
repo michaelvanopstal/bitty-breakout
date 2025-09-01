@@ -6,26 +6,37 @@ body {
   position: relative;
 }
 
-/* Canvas = speelscherm op middenlaag */
 #gameCanvas {
   position: absolute;
-  top: 10px;
-  left: 0;
-  width: 650px;
+  top: 7px;
+  left: 50%;
+  transform: translateX(calc(-50% - 1px)); /* 5px extra naar links */
+  width: 640px;
   height: 595px;
   background-color: transparent;
   border: 3px solid transparent;
-  z-index: 18; /* komt boven achtergrond, onder overlays */
+  z-index: 18;
+}
+
+#player-display {
+  position: absolute;
+  top: 50px;
+  left: 100px;
+  font-size: 18px;
+  color: white;
+  z-index: 999;
 }
 
 #scoreDisplay {
   position: absolute;
-  top: 72px;
-  right: 110px;
-  margin-right: 15px;
-  color:white;
-  font-size: 20px;
-  font-family: Arial, sans-serif;
+  top: 33px;         /* pas aan voor waar jij ’m wilt */
+  left: 1125px;       /* pas aan op je layout */
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  z-index: 555;
+  pointer-events: none;
+  user-select: none;
 }
 
 
@@ -38,13 +49,13 @@ body {
 
 #highscore-overlay {
   position: absolute;
-  top: 70px;
-  left: 675px;
+  top: 270px;
+  left: 40px;
   width: 200px;
   border-radius: 10px;
   padding: 10px;
   color: white;
-  font-size: 16px;
+  font-size: 12px;
   z-index: 99;
 }
 #highscore-overlay h2 {
@@ -53,15 +64,18 @@ body {
 }
 #highscore-overlay ol {
   list-style-type: none;
-  padding-left: 0;
   padding-left: 20px;
   margin: 0;
 }
+
 #trophy {
-  width: 60px;
-  display: block;
-  margin: 0 auto 10px auto;
+  position: absolute;
+  top: 80px;       /* verplaats verticaal */
+  left: 140px;    /* verplaats horizontaal */
+  width: 100px;    /* grootte aanpassen */
+  z-index: 1000;   /* altijd zichtbaar bovenop */
 }
+
 
 #game-container {
   position: relative;
@@ -70,26 +84,12 @@ body {
   justify-content: flex-start;
   align-items: flex-start;
   margin-left: 10px;
-  margin-top: 60px;
+  margin-top: 15px;
 }
-
-
-#top-info {
-  position: absolute;
-  top: 10px;
-  right: 60px;
-  width: fit-content;
-  text-align: right;
-  font-size: 18px;
-  color: white;
-  font-family: Arial, sans-serif;
-  z-index: 200;
-}
-
 
 #login-overlay {
   position: absolute;
-  top: 20px;
+  top: 150px;
   right: 30px;
   left: auto;
   text-align: right;
@@ -99,40 +99,34 @@ body {
 #login-box {
   display: inline-block;
 }
-  
 
-
- 
 #playerName {
   position: absolute;
-  top: 20px;
-  right: 100px; 
-  color:#008CFF;
+  top: 130px;
+  left: 740px;
+  color: #008CFF;
   font-size: 20px;
   font-family: Arial, sans-serif;
-  z-index: 999;
+  z-index: 800;
 }
 
-#timerDisplay {
+#time-box {
   position: absolute;
-  top: 72px;
-  right: 20px; 
-  color: white;
-  font-size: 20px;
-  font-family: Arial, sans-serif;
-  z-index: 999;
+  top: 36px;          /* verticaal afstellen */
+  left: 1275px;       /* horizontaal afstellen zodat hij in het TIME-vakje past */
+  width: 100px;
+  height: 30px;
+  text-align: center;
+  z-index: 1056;
+  pointer-events: none;
 }
-
-#player-display {
-  margin-right: 15px;
-}
-
 
 #timeDisplay {
-  margin-left: 5px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
 }
-
-
 
 
 #highscore-overlay ol li {
@@ -140,47 +134,13 @@ body {
   white-space: nowrap;
 }
 
-/* PXP Banner Overlay */
-#pxp-banner-overlay {
-  position: fixed;
-  bottom: 10px;
-  right: 0px;
-  left: 685px;
-  width: 770px;
-  height: 36px;
-  background-color: rgba(0, 0, 0, 0.0);
-  color: white;
-  font-size: 14px;
-  font-family: Arial, sans-serif;
-  display: flex;
-  align-items: center;
-  padding: 0 15px;
-  white-space: nowrap;
-  overflow: hidden;
-  border-radius: 6px;
-  z-index: 1020;
-}
-.positive { color: #00ff77; }
-.negative { color: #ff4444; }
-
-
-
-
-#pxp-scroll-text {
-  display: inline-block;
-  white-space: nowrap;
-  animation: scrollText 30s linear infinite;
-}
-
 @keyframes scrollText {
   from { transform: translateX(100%); }
   to   { transform: translateX(-100%); }
 }
 
-
-
 #bikeFlyby {
-  width: 120px; /* pas aan naar grootte */
+  width: 120px;
   height: auto;
   z-index: 1;
 }
@@ -191,15 +151,8 @@ body {
   height: auto;
   display: none;
   will-change: transform, left, top;
-  z-index: 1; /* hoger dan andere lagen */
+  z-index: 1;
   pointer-events: none;
-}
-
-#bikeFlyer {
-  position: absolute;
-  width: 150px;
-  height: auto;
-  display: none;
 }
 
 #bike-layer {
@@ -208,21 +161,17 @@ body {
 }
 
 #musicToggle {
-  background-color: #007bff !important;
-  color: white !important;
-  border: none;
-  padding: 8px 16px;
-  font-size: 16px;
-  border-radius: 6px;
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  width: 180px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  display: block;
-  margin: 10px auto;
+  z-index: 1000;
+  transition: transform 0.2s ease;
 }
 
-
 #musicToggle:hover {
-  background-color: #0056b3; /* donkerder blauw op hover */
+  transform: scale(1.05);
 }
 
 #rocketFlame {
@@ -230,7 +179,7 @@ body {
   width: 20px;
   height: 40px;
   background: radial-gradient(ellipse at center, orange 0%, red 60%, transparent 100%);
-  border-radius: 50% 50% 50% 50%;
+  border-radius: 50%;
   display: none;
   z-index: 1;
   filter: blur(1px);
@@ -248,12 +197,6 @@ body {
   }
 }
 
-#hud {
-  position: absolute;
-  top: 20px; /* pas aan tot boven de beker */
-  right: 30px; /* pas aan tot netjes rechts */
-  z-index: 20;
-}
 
 
 
