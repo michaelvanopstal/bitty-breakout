@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
  
   // Styling voor login knop
-loginBtn.style.backgroundColor = "#008CFF"; // PointPay-blauw
+loginBtn.style.backgroundColor = "#701C1A"; // PointPay-blauw
 loginBtn.style.color = "white";
 loginBtn.style.border = "none";
 loginBtn.style.borderRadius = "6px";
@@ -17,7 +17,7 @@ loginBtn.style.cursor = "pointer";
 loginBtn.style.marginTop = "5px";
 
 // Styling voor logout knop
-logoutBtn.style.backgroundColor = "#008CFF"; // PointPay-blauw
+logoutBtn.style.backgroundColor = "#701C1A"; // PointPay-blauw
 logoutBtn.style.color = "white";
 logoutBtn.style.border = "none";
 logoutBtn.style.borderRadius = "6px";

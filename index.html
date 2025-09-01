@@ -9,81 +9,108 @@
  <link rel="preload" href="signalblock2.png" as="image">
 
 
+<head>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="top-info">
-    <span id="player-display">Player</span>
-    <span id="scoreDisplay">score 0 pxp.</span>
-    <span id="timeDisplay">time 00:00</span>
-  </div>
+  
+  <span id="player-display">Player</span>
+  <span id="scoreDisplay">0</span>
 
-  <!-- Tooltip -->
-<div id="resetTooltip" style="
-  display: none;
-  position: absolute;
-  bottom: 140px;
-  right: 40px;
-  background-color: rgba(0, 0, 0, 0.85);
-  color: white;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-family: Arial, sans-serif;
-  z-index: 10000;
-  white-space: nowrap;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-">Use when the ball is stuck — no lives will be lost.</div>
 
-<!-- Reset Button -->
-<button id="resetBallBtn" style="
-  display: block;
+  
+
+<!-- ❤️ Hartjesboard -->
+<img id="heartBoardDisplay" src="heart_board.png" style="
   position: absolute;
-  bottom: 30px;
-  right: 30px;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background-color: red;
-  border: 4px solid white;
+  top: 10px;
+  left: 300px;
+  width: 80px;
+  height: 80px;
+  z-index: 888;
+">
+
+<!-- 💖 Cijfer erop -->
+<span id="heartCount" style="
+  position: absolute;
+  top: 40px;
+  left: 330px;
   color: white;
   font-weight: bold;
-  font-size: 14px;
-  font-family: Arial, sans-serif;
-  cursor: pointer;
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
-  z-index: 9999;
-  text-align: center;
-  line-height: 1.2;
-">RESET<br>BALL</button>
+  font-size: 20px;
+  z-index: 1000;
+  pointer-events: none;
+  user-select: none;
+">0</span>
+
+
+  <!-- Tooltip -->
+  <div id="resetTooltip" style="
+    display: none;
+    position: absolute;
+    bottom: 140px;
+    right: 40px;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    z-index: 10000;
+    white-space: nowrap;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  ">Use when the ball is stuck — no lives will be lost.</div>
+
+  <!-- Reset-knop -->
+  <img id="resetBallBtn" 
+       src="resetball.png" 
+       alt="Reset Ball" 
+       style="
+         position: absolute;
+         bottom: 30px;
+         right: 30px;
+         width: 100px;
+         height: 100px;
+         cursor: pointer;
+         z-index: 9999;
+         transition: transform 0.2s ease;
+       "
+       onmouseover="this.style.transform='scale(1.1)'"
+       onmouseout="this.style.transform='scale(1)'"
+  >
+</body>
+
+
 
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="600"></canvas>
+   
+ <div id="time-box">
+  <span id="timeDisplay">00:00</span>
+</div>
 
-    <div id="login-overlay">
-    
 
+
+ <div id="login-overlay">
 <div id="login-box">
-  <label for="player-name">Inlog:</label><br />
   <input type="text" id="player-name" placeholder="Voer je naam in" />
   <button id="login-btn">Login</button>
   <button id="logout-btn" style="display: none;">Logout</button>
 </div>
-
     </div>
-      <button id="musicToggle">🎵 Play Music</button>
+     <img id="musicToggle" src="playmusic button.png" alt="Play Music" style="cursor: pointer; width: 180px;" />
     <div id="highscore-overlay">
-      <img src="beker_clipped_rev_2.png" id="trophy" alt="Trophy" />
-      <h2>High score</h2>
       <ol id="highscore-list">
         <li></li><li></li><li></li><li></li><li></li>
         <li></li><li></li><li></li><li></li><li></li>
       </ol>
     </div>
   </div>
-<div id="hud" style="position: absolute; top: 40px; left: 715px; z-index: 10;">
+<div id="hud" style="position: absolute; top: 20px; left: 80px; z-index: 10;">
   <div id="livesDisplay" style="display: flex; gap: 6px;"></div>
 </div>
+
+<img src="beker_clipped_rev_2.png" id="trophy" alt="Trophy">
 
 
   <script src="login.js"></script>
@@ -111,7 +138,7 @@
     highscores.forEach((entry, index) => {
       const levelText = entry.level ? `— Level ${entry.level}` : "";
       const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} PXP — ${entry.time} ${levelText}`;
+      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} ${levelText}`;
       highscoreList.appendChild(li);
     });
   }
@@ -199,21 +226,10 @@
   animateFlyer("bikeFlyer", 20000, 1000);     // fiets na 1 sec, 20 sec lang
   // Herhaal elke 30 sec
   setInterval(() => animateFlyer("bikeFlyer", 20000, 1000), 30000);
-
 </script>
 
-<!-- PXP Coin Banner -->
-<div id="pxp-banner-overlay">
- <div id="pxp-scroll-text">
-  Market Cap: $745.55K <span class="positive">+10.51%</span> &nbsp;
-  Volume (24h): $298.27K <span class="positive">+11.02%</span> &nbsp;
-  FDV: $2.48M &nbsp;
-  Vol/Mkt Cap (24h): 40.01% &nbsp;
-  Total Supply: 100M PXP &nbsp;
-  Max. Supply: 100M PXP &nbsp;
-  Circulating Supply: 30M PXP &nbsp;
-</div>
-</div>
+
+
 
 <!-- Externe scripts -->
 <script src="login.js"></script>
@@ -226,7 +242,8 @@
     new Audio("track2.mp3"),
     new Audio("track3.mp3"),
     new Audio("track4.mp3"),
-
+    new Audio("track5.mp3"),
+    new Audio("track6.mp3"),
   ];
 
   let currentTrackIndex = 0;

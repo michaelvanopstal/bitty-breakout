@@ -1,5 +1,8 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+const paddleCanvas = document.createElement("canvas");
+const paddleCtx = paddleCanvas.getContext("2d");
+
 
 let elapsedTime = 0;
 let timerInterval = null;
@@ -40,6 +43,11 @@ let showGameOver = false;
 let gameOverAlpha = 0;
 let gameOverTimer = 0;
 let resetTriggered = false;
+let previousBallPos = {};
+let paddleY = canvas.height - paddleHeight - 0; // beginpositie onderaan
+const paddleSpeed = 6;
+let downPressed = false;
+let upPressed = false;
 
 // 🌟 Level 2 overgang
 let levelTransitionActive = false;
@@ -49,8 +57,31 @@ let levelMessageAlpha = 0;
 let levelMessageTimer = 0;
 let levelMessageVisible = false;
 let resetOverlayActive = false;
+let ballTrail = []; // Array om eerdere balposities te bewaren
+const maxTrailLength = 10;
 
+let machineGunActive = false;
+let machineGunGunX = 0;
+let machineGunGunY = 0;
+let machineGunBullets = [];
+let machineGunShotsFired = 0;
+let machineGunDifficulty = 2; // 1 = makkelijk, 2 = normaal, 3 = moeilijk
+let machineGunCooldownActive = false;
+let machineGunStartTime = 0;
+let machineGunCooldownTime = 30000; // 30 sec cooldown
+let machineGunBulletInterval = 500; // aanpasbaar per difficulty
+let machineGunLastShot = 0;
+let paddleDamageZones = []; // array van kapotgemaakte stukken
+let machineGunYOffset = 140; // minimale afstand tussen paddle en machinegun
+let minMachineGunY = 0;     // bovenste limiet (canvasrand)
 
+// ❤️ Hartjes-systeem
+let heartsCollected = 0;               // aantal verzamelde hartjes (reset bij 10)
+let heartBlocks = [];                  // blokken met verborgen hartjes
+let fallingHearts = [];                // actieve vallende hartjes
+let heartPopupTimer = 0;               // timer voor popup “Wow! 10 hearts – extra life!”
+let heartBoardX = 20;
+let heartBoardY = 20;
 
 
 let speedBoostActive = false;
@@ -72,8 +103,9 @@ balls.push({
 
 
 
+
 const bonusBricks = [
-  { col: 5, row: 3, type: "rocket" },
+  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },
   { col: 8, row: 4, type: "power" },
   { col: 2, row: 7, type: "doubleball" },
   { col: 4, row: 7, type: "2x" },
@@ -158,6 +190,18 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
+const heartBoardImg = new Image();
+heartBoardImg.src = "heart_board.png";
+
+const heartImg = new Image();
+heartImg.src = "heart.png"; // zorg dat je dit bestand hebt!
+
+
+const machinegunBlockImg = new Image();
+machinegunBlockImg.src = "machinegun_block.png";
+
+const machinegunGunImg = new Image();
+machinegunGunImg.src = "machinegun_gun.png";
 
 const lifeImg = new Image();
 lifeImg.src = "level.png";
@@ -248,9 +292,14 @@ function keyDownHandler(e) {
     rightPressed = true;
   } else if (e.key === "Left" || e.key === "ArrowLeft") {
     leftPressed = true;
+  } else if (e.key === "Up" || e.key === "ArrowUp") {
+    upPressed = true;
+  } else if (e.key === "Down" || e.key === "ArrowDown") {
+    downPressed = true;
   }
 
-  if ((e.key === "ArrowUp" || e.key === "Up" || e.code === "Space") && !ballLaunched) {
+  // 🎯 Actie: bal afschieten (alleen bij omhoogtoets of spatie) als bal nog niet gelanceerd is
+  if ((e.key === "ArrowUp" || e.code === "Space") && !ballLaunched) {
     ballLaunched = true;
     ballMoving = true;
 
@@ -266,8 +315,6 @@ function keyDownHandler(e) {
   if ((e.code === "ArrowUp" || e.code === "Space") && rocketActive && rocketAmmo > 0 && !rocketFired) {
     rocketFired = true;
     rocketAmmo--;
-
-    // 🔊 Speel afvuurgeluid
     rocketLaunchSound.currentTime = 0;
     rocketLaunchSound.play();
   }
@@ -276,32 +323,43 @@ function keyDownHandler(e) {
     shootFromFlags();
   }
 
-  if (!ballMoving && (e.code === "ArrowUp" || e.code === "Space")) {
-    if (lives <= 0) {
-      lives = 3;
-      score = 0;
-      level = 1;
-      resetBricks();
-      resetBall();
-      resetPaddle();
-      startTime = new Date();
-      gameOver = false;
+ if (!ballMoving && (e.code === "ArrowUp" || e.code === "Space")) {
+  if (lives <= 0) {
+    lives = 3;
+    score = 0;
+    level = 1;
+    resetBricks();
+    resetBall();
+    resetPaddle();
+    startTime = new Date();
+    gameOver = false;
 
-      document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
-      document.getElementById("timeDisplay").textContent = "time 00:00";
+    updateScoreDisplay(); // 👈 juiste regel
+    document.getElementById("timeDisplay").textContent = "00:00";
 
-      flagsOnPaddle = false;
-      flyingCoins = [];
-    }
 
-    ballMoving = true;
+    flagsOnPaddle = false;
+    flyingCoins = [];
+  }
+
+  ballMoving = true;
+ }
+}
+
+function keyUpHandler(e) {
+  if (e.key === "Right" || e.key === "ArrowRight") {
+    rightPressed = false;
+  } else if (e.key === "Left" || e.key === "ArrowLeft") {
+    leftPressed = false;
+  } else if (e.key === "Up" || e.key === "ArrowUp") {
+    upPressed = false;
+  } else if (e.key === "Down" || e.key === "ArrowDown") {
+    downPressed = false;
   }
 }
 
-
-function keyUpHandler(e) {
-  if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
-  else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
+function updateScoreDisplay() {
+  document.getElementById("scoreDisplay").textContent = score;
 }
 
 
@@ -341,6 +399,9 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
             break;
           case "doubleball":
             ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
+            break;
+            case "machinegun":
+            ctx.drawImage(machinegunBlockImg, brickX, brickY, brickWidth, brickHeight);
             break;
           case "speed":
             ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
@@ -383,7 +444,6 @@ function drawPointPopups() {
   ctx.globalAlpha = 1; // Transparantie resetten
 }
 
-
 function resetBricks() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -394,11 +454,11 @@ function resetBricks() {
       const bonus = bonusBricks.find(b => b.col === c && b.row === r);
       let pxp = pxpMap.find(p => p.col === c && p.row === r);
 
-        if (level === 2 && pxp) {
+      if (level === 2 && pxp) {
         brickType = pxp.type || "stone"; // 👈 gebruik type indien aanwezig, anders "stone"
-        } else if (bonus) {
-         brickType = bonus.type;
-        }
+      } else if (bonus) {
+        brickType = bonus.type;
+      }
 
       bricks[c][r].type = brickType;
 
@@ -410,24 +470,111 @@ function resetBricks() {
         delete bricks[c][r].hits;
         delete bricks[c][r].hasDroppedBag;
       }
+
+      // 🔄 Reset hartje voor elk blokje (veilig)
+      bricks[c][r].hasHeart = false;
+      bricks[c][r].heartDropped = false;
     }
+  }
+
+  // ✅ Plaats 4 willekeurige hartjes onder normale blokjes
+  assignHeartBlocks();
+}
+
+// 🔧 Hulp-functie om 4 hartjes te verdelen
+function assignHeartBlocks() {
+  heartBlocks = [];
+
+  let normalBricks = [];
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const brick = bricks[c][r];
+      if (brick.status === 1 && brick.type === "normal") {
+        normalBricks.push(brick);
+      }
+    }
+  }
+
+  for (let i = 0; i < 4 && normalBricks.length > 0; i++) {
+    const index = Math.floor(Math.random() * normalBricks.length);
+    const brick = normalBricks.splice(index, 1)[0];
+    brick.hasHeart = true;
+    brick.heartDropped = false;
+    heartBlocks.push(brick); // eventueel handig voor later
   }
 }
 
 
 
+function drawHeartPopup() {
+  if (heartPopupTimer > 0) {
+    ctx.save();
+    ctx.globalAlpha = heartPopupTimer / 100;
+    ctx.fillStyle = "#ff66aa";
+    ctx.font = "bold 24px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Wow! 10 hearts – extra life!", canvas.width / 2, 60);
+    ctx.restore();
+
+    heartPopupTimer--;
+  }
+}
 
 function drawPaddle() {
-  if (paddleExploding) return; // Verberg paddle tijdens explosie
-  ctx.drawImage(pointpayPaddleImg, paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+  if (paddleExploding) return;
+
+  ctx.drawImage(paddleCanvas, paddleX, paddleY);
 }
+
+function resetAllBonuses() {
+  // 🔁 Ballen en bonussen resetten
+  balls = [{
+    x: paddleX + paddleWidth / 2 - ballRadius,
+    y: paddleY - ballRadius * 2,
+    dx: 0,
+    dy: -6,
+    radius: ballRadius,
+    isMain: true
+  }];
+  ballLaunched = false;
+  ballMoving = false;
+
+  flagsOnPaddle = false;
+  flagTimer = 0;
+
+  rocketActive = false;
+  rocketAmmo = 0;
+  rocketFired = false;
+
+  machineGunActive = false;
+  machineGunCooldownActive = false;
+  machineGunBullets = [];
+  machineGunShotsFired = 0;
+  paddleDamageZones = [];
+
+  doublePointsActive = false;
+  doublePointsStartTime = 0;
+
+  speedBoostActive = false;
+  speedBoostStart = 0;
+
+  flyingCoins = [];
+  smokeParticles = [];
+  explosions = [];
+  coins = [];
+  pxpBags = []; 
+
+  machineGunGunX = 0;
+  machineGunGunY = 0;
+}
+
 
 
 
 function resetBall() {
   balls = [{
     x: paddleX + paddleWidth / 2 - ballRadius,
-    y: canvas.height - paddleHeight - ballRadius * 2,
+    y: paddleY - ballRadius * 2,
     dx: 0,
     dy: -6,
     radius: ballRadius,
@@ -443,11 +590,25 @@ function resetBall() {
   }
 }
 
-function resetPaddle() {
-  paddleX = (canvas.width - paddleWidth) / 2;
-  resetBall();  // maakt de eerste bal aan
- 
+function resetPaddle(skipBallReset = false, skipCentering = false) {
+  // 🎯 Zet paddle terug in het midden (alleen als NIET geskiped en NIET machinegun)
+  if (!skipCentering && !machineGunCooldownActive && !machineGunActive) {
+    paddleX = (canvas.width - paddleWidth) / 2;
+  }
+
+  // 🔁 Reset paddle-tekening inclusief schadeherstel
+  paddleCanvas.width = paddleWidth;
+  paddleCanvas.height = paddleHeight;
+  paddleCtx.clearRect(0, 0, paddleWidth, paddleHeight);
+  paddleCtx.drawImage(pointpayPaddleImg, 0, 0, paddleWidth, paddleHeight);
+
+  // 🟢 Bal resetten als dat moet
+  if (!skipBallReset && !machineGunCooldownActive && !machineGunActive) {
+    resetBall();  // maakt de eerste bal aan
+  }
 }
+
+
 
 function drawLivesOnCanvas() {
   for (let i = 0; i < lives; i++) {
@@ -463,8 +624,8 @@ function drawLivesOnCanvas() {
 
 function drawPaddleFlags() {
   if (flagsOnPaddle && Date.now() - flagTimer < 20000) {
-    ctx.drawImage(vlagImgLeft, paddleX - 5, canvas.height - paddleHeight - 40, 45, 45);
-    ctx.drawImage(vlagImgRight, paddleX + paddleWidth - 31, canvas.height - paddleHeight - 40, 45, 45);
+    ctx.drawImage(vlagImgLeft, paddleX - 5, paddleY - 40, 45, 45);
+    ctx.drawImage(vlagImgRight, paddleX + paddleWidth - 31, paddleY - 40, 45, 45);
   } else if (flagsOnPaddle && Date.now() - flagTimer >= 20000) {
     flagsOnPaddle = false;
   }
@@ -477,7 +638,7 @@ function shootFromFlags() {
   // Linkervlag
   flyingCoins.push({
     x: paddleX - 5 + 12,
-    y: canvas.height - paddleHeight - 40,
+    y: paddleY - 40,
     dy: -coinSpeed,
     active: true
   });
@@ -485,7 +646,7 @@ function shootFromFlags() {
   // Rechtervlag
   flyingCoins.push({
     x: paddleX + paddleWidth - 19 + 12,
-    y: canvas.height - paddleHeight - 40,
+   y: paddleY - 40,
     dy: -coinSpeed,
     active: true
   });
@@ -542,7 +703,7 @@ function checkFlyingCoinHits() {
 
               const earned = doublePointsActive ? 120 : 60;
               score += earned;
-              document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+              updateScoreDisplay(); // 👈 aangepaste regel
 
               pointPopups.push({
                 x: b.x + brickWidth / 2,
@@ -590,7 +751,7 @@ function checkFlyingCoinHits() {
 
           const earned = doublePointsActive ? 20 : 10;
           score += earned;
-          document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+          updateScoreDisplay(); // 👈 aangepaste regel
 
           coinSound.currentTime = 0;
           coinSound.play();
@@ -659,7 +820,7 @@ function saveHighscore() {
     highscores.forEach((entry, index) => {
       const lvl = entry.level || 1;
       const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} pxp — ${entry.time} — Level ${lvl}`;
+      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} — Level ${lvl}`;
       list.appendChild(li);
     });
   }
@@ -681,6 +842,70 @@ function drawCoins() {
     }
   });
 }
+
+function drawFallingHearts() {
+  fallingHearts.forEach((heart, i) => {
+    // 🚀 Beweging
+    heart.y += heart.dy;
+
+    // 💖 Pulserend formaat
+    const size = 24 + Math.sin(heart.pulse) * 2;
+    heart.pulse += 0.2;
+
+    // ✨ Teken hartje
+    ctx.globalAlpha = heart.alpha;
+    ctx.drawImage(heartImg, heart.x, heart.y, size, size);
+    ctx.globalAlpha = 1;
+
+    // 🔲 Paddle-bounding box
+    const paddleLeft = paddleX;
+    const paddleRight = paddleX + paddleWidth;
+    const paddleTop = paddleY;
+    const paddleBottom = paddleY + paddleHeight;
+
+    // 🟥 Heart-bounding box
+    const heartLeft = heart.x;
+    const heartRight = heart.x + size;
+    const heartTop = heart.y;
+    const heartBottom = heart.y + size;
+
+    // 🎯 Check of paddle het hartje vangt
+    const isOverlap =
+      heartRight >= paddleLeft &&
+      heartLeft <= paddleRight &&
+      heartBottom >= paddleTop &&
+      heartTop <= paddleBottom;
+
+      if (isOverlap && !heart.collected) {
+      heart.collected = true;
+      heartsCollected++;
+
+      // ⬇️ HTML teller updaten
+     document.getElementById("heartCount").textContent = heartsCollected;
+
+     coinSound.currentTime = 0;
+     coinSound.play();
+
+     // ✅ Beloning bij 10 hartjes
+    if (heartsCollected >= 10) {
+      heartsCollected = 0;
+      lives++;
+      updateLivesDisplay();
+      heartPopupTimer = 100;
+
+    // Reset HTML teller ook!
+    document.getElementById("heartCount").textContent = heartsCollected;
+  }
+}
+
+    // 💨 Verwijder uit array als buiten beeld of al gepakt
+    if (heart.y > canvas.height || heart.collected) {
+      fallingHearts.splice(i, 1);
+    }
+  });
+}
+
+
 
 function drawFlyingCoins() {
   flyingCoins.forEach((coin) => {
@@ -805,7 +1030,7 @@ function checkRocketCollision() {
           rocketExplosionSound.currentTime = 0;
           rocketExplosionSound.play();
 
-          document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+          updateScoreDisplay(); // 👈 aangepaste regel
           rocketFired = false;
 
           explosions.push({
@@ -835,21 +1060,28 @@ function checkCoinCollision() {
   coins.forEach(coin => {
     if (!coin.active) return;
 
-    const coinBottom = coin.y + coin.radius;
-    const paddleTop = canvas.height - paddleHeight;
+    const coinLeft = coin.x;
+    const coinRight = coin.x + coin.radius * 2;
+    const coinTop = coin.y;
+    const coinBottom = coin.y + coin.radius * 2;
 
-    // Paddle vangt muntje
-    if (
+    const paddleLeft = paddleX;
+    const paddleRight = paddleX + paddleWidth;
+    const paddleTop = paddleY;
+    const paddleBottom = paddleY + paddleHeight;
+
+    const isOverlap =
+      coinRight >= paddleLeft &&
+      coinLeft <= paddleRight &&
       coinBottom >= paddleTop &&
-      coinBottom <= canvas.height &&
-      coin.x + coin.radius > paddleX &&
-      coin.x < paddleX + paddleWidth
-    ) {
+      coinTop <= paddleBottom;
+
+    if (isOverlap) {
       coin.active = false;
 
       const earned = doublePointsActive ? 20 : 10;
       score += earned;
-      document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+      updateScoreDisplay(); // 👈 aangepaste regel
 
       coinSound.currentTime = 0;
       coinSound.play();
@@ -857,13 +1089,10 @@ function checkCoinCollision() {
       pointPopups.push({
         x: coin.x,
         y: coin.y,
-        value: "+" + earned + " pxp",
+        value: "+" + earned,
         alpha: 1
       });
-    }
-
-    // Coin valt uit beeld zonder vangst
-    else if (coinBottom > canvas.height) {
+    } else if (coinBottom > canvas.height) {
       coin.active = false;
     }
   });
@@ -890,6 +1119,19 @@ function collisionDetection() {
             ball.y = b.y - ball.radius - 1;
           } else {
             ball.y = b.y + brickHeight + ball.radius + 1;
+          }
+
+          // 💖 Hartje laten vallen als dit blokje er eentje heeft
+          if (b.hasHeart && !b.heartDropped) {
+            fallingHearts.push({
+              x: b.x + brickWidth / 2 - 12,
+              y: b.y + brickHeight,
+              dy: 2,
+              collected: false,
+              alpha: 1,
+              pulse: 0
+            });
+            b.heartDropped = true;
           }
 
           // 🪨 Gedrag voor stenen blokken
@@ -925,7 +1167,7 @@ function collisionDetection() {
 
               const earned = doublePointsActive ? 120 : 60;
               score += earned;
-              document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+              updateScoreDisplay(); // 👈 aangepaste regel
 
               pointPopups.push({
                 x: b.x + brickWidth / 2,
@@ -945,6 +1187,22 @@ function collisionDetection() {
               flagsOnPaddle = true;
               flagTimer = Date.now();
               flagsActivatedSound.play();
+              break;
+            case "machinegun":
+              machineGunActive = true;
+              machineGunShotsFired = 0;
+              machineGunBullets = [];
+              paddleDamageZones = [];
+              machineGunLastShot = Date.now();
+              machineGunStartTime = Date.now();
+
+              // Zet gun direct boven paddle met juiste offset
+              machineGunGunX = paddleX + paddleWidth / 2 - 30;
+              const gunStartY = Math.max(paddleY - machineGunYOffset, minMachineGunY);
+              machineGunGunY = gunStartY;
+
+              b.status = 0;
+              b.type = "normal";
               break;
             case "rocket":
               rocketActive = true;
@@ -972,7 +1230,7 @@ function collisionDetection() {
 
           const earned = doublePointsActive ? 20 : 10;
           score += earned;
-          document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+          updateScoreDisplay(); // 👈 aangepaste regel
 
           spawnCoin(b.x, b.y);
         }
@@ -980,7 +1238,6 @@ function collisionDetection() {
     }
   });
 }
-
 
 function spawnExtraBall(originBall) {
   // Huidige bal krijgt een lichte afwijking
@@ -1007,21 +1264,77 @@ function spawnPxpBag(x, y) {
   });
 }
 
+function isPaddleBlockedVertically(newY) {
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const brick = bricks[c][r];
+      if (!brick || brick.status !== 1) continue;
+
+      const brickLeft = brick.x;
+      const brickRight = brick.x + brickWidth;
+      const brickTop = brick.y;
+      const brickBottom = brick.y + brickHeight;
+
+      const paddleLeft = paddleX;
+      const paddleRight = paddleX + paddleWidth;
+      const paddleTop = newY;
+      const paddleBottom = newY + paddleHeight;
+
+      if (
+        paddleRight > brickLeft &&
+        paddleLeft < brickRight &&
+        paddleBottom > brickTop &&
+        paddleTop < brickBottom
+      ) {
+        return true; // botsing
+      }
+    }
+  }
+  return false;
+}
+
+
+function isPaddleBlockedHorizontally(newX) {
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const brick = bricks[c][r];
+      if (!brick || brick.status !== 1) continue;
+
+      const brickLeft = brick.x;
+      const brickRight = brick.x + brickWidth;
+      const brickTop = brick.y;
+      const brickBottom = brick.y + brickHeight;
+
+      const paddleLeft = newX;
+      const paddleRight = newX + paddleWidth;
+      const paddleTop = paddleY;
+      const paddleBottom = paddleY + paddleHeight;
+
+      if (
+        paddleRight > brickLeft &&
+        paddleLeft < brickRight &&
+        paddleBottom > brickTop &&
+        paddleTop < brickBottom
+      ) {
+        return true; // botsing
+      }
+    }
+  }
+  return false;
+}
 
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   collisionDetection();
   drawCoins();
+  drawFallingHearts();
+  drawHeartPopup();
   checkCoinCollision();
-  drawBricks();
-  drawPaddle();
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
   drawPointPopups();
-
-
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
     doublePointsActive = false;
@@ -1034,46 +1347,124 @@ function draw() {
       ball.x += ball.dx * speedMultiplier;
       ball.y += ball.dy * speedMultiplier;
     } else {
-      ball.x = paddleX + paddleWidth / 2 - ballRadius;
-      ball.y = canvas.height - paddleHeight - ballRadius * 2;
-    }
+       ball.x = paddleX + paddleWidth / 2 - ballRadius;
+       ball.y = paddleY - ballRadius * 2;
 
-    if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) {
+    }
+    
+    if (!ball.trail) ball.trail = [];
+
+    let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
+    let steps = 3; // hoe meer hoe vloeiender
+    for (let i = 1; i <= steps; i++) {
+    let px = last.x + (ball.x - last.x) * (i / steps);
+    let py = last.y + (ball.y - last.y) * (i / steps);
+    ball.trail.push({ x: px, y: py });
+  }
+
+    while (ball.trail.length > 20) {
+    ball.trail.shift();
+ }
+
+
+    // Veiliger links/rechts
+    if (ball.x <= ball.radius + 1 && ball.dx < 0) {
+      ball.x = ball.radius + 1;
+      ball.dx *= -1;
+      wallSound.currentTime = 0;
+      wallSound.play();
+    }
+    if (ball.x >= canvas.width - ball.radius - 1 && ball.dx > 0) {
+      ball.x = canvas.width - ball.radius - 1;
       ball.dx *= -1;
       wallSound.currentTime = 0;
       wallSound.play();
     }
 
-    if (ball.y < ball.radius) {
+    // Veiliger bovenkant
+    if (ball.y <= ball.radius + 1 && ball.dy < 0) {
+      ball.y = ball.radius + 1;
       ball.dy *= -1;
       wallSound.currentTime = 0;
       wallSound.play();
     }
+if (
+  ball.y + ball.radius > paddleY &&
+  ball.y - ball.radius < paddleY + paddleHeight &&
+  ball.x + ball.radius > paddleX &&
+  ball.x - ball.radius < paddleX + paddleWidth
+) {
+  let reflect = true;
 
-    if (
-      ball.y + ball.dy > canvas.height - paddleHeight - ball.radius &&
-      ball.y + ball.dy < canvas.height + 2 &&
-      ball.x + ball.radius > paddleX &&
-      ball.x - ball.radius < paddleX + paddleWidth
-    ) {
-      const hitPos = (ball.x - paddleX) / paddleWidth;
-      const angle = (hitPos - 0.5) * Math.PI / 2;
-      const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-      ball.dx = speed * Math.sin(angle);
-      ball.dy = -Math.abs(speed * Math.cos(angle));
+  if (machineGunActive || machineGunCooldownActive) {
+    const segmentWidth = paddleWidth / 10;
+    for (let i = 0; i < 10; i++) {
+      const segX = paddleX + i * segmentWidth;
+      const isDamaged = paddleDamageZones.some(hitX =>
+        hitX >= segX && hitX <= segX + segmentWidth
+      );
 
-      wallSound.currentTime = 0;
-      wallSound.play();
+      const ballCenterX = ball.x;
+      if (
+        ballCenterX >= segX &&
+        ballCenterX < segX + segmentWidth &&
+        isDamaged
+      ) {
+        reflect = false;
+        break;
+      }
     }
+  }
+
+  if (reflect) {
+    const hitPos = (ball.x - paddleX) / paddleWidth;
+    const angle = (hitPos - 0.5) * Math.PI / 2;
+    const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+    ball.dx = speed * Math.sin(angle);
+    ball.dy = -Math.abs(speed * Math.cos(angle));
+
+    wallSound.currentTime = 0;
+    wallSound.play();
+  }
+}
+
+
 
     if (ball.y + ball.dy > canvas.height) {
       balls.splice(index, 1); // verwijder bal zonder actie
     }
+// ✨ Gouden smalle energie-staart (taps en iets smaller dan bal)
+// ✨ Rechte gouden energie-staart — iets groter dan de bal en 2x zo lang
+if (ball.trail.length >= 2) {
+  const head = ball.trail[ball.trail.length - 1]; // meest recente positie
+  const tail = ball.trail[0]; // oudste positie (ver weg van bal)
+
+  ctx.save();
+
+  const gradient = ctx.createLinearGradient(
+    head.x + ball.radius, head.y + ball.radius,
+    tail.x + ball.radius, tail.y + ball.radius
+  );
+
+  ctx.lineWidth = ball.radius * 2.0; // iets kleiner dan 2.2
+  gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
+  gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
+
+  ctx.beginPath();
+  ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
+  ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = ball.radius * 2.2; // net iets groter dan de bal
+  ctx.lineCap = "round";
+  ctx.stroke();
+
+  ctx.restore();
+}
 
     ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
   });
 
-  // 🔴 Rode knipper-overlay bij reset
+
   if (resetOverlayActive) {
     if (Date.now() % 1000 < 500) {
       ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
@@ -1087,17 +1478,42 @@ function draw() {
     triggerPaddleExplosion(); // pas nu verlies van leven
   }
 
+ drawBricks();
 
-  // Paddle bewegen
-  if (rightPressed && paddleX < canvas.width - paddleWidth) {
-    paddleX += 7;
-  } else if (leftPressed && paddleX > 0) {
-    paddleX -= 7;
+  if (leftPressed) {
+  const newX = paddleX - paddleSpeed;
+  if (newX > 0 && !isPaddleBlockedHorizontally(newX)) {
+    paddleX = newX;
   }
+}
+
+if (rightPressed) {
+  const newX = paddleX + paddleSpeed;
+  if (newX + paddleWidth < canvas.width && !isPaddleBlockedHorizontally(newX)) {
+    paddleX = newX;
+  }
+}
+
+if (upPressed) {
+  const newY = paddleY - paddleSpeed;
+  if (newY > 0 && !isPaddleBlockedVertically(newY)) {
+    paddleY = newY;
+  }
+}
+
+if (downPressed) {
+  const newY = paddleY + paddleSpeed;
+  if (newY + paddleHeight < canvas.height && !isPaddleBlockedVertically(newY)) {
+    paddleY = newY;
+  }
+}
+
+  drawPaddle();
+
 
   if (rocketActive && !rocketFired && rocketAmmo > 0) {
     rocketX = paddleX + paddleWidth / 2 - 12;
-    rocketY = canvas.height - paddleHeight - 48;
+    rocketY = paddleY - 48; // ✅ boven de paddle, waar die zich ook bevindt
     ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
   }
 
@@ -1155,42 +1571,156 @@ function draw() {
   }
 
   // Zakjes tekenen en vangen
-  for (let i = pxpBags.length - 1; i >= 0; i--) {
-    let bag = pxpBags[i];
-    bag.y += bag.dy;
+for (let i = pxpBags.length - 1; i >= 0; i--) {
+  let bag = pxpBags[i];
+  bag.y += bag.dy;
 
-    ctx.drawImage(pxpBagImg, bag.x - 20, bag.y, 40, 40);
+  ctx.drawImage(pxpBagImg, bag.x - 20, bag.y, 40, 40);
 
-    const bagBottom = bag.y + 40;
-    const paddleTop = canvas.height - paddleHeight;
+  // Bounding box van zakje
+  const bagLeft = bag.x - 20;
+  const bagRight = bag.x + 20;
+  const bagTop = bag.y;
+  const bagBottom = bag.y + 40;
 
-    if (
-      bagBottom >= paddleTop &&
-      bagBottom <= canvas.height &&
-      bag.x > paddleX &&
-      bag.x < paddleX + paddleWidth
-    ) {
-      pxpBagSound.currentTime = 0;
-      pxpBagSound.play();
+  // Bounding box van paddle (gebruik huidige Y!)
+  const paddleLeft = paddleX;
+  const paddleRight = paddleX + paddleWidth;
+  const paddleTop = paddleY;
+  const paddleBottom = paddleY + paddleHeight;
 
-      const earned = doublePointsActive ? 160 : 80;
-      score += earned;
-      document.getElementById("scoreDisplay").textContent = "score " + score + " pxp.";
+  // Controleer volledige overlapping
+  const isOverlap =
+    bagRight >= paddleLeft &&
+    bagLeft <= paddleRight &&
+    bagBottom >= paddleTop &&
+    bagTop <= paddleBottom;
 
-      pointPopups.push({
-        x: bag.x,
-        y: bag.y,
-        value: "+" + earned + " pxp",
-        alpha: 1
-      });
+  if (isOverlap) {
+    pxpBagSound.currentTime = 0;
+    pxpBagSound.play();
 
-      pxpBags.splice(i, 1);
-    } else if (bag.y > canvas.height) {
-      pxpBags.splice(i, 1);
-    }
+    const earned = doublePointsActive ? 160 : 80;
+    score += earned;
+    updateScoreDisplay(); // 👈 aangepaste regel
+
+    pointPopups.push({
+      x: bag.x,
+      y: bag.y,
+      value: "+" + earned,
+      alpha: 1
+    });
+
+    pxpBags.splice(i, 1);
+  } else if (bag.y > canvas.height) {
+    pxpBags.splice(i, 1); // uit beeld
+  }
+}
+
+if (machineGunActive && !machineGunCooldownActive) {
+  // 📍 Instelbare offset tussen paddle en gun
+  const verticalOffset = machineGunYOffset;
+  const minY = 0;                  // bovenste limiet
+  const maxY = paddleY - 10;       // optioneel: niet te dicht bij paddle
+
+  // Targetposities voor X en Y
+  const targetX = paddleX + paddleWidth / 2 - 30;
+  let targetY = paddleY - verticalOffset;
+  targetY = Math.max(minY, targetY);
+  targetY = Math.min(targetY, maxY);
+
+  const followSpeed = machineGunDifficulty === 1 ? 1 : machineGunDifficulty === 2 ? 2 : 3;
+
+  // 🟢 Volg paddle horizontaal
+  if (machineGunGunX < targetX) machineGunGunX += followSpeed;
+  else if (machineGunGunX > targetX) machineGunGunX -= followSpeed;
+
+  // 🟢 Volg paddle verticaal
+  if (machineGunGunY < targetY) machineGunGunY += followSpeed;
+  else if (machineGunGunY > targetY) machineGunGunY -= followSpeed;
+
+  // 🔫 Teken geweer
+  ctx.drawImage(machinegunGunImg, machineGunGunX, machineGunGunY, 60, 60);
+
+  // 🔥 Vuur kogels
+  if (Date.now() - machineGunLastShot > machineGunBulletInterval && machineGunShotsFired < 30) {
+    machineGunBullets.push({
+      x: machineGunGunX + 30,
+      y: machineGunGunY + 60,
+      dy: 6
+    });
+    machineGunShotsFired++;
+    machineGunLastShot = Date.now();
+    shootSound.currentTime = 0;
+    shootSound.play();
   }
 
- // ✨ Leveltekst weergeven
+  // 💥 Verwerk kogels
+  machineGunBullets.forEach((bullet, i) => {
+    bullet.y += bullet.dy;
+    ctx.beginPath();
+    ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = "red";
+    ctx.fill();
+
+    // 🎯 Check botsing met paddle
+    if (
+      bullet.y >= paddleY &&
+      bullet.x >= paddleX &&
+      bullet.x <= paddleX + paddleWidth
+    ) {
+      const hitX = bullet.x - paddleX;
+      const radius = 6;
+
+      if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
+        paddleDamageZones.push(bullet.x);
+
+        // ❗ GAT MAKEN
+        paddleCtx.globalCompositeOperation = 'destination-out';
+        paddleCtx.beginPath();
+        paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
+        paddleCtx.fill();
+        paddleCtx.globalCompositeOperation = 'source-over';
+      }
+
+      machineGunBullets.splice(i, 1);
+    } else if (bullet.y > canvas.height) {
+      machineGunBullets.splice(i, 1);
+    }
+  });
+
+  // ⏳ Start cooldown als alle 30 kogels zijn afgevuurd
+  if (machineGunShotsFired >= 30 && machineGunBullets.length === 0 && !machineGunCooldownActive) {
+    machineGunCooldownActive = true;
+    machineGunStartTime = Date.now();
+  }
+}
+
+if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCooldownTime) {
+  machineGunCooldownActive = false;
+  machineGunActive = false;
+  paddleDamageZones = [];
+  score += 500;
+  pointPopups.push({
+    x: paddleX + paddleWidth / 2,
+    y: canvas.height - 30,
+    value: "+500",
+    alpha: 1
+  });
+
+  resetPaddle(true, true); // ✅ geen ball reset, geen centrering
+}
+
+// 💀 Paddle vernietigd?
+if ((machineGunActive || machineGunCooldownActive) && paddleDamageZones.length >= 10) {
+  machineGunActive = false;
+  machineGunCooldownActive = false;
+  // Paddle-explosie volgt automatisch bij ball loss
+}
+
+
+    
+    // ✨ Leveltekst weergeven
 if (levelMessageVisible) {
   ctx.save();
   ctx.globalAlpha = levelMessageAlpha;
@@ -1223,7 +1753,7 @@ if (levelTransitionActive) {
 if (showGameOver) {
   ctx.save();
   ctx.globalAlpha = gameOverAlpha;
-  ctx.fillStyle = "#ff4444";
+  ctx.fillStyle = "#B0B0B0";
   ctx.font = "bold 48px Arial";
   ctx.textAlign = "center";
   ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
@@ -1275,28 +1805,22 @@ if (showGameOver) {
     p.y += p.dy;
     p.alpha -= 0.02;
   });
+
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
 
-
-animationFrameId = requestAnimationFrame(draw);
-
-}
-
-
-
+  animationFrameId = requestAnimationFrame(draw);
+} // ✅ Sluit function draw() correct af
 
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 16) {
+  if (imagesLoaded === 21) {
     resetBricks();
     updateLivesDisplay(); // ✅ laat bij start meteen levens zien
+    resetPaddle(); // 🔥 paddletekening klaarzetten
     draw();
   }
 }
-
-
-
 
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
@@ -1314,6 +1838,11 @@ stone1Img.onload = onImageLoad;
 stone2Img.onload = onImageLoad;
 pxpBagImg.onload = onImageLoad;
 dollarPxpImg.onload = onImageLoad;
+machinegunBlockImg.onload = onImageLoad;
+machinegunGunImg.onload = onImageLoad;
+coinImg.onload = onImageLoad;
+heartImg.onload = onImageLoad; 
+heartBoardImg.onload = onImageLoad;
 
 
 document.addEventListener("mousedown", function (e) {
@@ -1353,7 +1882,8 @@ function startTimer() {
     elapsedTime++;
     const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
     const seconds = String(elapsedTime % 60).padStart(2, '0');
-    document.getElementById("timeDisplay").textContent = "time " + minutes + ":" + seconds;
+    document.getElementById("timeDisplay").textContent = minutes + ":" + seconds;
+
   }, 1000);
 }
 
@@ -1361,7 +1891,8 @@ function stopTimer() {
   clearInterval(timerInterval);
   timerRunning = false;
   elapsedTime = 0;
-  document.getElementById("timeDisplay").textContent = "time 00:00";
+  document.getElementById("timeDisplay").textContent = "00:00";
+
 }
 function pauseTimer() {
   clearInterval(timerInterval);
@@ -1393,6 +1924,10 @@ function triggerPaddleExplosion() {
     paddleExploding = true;
     paddleExplosionParticles = [];
 
+    // ❌ Machinegun direct stoppen bij levenverlies
+    machineGunActive = false;
+    machineGunCooldownActive = false;
+
     for (let i = 0; i < 50; i++) {
       paddleExplosionParticles.push({
         x: paddleX + paddleWidth / 2,
@@ -1413,7 +1948,8 @@ function triggerPaddleExplosion() {
 
       balls = [{
         x: paddleX + paddleWidth / 2 - ballRadius,
-        y: canvas.height - paddleHeight - ballRadius * 2,
+        y: paddleY - ballRadius * 2,
+
         dx: 0,
         dy: -6,
         radius: ballRadius,
@@ -1424,11 +1960,17 @@ function triggerPaddleExplosion() {
       ballMoving = false;
 
       resetTriggered = false; // ✅ reset na normale explosie
+
+      resetPaddle(); // visuele schade weg
     }, 1000);
 
   } else {
     // ✅ Laatste leven: eerst paddle laten ontploffen
     paddleExploding = true;
+
+    machineGunActive = false;
+    machineGunCooldownActive = false;
+
 
     gameOverSound.currentTime = 0;
     gameOverSound.play(); // 🔊 Speel "GAME OVER" geluid
@@ -1486,23 +2028,23 @@ function triggerPaddleExplosion() {
       resetBall();
       resetPaddle();
 
-      document.getElementById("scoreDisplay").textContent = "score 0 pxp.";
-      document.getElementById("timeDisplay").textContent = "time 00:00";
+      updateScoreDisplay(); // 👈 aangepaste regel
+      document.getElementById("timeDisplay").textContent = "00:00";
+
 
       resetTriggered = false; // ✅ reset ook hier voor zekerheid
     }, 1000);
   }
 }
 
-
 function startLevelTransition() {
   level++;
 
-  // 🎧 Speel level-up geluid
+  resetAllBonuses(); // ⬅️ Voeg deze regel toe
+
   levelUpSound.currentTime = 0;
   levelUpSound.play();
 
-  // Toon de overgangstekst
   levelMessageAlpha = 0;
   levelMessageTimer = 0;
   levelMessageVisible = true;
@@ -1516,7 +2058,7 @@ function startLevelTransition() {
 
   balls = [{
     x: paddleX + paddleWidth / 2 - ballRadius,
-    y: canvas.height - paddleHeight - ballRadius * 2,
+    y: paddleY - ballRadius * 2,
     dx: 0,
     dy: -6,
     radius: ballRadius,
@@ -1583,7 +2125,7 @@ function triggerBallReset() {
   setTimeout(() => {
     balls = [{
       x: paddleX + paddleWidth / 2 - ballRadius,
-      y: canvas.height - paddleHeight - ballRadius * 2,
+      y: paddleY - ballRadius * 2,
       dx: 0,
       dy: -6,
       radius: ballRadius,
