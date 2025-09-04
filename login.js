@@ -48,7 +48,7 @@ logoutBtn.style.marginTop = "5px";
       logoutBtn.style.display = "inline-block";
       window.readyToLaunch = true;
     } else {
-      alert("Vul je naam in om te starten.");
+      alert("player name.");
     }
   });
 
