@@ -195,6 +195,7 @@ body {
     transform: scale(1.2) rotate(5deg);
     opacity: 0.5;
   }
+}
 /* ===== Chat Box styles ===== */
 #chatbox{
   position:absolute;
