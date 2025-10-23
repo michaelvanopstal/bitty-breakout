@@ -166,7 +166,7 @@ body {
   bottom: 20px;
   width: 180px;
   cursor: pointer;
-  z-index: 10000;
+  z-index: 777;
   transition: transform 0.2s ease;
 }
 
