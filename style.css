@@ -70,7 +70,7 @@ body {
 
 #trophy {
   position: absolute;
-  top: 60px;       /* verplaats verticaal */
+  top: 70px;       /* verplaats verticaal */
   left: 140px;    /* verplaats horizontaal */
   width: 100px;    /* grootte aanpassen */
   z-index: 1000;   /* altijd zichtbaar bovenop */
