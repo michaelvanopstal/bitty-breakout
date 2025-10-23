@@ -77,7 +77,7 @@
     border-radius: 6px;
     font-size: 13px;
     font-family: Arial, sans-serif;
-    z-index: 10000;
+    z-index: 12000;
     white-space: nowrap;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   ">Use when the ball is stuck — no lives will be lost.</div>
@@ -93,7 +93,7 @@
          width: 80px;
          height: 80px;
          cursor: pointer;
-         z-index: 10000;
+         z-index: 12000;
          transition: transform 0.2s ease;
        "
        onmouseover="this.style.transform='scale(1.1)'"
@@ -235,14 +235,7 @@
   <button id="logout-btn" style="display: none;">Logout</button>
 </div>
     </div>
-    </div> <!-- einde #game-container -->
-
-<img id="musicToggle" src="playmusic button.png" alt="Play Music" />
-
-<div id="hud" style="position: absolute; top: 10px; left: 80px; z-index: 1000;">
-  <div id="livesDisplay" style="display: flex; gap: 6px;"></div>
-</div>
-
+     <img id="musicToggle" src="playmusic button.png" alt="Play Music" style="cursor: pointer; width: 180px;" />
     <div id="highscore-overlay">
       <ol id="highscore-list">
         <li></li><li></li><li></li><li></li><li></li>
@@ -419,43 +412,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const musicBtn = document.getElementById('musicToggle');
   if (!musicBtn) return;
 
-  // BESTANDSNAMEN (pas aan als je een apart stop-icoon hebt)
-  const PLAY_IMG = 'playmusic button.png';
-  const STOP_IMG = 'stopmusic_button.png'; // zet gelijk aan PLAY_IMG als je dit (nog) niet hebt
-
-  // zorg dat globale state bestaat
-  window.albumTracks = window.albumTracks || [];
-  window.currentTrackIndex = Number.isInteger(window.currentTrackIndex) ? window.currentTrackIndex : 0;
-  window.musicPlaying = !!window.musicPlaying;
-
   function updateBtnUI(playing){
     musicBtn.title = playing ? 'Stop Music' : 'Play Music';
     musicBtn.alt   = playing ? 'Stop Music' : 'Play Music';
-    musicBtn.src   = playing ? STOP_IMG : PLAY_IMG;
+    musicBtn.src   = playing ? 'stopmusic_button.png' : 'playmusic button.png';
+    // ^ pas bestandsnamen aan naar jouw assets
   }
-  updateBtnUI(window.musicPlaying);
+  updateBtnUI(musicPlaying);
 
   musicBtn.addEventListener('click', () => {
-    window.musicPlaying = !window.musicPlaying;
+    musicPlaying = !musicPlaying;
 
-    // stop/clear alles defensief
-    if (Array.isArray(window.albumTracks)) {
-      window.albumTracks.forEach(t => { try{ t.pause(); t.currentTime = 0; } catch(e){} });
-    }
+    // stop/clear alle tracks
+    albumTracks.forEach(t => { t.pause(); t.currentTime = 0; });
 
-    if (window.musicPlaying) {
-      const tracks = Array.isArray(window.albumTracks) ? window.albumTracks : [];
-      const idx = Math.max(0, Math.min(window.currentTrackIndex, tracks.length - 1));
-      const track = tracks[idx];
-      const p = track?.play?.();
+    if (musicPlaying) {
+      const p = albumTracks[currentTrackIndex].play();
       if (p && typeof p.catch === 'function') {
-        p.catch(() => { window.musicPlaying = false; updateBtnUI(false); });
+        p.catch(() => { musicPlaying = false; updateBtnUI(false); });
       }
     } else {
-      window.currentTrackIndex = 0; // optioneel
+      currentTrackIndex = 0; // optioneel
     }
 
-    updateBtnUI(window.musicPlaying);
+    updateBtnUI(musicPlaying);
     musicBtn.blur();
   });
 });
