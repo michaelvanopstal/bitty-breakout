@@ -39,7 +39,9 @@
   <span id="scoreDisplay">0</span>
 
 
-  <!-- ❤️ Hartjesboard -->
+  
+
+<!-- ❤️ Hartjesboard -->
 <img id="heartBoardDisplay" src="heart_board.png" style="
   position: absolute;
   top: 10px;
@@ -62,12 +64,42 @@
   user-select: none;
 ">0</span>
 
-<!-- Tooltip -->
-<div id="resetTooltip">Use when the ball is stuck — no lives will be lost.</div>
 
-<!-- Reset-knop -->
-<img id="resetBallBtn" src="resetball.png" alt="Reset Ball">
+  <!-- Tooltip -->
+  <div id="resetTooltip" style="
+    display: none;
+    position: absolute;
+    bottom: 60px;
+    right: 40px;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    z-index: 868;
+    white-space: nowrap;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  ">Use when the ball is stuck — no lives will be lost.</div>
 
+  <!-- Reset-knop -->
+  <img id="resetBallBtn" 
+       src="resetball.png" 
+       alt="Reset Ball" 
+       style="
+         position: absolute;
+         bottom: 20px;
+         right: 30px;
+         width: 80px;
+         height: 80px;
+         cursor: pointer;
+         z-index: 888;
+         transition: transform 0.2s ease;
+       "
+       onmouseover="this.style.transform='scale(1.1)'"
+       onmouseout="this.style.transform='scale(1)'"
+  >
+</body>
 <script>
 (()=>{
   const $msgs   = document.getElementById('chatMessages');
@@ -96,18 +128,7 @@
       playerName = localStorage.getItem('chatName');
 
     return playerName || 'Anon';
- }
-
-  // ... jouw bestaande chatcode gaat hier verder ...
-})();
-</script>
-
-<!-- laad hier ook je andere scripts zoals game.js / login.js -->
-<script src="login.js"></script>
-<script src="game.js"></script>
-</body>
-</html>
-
+  }
 
   // automatische naamdetectie
   function updateChatName() {

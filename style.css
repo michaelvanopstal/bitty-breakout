@@ -323,45 +323,6 @@ body {
 #chatbox.collapsed #chatToggleBtn{ transform: rotate(0deg); }
 
 
-Tooltip los element */
-#resetTooltip {
-  display: none; /* standaard onzichtbaar */
-  position: fixed;         /* ← blijft op vaste plek */
-  bottom: 100px;           /* afstand vanaf onderkant */
-  right: 40px;             /* afstand vanaf rechterkant */
-  background-color: rgba(0, 0, 0, 0.85);
-  color: white;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-family: Arial, sans-serif;
-  z-index: 868;
-  white-space: nowrap;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-/* Resetknop los element */
-#resetBallBtn {
-  position: fixed;         /* blijft op vaste plek */
-  bottom: 20px;            /* afstand van onderkant scherm */
-  right: 30px;             /* afstand van rechterkant scherm */
-  width: 80px;
-  height: 80px;
-  cursor: pointer;
-  z-index: 888;
-  transition: transform 0.2s ease;
-}
-
-#resetBallBtn:hover {
-  transform: scale(1.1);
-}
-
-/* Tooltip tonen bij hover over knop */
-#resetBallBtn:hover + #resetTooltip {
-  display: block;
-}
-
-
 
 
 
