@@ -161,7 +161,7 @@ body {
 }
 
 #musicToggle {
-  position: fixed;
+  position: absolute;
   left: 20px;
   bottom: 20px;
   width: 180px;
