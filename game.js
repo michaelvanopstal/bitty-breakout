@@ -1689,6 +1689,7 @@ function draw() {
 
   collisionDetection();
   drawCoins();
+  drawBricks();
   drawFallingHearts();
   drawHeartPopup();
   checkCoinCollision();
