@@ -245,17 +245,21 @@ body {
   border-top: 2px solid #ffcf62;
   border-bottom: 2px solid #b66414;
   overflow-y: auto;
-  overflow-x: auto;           /* ← horizontale schuifbalk indien nodig */
+  overflow-x: auto;      /* <-- horizontale balk alleen hier */
   word-wrap: break-word;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
+
+
 .chat-text{
   font-size: 13px;
   word-wrap: break-word;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
+
+
 
 
 
@@ -274,20 +278,22 @@ body {
 }
 .chat-text{ font-size:13px; }
 
-#chatForm{
-  display:flex; gap:6px;
-  padding:8px;
-  background: linear-gradient(#ffb545,#f08a25);
-  border-top:2px solid #b66414;
-}
+#chatForm { display:flex; gap:6px; padding:8px; background: linear-gradient(#ffb545,#f08a25); border-top:2px solid #b66414; }
 #chatForm input{
-  flex:1;
-  height:34px;
-  border:none; outline:none;
-  border-radius:10px;
-  padding:0 10px;
-  background:#fff5e3;
+  flex: 1;
+  min-width: 0;              /* ← essentieel: mag krimpen in flex */
+  height: 34px;
+  border: none; outline: none;
+  border-radius: 10px;
+  padding: 0 10px;
+  background: #fff5e3;
 }
+#chatInput{
+  white-space: nowrap;       /* één regel */
+  overflow: hidden;
+  text-overflow: ellipsis;   /* laat '...' zien bij superlange strings */
+}
+
 #chatName{ flex:0 0 98px; }
 #chatForm button{
   flex:0 0 46px;
