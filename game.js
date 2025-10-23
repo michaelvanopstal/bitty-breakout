@@ -322,16 +322,17 @@ resetBtn.addEventListener("mouseleave", () => {
 });
 
 function pickRandomRockSprite() {
-  // Groter dan eerst
+  // Verdeling: 40% small (stone1), 35% medium (stone2), 25% large (stone1 groot)
   const r = Math.random();
   if (r < 0.40) {
-    return { img: stoneSmallImg || stone1Img,  baseSize: 34, sizeJitter: 6 };  // klein → ~34px
+    return { img: stone1Img, baseSize: 22, sizeJitter: 4 };   // klein
   } else if (r < 0.75) {
-    return { img: stoneMediumImg || stone2Img, baseSize: 44, sizeJitter: 8 };  // medium → ~44px
+    return { img: stone2Img, baseSize: 30, sizeJitter: 6 };   // medium
   } else {
-    return { img: stoneLargeImg || stone1Img,  baseSize: 58, sizeJitter: 10 }; // groot → ~58px
+    return { img: stone1Img, baseSize: 38, sizeJitter: 6 };   // groot
   }
 }
+// 👉 Later kun je de 'grote' variant eenvoudig mappen naar een derde texture (bijv. stone3Img)
 
 // spawn UITGESTELD in een queue, zodat ze één voor één vallen
 function triggerStonefall(originX, originY) {
@@ -373,51 +374,29 @@ function triggerStonefall(originX, originY) {
   }
 }
 
-
 function drawFallingStones() {
-  // ⏱️ Nieuwe stenen vrijgeven wanneer hun spawnAt is bereikt
-  const now = (typeof performance !== "undefined" && performance && performance.now)
-    ? performance.now()
-    : Date.now(); // ✅ fallback als performance.now() ontbreekt
-
-  for (let i = stonefallQueue.length - 1; i >= 0; i--) {
-    const q = stonefallQueue[i];
-    if (now >= q.spawnAt) {
-      // push naar actieve lijst
-      fallingStones.push({ ...q, active: true });
-      stonefallQueue.splice(i, 1);
-    }
-  }
-
-  // ⬇️ laat de rest van jouw drawFallingStones() ongewijzigd staan
-  // (vanaf hier: physics + tekenen + collisions + out-of-bounds)
-
-  // Bestaande stenen updaten/tekenen
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
     if (!s.active) { fallingStones.splice(i, 1); continue; }
 
-    // Fysica: zachte boog + zwaartekracht
+    // Fysica: boog + zwaartekracht
     s.vx += s.ax;
     s.vy += s.ay;
-
-    // limieten voor natuurlijke val (geen “schieten”)
-    s.vx = Math.max(Math.min(s.vx, 2.0), -2.0);
-    s.vy = Math.min(s.vy, 7.0);
+    s.vx *= 0.999;           // lichte demping
+    s.vy = Math.min(s.vy, 12);
 
     s.x += s.vx;
     s.y += s.vy;
 
-    // Teken
-    const img = s.img && s.img.complete ? s.img : null;
-    if (img) {
-      ctx.drawImage(img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+    // Teken steen (val terug op vierkantje als img nog niet geladen)
+    if (s.img && s.img.complete) {
+      ctx.drawImage(s.img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
     } else {
       ctx.fillStyle = "#777";
       ctx.fillRect(s.x - s.size/2, s.y - s.size/2, s.size, s.size);
     }
 
-    // Paddle-collision
+    // Paddle-collision (AABB)
     const paddleLeft   = paddleX;
     const paddleRight  = paddleX + paddleWidth;
     const paddleTop    = paddleY;
@@ -436,7 +415,7 @@ function drawFallingStones() {
     if (hitPaddle) {
       if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, s.y);
       s.active = false;
-      stoneHitOverlayTimer = 18;
+      stoneHitOverlayTimer = 18; // ~300ms flash
 
       if (lives > 1) {
         lives--;
@@ -449,14 +428,14 @@ function drawFallingStones() {
       continue;
     }
 
-    // Onder uit beeld
+    // Bodem → vergruizen
     if (s.y - s.size/2 > canvas.height) {
       if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, canvas.height - 10);
       s.active = false;
       continue;
     }
 
-    // Links/rechts uit beeld
+    // Links/Rechts buiten beeld → opruimen
     if (s.x + s.size/2 < 0 || s.x - s.size/2 > canvas.width) {
       s.active = false;
     }
@@ -1689,7 +1668,6 @@ function draw() {
 
   collisionDetection();
   drawCoins();
-  drawBricks();
   drawFallingHearts();
   drawHeartPopup();
   checkCoinCollision();
