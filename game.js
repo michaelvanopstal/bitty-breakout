@@ -336,37 +336,28 @@ function pickRandomRockSprite() {
 // spawn UITGESTELD in een queue, zodat ze één voor één vallen
 function triggerStonefall(originX, originY) {
   const count = 5 + Math.floor(Math.random() * 4); // 5–8
-  const now = performance.now();
+  const base = (typeof performance !== "undefined" && performance && performance.now)
+    ? performance.now()
+    : Date.now();
 
   for (let i = 0; i < count; i++) {
-    // 0 = recht; 1 = boog links; 2 = boog rechts
     const style = Math.floor(Math.random() * 3);
+
     const rock = pickRandomRockSprite();
     const size = rock.baseSize + Math.floor(Math.random() * rock.sizeJitter);
 
-    // Langzamer & zwaarder → geen “afschieten”-gevoel
-    const vy0 = 1.2 + Math.random() * 0.8;     // lager dan voorheen
+    const vy0 = 1.2 + Math.random() * 0.8;
     let   vx0 = 0;
     let   ax  = 0;
-    const ay  = 0.09 + Math.random() * 0.03;   // zachte zwaartekracht
+    const ay  = 0.09 + Math.random() * 0.03;
 
-    if (style === 1) {         // linksboog
-      vx0 = -(0.6 + Math.random() * 0.5);
-      ax  = -0.015 - Math.random() * 0.015;
-    } else if (style === 2) {  // rechtsboog
-      vx0 =  (0.6 + Math.random() * 0.5);
-      ax  =  0.015 + Math.random() * 0.015;
-    } else {                   // bijna recht
-      vx0 = (Math.random() - 0.5) * 0.25;
-      ax  = (Math.random() - 0.5) * 0.006;
-    }
+    if (style === 1) { vx0 = -(0.6 + Math.random() * 0.5); ax = -0.015 - Math.random() * 0.015; }
+    else if (style === 2) { vx0 = (0.6 + Math.random() * 0.5); ax = 0.015 + Math.random() * 0.015; }
+    else { vx0 = (Math.random() - 0.5) * 0.25; ax = (Math.random() - 0.5) * 0.006; }
 
-    // horizontale spreiding rond het blok
     const xSpread = (Math.random() - 0.5) * 30;
-
-    // ⏱️ vertraagde spawn: 160–320ms tussen elke steen
     const delay = 160 + Math.random() * 160;
-    const spawnAt = now + i * delay;
+    const spawnAt = base + i * delay;
 
     stonefallQueue.push({
       spawnAt,
@@ -382,16 +373,24 @@ function triggerStonefall(originX, originY) {
   }
 }
 
+
 function drawFallingStones() {
   // ⏱️ Nieuwe stenen vrijgeven wanneer hun spawnAt is bereikt
-  const t = performance.now();
+  const now = (typeof performance !== "undefined" && performance && performance.now)
+    ? performance.now()
+    : Date.now(); // ✅ fallback als performance.now() ontbreekt
+
   for (let i = stonefallQueue.length - 1; i >= 0; i--) {
     const q = stonefallQueue[i];
-    if (t >= q.spawnAt) {
+    if (now >= q.spawnAt) {
+      // push naar actieve lijst
       fallingStones.push({ ...q, active: true });
       stonefallQueue.splice(i, 1);
     }
   }
+
+  // ⬇️ laat de rest van jouw drawFallingStones() ongewijzigd staan
+  // (vanaf hier: physics + tekenen + collisions + out-of-bounds)
 
   // Bestaande stenen updaten/tekenen
   for (let i = fallingStones.length - 1; i >= 0; i--) {
