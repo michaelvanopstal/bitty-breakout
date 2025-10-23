@@ -95,6 +95,122 @@
        onmouseout="this.style.transform='scale(1)'"
   >
 </body>
+<script>
+(()=>{
+  const $msgs   = document.getElementById('chatMessages');
+  const $form   = document.getElementById('chatForm');
+  const $input  = document.getElementById('chatInput');
+  const $name   = document.getElementById('chatName');
+  const $clear  = document.getElementById('chatClearBtn');
+
+  const STORE_KEY = 'bb_chat_messages';
+  const LIMIT = 100; // na 100 regels schoonmaken
+
+  // 🔸 Functie om spelernaam uit het spel te halen
+  function detectPlayerName() {
+    let playerName = '';
+
+    // zoek inlogveld of display-element
+    const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
+    const display = document.getElementById('player-display');
+
+    if (nameInput && nameInput.value.trim() !== '') playerName = nameInput.value.trim();
+    else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player')
+      playerName = display.textContent.trim();
+
+    // fallback: bewaar oude naam
+    if (!playerName && localStorage.getItem('chatName'))
+      playerName = localStorage.getItem('chatName');
+
+    return playerName || 'Anon';
+  }
+
+  // automatische naamdetectie
+  function updateChatName() {
+    const name = detectPlayerName();
+    $name.value = name;
+    $name.disabled = true; // vergrendeld
+    localStorage.setItem('chatName', name);
+  }
+
+  // controleer elke seconde of de naam intussen is ingevuld
+  updateChatName();
+  setInterval(updateChatName, 1000);
+
+  // opslag helpers
+  function getStore(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+    catch(e){ return []; }
+  }
+  function setStore(arr){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }catch(e){}
+  }
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function nowTime(){
+    const d = new Date();
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function escapeHTML(s){
+    return s.replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[c]));
+  }
+  function linkify(s){
+    return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+  }
+
+  function render(all){
+    $msgs.innerHTML = '';
+    all.forEach(m=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'chat-msg';
+      wrap.innerHTML =
+        `<div class="chat-meta">${m.time} — <b>${escapeHTML(m.name)}</b></div>
+         <div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
+      $msgs.appendChild(wrap);
+    });
+    $msgs.scrollTop = $msgs.scrollHeight;
+  }
+
+  function addMessage(name, text){
+    let all = getStore();
+    if(all.length >= LIMIT){
+      all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
+    }
+    all.push({ name, text, time: nowTime() });
+    setStore(all);
+    render(all);
+  }
+
+  render(getStore());
+
+  // versturen
+  $form.addEventListener('submit', e=>{
+    e.preventDefault();
+    const name = detectPlayerName();
+    const text = $input.value.trim();
+    if(!text) return;
+    addMessage(name, text);
+    $input.value = '';
+    $input.focus();
+  });
+
+  $clear.addEventListener('click', ()=>{
+    setStore([]);
+    render([]);
+  });
+
+  $input.addEventListener('keydown', e=>{
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      $form.requestSubmit();
+    }
+  });
+
+})();
+</script>
 
 
 
