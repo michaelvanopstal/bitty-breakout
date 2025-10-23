@@ -405,29 +405,63 @@
       }
     });
   });
+</script>  
+  
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const musicBtn = document.getElementById('musicToggle');
+  if (!musicBtn) return;
 
-  document.getElementById("musicToggle").addEventListener("click", () => {
+  function updateBtnUI(playing){
+    musicBtn.title = playing ? 'Stop Music' : 'Play Music';
+    musicBtn.alt   = playing ? 'Stop Music' : 'Play Music';
+    musicBtn.src   = playing ? 'stopmusic_button.png' : 'playmusic button.png';
+    // ^ pas bestandsnamen aan naar jouw assets
+  }
+  updateBtnUI(musicPlaying);
+
+  musicBtn.addEventListener('click', () => {
     musicPlaying = !musicPlaying;
 
-    if (musicPlaying) {
-      // Stop alle andere tracks eerst
-      albumTracks.forEach(track => {
-        track.pause();
-        track.currentTime = 0;
-      });
+    // stop/clear alle tracks
+    albumTracks.forEach(t => { t.pause(); t.currentTime = 0; });
 
-      albumTracks[currentTrackIndex].play();
-      document.getElementById("musicToggle").textContent = "🔇 Stop Music";
+    if (musicPlaying) {
+      const p = albumTracks[currentTrackIndex].play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => { musicPlaying = false; updateBtnUI(false); });
+      }
     } else {
-      albumTracks.forEach(track => {
-        track.pause();
-        track.currentTime = 0;
-      });
-      document.getElementById("musicToggle").textContent = "🎵 Play Music";
-      currentTrackIndex = 0; // optioneel resetten naar begin
+      currentTrackIndex = 0; // optioneel
     }
 
-    // 🛡️ Haal focus van knop zodat toetsen werken
-    document.getElementById("musicToggle").blur();
+    updateBtnUI(musicPlaying);
+    musicBtn.blur();
   });
+});
 </script>
+
+
+<!-- 💬 Chat open/dicht -->
+<script>
+(()=> {
+  const chat = document.getElementById('chatbox');
+  const toggleBtn = document.getElementById('chatToggleBtn');
+
+  try {
+    if (localStorage.getItem('chatCollapsed') === '1') chat.classList.add('collapsed');
+  } catch(e){}
+
+  toggleBtn?.addEventListener('click', () => {
+    chat.classList.toggle('collapsed');
+    try {
+      localStorage.setItem('chatCollapsed', chat.classList.contains('collapsed') ? '1' : '0');
+    } catch(e){}
+  });
+
+  const chatInput = document.getElementById('chatInput');
+  if (chatInput) chatInput.setAttribute('maxlength','300');
+})();
+</script>
+</body>
+</html>
