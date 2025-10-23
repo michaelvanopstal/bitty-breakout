@@ -295,8 +295,26 @@ body {
   border-radius:10px;
   background:#7a2b00; color:#ffd56a; font-weight:700;
 }
+
+
 #chatForm button:hover{ filter:brightness(1.08); }
 /* ===== /Chat Box styles ===== */
+
+/* Header-knopjes uniform */
+.chat-icon-btn{
+  border:none; background:rgba(0,0,0,.08); color:#7a2b00;
+  width:28px; height:28px; border-radius:8px; cursor:pointer;
+}
+.chat-icon-btn:hover{ background:rgba(0,0,0,.16); }
+
+/* Ingeklapt: alleen header zichtbaar */
+#chatbox.collapsed{ height:42px; overflow:hidden; }
+#chatbox.collapsed #chatMessages,
+#chatbox.collapsed #chatForm{ display:none; }
+
+/* Pijltje draait als open */
+#chatbox:not(.collapsed) #chatToggleBtn{ transform: rotate(90deg); }
+#chatbox.collapsed #chatToggleBtn{ transform: rotate(0deg); }
 
 
 
