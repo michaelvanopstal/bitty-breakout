@@ -197,21 +197,24 @@ body {
   }
 }
 /* ===== Chat Box styles ===== */
+/* was: position:absolute;  -> maak 'm fixed */
 #chatbox{
-  position:absolute;
-  right:30px;
-  top:160px;          /* pas aan als nodig i.v.m. je layout */
-  width:300px;
-  height:360px;
-  display:flex;
-  flex-direction:column;
-  z-index:9998;
-  font-family:system-ui, Arial, sans-serif;
-  border-radius:18px;
+  position: fixed;
+  right: 30px;
+  top: 160px;
+  width: 300px;
+  height: 360px;
+  display: flex;
+  flex-direction: column;
+  z-index: 9998;
+  font-family: system-ui, Arial, sans-serif;
+  border-radius: 18px;
   background: linear-gradient(#f6a53b,#e27e22);
   box-shadow: 0 8px 20px rgba(0,0,0,.35), inset 0 0 0 4px #c76b12, inset 0 0 0 8px #ffc85a;
-  overflow:hidden;
+  overflow: hidden;
+  max-width: 90vw;            /* extra veiligheid op smalle schermen */
 }
+
 
 #chatbox .chatbox-header{
   height:42px;
