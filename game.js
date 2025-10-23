@@ -281,6 +281,18 @@ stone2Img.src = "stone2.png";
 const pxpBagImg = new Image();
 pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
 
+// 🆕 Stonefall assets
+const stoneSmallImg  = new Image(); 
+stoneSmallImg.src  = "stone_small.png";
+
+const stoneMediumImg = new Image();  
+stoneMediumImg.src = "stone_medium.png";
+
+const stoneLargeImg  = new Image(); 
+stoneLargeImg.src  = "stone_large.png";
+
+const stoneBlockImg  = new Image(); 
+stoneBlockImg.src  = "stone_block.png";
 
 
 
@@ -308,17 +320,15 @@ resetBtn.addEventListener("mouseleave", () => {
 });
 
 function pickRandomRockSprite() {
-  // Verdeling: 40% small (stone1), 35% medium (stone2), 25% large (stone1 groot)
   const r = Math.random();
   if (r < 0.40) {
-    return { img: stone1Img, baseSize: 22, sizeJitter: 4 };   // klein
+    return { img: stoneSmallImg,  baseSize: 22, sizeJitter: 4 }; // klein
   } else if (r < 0.75) {
-    return { img: stone2Img, baseSize: 30, sizeJitter: 6 };   // medium
+    return { img: stoneMediumImg, baseSize: 30, sizeJitter: 6 }; // medium
   } else {
-    return { img: stone1Img, baseSize: 38, sizeJitter: 6 };   // groot
+    return { img: stoneLargeImg,  baseSize: 38, sizeJitter: 6 }; // groot
   }
 }
-// 👉 Later kun je de 'grote' variant eenvoudig mappen naar een derde texture (bijv. stone3Img)
 
 function triggerStonefall(originX, originY) {
   // 5–8 stenen per activatie
@@ -626,14 +636,14 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
             ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
             break;
             case "stonefall":
-              // vierkant blokje van steen
-         if (stone1Img && stone1Img.complete) {
-            ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
-            } else {
-           ctx.fillStyle = "#6f6b66";
-           ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-           ctx.strokeStyle = "#5a554f";
-           ctx.strokeRect(brickX+0.5, brickY+0.5, brickWidth-1, brickHeight-1);
+              // vierkant blokje van steen                                        case "stonefall":
+              if (stoneBlockImg && stoneBlockImg.complete) {
+                   ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
+               } else {
+               ctx.fillStyle = "#6f6b66";
+               ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+               ctx.strokeStyle = "#5a554f";
+              ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
           }
            break;
 
@@ -2092,7 +2102,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 23) {
+  if (imagesLoaded === 27) {
     resetBricks();
     updateLivesDisplay(); // ✅ laat bij start meteen levens zien
     resetPaddle(); // 🔥 paddletekening klaarzetten
@@ -2123,6 +2133,10 @@ heartImg.onload = onImageLoad;
 heartBoardImg.onload = onImageLoad;
 silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
+stoneSmallImg.onload  = onImageLoad;
+stoneMediumImg.onload = onImageLoad;
+stoneLargeImg.onload  = onImageLoad;
+stoneBlockImg.onload  = onImageLoad;
 
 
 document.addEventListener("mousedown", function (e) {
