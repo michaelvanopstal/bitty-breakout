@@ -78,6 +78,8 @@ let minMachineGunY = 0;     // bovenste limiet (canvasrand)
 // 🪨 Stonefall — vallende stenen + korte hit-flash
 let fallingStones = [];      // {x,y,vx,vy,ax,ay,size,img,active}
 let stoneHitOverlayTimer = 0; // korte rode overlay bij paddle-hit
+// 🪨 Stonefall — queue zodat stenen één voor één spawnen
+let stonefallQueue = []; // items: { spawnAt, x, y, vx, vy, ax, ay, size, img }
 
 // ❤️ Hartjes-systeem
 let heartsCollected = 0;               // aantal verzamelde hartjes (reset bij 10)
@@ -320,47 +322,54 @@ resetBtn.addEventListener("mouseleave", () => {
 });
 
 function pickRandomRockSprite() {
+  // Groter dan eerst
   const r = Math.random();
   if (r < 0.40) {
-    return { img: stoneSmallImg,  baseSize: 22, sizeJitter: 4 }; // klein
+    return { img: stoneSmallImg || stone1Img,  baseSize: 34, sizeJitter: 6 };  // klein → ~34px
   } else if (r < 0.75) {
-    return { img: stoneMediumImg, baseSize: 30, sizeJitter: 6 }; // medium
+    return { img: stoneMediumImg || stone2Img, baseSize: 44, sizeJitter: 8 };  // medium → ~44px
   } else {
-    return { img: stoneLargeImg,  baseSize: 38, sizeJitter: 6 }; // groot
+    return { img: stoneLargeImg || stone1Img,  baseSize: 58, sizeJitter: 10 }; // groot → ~58px
   }
 }
 
+// spawn UITGESTELD in een queue, zodat ze één voor één vallen
 function triggerStonefall(originX, originY) {
-  // 5–8 stenen per activatie
-  const count = 5 + Math.floor(Math.random() * 4);
+  const count = 5 + Math.floor(Math.random() * 4); // 5–8
+  const now = performance.now();
 
   for (let i = 0; i < count; i++) {
-    // 0 = recht naar beneden, 1 = boog links, 2 = boog rechts
+    // 0 = recht; 1 = boog links; 2 = boog rechts
     const style = Math.floor(Math.random() * 3);
-
     const rock = pickRandomRockSprite();
     const size = rock.baseSize + Math.floor(Math.random() * rock.sizeJitter);
 
-    const vy0 = 2.6 + Math.random() * 2.6;  // startsnelheid omlaag
+    // Langzamer & zwaarder → geen “afschieten”-gevoel
+    const vy0 = 1.2 + Math.random() * 0.8;     // lager dan voorheen
     let   vx0 = 0;
-    let   ax  = 0;                           // horizontale versnelling voor boog
-    const ay  = 0.12 + Math.random() * 0.07; // “zwaartekracht”
+    let   ax  = 0;
+    const ay  = 0.09 + Math.random() * 0.03;   // zachte zwaartekracht
 
-    if (style === 1) {         // links-boog
-      vx0 = -(1.2 + Math.random() * 1.8);
-      ax  = -0.03 - Math.random() * 0.04;
-    } else if (style === 2) {  // rechts-boog
-      vx0 =  (1.2 + Math.random() * 1.8);
-      ax  =  0.03 + Math.random() * 0.04;
-    } else {                   // recht naar beneden met mini-jitter
-      vx0 = (Math.random() - 0.5) * 0.4;
-      ax  = (Math.random() - 0.5) * 0.01;
+    if (style === 1) {         // linksboog
+      vx0 = -(0.6 + Math.random() * 0.5);
+      ax  = -0.015 - Math.random() * 0.015;
+    } else if (style === 2) {  // rechtsboog
+      vx0 =  (0.6 + Math.random() * 0.5);
+      ax  =  0.015 + Math.random() * 0.015;
+    } else {                   // bijna recht
+      vx0 = (Math.random() - 0.5) * 0.25;
+      ax  = (Math.random() - 0.5) * 0.006;
     }
 
-    // lichte horizontale spreiding rond blokcentrum
-    const xSpread = (Math.random() - 0.5) * 40;
+    // horizontale spreiding rond het blok
+    const xSpread = (Math.random() - 0.5) * 30;
 
-    fallingStones.push({
+    // ⏱️ vertraagde spawn: 160–320ms tussen elke steen
+    const delay = 160 + Math.random() * 160;
+    const spawnAt = now + i * delay;
+
+    stonefallQueue.push({
+      spawnAt,
       x: originX + xSpread,
       y: originY + 10,
       vx: vx0,
@@ -368,9 +377,90 @@ function triggerStonefall(originX, originY) {
       ax,
       ay,
       size,
-      img: rock.img,
-      active: true
+      img: rock.img
     });
+  }
+}
+
+function drawFallingStones() {
+  // ⏱️ Nieuwe stenen vrijgeven wanneer hun spawnAt is bereikt
+  const t = performance.now();
+  for (let i = stonefallQueue.length - 1; i >= 0; i--) {
+    const q = stonefallQueue[i];
+    if (t >= q.spawnAt) {
+      fallingStones.push({ ...q, active: true });
+      stonefallQueue.splice(i, 1);
+    }
+  }
+
+  // Bestaande stenen updaten/tekenen
+  for (let i = fallingStones.length - 1; i >= 0; i--) {
+    const s = fallingStones[i];
+    if (!s.active) { fallingStones.splice(i, 1); continue; }
+
+    // Fysica: zachte boog + zwaartekracht
+    s.vx += s.ax;
+    s.vy += s.ay;
+
+    // limieten voor natuurlijke val (geen “schieten”)
+    s.vx = Math.max(Math.min(s.vx, 2.0), -2.0);
+    s.vy = Math.min(s.vy, 7.0);
+
+    s.x += s.vx;
+    s.y += s.vy;
+
+    // Teken
+    const img = s.img && s.img.complete ? s.img : null;
+    if (img) {
+      ctx.drawImage(img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+    } else {
+      ctx.fillStyle = "#777";
+      ctx.fillRect(s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+    }
+
+    // Paddle-collision
+    const paddleLeft   = paddleX;
+    const paddleRight  = paddleX + paddleWidth;
+    const paddleTop    = paddleY;
+    const paddleBottom = paddleY + paddleHeight;
+    const stoneLeft    = s.x - s.size/2;
+    const stoneRight   = s.x + s.size/2;
+    const stoneTop     = s.y - s.size/2;
+    const stoneBottom  = s.y + s.size/2;
+
+    const hitPaddle =
+      stoneRight >= paddleLeft &&
+      stoneLeft  <= paddleRight &&
+      stoneBottom>= paddleTop &&
+      stoneTop   <= paddleBottom;
+
+    if (hitPaddle) {
+      if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, s.y);
+      s.active = false;
+      stoneHitOverlayTimer = 18;
+
+      if (lives > 1) {
+        lives--;
+        if (typeof updateLivesDisplay === "function") updateLivesDisplay();
+      } else {
+        lives = 0;
+        if (typeof updateLivesDisplay === "function") updateLivesDisplay();
+        if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
+      }
+      continue;
+    }
+
+    // Onder uit beeld
+    if (s.y - s.size/2 > canvas.height) {
+      if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, canvas.height - 10);
+      s.active = false;
+      continue;
+    }
+
+    // Links/rechts uit beeld
+    if (s.x + s.size/2 < 0 || s.x - s.size/2 > canvas.width) {
+      s.active = false;
+    }
   }
 }
 
