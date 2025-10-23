@@ -238,14 +238,26 @@ body {
 #chatClearBtn:hover{ background:rgba(0,0,0,.16); }
 
 #chatMessages{
-  flex:1;
-  padding:10px 10px 6px 10px;
-  background:#6a0f0f;          /* matcht je rode gamekader */
-  color:#ffe9c4;
-  overflow-y:auto;
-  border-top:2px solid #ffcf62;
-  border-bottom:2px solid #b66414;
+  flex: 1;
+  padding: 10px 10px 6px 10px;
+  background: #6a0f0f;
+  color: #ffe9c4;
+  border-top: 2px solid #ffcf62;
+  border-bottom: 2px solid #b66414;
+  overflow-y: auto;
+  overflow-x: auto;           /* ← horizontale schuifbalk indien nodig */
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
+.chat-text{
+  font-size: 13px;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+
 
 .chat-msg{
   background: rgba(255,255,255,.06);
