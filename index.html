@@ -12,7 +12,23 @@
 <head>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body><!-- ===== Chat Box (rechts) ===== -->
+<div id="chatbox">
+  <div class="chatbox-header">
+    <span>CHAT</span>
+    <button id="chatClearBtn" title="Leeg chat">✕</button>
+  </div>
+
+  <div id="chatMessages" aria-live="polite"></div>
+
+  <form id="chatForm" autocomplete="off">
+    <input id="chatName" type="text" placeholder="Naam" maxlength="18" />
+    <input id="chatInput" type="text" placeholder="Schrijf een bericht..." />
+    <button type="submit" title="Stuur">▶</button>
+  </form>
+</div>
+<!-- ===== /Chat Box ===== -->
+
   
   <span id="player-display">Player</span>
   <span id="scoreDisplay">0</span>
