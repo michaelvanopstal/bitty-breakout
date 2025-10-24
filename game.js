@@ -75,10 +75,6 @@ let machineGunLastShot = 0;
 let paddleDamageZones = []; // array van kapotgemaakte stukken
 let machineGunYOffset = 140; // minimale afstand tussen paddle en machinegun
 let minMachineGunY = 0;     // bovenste limiet (canvasrand)
-// 🪨 Stonefall-systeem
-let fallingStones = [];          // actieve stenen
-let stonefallQueue = [];         // wachtrij met spawn-tijd
-let stoneHitOverlayTimer = 0;    // korte rode overlay bij paddle-hit
 
 // ❤️ Hartjes-systeem
 let heartsCollected = 0;               // aantal verzamelde hartjes (reset bij 10)
@@ -122,13 +118,12 @@ balls.push({
 
 const bonusBricks = [
   { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },
-  { col: 8, row: 4, type: "power" },   { col: 4, row: 13, type: "stonefall" },
-
+  { col: 8, row: 4, type: "power" },
   { col: 2, row: 7, type: "doubleball" }, { col: 7, row: 14, type: "silver" },{ col: 8, row: 14, type: "silver" },{ col: 6, row: 14, type: "silver" },
   { col: 0, row: 14, type: "silver" }, { col: 1, row: 14, type: "silver" }, { col: 2, row: 14, type: "silver" },
 
 
-  { col: 4, row: 7, type: "2x" },    { col: 4, row: 6, type: "stonefall" },
+  { col: 4, row: 7, type: "2x" },
   { col: 2, row: 3, type: "speed" },
   { col: 3, row: 14, type: "stone" },
   { col: 4, row: 14, type: "stone" },
@@ -282,18 +277,6 @@ stone2Img.src = "stone2.png";
 const pxpBagImg = new Image();
 pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
 
-// 🪨 Stonefall afbeeldingen
-const stoneSmallImg  = new Image(); 
-stoneSmallImg.src  = "stone_small.png";
-
-const stoneMediumImg = new Image(); 
-stoneMediumImg.src = "stone_medium.png";
-
-const stoneLargeImg  = new Image(); 
-stoneLargeImg.src  = "stone_large.png";
-
-const stoneBlockImg  = new Image(); 
-stoneBlockImg.src  = "stone_block.png";
 
 
 
@@ -457,77 +440,13 @@ function mouseMoveHandler(e) {
   }
 }
 
-function pickRandomRockSprite() {
-  const r = Math.random();
-  if (r < 0.40) return { img: stoneSmallImg,  baseSize: 34, sizeJitter: 6 };
-  if (r < 0.75) return { img: stoneMediumImg, baseSize: 44, sizeJitter: 8 };
-  return { img: stoneLargeImg,  baseSize: 58, sizeJitter: 10 };
-}
 
-function startStonefallEmitter(brick, originX, originY, durationMs = 2500) {
-  const now = performance.now();
-  brick.stonefallActive = true;
-  brick.stonefallStartedAt = now;
-  brick.stonefallEndAt = now + durationMs;
-
-  const count = 5 + Math.floor(Math.random() * 4);
-  for (let i = 0; i < count; i++) {
-    const style = Math.floor(Math.random() * 3);
-    const rock  = pickRandomRockSprite();
-    const size  = rock.baseSize + Math.floor(Math.random() * rock.sizeJitter);
-
-    const ay  = 0.09 + Math.random() * 0.03;
-    const vy0 = 1.2 + Math.random() * 0.8;
-    let vx0 = 0, ax = 0;
-
-    if (style === 1) { vx0 = -(0.6 + Math.random() * 0.5); ax = -0.015; }
-    else if (style === 2) { vx0 = (0.6 + Math.random() * 0.5); ax = 0.015; }
-
-    const xSpread = (Math.random() - 0.5) * 30;
-    const delay = Math.random() * (durationMs - 400);
-    const spawnAt = now + delay;
-
-    stonefallQueue.push({
-      spawnAt,
-      x: originX + xSpread,
-      y: originY + 10,
-      vx: vx0,
-      vy: vy0,
-      ax,
-      ay,
-      size,
-      img: rock.img
-    });
-  }
-}
-
-function updateStonefallBlocks() {
-  const now = performance.now();
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      const b = bricks[c][r];
-      if (!b || b.status !== 1) continue;
-
-      if (b.type === "stonefall" && b.stonefallActive && !b.stonefallFinished) {
-        if (now >= b.stonefallEndAt) {
-          if (typeof spawnStoneDebris === "function")
-            spawnStoneDebris(b.x + brickWidth / 2, b.y + brickHeight / 2);
-          b.status = 0;
-          score += doublePointsActive ? 20 : 10;
-          updateScoreDisplay();
-          spawnCoin(b.x, b.y);
-          b.type = "normal";
-          b.stonefallFinished = true;
-        }
-      }
-    }
-  }
-}
 
 
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
-  const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
+const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
+
 
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -536,6 +455,7 @@ function drawBricks() {
         const brickX = offsetX + c * brickWidth;
         const brickY = r * brickHeight + (levelTransitionActive ? transitionOffsetY : 0);
 
+
         b.x = brickX;
         b.y = brickY;
 
@@ -543,35 +463,28 @@ function drawBricks() {
           case "2x":
             ctx.drawImage(doublePointsImg, brickX, brickY, brickWidth, brickHeight);
             break;
-
           case "rocket":
             ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
             break;
-
           case "power":
             ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
             break;
-
           case "doubleball":
             ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
             break;
-
-          case "machinegun":
+            case "machinegun":
             ctx.drawImage(machinegunBlockImg, brickX, brickY, brickWidth, brickHeight);
             break;
-
           case "speed":
             ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
             break;
-
-          case "silver":
-            if (!b.hits || b.hits === 0) {
-              ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
-            } else if (b.hits === 1) {
-              ctx.drawImage(silver2Img, brickX, brickY, brickWidth, brickHeight);
-            }
-            break;
-
+            case "silver":
+          if (!b.hits || b.hits === 0) {
+             ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
+           } else if (b.hits === 1) {
+             ctx.drawImage(silver2Img, brickX, brickY, brickWidth, brickHeight);
+           }
+           break;
           case "stone":
             if (b.hits === 0) {
               ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
@@ -581,18 +494,6 @@ function drawBricks() {
               ctx.drawImage(dollarPxpImg, brickX, brickY, brickWidth, brickHeight);
             }
             break;
-
-          case "stonefall":
-            if (stoneBlockImg && stoneBlockImg.complete) {
-              ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
-            } else {
-              ctx.fillStyle = "#6f6b66";
-              ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-              ctx.strokeStyle = "#5a554f";
-              ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
-            }
-            break;
-
           default:
             ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
             break;
@@ -601,7 +502,6 @@ function drawBricks() {
     }
   }
 }
-
 
 function drawPointPopups() {
   pointPopups.forEach((p, index) => {
@@ -1280,7 +1180,6 @@ function checkCoinCollision() {
   });
 }
 
-
 function collisionDetection() {
   balls.forEach(ball => {
     for (let c = 0; c < brickColumnCount; c++) {
@@ -1389,24 +1288,12 @@ function collisionDetection() {
 
           // 🎁 Bonusacties
           switch (b.type) {
-            case "stonefall": {
-              // 🔥 STAP 7: start emitter en laat blok even blijven staan
-              if (!b.stonefallActive) {
-                const midX = b.x + brickWidth / 2;
-                const midY = b.y + brickHeight / 2;
-                startStonefallEmitter(b, midX, midY, 2500); // ~2.5s spuugtijd
-              }
-              // ⚠️ Geen gedeelde cleanup nu; die gebeurt later in updateStonefallBlocks()
-              return;
-            }
-
             case "power":
             case "flags":
               flagsOnPaddle = true;
               flagTimer = Date.now();
               flagsActivatedSound.play();
               break;
-
             case "machinegun":
               machineGunActive = true;
               machineGunShotsFired = 0;
@@ -1419,24 +1306,20 @@ function collisionDetection() {
               b.status = 0;
               b.type = "normal";
               break;
-
             case "rocket":
               rocketActive = true;
               rocketAmmo = 3;
               rocketReadySound.play();
               break;
-
             case "doubleball":
               spawnExtraBall(ball);
               doubleBallSound.play();
               break;
-
             case "2x":
               doublePointsActive = true;
               doublePointsStartTime = Date.now();
               doublePointsSound.play();
               break;
-
             case "speed":
               speedBoostActive = true;
               speedBoostStart = Date.now();
@@ -1444,7 +1327,6 @@ function collisionDetection() {
               break;
           }
 
-          // 🔽 Gedeelde cleanup voor reguliere bonussen
           b.status = 0;
 
           let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
@@ -1458,8 +1340,6 @@ function collisionDetection() {
     }
   });
 }
-
-
 
 
 function spawnExtraBall(originBall) {
@@ -1546,106 +1426,21 @@ function isPaddleBlockedHorizontally(newX) {
   return false;
 }
 
-function drawFallingStones() {
-  // ⏱️ Nieuwe stenen vrijgeven wanneer hun spawnAt is bereikt
-  const now = (typeof performance !== "undefined" && performance && performance.now)
-    ? performance.now()
-    : Date.now();
 
-  for (let i = stonefallQueue.length - 1; i >= 0; i--) {
-    const q = stonefallQueue[i];
-    if (now >= q.spawnAt) {
-      fallingStones.push({ ...q, active: true });
-      stonefallQueue.splice(i, 1);
-    }
-  }
-
-  // Bestaande stenen updaten/tekenen
-  for (let i = fallingStones.length - 1; i >= 0; i--) {
-    const s = fallingStones[i];
-    if (!s.active) { fallingStones.splice(i, 1); continue; }
-
-    // Fysica
-    s.vx += s.ax;
-    s.vy += s.ay;
-    s.vx = Math.max(Math.min(s.vx, 2.0), -2.0);
-    s.vy = Math.min(s.vy, 7.0);
-    s.x += s.vx;
-    s.y += s.vy;
-
-    // Teken
-    const img = s.img && s.img.complete ? s.img : null;
-    if (img) ctx.drawImage(img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
-    else {
-      ctx.fillStyle = "#777";
-      ctx.fillRect(s.x - s.size/2, s.y - s.size/2, s.size, s.size);
-    }
-
-    // Paddle-collision (AABB)
-    const paddleLeft = paddleX, paddleRight = paddleX + paddleWidth;
-    const paddleTop = paddleY, paddleBottom = paddleY + paddleHeight;
-    const stoneLeft = s.x - s.size/2, stoneRight = s.x + s.size/2;
-    const stoneTop = s.y - s.size/2, stoneBottom = s.y + s.size/2;
-
-    const hitPaddle =
-      stoneRight >= paddleLeft &&
-      stoneLeft  <= paddleRight &&
-      stoneBottom>= paddleTop &&
-      stoneTop   <= paddleBottom;
-
-    if (hitPaddle) {
-      if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, s.y);
-      s.active = false;
-      stoneHitOverlayTimer = 18;
-      if (lives > 1) {
-        lives--;
-        if (typeof updateLivesDisplay === "function") updateLivesDisplay();
-      } else {
-        lives = 0;
-        if (typeof updateLivesDisplay === "function") updateLivesDisplay();
-        if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
-      }
-      continue;
-    }
-
-    // Bodem → vergruizen
-    if (s.y - s.size/2 > canvas.height) {
-      if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, canvas.height - 10);
-      s.active = false;
-      continue;
-    }
-
-    // Links/Rechts buiten beeld → opruimen
-    if (s.x + s.size/2 < 0 || s.x - s.size/2 > canvas.width) {
-      s.active = false;
-    }
-  }
-}
-
-
-
- function draw() {
+function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-   
-  collisionDetection();
-  updateStonefallBlocks(); // <-- nieuw voor Stonefall
-  drawElectricBursts();
 
+  drawElectricBursts(); // 🔄 VOORAF tekenen, zodat het ONDER alles ligt
+
+  collisionDetection();
   drawCoins();
   drawFallingHearts();
   drawHeartPopup();
   checkCoinCollision();
-  drawFallingStones();   // <-- stenen boven bricks
-   
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
   drawPointPopups();
-
-
-  drawPaddle();
-
-}
 
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
@@ -2134,7 +1929,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 27) {
+  if (imagesLoaded === 23) {
     resetBricks();
     updateLivesDisplay(); // ✅ laat bij start meteen levens zien
     resetPaddle(); // 🔥 paddletekening klaarzetten
@@ -2165,10 +1960,6 @@ heartImg.onload = onImageLoad;
 heartBoardImg.onload = onImageLoad;
 silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
-stoneSmallImg.onload  = onImageLoad;
-stoneMediumImg.onload = onImageLoad;
-stoneLargeImg.onload  = onImageLoad;
-stoneBlockImg.onload  = onImageLoad;
 
 
 document.addEventListener("mousedown", function (e) {
