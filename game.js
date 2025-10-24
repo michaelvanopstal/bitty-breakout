@@ -1033,29 +1033,19 @@ function pickRandomRockSprite() {
 }
 
 function triggerStonefall(originX, originY) {
+  // 5–8 stenen spawnen
   const count = 5 + Math.floor(Math.random() * 4);
-
   for (let i = 0; i < count; i++) {
-    const rock = pickRandomRockSprite();
-
-    // Kleine spreiding en richting met lichte boog
-    const angle = (Math.random() - 0.5) * Math.PI / 3; // -30° tot +30°
-    const speed = 3 + Math.random() * 1.5;
-
     fallingStones.push({
-      x: originX,
-      y: originY,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      ay: 0.15 + Math.random() * 0.05, // zwaartekracht
-      size: rock.baseSize + (Math.random() - 0.5) * rock.sizeJitter,
-      img: rock.img,
+      x: originX + (Math.random() - 0.5) * 40,  // beetje spreiding
+      y: originY + 10,
+      dy: 3 + Math.random() * 2,                // valsnelheid
+      size: 22 + Math.random() * 10,
       active: true,
       shattered: false
     });
   }
 }
-
 
 // tekent + update van de vallende stenen, levensverlies bij hit, “verprijten”
 function drawFallingStones() {
@@ -1064,8 +1054,7 @@ function drawFallingStones() {
     if (!s.active) { fallingStones.splice(i, 1); continue; }
 
     // tekenen – hergebruik stone1.png
-    const img = s.img && s.img.complete ? s.img : stone1Img;
-ctx.drawImage(img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+    ctx.drawImage(stone1Img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
 
     // bewegen
     s.y += s.dy;
@@ -1113,7 +1102,6 @@ ctx.drawImage(img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     }
   }
 }
-
 
 
 function drawFlyingCoins() {
