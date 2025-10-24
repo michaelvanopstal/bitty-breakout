@@ -1402,26 +1402,33 @@ function collisionDetection() {
 
           // 🎁 Bonusacties
           switch (b.type) {
-            case "stonefall": {
-              // Blok blijft staan en spuugt 5–8 stenen; cleanup later in updateStonefallBlocks()
-              if (!b.stonefallActive) {
-                const midX = b.x + brickWidth / 2;
-                const midY = b.y + brickHeight / 2;
-                // Gebruik de emitter-variant:
-                // startStonefallEmitter(b, midX, midY, 2500);
-                // Als je nog geen emitter hebt, kun je tijdelijk dit gebruiken:
-                if (typeof startStonefallEmitter === "function") {
-                  startStonefallEmitter(b, midX, midY, 2500);
-                } else {
-                  // fallback: direct queue’en (dan wél meteen cleanup hieronder)
-                  triggerStonefall(midX, midY);
-                }
-              }
-              // ⚠️ Heel belangrijk: GEEN directe cleanup; emitter regelt het later.
-              // Alleen als je de fallback (triggerStonefall) gebruikt en GEEN emitter hebt,
-              // kun je dit 'return;' weghalen zodat hij doorloopt naar cleanup.
-              return;
-            }
+           case "stonefall": {
+  // hits tellen
+  b.hits = (b.hits || 0) + 1;
+
+  // spuug stenen (elke hit)
+  const midX = b.x + brickWidth / 2;
+  const midY = b.y + brickHeight / 2;
+  triggerStonefall(midX, midY);
+
+  if (b.hits >= 3) {
+    // nu pas blok weg + punten + coin
+    b.status = 0;
+
+    let earned = doublePointsActive ? 20 : 10;
+    score += earned;
+    updateScoreDisplay();
+
+    spawnCoin(b.x, b.y);
+    b.type = "normal";
+    // geen return → laat na de switch de rest van de afhandeling NIET lopen,
+    // we zijn klaar voor deze botsing
+  } else {
+    // blok blijft staan tot 3e hit
+    return;
+  }
+  break;
+}
 
             case "power":
             case "flags":
