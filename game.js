@@ -52,7 +52,8 @@ let paddleFreeMove = false; // ⛔ paddle zit eerst vast in verticale beweging
 // 🪨 Stonefall
 let fallingStones = [];  // actieve vallende stenen {x,y,dy,size,active,shattered}
 let stoneHitOverlayTimer = 0; // kort rood flash-effect bij paddle-hit
-let stoneHitLock = false; // voorkomt meerdere leven-afnames tegelijk
+let stoneHitLock = false;        // voorkomt meerdere leven-afnamen tegelijk
+let stoneClearRequested = false; // na de loop alle stenen weggooien
 
 // 🌟 Level 2 overgang
 let levelTransitionActive = false;
@@ -1063,68 +1064,82 @@ function triggerStonefall(originX, originY) {
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
-    if (!s.active) { fallingStones.splice(i, 1); continue; }
-
-    // ✅ tekenen – gebruik de gekozen sprite met fallback
-    if (s.img && s.img.complete) {
-      ctx.drawImage(s.img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
-    } else {
-      // fallback als de sprite nog niet geladen is
-      ctx.drawImage(stoneSmallImg, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+    if (!s.active) { 
+      fallingStones.splice(i, 1); 
+      continue; 
     }
 
-    // bewegen
+    // ✅ Tekenen – gebruik de gekozen sprite met fallback
+    if (s.img && s.img.complete) {
+      ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+    } else {
+      // fallback als de sprite nog niet geladen is
+      ctx.drawImage(stoneSmallImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+    }
+
+    // 🌀 Beweging
     s.y += s.dy;
 
-
-    // botsing met paddle?
+    // 🎯 Paddle-collision check
     const paddleLeft   = paddleX;
     const paddleRight  = paddleX + paddleWidth;
     const paddleTop    = paddleY;
     const paddleBottom = paddleY + paddleHeight;
-    const stoneLeft    = s.x - s.size/2;
-    const stoneRight   = s.x + s.size/2;
-    const stoneTop     = s.y - s.size/2;
-    const stoneBottom  = s.y + s.size/2;
+    const stoneLeft    = s.x - s.size / 2;
+    const stoneRight   = s.x + s.size / 2;
+    const stoneTop     = s.y - s.size / 2;
+    const stoneBottom  = s.y + s.size / 2;
 
-    const hitPaddle = (
+    const hitPaddle =
       stoneRight >= paddleLeft &&
       stoneLeft  <= paddleRight &&
-      stoneBottom>= paddleTop &&
-      stoneTop   <= paddleBottom
-    );
+      stoneBottom >= paddleTop &&
+      stoneTop   <= paddleBottom;
 
     if (hitPaddle) {
-  if (!stoneHitLock) {
-    stoneHitLock = true; // voorkomt meerdere hits tegelijk
+      // 💥 Effect bij impact
+      spawnStoneDebris(s.x, s.y);
+      s.active = false;
+      stoneHitOverlayTimer = 18;
 
-    // 💥 Puin-effect bij impact
-    spawnStoneDebris(s.x, s.y);
-    stoneHitOverlayTimer = 18;
+      if (!stoneHitLock) {
+        stoneHitLock = true;
 
-    // 💖 Leven aftrekken
-    if (lives > 1) {
-      lives--;
-      updateLivesDisplay();
-    } else {
-      lives = 0;
-      updateLivesDisplay();
-      triggerPaddleExplosion();
+        // ❤️ Slechts één leven aftrekken per salvo
+        if (lives > 1) {
+          lives--;
+          if (typeof updateLivesDisplay === "function") updateLivesDisplay();
+        } else {
+          lives = 0;
+          if (typeof updateLivesDisplay === "function") updateLivesDisplay();
+          if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
+        }
+
+        // 🎯 Bal terug op paddle (geen bricks reset)
+        if (typeof resetBall === "function") resetBall();
+
+        // 🚫 Markeer dat alle stenen verwijderd moeten worden (na loop)
+        stoneClearRequested = true;
+
+        // ⏳ 0.8 sec onschendbaarheid
+        setTimeout(() => { stoneHitLock = false; }, 800);
+      }
+
+      continue;
     }
 
-    // 💫 Reset ball direct terug op paddle
-    resetBall();
-
-    // 🪨 Stop alle vallende stenen direct
-    fallingStones = [];
-
-    // ⏳ Na korte delay mag weer geraakt worden
-    setTimeout(() => { stoneHitLock = false; }, 2000);
+    // 💀 Onderaan uit beeld → vergruizen
+    if (s.y - s.size / 2 > canvas.height) {
+      spawnStoneDebris(s.x, canvas.height - 10);
+      s.active = false;
+    }
   }
 
-  // steen zelf verwijderen
-  s.active = false;
-  continue;
+  // 🧹 Na de loop alle stenen tegelijk verwijderen (veilig)
+  if (stoneClearRequested) {
+    fallingStones.length = 0;
+    stoneClearRequested = false;
+  }
 }
 
 
