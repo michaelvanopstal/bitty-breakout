@@ -1040,7 +1040,7 @@ function pickRandomRockSprite() {
 }
 
 function triggerStonefall(originX, originY) {
-  const count = 2 + Math.floor(Math.random() * 4); // 5–8
+  const count = 1 + Math.floor(Math.random() * 3); // 5–8
   for (let i = 0; i < count; i++) {
     const rock = pickRandomRockSprite(); // kiest small/medium/large
 
