@@ -1546,6 +1546,82 @@ function isPaddleBlockedHorizontally(newX) {
   return false;
 }
 
+function drawFallingStones() {
+  // ⏱️ Nieuwe stenen vrijgeven wanneer hun spawnAt is bereikt
+  const now = (typeof performance !== "undefined" && performance && performance.now)
+    ? performance.now()
+    : Date.now();
+
+  for (let i = stonefallQueue.length - 1; i >= 0; i--) {
+    const q = stonefallQueue[i];
+    if (now >= q.spawnAt) {
+      fallingStones.push({ ...q, active: true });
+      stonefallQueue.splice(i, 1);
+    }
+  }
+
+  // Bestaande stenen updaten/tekenen
+  for (let i = fallingStones.length - 1; i >= 0; i--) {
+    const s = fallingStones[i];
+    if (!s.active) { fallingStones.splice(i, 1); continue; }
+
+    // Fysica
+    s.vx += s.ax;
+    s.vy += s.ay;
+    s.vx = Math.max(Math.min(s.vx, 2.0), -2.0);
+    s.vy = Math.min(s.vy, 7.0);
+    s.x += s.vx;
+    s.y += s.vy;
+
+    // Teken
+    const img = s.img && s.img.complete ? s.img : null;
+    if (img) ctx.drawImage(img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+    else {
+      ctx.fillStyle = "#777";
+      ctx.fillRect(s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+    }
+
+    // Paddle-collision (AABB)
+    const paddleLeft = paddleX, paddleRight = paddleX + paddleWidth;
+    const paddleTop = paddleY, paddleBottom = paddleY + paddleHeight;
+    const stoneLeft = s.x - s.size/2, stoneRight = s.x + s.size/2;
+    const stoneTop = s.y - s.size/2, stoneBottom = s.y + s.size/2;
+
+    const hitPaddle =
+      stoneRight >= paddleLeft &&
+      stoneLeft  <= paddleRight &&
+      stoneBottom>= paddleTop &&
+      stoneTop   <= paddleBottom;
+
+    if (hitPaddle) {
+      if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, s.y);
+      s.active = false;
+      stoneHitOverlayTimer = 18;
+      if (lives > 1) {
+        lives--;
+        if (typeof updateLivesDisplay === "function") updateLivesDisplay();
+      } else {
+        lives = 0;
+        if (typeof updateLivesDisplay === "function") updateLivesDisplay();
+        if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
+      }
+      continue;
+    }
+
+    // Bodem → vergruizen
+    if (s.y - s.size/2 > canvas.height) {
+      if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, canvas.height - 10);
+      s.active = false;
+      continue;
+    }
+
+    // Links/Rechts buiten beeld → opruimen
+    if (s.x + s.size/2 < 0 || s.x - s.size/2 > canvas.width) {
+      s.active = false;
+    }
+  }
+}
+
 
 
  function draw() {
@@ -1554,7 +1630,6 @@ function isPaddleBlockedHorizontally(newX) {
   collisionDetection();
   updateStonefallBlocks(); // <-- nieuw voor Stonefall
   drawElectricBursts();
-  drawBricks();
 
   drawCoins();
   drawFallingHearts();
