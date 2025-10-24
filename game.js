@@ -566,39 +566,58 @@ function drawPointPopups() {
 }
 
 function resetBricks() {
+  // Kies de juiste map per level
+  let currentMap = [];
+  if (level === 1) {
+    currentMap = (typeof level1Map !== "undefined" && Array.isArray(level1Map))
+      ? level1Map
+      : bonusBricks;
+  } else if (level === 2) {
+    currentMap = (typeof level2Map !== "undefined" && Array.isArray(level2Map))
+      ? level2Map
+      : pxpMap;
+  } else if (level === 3) {
+    currentMap = (typeof level3Map !== "undefined" && Array.isArray(level3Map))
+      ? level3Map
+      : [];
+  } else {
+    currentMap = [];
+  }
+
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
-      bricks[c][r].status = 1;
+      const b = bricks[c][r];
+      b.status = 1;
 
-      let brickType = "normal"; // ✅ slechts één keer
+      // Kijk of deze brick in de map voorkomt
+      const defined = currentMap.find(p => p.col === c && p.row === r);
+      let brickType = defined ? defined.type : "normal"; // standaard "normal"
 
-      const bonus = bonusBricks.find(b => b.col === c && b.row === r);
-      let pxp = pxpMap.find(p => p.col === c && p.row === r);
-
-      if (level === 2 && pxp) {
-        brickType = pxp.type || "stone"; // 👈 gebruik type indien aanwezig, anders "stone"
-      } else if (bonus) {
-        brickType = bonus.type;
+      // 💎 Level 1 bonus fallback (alleen voor je originele setup)
+      if (level === 1 && !defined) {
+        const bonus = bonusBricks.find(x => x.col === c && x.row === r);
+        if (bonus) brickType = bonus.type;
       }
 
-      bricks[c][r].type = brickType;
+      // Pas type toe
+      b.type = brickType;
 
-      // Extra eigenschappen voor stone blokken
-      if (brickType === "stone") {
-        bricks[c][r].hits = 0;
-        bricks[c][r].hasDroppedBag = false;
+      // Reset type-specifieke eigenschappen
+      if (brickType === "stone" || brickType === "silver") {
+        b.hits = 0;
+        b.hasDroppedBag = false;
       } else {
-        delete bricks[c][r].hits;
-        delete bricks[c][r].hasDroppedBag;
+        delete b.hits;
+        delete b.hasDroppedBag;
       }
 
-      // 🔄 Reset hartje voor elk blokje (veilig)
-      bricks[c][r].hasHeart = false;
-      bricks[c][r].heartDropped = false;
+      // Reset hartjes
+      b.hasHeart = false;
+      b.heartDropped = false;
     }
   }
 
-  // ✅ Plaats 4 willekeurige hartjes onder normale blokjes
+  // Plaats 4 willekeurige hartjes onder normale blokken
   assignHeartBlocks();
 }
 
