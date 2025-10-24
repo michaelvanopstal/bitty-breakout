@@ -518,13 +518,16 @@ function drawBricks() {
             }
             break;
 
-         case "stonefall":
-          if (stoneBlockImg && stoneBlockImg.complete) {
-           ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
-           } else {
-           ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight); // fallback
-           }
-            break;
+              case "stonefall":
+  if (stoneBlockImg && stoneBlockImg.complete) {
+    ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
+  } else {
+    ctx.fillStyle = "#6f6b66";
+    ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+    ctx.strokeStyle = "#5a554f";
+    ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
+  }
+  break;
 
 
           default:
@@ -1023,29 +1026,34 @@ function drawFallingHearts() {
 
 function pickRandomRockSprite() {
   const r = Math.random();
-  if (r < 0.4) {
-    return { img: stoneSmallImg, baseSize: 22 * 3, sizeJitter: 4 * 3 };
-  } else if (r < 0.75) {
-    return { img: stoneMediumImg, baseSize: 30 * 3, sizeJitter: 6 * 3 };
-  } else {
-    return { img: stoneLargeImg, baseSize: 38 * 3, sizeJitter: 6 * 3 };
+  if (r < 0.40) {         // 40% klein
+    return { img: stoneSmallImg,  size: 70 + Math.random() * 12 };   // ~70–82
+  } else if (r < 0.75) {  // 35% medium
+    return { img: stoneMediumImg, size: 86 + Math.random() * 14 };   // ~86–100
+  } else {                // 25% groot
+    return { img: stoneLargeImg,  size: 102 + Math.random() * 16 };  // ~102–118
   }
 }
 
+
 function triggerStonefall(originX, originY) {
-  // 5–8 stenen spawnen
-  const count = 5 + Math.floor(Math.random() * 4);
+  const count = 5 + Math.floor(Math.random() * 4); // 5–8
   for (let i = 0; i < count; i++) {
+    const rock = pickRandomRockSprite(); // ⬅️ kiest small/medium/large
+
     fallingStones.push({
-      x: originX + (Math.random() - 0.5) * 40,  // beetje spreiding
+      x: originX + (Math.random() - 0.5) * 40,
       y: originY + 10,
-      dy: 3 + Math.random() * 2,                // valsnelheid
-      size: 22 + Math.random() * 10,
+      dy: 3 + Math.random() * 2,
+      size: rock.size,
+      img: rock.img,          // ⬅️ BEWAAR DE JUISTE SPRITE HIER
       active: true,
       shattered: false
     });
   }
 }
+
+
 
 // tekent + update van de vallende stenen, levensverlies bij hit, “verprijten”
 function drawFallingStones() {
@@ -1053,11 +1061,17 @@ function drawFallingStones() {
     const s = fallingStones[i];
     if (!s.active) { fallingStones.splice(i, 1); continue; }
 
-    // tekenen – hergebruik stone1.png
-    ctx.drawImage(stone1Img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+    // ✅ tekenen – gebruik de gekozen sprite met fallback
+    if (s.img && s.img.complete) {
+      ctx.drawImage(s.img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+    } else {
+      // fallback als de sprite nog niet geladen is
+      ctx.drawImage(stoneSmallImg, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+    }
 
     // bewegen
     s.y += s.dy;
+
 
     // botsing met paddle?
     const paddleLeft   = paddleX;
