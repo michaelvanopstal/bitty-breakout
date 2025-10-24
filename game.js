@@ -196,6 +196,23 @@ const level3Map = [
   { col: 3, row: 8, type: "stonefall" },
   { col: 5, row: 8, type: "stonefall" },
 ];
+// 🔷 Level 4 — diagonale /-lijnen (stone afgewisseld met normal)
+const level4Map = (() => {
+  const cols = 9;    // 0..8
+  const rows = 15;   // 0..14
+  const arr = [];
+
+  // Diagonalen van linksonder naar rechtsboven = constante (row - col)
+  // Even diagonaal → stone, oneven → normal
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const diag = row - col;
+      const isEvenDiag = ((diag % 2) + 2) % 2 === 0;
+      arr.push({ col, row, type: isEvenDiag ? "stone" : "normal" });
+    }
+  }
+  return arr;
+})();
 
 const resetBallSound = new Audio("resetball.mp3");
 
