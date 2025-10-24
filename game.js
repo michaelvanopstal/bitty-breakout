@@ -1547,23 +1547,30 @@ function isPaddleBlockedHorizontally(newX) {
 }
 
 
-function draw() {
+
+ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  drawElectricBursts(); // 🔄 VOORAF tekenen, zodat het ONDER alles ligt
-
-  collisionDetection(); 
-  updateStonefallBlocks();
+   
+  collisionDetection();
+  updateStonefallBlocks(); // <-- nieuw voor Stonefall
+  drawElectricBursts();
   drawBricks();
-  drawFallingStones();
+
   drawCoins();
   drawFallingHearts();
   drawHeartPopup();
   checkCoinCollision();
+  drawFallingStones();   // <-- stenen boven bricks
+   
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
   drawPointPopups();
+
+
+  drawPaddle();
+
+}
 
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
