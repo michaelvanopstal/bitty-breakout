@@ -1028,7 +1028,6 @@ function drawFallingHearts() {
     }
   });
 }
-
 function pickRandomRockSprite() {
   const r = Math.random();
   if (r < 0.40) {         // 40% klein
@@ -1040,47 +1039,43 @@ function pickRandomRockSprite() {
   }
 }
 
-
 function triggerStonefall(originX, originY) {
-  const count = 5 + Math.floor(Math.random() * 4); // 2–5
+  const count = 5 + Math.floor(Math.random() * 4); // 5–8
   for (let i = 0; i < count; i++) {
-    const rock = pickRandomRockSprite(); // ⬅️ kiest small/medium/large
+    const rock = pickRandomRockSprite(); // kiest small/medium/large
 
     fallingStones.push({
       x: originX + (Math.random() - 0.5) * 40,
       y: originY + 10,
       dy: 3 + Math.random() * 2,
       size: rock.size,
-      img: rock.img,          // ⬅️ BEWAAR DE JUISTE SPRITE HIER
+      img: rock.img,          // per-steen sprite
       active: true,
       shattered: false
     });
   }
 }
 
-
-
-// tekent + update van de vallende stenen, levensverlies bij hit, “verprijten”
+// Tekent + update van de vallende stenen, 1 leven per salvo, bal-reset, veilige cleanup
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
-    if (!s.active) { 
-      fallingStones.splice(i, 1); 
-      continue; 
+    if (!s.active) {
+      fallingStones.splice(i, 1);
+      continue;
     }
 
-    // ✅ Tekenen – gebruik de gekozen sprite met fallback
+    // Tekenen – gebruik de gekozen sprite met fallback
     if (s.img && s.img.complete) {
       ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     } else {
-      // fallback als de sprite nog niet geladen is
       ctx.drawImage(stoneSmallImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     }
 
-    // 🌀 Beweging
+    // Beweging
     s.y += s.dy;
 
-    // 🎯 Paddle-collision check
+    // Paddle-collision
     const paddleLeft   = paddleX;
     const paddleRight  = paddleX + paddleWidth;
     const paddleTop    = paddleY;
@@ -1097,7 +1092,7 @@ function drawFallingStones() {
       stoneTop   <= paddleBottom;
 
     if (hitPaddle) {
-      // 💥 Effect bij impact
+      // Effect bij impact
       spawnStoneDebris(s.x, s.y);
       s.active = false;
       stoneHitOverlayTimer = 18;
@@ -1105,7 +1100,7 @@ function drawFallingStones() {
       if (!stoneHitLock) {
         stoneHitLock = true;
 
-        // ❤️ Slechts één leven aftrekken per salvo
+        // Slechts één leven aftrekken per salvo
         if (lives > 1) {
           lives--;
           if (typeof updateLivesDisplay === "function") updateLivesDisplay();
@@ -1115,41 +1110,33 @@ function drawFallingStones() {
           if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
         }
 
-        // 🎯 Bal terug op paddle (geen bricks reset)
+        // Bal terug op paddle (geen bricks reset)
         if (typeof resetBall === "function") resetBall();
 
-        // 🚫 Markeer dat alle stenen verwijderd moeten worden (na loop)
+        // Vraag na de loop om alle stenen te verwijderen (veilig)
         stoneClearRequested = true;
 
-        // ⏳ 0.8 sec onschendbaarheid
+        // Korte onschendbaarheid voor het volgende salvo
         setTimeout(() => { stoneHitLock = false; }, 800);
       }
 
       continue;
     }
 
-    // 💀 Onderaan uit beeld → vergruizen
+    // Onderaan uit beeld → vergruizen
     if (s.y - s.size / 2 > canvas.height) {
       spawnStoneDebris(s.x, canvas.height - 10);
       s.active = false;
     }
   }
 
-  // 🧹 Na de loop alle stenen tegelijk verwijderen (veilig)
+  // Na de loop alle stenen in één keer verwijderen (voorkomt loop-crash)
   if (stoneClearRequested) {
     fallingStones.length = 0;
     stoneClearRequested = false;
   }
 }
 
-
-    // bodem: ook verprijten
-    if (s.y - s.size/2 > canvas.height) {
-      spawnStoneDebris(s.x, canvas.height - 10);
-      s.active = false;
-    }
-  }
-}
 
 
 function drawFlyingCoins() {
