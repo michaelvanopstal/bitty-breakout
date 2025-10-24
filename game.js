@@ -676,9 +676,9 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
-
 function resetBricks() {
   let currentMap = [];
+
   if (level === 1) {
     currentMap = (typeof level1Map !== "undefined" && Array.isArray(level1Map)) ? level1Map : bonusBricks;
   } else if (level === 2) {
@@ -693,9 +693,7 @@ function resetBricks() {
     currentMap = [];
   }
 
-  // … rest van je bestaande resetBricks() ongewijzigd …
-}
-
+  // … rest van je bestaande resetBricks() …
 
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -706,7 +704,7 @@ function resetBricks() {
       const defined = currentMap.find(p => p.col === c && p.row === r);
       let brickType = defined ? defined.type : "normal"; // standaard "normal"
 
-      // 💎 Level 1 bonus fallback (alleen voor je originele setup)
+      // Level 1 bonus fallback (alleen voor je originele setup)
       if (level === 1 && !defined) {
         const bonus = bonusBricks.find(x => x.col === c && x.row === r);
         if (bonus) brickType = bonus.type;
@@ -733,6 +731,7 @@ function resetBricks() {
   // Plaats 4 willekeurige hartjes onder normale blokken
   assignHeartBlocks();
 }
+
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
 function assignHeartBlocks() {
