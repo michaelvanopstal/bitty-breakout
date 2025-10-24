@@ -165,6 +165,37 @@ const pxpMap = [
   { col: 6, row: 7, type: "stone" },
   { col: 0, row: 0, type: "stone" },                                                               
 ];
+// 🌋 Level 3 layout (voorbeeld)
+const level3Map = [
+  // Rand van stenen (stevig)
+  { col: 0, row: 0, type: "stone" }, { col: 1, row: 0, type: "stone" }, { col: 2, row: 0, type: "stone" },
+  { col: 3, row: 0, type: "stone" }, { col: 4, row: 0, type: "stone" }, { col: 5, row: 0, type: "stone" },
+  { col: 6, row: 0, type: "stone" }, { col: 7, row: 0, type: "stone" }, { col: 8, row: 0, type: "stone" },
+  { col: 0, row: 14, type: "stone" }, { col: 1, row: 14, type: "stone" }, { col: 2, row: 14, type: "stone" },
+  { col: 3, row: 14, type: "stone" }, { col: 4, row: 14, type: "stone" }, { col: 5, row: 14, type: "stone" },
+  { col: 6, row: 14, type: "stone" }, { col: 7, row: 14, type: "stone" }, { col: 8, row: 14, type: "stone" },
+
+  // Zijwanden
+  { col: 0, row: 4, type: "stone" }, { col: 0, row: 5, type: "stone" }, { col: 0, row: 6, type: "stone" },
+  { col: 8, row: 4, type: "stone" }, { col: 8, row: 5, type: "stone" }, { col: 8, row: 6, type: "stone" },
+
+  // Diagonalen van silver (2 hits + elektriciteitseffect)
+  { col: 1, row: 3, type: "silver" }, { col: 2, row: 4, type: "silver" }, { col: 3, row: 5, type: "silver" },
+  { col: 4, row: 6, type: "silver" }, { col: 5, row: 5, type: "silver" }, { col: 6, row: 4, type: "silver" },
+  { col: 7, row: 3, type: "silver" },
+
+  // Bonussen verspreid
+  { col: 4, row: 2, type: "machinegun" },
+  { col: 2, row: 2, type: "doubleball" },
+  { col: 6, row: 2, type: "speed" },
+  { col: 1, row: 8, type: "2x" },
+  { col: 7, row: 8, type: "2x" },
+  { col: 4, row: 9, type: "rocket" },
+
+  // Stonefall “valstrikken” (3 hits + laat stenen vallen)
+  { col: 3, row: 8, type: "stonefall" },
+  { col: 5, row: 8, type: "stonefall" },
+];
 
 const resetBallSound = new Audio("resetball.mp3");
 
