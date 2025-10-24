@@ -49,6 +49,9 @@ const paddleSpeed = 6;
 let downPressed = false;
 let upPressed = false;
 let paddleFreeMove = false; // ⛔ paddle zit eerst vast in verticale beweging
+// 🪨 Stonefall
+let fallingStones = [];  // actieve vallende stenen {x,y,dy,size,active,shattered}
+let stoneHitOverlayTimer = 0; // kort rood flash-effect bij paddle-hit
 
 // 🌟 Level 2 overgang
 let levelTransitionActive = false;
@@ -118,7 +121,8 @@ balls.push({
 
 const bonusBricks = [
   { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },
-  { col: 8, row: 4, type: "power" },
+  { col: 8, row: 4, type: "power" },   { col: 4, row: 6, type: "stonefall" },
+
   { col: 2, row: 7, type: "doubleball" }, { col: 7, row: 14, type: "silver" },{ col: 8, row: 14, type: "silver" },{ col: 6, row: 14, type: "silver" },
   { col: 0, row: 14, type: "silver" }, { col: 1, row: 14, type: "silver" }, { col: 2, row: 14, type: "silver" },
 
@@ -276,6 +280,21 @@ stone2Img.src = "stone2.png";
 
 const pxpBagImg = new Image();
 pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
+
+imgStoneBlock = new Image();
+imgStoneBlock.src = "stone_block.png";
+
+imgRockSmall = new Image();
+imgRockSmall.src = "rock_small.png";
+
+imgRockMedium = new Image();
+imgRockMedium.src = "rock_medium.png";
+
+imgRockLarge = new Image();
+imgRockLarge.src = "rock_large.png";
+
+// Vergeet niet je 'expected' imagesLoaded maximale aantal met +4 te verhogen.
+
 
 
 
@@ -497,6 +516,11 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
           default:
             ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
             break;
+            case "stonefall":
+            // Tijdelijk zelfde look als stone; later kun je eigen sprite plaatsen
+            ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
+            break;
+
         }
       }
     }
@@ -987,6 +1011,77 @@ function drawFallingHearts() {
   });
 }
 
+function triggerStonefall(originX, originY) {
+  // 5–8 stenen spawnen
+  const count = 5 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < count; i++) {
+    fallingStones.push({
+      x: originX + (Math.random() - 0.5) * 40,  // beetje spreiding
+      y: originY + 10,
+      dy: 3 + Math.random() * 2,                // valsnelheid
+      size: 22 + Math.random() * 10,
+      active: true,
+      shattered: false
+    });
+  }
+}
+
+// tekent + update van de vallende stenen, levensverlies bij hit, “verprijten”
+function drawFallingStones() {
+  for (let i = fallingStones.length - 1; i >= 0; i--) {
+    const s = fallingStones[i];
+    if (!s.active) { fallingStones.splice(i, 1); continue; }
+
+    // tekenen – hergebruik stone1.png
+    ctx.drawImage(stone1Img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+
+    // bewegen
+    s.y += s.dy;
+
+    // botsing met paddle?
+    const paddleLeft   = paddleX;
+    const paddleRight  = paddleX + paddleWidth;
+    const paddleTop    = paddleY;
+    const paddleBottom = paddleY + paddleHeight;
+    const stoneLeft    = s.x - s.size/2;
+    const stoneRight   = s.x + s.size/2;
+    const stoneTop     = s.y - s.size/2;
+    const stoneBottom  = s.y + s.size/2;
+
+    const hitPaddle = (
+      stoneRight >= paddleLeft &&
+      stoneLeft  <= paddleRight &&
+      stoneBottom>= paddleTop &&
+      stoneTop   <= paddleBottom
+    );
+
+    if (hitPaddle) {
+      // steen “verprijt” in puin
+      spawnStoneDebris(s.x, s.y);
+      s.active = false;
+      stoneHitOverlayTimer = 18; // ~300ms flash
+
+      // leven aftrekken zonder bal te verliezen
+      if (lives > 1) {
+        lives--;
+        updateLivesDisplay();
+      } else {
+        // 0 levens → gebruik je bestaande game-over flow
+        lives = 0;
+        updateLivesDisplay();
+        triggerPaddleExplosion(); // hergebruikt je bestaande afhandeling
+      }
+      continue;
+    }
+
+    // bodem: ook verprijten
+    if (s.y - s.size/2 > canvas.height) {
+      spawnStoneDebris(s.x, canvas.height - 10);
+      s.active = false;
+    }
+  }
+}
+
 
 
 function drawFlyingCoins() {
@@ -1325,7 +1420,14 @@ function collisionDetection() {
               speedBoostStart = Date.now();
               speedBoostSound.play();
               break;
-          }
+          case "stonefall": {
+             // spawn vallende stenen vanaf midden van dit blok
+              const midX = b.x + brickWidth / 2;
+              const midY = b.y + brickHeight / 2;
+              triggerStonefall(midX, midY);
+              break;
+           }
+
 
           b.status = 0;
 
@@ -1435,6 +1537,7 @@ function draw() {
   collisionDetection();
   drawCoins();
   drawFallingHearts();
+  drawFallingStones();  
   drawHeartPopup();
   checkCoinCollision();
   drawPaddleFlags();
@@ -1578,6 +1681,13 @@ if (ball.trail.length >= 2) {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
   }
+
+  // 🔴 Korte hit-flash bij steen op paddle
+if (stoneHitOverlayTimer > 0) {
+  ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  stoneHitOverlayTimer--;
+}
 
 
   // ✅ Na de loop: check of alle ballen weg zijn
@@ -1929,7 +2039,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 23) {
+  if (imagesLoaded === 27) {
     resetBricks();
     updateLivesDisplay(); // ✅ laat bij start meteen levens zien
     resetPaddle(); // 🔥 paddletekening klaarzetten
@@ -1960,6 +2070,12 @@ heartImg.onload = onImageLoad;
 heartBoardImg.onload = onImageLoad;
 silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
+imgStoneBlock.onload = () => { imagesLoaded++; };
+imgRockSmall.onload = () => { imagesLoaded++; };
+imgRockMedium.onload = () => { imagesLoaded++; };
+imgRockLarge.onload = () => { imagesLoaded++; };
+// Roep deze 1x aan tijdens init/start:
+loadStonefallImages();
 
 
 document.addEventListener("mousedown", function (e) {
