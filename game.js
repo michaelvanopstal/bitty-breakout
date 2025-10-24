@@ -461,11 +461,9 @@ function mouseMoveHandler(e) {
 
 
 
-
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
-const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
-
+  const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
 
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -474,7 +472,6 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
         const brickX = offsetX + c * brickWidth;
         const brickY = r * brickHeight + (levelTransitionActive ? transitionOffsetY : 0);
 
-
         b.x = brickX;
         b.y = brickY;
 
@@ -482,28 +479,35 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
           case "2x":
             ctx.drawImage(doublePointsImg, brickX, brickY, brickWidth, brickHeight);
             break;
+
           case "rocket":
             ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
             break;
+
           case "power":
             ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
             break;
+
           case "doubleball":
             ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
             break;
-            case "machinegun":
+
+          case "machinegun":
             ctx.drawImage(machinegunBlockImg, brickX, brickY, brickWidth, brickHeight);
             break;
+
           case "speed":
             ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
             break;
-            case "silver":
-          if (!b.hits || b.hits === 0) {
-             ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
-           } else if (b.hits === 1) {
-             ctx.drawImage(silver2Img, brickX, brickY, brickWidth, brickHeight);
-           }
-           break;
+
+          case "silver":
+            if (!b.hits || b.hits === 0) {
+              ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
+            } else if (b.hits === 1) {
+              ctx.drawImage(silver2Img, brickX, brickY, brickWidth, brickHeight);
+            }
+            break;
+
           case "stone":
             if (b.hits === 0) {
               ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
@@ -513,19 +517,25 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
               ctx.drawImage(dollarPxpImg, brickX, brickY, brickWidth, brickHeight);
             }
             break;
+
+          case "stonefall":
+            // Gebruik eigen sprite als je die hebt, anders tijdelijk stone1Img
+            if (typeof stoneBlockImg !== "undefined" && stoneBlockImg && stoneBlockImg.complete) {
+              ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
+            } else {
+              ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
+            }
+            break;
+
           default:
             ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
             break;
-            case "stonefall":
-            // Tijdelijk zelfde look als stone; later kun je eigen sprite plaatsen
-            ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
-            break;
-
         }
       }
     }
   }
 }
+
 
 function drawPointPopups() {
   pointPopups.forEach((p, index) => {
