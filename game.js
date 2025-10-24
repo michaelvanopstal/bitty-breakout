@@ -130,11 +130,11 @@ const bonusBricks = [
   { col: 0, row: 14, type: "silver" }, { col: 1, row: 14, type: "silver" }, { col: 2, row: 14, type: "silver" },
 
 
-  { col: 4, row: 7, type: "2x" },
-  { col: 2, row: 3, type: "speed" },
-  { col: 3, row: 14, type: "stone" },
-  { col: 4, row: 14, type: "stone" },
-  { col: 5, row: 13, type: "stone" },
+  { col: 4, row: 7, type: "2x" },          { col: 5, row: 8, type: "stonefall" },
+  { col: 2, row: 3, type: "speed" },       { col: 2, row: 2, type: "stonefall" },      
+  { col: 3, row: 14, type: "stone" },      { col: 2, row: 3, type: "stonefall" },
+  { col: 4, row: 14, type: "stone" },      { col: 2, row: 4, type: "stonefall" },
+  { col: 5, row: 14, type: "stone" },
   { col: 0, row: 8, type: "stone" },
   { col: 1, row: 8, type: "stone" },
   { col: 2, row: 8, type: "stone" },
