@@ -525,7 +525,6 @@ function updateStonefallBlocks() {
 }
 
 
-
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
 const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
@@ -582,20 +581,21 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
             break;
             case "stonefall":
           if (stoneBlockImg && stoneBlockImg.complete) {
-            ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
+              ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
             } else {
-            ctx.fillStyle = "#6f6b66";
-            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-            ctx.strokeStyle = "#5a554f";
-            ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
+             ctx.fillStyle = "#6f6b66";
+             ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+             ctx.strokeStyle = "#5a554f";
+             ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
             }
-            break;
+             break;
 
         }
       }
     }
   }
 }
+
 
 function drawPointPopups() {
   pointPopups.forEach((p, index) => {
@@ -1274,6 +1274,49 @@ function checkCoinCollision() {
   });
 }
 
+
+function checkCoinCollision() {
+  coins.forEach(coin => {
+    if (!coin.active) return;
+
+    const coinLeft = coin.x;
+    const coinRight = coin.x + coin.radius * 2;
+    const coinTop = coin.y;
+    const coinBottom = coin.y + coin.radius * 2;
+
+    const paddleLeft = paddleX;
+    const paddleRight = paddleX + paddleWidth;
+    const paddleTop = paddleY;
+    const paddleBottom = paddleY + paddleHeight;
+
+    const isOverlap =
+      coinRight >= paddleLeft &&
+      coinLeft <= paddleRight &&
+      coinBottom >= paddleTop &&
+      coinTop <= paddleBottom;
+
+    if (isOverlap) {
+      coin.active = false;
+
+      const earned = doublePointsActive ? 20 : 10;
+      score += earned;
+      updateScoreDisplay(); // 👈 aangepaste regel
+
+      coinSound.currentTime = 0;
+      coinSound.play();
+
+      pointPopups.push({
+        x: coin.x,
+        y: coin.y,
+        value: "+" + earned,
+        alpha: 1
+      });
+    } else if (coinBottom > canvas.height) {
+      coin.active = false;
+    }
+  });
+}
+
 function collisionDetection() {
   balls.forEach(ball => {
     for (let c = 0; c < brickColumnCount; c++) {
@@ -1382,24 +1425,12 @@ function collisionDetection() {
 
           // 🎁 Bonusacties
           switch (b.type) {
-            case "stonefall": {
-              // 🔥 STAP 7: start emitter en laat blok even blijven staan
-              if (!b.stonefallActive) {
-                const midX = b.x + brickWidth / 2;
-                const midY = b.y + brickHeight / 2;
-                startStonefallEmitter(b, midX, midY, 2500); // ~2.5s spuugtijd
-              }
-              // ⚠️ Geen gedeelde cleanup nu; die gebeurt later in updateStonefallBlocks()
-              return;
-            }
-
             case "power":
             case "flags":
               flagsOnPaddle = true;
               flagTimer = Date.now();
               flagsActivatedSound.play();
               break;
-
             case "machinegun":
               machineGunActive = true;
               machineGunShotsFired = 0;
@@ -1412,32 +1443,35 @@ function collisionDetection() {
               b.status = 0;
               b.type = "normal";
               break;
-
             case "rocket":
               rocketActive = true;
               rocketAmmo = 3;
               rocketReadySound.play();
               break;
-
             case "doubleball":
               spawnExtraBall(ball);
               doubleBallSound.play();
               break;
-
             case "2x":
               doublePointsActive = true;
               doublePointsStartTime = Date.now();
               doublePointsSound.play();
               break;
-
             case "speed":
               speedBoostActive = true;
               speedBoostStart = Date.now();
               speedBoostSound.play();
               break;
-          }
+              case "stonefall": {
+             if (!b.stonefallActive) {
+              const midX = b.x + brickWidth / 2;
+              const midY = b.y + brickHeight / 2;
+              startStonefallEmitter(b, midX, midY, 2500);
+              }
+              return; // wacht met vernietigen tot emitter klaar is
+              }
 
-          // 🔽 Gedeelde cleanup voor reguliere bonussen
+
           b.status = 0;
 
           let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
@@ -1451,6 +1485,7 @@ function collisionDetection() {
     }
   });
 }
+
 
 
 function spawnExtraBall(originBall) {
