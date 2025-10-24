@@ -1142,11 +1142,12 @@ function drawFallingStones() {
     const stoneTop     = s.y - s.size / 2;
     const stoneBottom  = s.y + s.size / 2;
 
-    const hitPaddle =
-      stoneRight >= paddleLeft &&
-      stoneLeft  <= paddleRight &&
-      stoneBottom >= paddleTop &&
-      stoneTop   <= paddleBottom;
+    // kleine correctie zodat de steen visueel echt de paddle raakt
+const hitPaddle =
+  stoneRight >= paddleLeft &&
+  stoneLeft  <= paddleRight &&
+  (stoneBottom - 10) >= paddleTop &&  // 10 px marge omhoog
+  stoneTop   <= paddleBottom;
 
     if (hitPaddle) {
       // effect op de steen zelf
