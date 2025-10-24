@@ -75,11 +75,6 @@ let machineGunLastShot = 0;
 let paddleDamageZones = []; // array van kapotgemaakte stukken
 let machineGunYOffset = 140; // minimale afstand tussen paddle en machinegun
 let minMachineGunY = 0;     // bovenste limiet (canvasrand)
-// 🪨 Stonefall — vallende stenen + korte hit-flash
-let fallingStones = [];      // {x,y,vx,vy,ax,ay,size,img,active}
-let stoneHitOverlayTimer = 0; // korte rode overlay bij paddle-hit
-// 🪨 Stonefall — queue zodat stenen één voor één spawnen
-let stonefallQueue = []; // items: { spawnAt, x, y, vx, vy, ax, ay, size, img }
 
 // ❤️ Hartjes-systeem
 let heartsCollected = 0;               // aantal verzamelde hartjes (reset bij 10)
@@ -123,8 +118,7 @@ balls.push({
 
 const bonusBricks = [
   { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },
-  { col: 8, row: 4, type: "power" },     { col: 4, row: 13, type: "stonefall" },
-
+  { col: 8, row: 4, type: "power" },
   { col: 2, row: 7, type: "doubleball" }, { col: 7, row: 14, type: "silver" },{ col: 8, row: 14, type: "silver" },{ col: 6, row: 14, type: "silver" },
   { col: 0, row: 14, type: "silver" }, { col: 1, row: 14, type: "silver" }, { col: 2, row: 14, type: "silver" },
 
@@ -283,18 +277,6 @@ stone2Img.src = "stone2.png";
 const pxpBagImg = new Image();
 pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
 
-// 🆕 Stonefall assets
-const stoneSmallImg  = new Image(); 
-stoneSmallImg.src  = "stone_small.png";
-
-const stoneMediumImg = new Image();  
-stoneMediumImg.src = "stone_medium.png";
-
-const stoneLargeImg  = new Image(); 
-stoneLargeImg.src  = "stone_large.png";
-
-const stoneBlockImg  = new Image(); 
-stoneBlockImg.src  = "stone_block.png";
 
 
 
@@ -320,127 +302,6 @@ resetBtn.addEventListener("mouseenter", () => {
 resetBtn.addEventListener("mouseleave", () => {
   tooltip.style.display = "none";
 });
-
-function pickRandomRockSprite() {
-  // Verdeling: 40% small (stone1), 35% medium (stone2), 25% large (stone1 groot)
-  const r = Math.random();
-  if (r < 0.40) {
-    return { img: stone1Img, baseSize: 22, sizeJitter: 4 };   // klein
-  } else if (r < 0.75) {
-    return { img: stone2Img, baseSize: 30, sizeJitter: 6 };   // medium
-  } else {
-    return { img: stone1Img, baseSize: 38, sizeJitter: 6 };   // groot
-  }
-}
-// 👉 Later kun je de 'grote' variant eenvoudig mappen naar een derde texture (bijv. stone3Img)
-
-// spawn UITGESTELD in een queue, zodat ze één voor één vallen
-function triggerStonefall(originX, originY) {
-  const count = 5 + Math.floor(Math.random() * 4); // 5–8
-  const base = (typeof performance !== "undefined" && performance && performance.now)
-    ? performance.now()
-    : Date.now();
-
-  for (let i = 0; i < count; i++) {
-    const style = Math.floor(Math.random() * 3);
-
-    const rock = pickRandomRockSprite();
-    const size = rock.baseSize + Math.floor(Math.random() * rock.sizeJitter);
-
-    const vy0 = 1.2 + Math.random() * 0.8;
-    let   vx0 = 0;
-    let   ax  = 0;
-    const ay  = 0.09 + Math.random() * 0.03;
-
-    if (style === 1) { vx0 = -(0.6 + Math.random() * 0.5); ax = -0.015 - Math.random() * 0.015; }
-    else if (style === 2) { vx0 = (0.6 + Math.random() * 0.5); ax = 0.015 + Math.random() * 0.015; }
-    else { vx0 = (Math.random() - 0.5) * 0.25; ax = (Math.random() - 0.5) * 0.006; }
-
-    const xSpread = (Math.random() - 0.5) * 30;
-    const delay = 160 + Math.random() * 160;
-    const spawnAt = base + i * delay;
-
-    stonefallQueue.push({
-      spawnAt,
-      x: originX + xSpread,
-      y: originY + 10,
-      vx: vx0,
-      vy: vy0,
-      ax,
-      ay,
-      size,
-      img: rock.img
-    });
-  }
-}
-
-function drawFallingStones() {
-  for (let i = fallingStones.length - 1; i >= 0; i--) {
-    const s = fallingStones[i];
-    if (!s.active) { fallingStones.splice(i, 1); continue; }
-
-    // Fysica: boog + zwaartekracht
-    s.vx += s.ax;
-    s.vy += s.ay;
-    s.vx *= 0.999;           // lichte demping
-    s.vy = Math.min(s.vy, 12);
-
-    s.x += s.vx;
-    s.y += s.vy;
-
-    // Teken steen (val terug op vierkantje als img nog niet geladen)
-    if (s.img && s.img.complete) {
-      ctx.drawImage(s.img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
-    } else {
-      ctx.fillStyle = "#777";
-      ctx.fillRect(s.x - s.size/2, s.y - s.size/2, s.size, s.size);
-    }
-
-    // Paddle-collision (AABB)
-    const paddleLeft   = paddleX;
-    const paddleRight  = paddleX + paddleWidth;
-    const paddleTop    = paddleY;
-    const paddleBottom = paddleY + paddleHeight;
-    const stoneLeft    = s.x - s.size/2;
-    const stoneRight   = s.x + s.size/2;
-    const stoneTop     = s.y - s.size/2;
-    const stoneBottom  = s.y + s.size/2;
-
-    const hitPaddle =
-      stoneRight >= paddleLeft &&
-      stoneLeft  <= paddleRight &&
-      stoneBottom>= paddleTop &&
-      stoneTop   <= paddleBottom;
-
-    if (hitPaddle) {
-      if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, s.y);
-      s.active = false;
-      stoneHitOverlayTimer = 18; // ~300ms flash
-
-      if (lives > 1) {
-        lives--;
-        if (typeof updateLivesDisplay === "function") updateLivesDisplay();
-      } else {
-        lives = 0;
-        if (typeof updateLivesDisplay === "function") updateLivesDisplay();
-        if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
-      }
-      continue;
-    }
-
-    // Bodem → vergruizen
-    if (s.y - s.size/2 > canvas.height) {
-      if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, canvas.height - 10);
-      s.active = false;
-      continue;
-    }
-
-    // Links/Rechts buiten beeld → opruimen
-    if (s.x + s.size/2 < 0 || s.x - s.size/2 > canvas.width) {
-      s.active = false;
-    }
-  }
-}
 
 
 function keyDownHandler(e) {
@@ -580,73 +441,6 @@ function mouseMoveHandler(e) {
 }
 
 
-function drawFallingStones() {
-  for (let i = fallingStones.length - 1; i >= 0; i--) {
-    const s = fallingStones[i];
-    if (!s.active) { fallingStones.splice(i, 1); continue; }
-
-    // Fysica: boog + zwaartekracht
-    s.vx += s.ax;
-    s.vy += s.ay;
-    s.vx *= 0.999;           // lichte demping
-    s.vy = Math.min(s.vy, 12);
-
-    s.x += s.vx;
-    s.y += s.vy;
-
-    // Teken steen (val terug op vierkantje als img nog niet geladen)
-    if (s.img && s.img.complete) {
-      ctx.drawImage(s.img, s.x - s.size/2, s.y - s.size/2, s.size, s.size);
-    } else {
-      ctx.fillStyle = "#777";
-      ctx.fillRect(s.x - s.size/2, s.y - s.size/2, s.size, s.size);
-    }
-
-    // Paddle-collision (AABB)
-    const paddleLeft   = paddleX;
-    const paddleRight  = paddleX + paddleWidth;
-    const paddleTop    = paddleY;
-    const paddleBottom = paddleY + paddleHeight;
-    const stoneLeft    = s.x - s.size/2;
-    const stoneRight   = s.x + s.size/2;
-    const stoneTop     = s.y - s.size/2;
-    const stoneBottom  = s.y + s.size/2;
-
-    const hitPaddle =
-      stoneRight >= paddleLeft &&
-      stoneLeft  <= paddleRight &&
-      stoneBottom>= paddleTop &&
-      stoneTop   <= paddleBottom;
-
-    if (hitPaddle) {
-      if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, s.y);
-      s.active = false;
-      stoneHitOverlayTimer = 18; // ~300ms flash
-
-      if (lives > 1) {
-        lives--;
-        if (typeof updateLivesDisplay === "function") updateLivesDisplay();
-      } else {
-        lives = 0;
-        if (typeof updateLivesDisplay === "function") updateLivesDisplay();
-        if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
-      }
-      continue;
-    }
-
-    // Bodem → vergruizen
-    if (s.y - s.size/2 > canvas.height) {
-      if (typeof spawnStoneDebris === "function") spawnStoneDebris(s.x, canvas.height - 10);
-      s.active = false;
-      continue;
-    }
-
-    // Links/Rechts buiten beeld → opruimen
-    if (s.x + s.size/2 < 0 || s.x - s.size/2 > canvas.width) {
-      s.active = false;
-    }
-  }
-}
 
 
 function drawBricks() {
@@ -703,18 +497,6 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
           default:
             ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
             break;
-            case "stonefall":
-              // vierkant blokje van steen                                        case "stonefall":
-              if (stoneBlockImg && stoneBlockImg.complete) {
-                   ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
-               } else {
-               ctx.fillStyle = "#6f6b66";
-               ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-               ctx.strokeStyle = "#5a554f";
-              ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
-          }
-           break;
-
         }
       }
     }
@@ -1503,77 +1285,61 @@ function collisionDetection() {
 
             return;
           }
-             // 🎁 Bonusacties
-switch (b.type) {
-  case "power":
-  case "flags":
-    flagsOnPaddle = true;
-    flagTimer = Date.now();
-    flagsActivatedSound.play();
-    break;
 
-  case "machinegun":
-    machineGunActive = true;
-    machineGunShotsFired = 0;
-    machineGunBullets = [];
-    paddleDamageZones = [];
-    machineGunLastShot = Date.now();
-    machineGunStartTime = Date.now();
-    machineGunGunX = paddleX + paddleWidth / 2 - 30;
-    machineGunGunY = Math.max(paddleY - machineGunYOffset, minMachineGunY);
-    b.status = 0;
-    b.type = "normal";
-    break;
+          // 🎁 Bonusacties
+          switch (b.type) {
+            case "power":
+            case "flags":
+              flagsOnPaddle = true;
+              flagTimer = Date.now();
+              flagsActivatedSound.play();
+              break;
+            case "machinegun":
+              machineGunActive = true;
+              machineGunShotsFired = 0;
+              machineGunBullets = [];
+              paddleDamageZones = [];
+              machineGunLastShot = Date.now();
+              machineGunStartTime = Date.now();
+              machineGunGunX = paddleX + paddleWidth / 2 - 30;
+              machineGunGunY = Math.max(paddleY - machineGunYOffset, minMachineGunY);
+              b.status = 0;
+              b.type = "normal";
+              break;
+            case "rocket":
+              rocketActive = true;
+              rocketAmmo = 3;
+              rocketReadySound.play();
+              break;
+            case "doubleball":
+              spawnExtraBall(ball);
+              doubleBallSound.play();
+              break;
+            case "2x":
+              doublePointsActive = true;
+              doublePointsStartTime = Date.now();
+              doublePointsSound.play();
+              break;
+            case "speed":
+              speedBoostActive = true;
+              speedBoostStart = Date.now();
+              speedBoostSound.play();
+              break;
+          }
 
-  case "rocket":
-    rocketActive = true;
-    rocketAmmo = 3;
-    rocketReadySound.play();
-    break;
+          b.status = 0;
 
-  case "doubleball":
-    spawnExtraBall(ball);
-    doubleBallSound.play();
-    break;
+          let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
+          score += earned;
+          updateScoreDisplay();
 
-  case "2x":
-    doublePointsActive = true;
-    doublePointsStartTime = Date.now();
-    doublePointsSound.play();
-    break;
-
-  case "speed":
-    speedBoostActive = true;
-    speedBoostStart = Date.now();
-    speedBoostSound.play();
-    break;
-
-  case "stonefall": {
-    const midX = b.x + brickWidth / 2;
-    const midY = b.y + brickHeight / 2;
-    triggerStonefall(midX, midY);
-    break;
-  }
-}
-
-// 🔽 Gedeelde cleanup (voor alle bonus-types hetzelfde)
-b.status = 0;
-
-let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
-score += earned;
-updateScoreDisplay();
-
-    b.type = "normal";
-spawnCoin(b.x, b.y);
-
-// voorkom dubbele hits in dit frame
-return;
+          b.type = "normal";
+          spawnCoin(b.x, b.y);
         }
       }
     }
   });
 }
-
 
 
 function spawnExtraBall(originBall) {
@@ -1671,7 +1437,6 @@ function draw() {
   drawFallingHearts();
   drawHeartPopup();
   checkCoinCollision();
-  drawFallingStones();  // 🪨 vallende stenen updaten/tekenen
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
@@ -1853,12 +1618,6 @@ if (downPressed) {
   if (newY + paddleHeight < canvas.height && !isPaddleBlockedVertically(newY)) {
     paddleY = newY;
   }
-}
-
-  if (stoneHitOverlayTimer > 0) {
-  ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  stoneHitOverlayTimer--;
 }
 
 
@@ -2170,7 +1929,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 27) {
+  if (imagesLoaded === 23) {
     resetBricks();
     updateLivesDisplay(); // ✅ laat bij start meteen levens zien
     resetPaddle(); // 🔥 paddletekening klaarzetten
@@ -2201,10 +1960,6 @@ heartImg.onload = onImageLoad;
 heartBoardImg.onload = onImageLoad;
 silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
-stoneSmallImg.onload  = onImageLoad;
-stoneMediumImg.onload = onImageLoad;
-stoneLargeImg.onload  = onImageLoad;
-stoneBlockImg.onload  = onImageLoad;
 
 
 document.addEventListener("mousedown", function (e) {
