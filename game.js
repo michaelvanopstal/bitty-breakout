@@ -281,17 +281,17 @@ stone2Img.src = "stone2.png";
 const pxpBagImg = new Image();
 pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
 
-imgStoneBlock = new Image();
-imgStoneBlock.src = "stone_block.png";
+const stoneBlockImg  = new Image();
+stoneBlockImg.src  = "stone_block.png";
 
-imgRockSmall = new Image();
-imgRockSmall.src = "rock_small.png";
+const stoneSmallImg  = new Image();
+stoneSmallImg.src  = "stone_small.png";
 
-imgRockMedium = new Image();
-imgRockMedium.src = "rock_medium.png";
+const stoneMediumImg = new Image(); 
+stoneMediumImg.src = "stone_medium.png";
 
-imgRockLarge = new Image();
-imgRockLarge.src = "rock_large.png";
+const stoneLargeImg  = new Image(); 
+stoneLargeImg.src  = "stone_large.png";
 
 // Vergeet niet je 'expected' imagesLoaded maximale aantal met +4 te verhogen.
 
@@ -518,14 +518,14 @@ function drawBricks() {
             }
             break;
 
-          case "stonefall":
-            // Gebruik eigen sprite als je die hebt, anders tijdelijk stone1Img
-            if (typeof stoneBlockImg !== "undefined" && stoneBlockImg && stoneBlockImg.complete) {
-              ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
-            } else {
-              ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
-            }
+         case "stonefall":
+          if (stoneBlockImg && stoneBlockImg.complete) {
+           ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
+           } else {
+           ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight); // fallback
+           }
             break;
+
 
           default:
             ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
@@ -2101,11 +2101,10 @@ heartBoardImg.onload = onImageLoad;
 silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
 
-// 🪨 Stonefall-afbeeldingen (de 4 nieuwe)
-stoneBlockImg.onload = onImageLoad;
-rockSmallImg.onload = onImageLoad;
-rockMediumImg.onload = onImageLoad;
-rockLargeImg.onload = onImageLoad;
+stoneBlockImg.onload  = onImageLoad;
+stoneSmallImg.onload  = onImageLoad;
+stoneMediumImg.onload = onImageLoad;
+stoneLargeImg.onload  = onImageLoad;
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
