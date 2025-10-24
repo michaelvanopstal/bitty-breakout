@@ -1055,27 +1055,25 @@ function triggerStonefall(originX, originY) {
     });
   }
 }
-
-// Tekent + update van de vallende stenen, 1 leven per salvo, bal-reset, veilige cleanup
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
-    if (!s.active) {
-      fallingStones.splice(i, 1);
-      continue;
+    if (!s.active) { 
+      fallingStones.splice(i, 1); 
+      continue; 
     }
 
-    // Tekenen – gebruik de gekozen sprite met fallback
+    // tekenen – per-steen sprite met fallback
     if (s.img && s.img.complete) {
       ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     } else {
       ctx.drawImage(stoneSmallImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     }
 
-    // Beweging
+    // beweging
     s.y += s.dy;
 
-    // Paddle-collision
+    // paddle-collision
     const paddleLeft   = paddleX;
     const paddleRight  = paddleX + paddleWidth;
     const paddleTop    = paddleY;
@@ -1092,50 +1090,44 @@ function drawFallingStones() {
       stoneTop   <= paddleBottom;
 
     if (hitPaddle) {
-      // Effect bij impact
+      // effect op de steen zelf
       spawnStoneDebris(s.x, s.y);
       s.active = false;
       stoneHitOverlayTimer = 18;
 
+      // ❗ logica éénmalig per salvo
       if (!stoneHitLock) {
         stoneHitLock = true;
 
-        // Slechts één leven aftrekken per salvo
-        if (lives > 1) {
-          lives--;
-          if (typeof updateLivesDisplay === "function") updateLivesDisplay();
-        } else {
-          lives = 0;
-          if (typeof updateLivesDisplay === "function") updateLivesDisplay();
-          if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
+        // 🚀 laat de paddle ontploffen (+ 1 leven eraf + bal op paddle)
+        if (typeof triggerPaddleExplosion === "function") {
+          triggerPaddleExplosion();
         }
 
-        // Bal terug op paddle (geen bricks reset)
-        if (typeof resetBall === "function") resetBall();
-
-        // Vraag na de loop om alle stenen te verwijderen (veilig)
+        // na de loop alle stenen weghalen (veilig)
         stoneClearRequested = true;
 
-        // Korte onschendbaarheid voor het volgende salvo
-        setTimeout(() => { stoneHitLock = false; }, 800);
+        // kleine cooldown voordat volgende salvo weer leven kan kosten
+        setTimeout(() => { stoneHitLock = false; }, 1200);
       }
 
       continue;
     }
 
-    // Onderaan uit beeld → vergruizen
+    // onder uit beeld → vergruizen
     if (s.y - s.size / 2 > canvas.height) {
       spawnStoneDebris(s.x, canvas.height - 10);
       s.active = false;
     }
   }
 
-  // Na de loop alle stenen in één keer verwijderen (voorkomt loop-crash)
+  // ná de iteratie: in één keer alle stenen wissen (voorkomt loop issues)
   if (stoneClearRequested) {
     fallingStones.length = 0;
     stoneClearRequested = false;
   }
 }
+
 
 
 
