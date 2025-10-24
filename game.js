@@ -527,8 +527,7 @@ function updateStonefallBlocks() {
 
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
-const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
-
+  const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
 
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -537,7 +536,6 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
         const brickX = offsetX + c * brickWidth;
         const brickY = r * brickHeight + (levelTransitionActive ? transitionOffsetY : 0);
 
-
         b.x = brickX;
         b.y = brickY;
 
@@ -545,28 +543,35 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
           case "2x":
             ctx.drawImage(doublePointsImg, brickX, brickY, brickWidth, brickHeight);
             break;
+
           case "rocket":
             ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
             break;
+
           case "power":
             ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
             break;
+
           case "doubleball":
             ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
             break;
-            case "machinegun":
+
+          case "machinegun":
             ctx.drawImage(machinegunBlockImg, brickX, brickY, brickWidth, brickHeight);
             break;
+
           case "speed":
             ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
             break;
-            case "silver":
-          if (!b.hits || b.hits === 0) {
-             ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
-           } else if (b.hits === 1) {
-             ctx.drawImage(silver2Img, brickX, brickY, brickWidth, brickHeight);
-           }
-           break;
+
+          case "silver":
+            if (!b.hits || b.hits === 0) {
+              ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
+            } else if (b.hits === 1) {
+              ctx.drawImage(silver2Img, brickX, brickY, brickWidth, brickHeight);
+            }
+            break;
+
           case "stone":
             if (b.hits === 0) {
               ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
@@ -576,20 +581,21 @@ const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
               ctx.drawImage(dollarPxpImg, brickX, brickY, brickWidth, brickHeight);
             }
             break;
+
+          case "stonefall":
+            if (stoneBlockImg && stoneBlockImg.complete) {
+              ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
+            } else {
+              ctx.fillStyle = "#6f6b66";
+              ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+              ctx.strokeStyle = "#5a554f";
+              ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
+            }
+            break;
+
           default:
             ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
             break;
-            case "stonefall":
-          if (stoneBlockImg && stoneBlockImg.complete) {
-              ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
-            } else {
-             ctx.fillStyle = "#6f6b66";
-             ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-             ctx.strokeStyle = "#5a554f";
-             ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
-            }
-             break;
-
         }
       }
     }
@@ -1383,12 +1389,24 @@ function collisionDetection() {
 
           // 🎁 Bonusacties
           switch (b.type) {
+            case "stonefall": {
+              // 🔥 STAP 7: start emitter en laat blok even blijven staan
+              if (!b.stonefallActive) {
+                const midX = b.x + brickWidth / 2;
+                const midY = b.y + brickHeight / 2;
+                startStonefallEmitter(b, midX, midY, 2500); // ~2.5s spuugtijd
+              }
+              // ⚠️ Geen gedeelde cleanup nu; die gebeurt later in updateStonefallBlocks()
+              return;
+            }
+
             case "power":
             case "flags":
               flagsOnPaddle = true;
               flagTimer = Date.now();
               flagsActivatedSound.play();
               break;
+
             case "machinegun":
               machineGunActive = true;
               machineGunShotsFired = 0;
@@ -1401,35 +1419,32 @@ function collisionDetection() {
               b.status = 0;
               b.type = "normal";
               break;
+
             case "rocket":
               rocketActive = true;
               rocketAmmo = 3;
               rocketReadySound.play();
               break;
+
             case "doubleball":
               spawnExtraBall(ball);
               doubleBallSound.play();
               break;
+
             case "2x":
               doublePointsActive = true;
               doublePointsStartTime = Date.now();
               doublePointsSound.play();
               break;
+
             case "speed":
               speedBoostActive = true;
               speedBoostStart = Date.now();
               speedBoostSound.play();
               break;
-              case "stonefall": {
-             if (!b.stonefallActive) {
-              const midX = b.x + brickWidth / 2;
-              const midY = b.y + brickHeight / 2;
-              startStonefallEmitter(b, midX, midY, 2500);
-              }
-              return; // wacht met vernietigen tot emitter klaar is
-              }
+          }
 
-
+          // 🔽 Gedeelde cleanup voor reguliere bonussen
           b.status = 0;
 
           let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
@@ -1443,6 +1458,7 @@ function collisionDetection() {
     }
   });
 }
+
 
 
 
