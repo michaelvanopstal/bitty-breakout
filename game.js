@@ -165,110 +165,6 @@ const pxpMap = [
   { col: 6, row: 7, type: "stone" },
   { col: 0, row: 0, type: "stone" },                                                               
 ];
-// 🌋 Level 3 layout (voorbeeld)
-const level3Map = [
-  // Rand van stenen (stevig)
-  { col: 0, row: 0, type: "stone" }, { col: 1, row: 0, type: "stone" }, { col: 2, row: 0, type: "stone" },
-  { col: 3, row: 0, type: "stone" }, { col: 4, row: 0, type: "stone" }, { col: 5, row: 0, type: "stone" },
-  { col: 6, row: 0, type: "stone" }, { col: 7, row: 0, type: "stone" }, { col: 8, row: 0, type: "stone" },
-  { col: 0, row: 14, type: "stone" }, { col: 1, row: 14, type: "stone" }, { col: 2, row: 14, type: "stone" },
-  { col: 3, row: 14, type: "stone" }, { col: 4, row: 14, type: "stone" }, { col: 5, row: 14, type: "stone" },
-  { col: 6, row: 14, type: "stone" }, { col: 7, row: 14, type: "stone" }, { col: 8, row: 14, type: "stone" },
-
-  // Zijwanden
-  { col: 0, row: 4, type: "stone" }, { col: 0, row: 5, type: "stone" }, { col: 0, row: 6, type: "stone" },
-  { col: 8, row: 4, type: "stone" }, { col: 8, row: 5, type: "stone" }, { col: 8, row: 6, type: "stone" },
-
-  // Diagonalen van silver (2 hits + elektriciteitseffect)
-  { col: 1, row: 3, type: "silver" }, { col: 2, row: 4, type: "silver" }, { col: 3, row: 5, type: "silver" },
-  { col: 4, row: 6, type: "silver" }, { col: 5, row: 5, type: "silver" }, { col: 6, row: 4, type: "silver" },
-  { col: 7, row: 3, type: "silver" },
-
-  // Bonussen verspreid
-  { col: 4, row: 2, type: "machinegun" },
-  { col: 2, row: 2, type: "doubleball" },
-  { col: 6, row: 2, type: "speed" },
-  { col: 1, row: 8, type: "2x" },
-  { col: 7, row: 8, type: "2x" },
-  { col: 4, row: 9, type: "rocket" },
-
-  // Stonefall “valstrikken” (3 hits + laat stenen vallen)
-  { col: 3, row: 8, type: "stonefall" },
-  { col: 5, row: 8, type: "stonefall" },
-];
-// 🔷 Level 4 — diagonale /-lijnen (stone afgewisseld met normal)
-const level4Map = (() => {
-  const cols = 9;    // 0..8
-  const rows = 15;   // 0..14
-  const arr = [];
-
-  // Diagonalen van linksonder naar rechtsboven = constante (row - col)
-  // Even diagonaal → stone, oneven → normal
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const diag = row - col;
-      const isEvenDiag = ((diag % 2) + 2) % 2 === 0;
-      arr.push({ col, row, type: isEvenDiag ? "stone" : "normal" });
-    }
-  }
-  return arr;
-})();
-
-// 🌀 Level 5 — concentrische ringen (arena + doorgangen)
-const level5Map = (() => {
-  const cols = brickColumnCount; // 9
-  const rows = brickRowCount;    // 15
-  const arr = [];
-
-  // Helper om één ring toe te voegen (offset k vanaf de rand)
-  function addRing(k, type, opts = {}) {
-    const top = k, left = k;
-    const bottom = rows - 1 - k, right = cols - 1 - k;
-    for (let c = left; c <= right; c++) {
-      // top
-      if (!shouldSkip(top, c, opts)) arr.push({ col: c, row: top, type });
-      // bottom
-      if (!shouldSkip(bottom, c, opts)) arr.push({ col: c, row: bottom, type });
-    }
-    for (let r = top + 1; r < bottom; r++) {
-      // left
-      if (!shouldSkip(r, left, opts)) arr.push({ col: left, row: r, type });
-      // right
-      if (!shouldSkip(r, right, opts)) arr.push({ col: right, row: r, type });
-    }
-  }
-
-  // Optionele “gaten” in een ring voor doorgangen
-  function shouldSkip(r, c, { gapEvery, gapPhase, gapAxis } = {}) {
-    if (!gapEvery) return false;
-    if (gapAxis === "row") return (r + (gapPhase || 0)) % gapEvery === 0;
-    if (gapAxis === "col") return (c + (gapPhase || 0)) % gapEvery === 0;
-    // standaard: checker
-    return ((r + c + (gapPhase || 0)) % gapEvery) === 0;
-  }
-
-  // Ring 0 (buiten): stevig stone (geen gaten)
-  addRing(0, "stone");
-  // Ring 1: normal, met regelmatige doorgangen
-  addRing(1, "normal", { gapEvery: 3, gapPhase: 1, gapAxis: "row" });
-  // Ring 2: silver (2 hits, met jouw elektriciteitseffect)
-  addRing(2, "silver");
-  // Ring 3: normal, met andere doorgangen
-  addRing(3, "normal", { gapEvery: 4, gapPhase: 2, gapAxis: "col" });
-
-  // 🎯 Bonussen op strategische plekken (arena-gevoel)
-  const midC = Math.floor(cols / 2);   // 4
-  const midR = Math.floor(rows / 2);   // 7
-  arr.push({ col: midC, row: midR, type: "doubleball" });     // midden
-  arr.push({ col: midC, row: 2, type: "rocket" });            // boven-as
-  arr.push({ col: 1, row: rows - 3, type: "machinegun" });    // linksonder ring
-  arr.push({ col: cols - 2, row: rows - 3, type: "speed" });  // rechtsonder ring
-  arr.push({ col: midC, row: rows - 4, type: "2x" });         // onder-as
-  arr.push({ col: 2, row: midR, type: "stonefall" });         // links-as
-  arr.push({ col: cols - 3, row: midR, type: "stonefall" });  // rechts-as
-
-  return arr;
-})();
 
 const resetBallSound = new Audio("resetball.mp3");
 
@@ -676,24 +572,25 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
-function resetBricks() {
-  let currentMap = [];
 
+function resetBricks() {
+  // Kies de juiste map per level
+  let currentMap = [];
   if (level === 1) {
-    currentMap = (typeof level1Map !== "undefined" && Array.isArray(level1Map)) ? level1Map : bonusBricks;
+    currentMap = (typeof level1Map !== "undefined" && Array.isArray(level1Map))
+      ? level1Map
+      : bonusBricks;
   } else if (level === 2) {
-    currentMap = (typeof level2Map !== "undefined" && Array.isArray(level2Map)) ? level2Map : pxpMap;
+    currentMap = (typeof level2Map !== "undefined" && Array.isArray(level2Map))
+      ? level2Map
+      : pxpMap;
   } else if (level === 3) {
-    currentMap = (typeof level3Map !== "undefined" && Array.isArray(level3Map)) ? level3Map : [];
-  } else if (level === 4) {
-    currentMap = (typeof level4Map !== "undefined" && Array.isArray(level4Map)) ? level4Map : [];
-  } else if (level === 5) {
-    currentMap = (typeof level5Map !== "undefined" && Array.isArray(level5Map)) ? level5Map : [];
+    currentMap = (typeof level3Map !== "undefined" && Array.isArray(level3Map))
+      ? level3Map
+      : [];
   } else {
     currentMap = [];
   }
-
-  // … rest van je bestaande resetBricks() …
 
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -704,7 +601,7 @@ function resetBricks() {
       const defined = currentMap.find(p => p.col === c && p.row === r);
       let brickType = defined ? defined.type : "normal"; // standaard "normal"
 
-      // Level 1 bonus fallback (alleen voor je originele setup)
+      // 💎 Level 1 bonus fallback (alleen voor je originele setup)
       if (level === 1 && !defined) {
         const bonus = bonusBricks.find(x => x.col === c && x.row === r);
         if (bonus) brickType = bonus.type;
@@ -731,7 +628,6 @@ function resetBricks() {
   // Plaats 4 willekeurige hartjes onder normale blokken
   assignHeartBlocks();
 }
-
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
 function assignHeartBlocks() {
