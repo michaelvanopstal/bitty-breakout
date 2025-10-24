@@ -52,6 +52,7 @@ let paddleFreeMove = false; // ⛔ paddle zit eerst vast in verticale beweging
 // 🪨 Stonefall
 let fallingStones = [];  // actieve vallende stenen {x,y,dy,size,active,shattered}
 let stoneHitOverlayTimer = 0; // kort rood flash-effect bij paddle-hit
+let stoneHitLock = false; // voorkomt meerdere leven-afnames tegelijk
 
 // 🌟 Level 2 overgang
 let levelTransitionActive = false;
@@ -1040,7 +1041,7 @@ function pickRandomRockSprite() {
 
 
 function triggerStonefall(originX, originY) {
-  const count = 5 + Math.floor(Math.random() * 4); // 5–8
+  const count = 5 + Math.floor(Math.random() * 4); // 2–5
   for (let i = 0; i < count; i++) {
     const rock = pickRandomRockSprite(); // ⬅️ kiest small/medium/large
 
@@ -1094,23 +1095,38 @@ function drawFallingStones() {
     );
 
     if (hitPaddle) {
-      // steen “verprijt” in puin
-      spawnStoneDebris(s.x, s.y);
-      s.active = false;
-      stoneHitOverlayTimer = 18; // ~300ms flash
+  if (!stoneHitLock) {
+    stoneHitLock = true; // voorkomt meerdere hits tegelijk
 
-      // leven aftrekken zonder bal te verliezen
-      if (lives > 1) {
-        lives--;
-        updateLivesDisplay();
-      } else {
-        // 0 levens → gebruik je bestaande game-over flow
-        lives = 0;
-        updateLivesDisplay();
-        triggerPaddleExplosion(); // hergebruikt je bestaande afhandeling
-      }
-      continue;
+    // 💥 Puin-effect bij impact
+    spawnStoneDebris(s.x, s.y);
+    stoneHitOverlayTimer = 18;
+
+    // 💖 Leven aftrekken
+    if (lives > 1) {
+      lives--;
+      updateLivesDisplay();
+    } else {
+      lives = 0;
+      updateLivesDisplay();
+      triggerPaddleExplosion();
     }
+
+    // 💫 Reset ball direct terug op paddle
+    resetBall();
+
+    // 🪨 Stop alle vallende stenen direct
+    fallingStones = [];
+
+    // ⏳ Na korte delay mag weer geraakt worden
+    setTimeout(() => { stoneHitLock = false; }, 2000);
+  }
+
+  // steen zelf verwijderen
+  s.active = false;
+  continue;
+}
+
 
     // bodem: ook verprijten
     if (s.y - s.size/2 > canvas.height) {
