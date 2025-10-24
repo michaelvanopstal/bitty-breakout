@@ -2100,12 +2100,17 @@ heartImg.onload = onImageLoad;
 heartBoardImg.onload = onImageLoad;
 silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
-imgStoneBlock.onload = () => { imagesLoaded++; };
-imgRockSmall.onload = () => { imagesLoaded++; };
-imgRockMedium.onload = () => { imagesLoaded++; };
-imgRockLarge.onload = () => { imagesLoaded++; };
-// Roep deze 1x aan tijdens init/start:
-loadStonefallImages();
+
+// 🪨 Stonefall-afbeeldingen (de 4 nieuwe)
+stoneBlockImg.onload = onImageLoad;
+rockSmallImg.onload = onImageLoad;
+rockMediumImg.onload = onImageLoad;
+rockLargeImg.onload = onImageLoad;
+
+// 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
+if (typeof loadStonefallImages === "function") {
+  loadStonefallImages();
+}
 
 
 document.addEventListener("mousedown", function (e) {
