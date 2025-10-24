@@ -1274,7 +1274,6 @@ function checkCoinCollision() {
     }
   });
 }
-
 function collisionDetection() {
   balls.forEach(ball => {
     for (let c = 0; c < brickColumnCount; c++) {
@@ -1352,7 +1351,7 @@ function collisionDetection() {
               });
             }
 
-            return;
+            return; // klaar met deze hit
           }
 
           // 🪙 Gedrag voor silver blokken
@@ -1360,7 +1359,7 @@ function collisionDetection() {
             b.hits = (b.hits || 0) + 1;
 
             if (b.hits === 1) {
-              // toon silver2.png – gebeurt in drawBricks()
+              // silver2.png tekenen gebeurt in drawBricks()
             } else if (b.hits >= 2) {
               b.status = 0;
 
@@ -1378,17 +1377,39 @@ function collisionDetection() {
               });
             }
 
-            return;
+            return; // klaar met deze hit
           }
 
           // 🎁 Bonusacties
           switch (b.type) {
+            case "stonefall": {
+              // Blok blijft staan en spuugt 5–8 stenen; cleanup later in updateStonefallBlocks()
+              if (!b.stonefallActive) {
+                const midX = b.x + brickWidth / 2;
+                const midY = b.y + brickHeight / 2;
+                // Gebruik de emitter-variant:
+                // startStonefallEmitter(b, midX, midY, 2500);
+                // Als je nog geen emitter hebt, kun je tijdelijk dit gebruiken:
+                if (typeof startStonefallEmitter === "function") {
+                  startStonefallEmitter(b, midX, midY, 2500);
+                } else {
+                  // fallback: direct queue’en (dan wél meteen cleanup hieronder)
+                  triggerStonefall(midX, midY);
+                }
+              }
+              // ⚠️ Heel belangrijk: GEEN directe cleanup; emitter regelt het later.
+              // Alleen als je de fallback (triggerStonefall) gebruikt en GEEN emitter hebt,
+              // kun je dit 'return;' weghalen zodat hij doorloopt naar cleanup.
+              return;
+            }
+
             case "power":
             case "flags":
               flagsOnPaddle = true;
               flagTimer = Date.now();
               flagsActivatedSound.play();
               break;
+
             case "machinegun":
               machineGunActive = true;
               machineGunShotsFired = 0;
@@ -1401,34 +1422,32 @@ function collisionDetection() {
               b.status = 0;
               b.type = "normal";
               break;
+
             case "rocket":
               rocketActive = true;
               rocketAmmo = 3;
               rocketReadySound.play();
               break;
+
             case "doubleball":
               spawnExtraBall(ball);
               doubleBallSound.play();
               break;
+
             case "2x":
               doublePointsActive = true;
               doublePointsStartTime = Date.now();
               doublePointsSound.play();
               break;
+
             case "speed":
               speedBoostActive = true;
               speedBoostStart = Date.now();
               speedBoostSound.play();
               break;
-          case "stonefall": {
-             // spawn vallende stenen vanaf midden van dit blok
-              const midX = b.x + brickWidth / 2;
-              const midY = b.y + brickHeight / 2;
-              triggerStonefall(midX, midY);
-              break;
-           }
+          } // <-- einde switch
 
-
+          // 🔽 Gedeelde cleanup (voor alle reguliere bonussen)
           b.status = 0;
 
           let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
@@ -1437,11 +1456,12 @@ function collisionDetection() {
 
           b.type = "normal";
           spawnCoin(b.x, b.y);
-        }
-      }
-    }
-  });
-}
+        } // <-- einde IF hit
+      } // <-- einde for r
+    } // <-- einde for c
+  }); // <-- einde balls.forEach
+} // <-- einde function
+
 
 
 function spawnExtraBall(originBall) {
