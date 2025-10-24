@@ -155,7 +155,7 @@ const pxpMap = [
    { col: 0, row: 7, type: "stone" },  { col: 1, row: 1, type: "stone" },
   { col: 1, row: 6, type: "stone" },   { col: 2, row: 2, type: "stone" },
   { col: 2, row: 7, type: "stone" },  { col: 8, row: 0, type: "stone" },
-  { col: 7, row: 1, type: "stone" },
+  { col: 7, row: 1, type: "stone" }, { col: 0, row: 14, type: "stone" },
   { col: 6, row: 2, type: "stone" },
   { col: 8, row: 0, type: "stone" },
   { col: 7, row: 1, type: "stone" },
