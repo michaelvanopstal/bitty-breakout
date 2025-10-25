@@ -266,9 +266,6 @@ const brickColumnCount = 9;
 const brickWidth = customBrickWidth;
 const brickHeight = customBrickHeight;
 
-// ============================================================================
-// ==================== LEVEL REGISTRATION (NA CONSTANTS!) ====================
-// ============================================================================
 // Behoud level 1–3 exact zoals je ze al hebt
 defineLevel(1, bonusBricks);
 defineLevel(2, pxpMap);
@@ -290,109 +287,7 @@ for (let i = 2; i <= 6; i++) addBlock(6, i, i, "silver");
 // defineLevel(9, [ { col: 4, row: 2, type: "speed" } ]);
 // ...
 
-// ============================================================================
-// ====================== resetBricks (LEVELS-variant) ========================
-// ============================================================================
-function resetBricks() {
-  // Kies de map voor het huidige level
-  var currentMap = [];
 
-  // 1) LEVELS voorrang als die bestaat
-  if (typeof LEVELS !== 'undefined' && Array.isArray(LEVELS) && Array.isArray(LEVELS[level - 1])) {
-    currentMap = LEVELS[level - 1];
-  } else {
-    // 2) Fallback: behoud je oude 1-3 maps precies
-    if (level === 1) {
-      currentMap = (typeof level1Map !== 'undefined' && Array.isArray(level1Map)) ? level1Map : bonusBricks;
-    } else if (level === 2) {
-      currentMap = (typeof level2Map !== 'undefined' && Array.isArray(level2Map)) ? level2Map : pxpMap;
-    } else if (level === 3) {
-      currentMap = (typeof level3Map !== 'undefined' && Array.isArray(level3Map)) ? level3Map : [];
-    } else {
-      currentMap = [];
-    }
-  }
-
-  // Reset en invullen
-  for (var c = 0; c < brickColumnCount; c++) {
-    for (var r = 0; r < brickRowCount; r++) {
-      var b = bricks[c][r];
-      b.status = 1;
-
-      // Check of deze positie in de huidige levelmap staat
-      var defined = currentMap.find(function(p){ return p.col === c && p.row === r; });
-      var brickType = defined ? defined.type : 'normal';
-
-      // Extra fallback specifiek voor level 1
-      if (level === 1 && !defined && Array.isArray(bonusBricks)) {
-        var bonus = bonusBricks.find(function(x){ return x.col === c && x.row === r; });
-        if (bonus) brickType = bonus.type;
-      }
-
-      // Type toepassen
-      b.type = brickType;
-
-      // Type-specifieke reset
-      if (brickType === 'stone' || brickType === 'silver') {
-        b.hits = 0;
-        b.hasDroppedBag = false;
-      } else {
-        delete b.hits;
-        delete b.hasDroppedBag;
-      }
-
-      // Hartjes reset
-      b.hasHeart = false;
-      b.heartDropped = false;
-    }
-  }
-
-  // Plaats 4 willekeurige hartjes onder normale blokken
-  assignHeartBlocks();
-}
-
-// ============================================================================
-// =============== startLevelTransition (loop na 20 levels) ===================
-// ============================================================================
-function startLevelTransition() {
-  level++;
-  if (level > LEVELS.length) {
-    // Terug naar level 1 (of vervang dit door een "You Win" scherm)
-    level = 1;
-  }
-
-  resetAllBonuses();
-
-  levelUpSound.currentTime = 0;
-  levelUpSound.play();
-
-  levelMessageAlpha = 0;
-  levelMessageTimer = 0;
-  levelMessageVisible = true;
-  levelTransitionActive = true;
-
-  resetBricks();
-  transitionOffsetY = -300;
-
-  ballLaunched = false;
-  ballMoving = false;
-
-  balls = [{
-    x: paddleX + paddleWidth / 2 - ballRadius,
-    y: paddleY - ballRadius * 2,
-    dx: 0,
-    dy: -6,
-    radius: ballRadius,
-    isMain: true
-  }];
-
-  resetPaddle();
-  updateLivesDisplay();
-}
-
-// ============================================================================
-// =================== AUDIO / SFX (mag ook erboven staan) ====================
-// ============================================================================
 const resetBallSound = new Audio("resetball.mp3");
 const levelUpSound = new Audio("levelup.mp3");
 const paddleExplodeSound = new Audio("paddle_explode.mp3");
@@ -447,107 +342,8 @@ for (let i = 2; i <= 6; i++) addBlock(6, i, i, "silver");
 // addBlock(7, 3, 8, "doubleball");
 // fillRect(8, 2, 5, 6, 7, "stonefall");
 // defineLevel(9, [ { col: 4, row: 2, type: "speed" } ]);
-// ...
 
-// ============================================================================
-// ====================== resetBricks (LEVELS-variant) ========================
-// ============================================================================
-function resetBricks() {
-  // Kies de map voor het huidige level
-  var currentMap = [];
 
-  // 1) LEVELS voorrang als die bestaat
-  if (typeof LEVELS !== 'undefined' && Array.isArray(LEVELS) && Array.isArray(LEVELS[level - 1])) {
-    currentMap = LEVELS[level - 1];
-  } else {
-    // 2) Fallback: behoud je oude 1-3 maps precies
-    if (level === 1) {
-      currentMap = (typeof level1Map !== 'undefined' && Array.isArray(level1Map)) ? level1Map : bonusBricks;
-    } else if (level === 2) {
-      currentMap = (typeof level2Map !== 'undefined' && Array.isArray(level2Map)) ? level2Map : pxpMap;
-    } else if (level === 3) {
-      currentMap = (typeof level3Map !== 'undefined' && Array.isArray(level3Map)) ? level3Map : [];
-    } else {
-      currentMap = [];
-    }
-  }
-
-  // Reset en invullen
-  for (var c = 0; c < brickColumnCount; c++) {
-    for (var r = 0; r < brickRowCount; r++) {
-      var b = bricks[c][r];
-      b.status = 1;
-
-      // Check of deze positie in de huidige levelmap staat
-      var defined = currentMap.find(function(p){ return p.col === c && p.row === r; });
-      var brickType = defined ? defined.type : 'normal';
-
-      // Extra fallback specifiek voor level 1
-      if (level === 1 && !defined && Array.isArray(bonusBricks)) {
-        var bonus = bonusBricks.find(function(x){ return x.col === c && x.row === r; });
-        if (bonus) brickType = bonus.type;
-      }
-
-      // Type toepassen
-      b.type = brickType;
-
-      // Type-specifieke reset
-      if (brickType === 'stone' || brickType === 'silver') {
-        b.hits = 0;
-        b.hasDroppedBag = false;
-      } else {
-        delete b.hits;
-        delete b.hasDroppedBag;
-      }
-
-      // Hartjes reset
-      b.hasHeart = false;
-      b.heartDropped = false;
-    }
-  }
-
-  // Plaats 4 willekeurige hartjes onder normale blokken
-  assignHeartBlocks();
-}
-
-// ============================================================================
-// =============== startLevelTransition (loop na 20 levels) ===================
-// ============================================================================
-function startLevelTransition() {
-  level++;
-  if (level > LEVELS.length) {
-    // Terug naar level 1 (of vervang dit door een "You Win" scherm)
-    level = 1;
-  }
-
-  resetAllBonuses();
-
-  levelUpSound.currentTime = 0;
-  levelUpSound.play();
-
-  levelMessageAlpha = 0;
-  levelMessageTimer = 0;
-  levelMessageVisible = true;
-  levelTransitionActive = true;
-
-  resetBricks();
-  transitionOffsetY = -300;
-
-  ballLaunched = false;
-  ballMoving = false;
-
-  balls = [{
-    x: paddleX + paddleWidth / 2 - ballRadius,
-    y: paddleY - ballRadius * 2,
-    dx: 0,
-    dy: -6,
-    radius: ballRadius,
-    isMain: true
-  }];
-
-  resetPaddle();
-  updateLivesDisplay();
-}
 
 
 const bricks = [];
