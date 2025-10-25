@@ -1108,7 +1108,7 @@ function triggerStonefall(originX, originY) {
     fallingStones.push({
       x: originX + (Math.random() - 0.5) * 40,  // lichte spreiding
       y: originY + 10,
-      dy: 3 + Math.random() * 2,                // val­snelheid
+      dy: 1.8 + Math.random() * 1.2,                // val­snelheid
       size: rock.size,
       img: rock.img,                            // sprite
       active: true,
