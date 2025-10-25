@@ -1098,40 +1098,6 @@ function pickRandomRockSprite() {
   }
 }
 
-
-function triggerStonefall(originX, originY) {
-  // 🎲 aantal vallende stenen per hit (random 1–3)
-  const count = 1 + Math.floor(Math.random() * 3);
-
-  for (let i = 0; i < count; i++) {
-    const rock = pickRandomRockSprite(); // kiest small / medium / large
-
-    fallingStones.push({
-      x: originX + (Math.random() - 0.5) * 40,  // lichte spreiding
-      y: originY + 10,
-      dy: 3 + Math.random() * 2,                // val­snelheid
-      size: rock.size,
-      img: rock.img,                            // sprite
-      active: true,
-      shattered: false,
-
-      // 🔧 nieuwe eigenschappen voor betere paddle-botsing
-      framesInside: 0,       // telt frames dat steen overlapt met paddle
-      hitboxScale: 0.9,      // 90% van diameter voor realistische hitbox
-      minPenetration: null   // wordt berekend bij eerste collision-check
-    });
-  }
-}
-
-// ✅ Cirkel (steen) vs rechthoek (paddle)
-function circleIntersectsRect(cx, cy, r, rx, ry, rw, rh) {
-  const closestX = Math.max(rx, Math.min(cx, rx + rw));
-  const closestY = Math.max(ry, Math.min(cy, ry + rh));
-  const dx = cx - closestX;
-  const dy = cy - closestY;
-  return (dx * dx + dy * dy) <= (r * r);
-}
-
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
@@ -1213,19 +1179,8 @@ function drawFallingStones() {
 }
 
 
-    // onder uit beeld → vergruizen
-    if (s.y - s.size / 2 > canvas.height) {
-      spawnStoneDebris(s.x, canvas.height - 10);
-      s.active = false;
-    }
-  }
 
-  // ná de iteratie: in één keer alle stenen wissen (voorkomt loop issues)
-  if (stoneClearRequested) {
-    fallingStones.length = 0;
-    stoneClearRequested = false;
-  }
-}
+ 
 
 
 
