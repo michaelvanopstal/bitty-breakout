@@ -1106,7 +1106,7 @@ function triggerStonefall(originX, originY) {
     const rock = pickRandomRockSprite(); // kiest small / medium / large
 
     fallingStones.push({
-      x: originX + (Math.random() - 0.5) * 40,  // lichte spreiding
+      x: originX + (Math.random() - 0.5) * 20,  // lichte spreiding
       y: originY + 10,
       dy: 1.8 + Math.random() * 1.2,                // val­snelheid
       size: rock.size,
