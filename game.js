@@ -1106,6 +1106,20 @@ function circleIntersectsRect(cx, cy, r, rx, ry, rw, rh) {
   return (dx * dx + dy * dy) <= (r * r);
 }
 
+function updateBrickRects() {
+  const totalBricksWidth = brickColumnCount * brickWidth;
+  const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
+
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const b = bricks[c][r];
+      // dezelfde y als in drawBricks(), incl. transitionOffsetY
+      b.x = offsetX + c * brickWidth;
+      b.y = r * brickHeight + (levelTransitionActive ? transitionOffsetY : 0);
+    }
+  }
+}
+
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
@@ -1589,6 +1603,7 @@ function draw() {
 
   collisionDetection();
   drawCoins();
+  updateBrickRects();
   drawFallingHearts();
   drawFallingStones();  
   drawHeartPopup();
