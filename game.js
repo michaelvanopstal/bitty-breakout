@@ -264,7 +264,8 @@ addBonuses(5, [
   {col:7,row:5,type:"stone"},{col:8,row:5,type:"stone"},{col:0,row:5,type:"stone"},{col:1,row:5,type:"stone"},
   {col:6,row:14,type:"silver"},{col:7,row:14,type:"stone"},{col:8,row:14,type:"silver"},
   // traps midden
-  {col:3,row:8,type:"stonefall"},{col:5,row:8,type:"stonefall"},
+  {col:3,row:8,type:"stonefall"},{col:5,row:8,type:"stonefall"},{col:0,row:0,type:"stonefall"},{col:1,row:1,type:"stonefall"},
+  {col:8,row:0,type:"stonefall"},{col:7,row:1,type:"stonefall"},
   // bonussen
   {col:4,row:2,type:"machinegun"},{col:1,row:7,type:"doubleball"},{col:7,row:7,type:"speed"},
   {col:4,row:9,type:"rocket"},{col:4,row:6,type:"2x"},{col:8,row:4,type:"power"}
