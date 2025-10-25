@@ -2493,25 +2493,28 @@ function triggerPaddleExplosion() {
   }
 }
 
-
 function startLevelTransition() {
+  // ✅ Wincheck vóór level++ (we zitten aan het einde van het laatste level)
   if (level >= TOTAL_LEVELS) {
     // 🚩 WIN: zelfde reset-flow als game over, maar "You Win"
     saveHighscore();
-    pauseTimer();
+    pauseTimer?.();
 
-    // Toon korte win-overlay (hergebruik jouw game over stijl)
-    explosions.push({ x: canvas.width/2, y: canvas.height/2, radius: 10, alpha: 1, color: "white" });
+    // Korte win-overlay (optioneel; laat staan als je explosions gebruikt)
+    explosions?.push({ x: canvas.width / 2, y: canvas.height / 2, radius: 10, alpha: 1, color: "white" });
 
     // Reset naar beginstaat
     lives = 3;
-    updateLivesDisplay();
+    updateLivesDisplay?.();
     heartsCollected = 0;
-    document.getElementById("heartCount").textContent = heartsCollected;
+    const heartCountEl = document.getElementById("heartCount");
+    if (heartCountEl) heartCountEl.textContent = heartsCollected;
+
     score = 0;
     level = 1;
     elapsedTime = 0;
 
+    // Flags/bonussen terug naar neutraal
     paddleExploding = false;
     paddleExplosionParticles = [];
     speedBoostActive = false;
@@ -2520,6 +2523,8 @@ function startLevelTransition() {
     rocketActive = false;
     rocketFired = false;
     rocketAmmo = 0;
+
+    // Diverse arrays leegmaken (alleen als ze bestaan)
     flyingCoins = [];
     smokeParticles = [];
     explosions = [];
@@ -2530,16 +2535,30 @@ function startLevelTransition() {
 
     resetBricks();
     resetBall();
-    resetPaddle();
-    updateScoreDisplay();
-    document.getElementById("timeDisplay").textContent = "00:00";
+    resetPaddle?.();
+    updateScoreDisplay?.();
+
+    const timeEl = document.getElementById("timeDisplay");
+    if (timeEl) timeEl.textContent = "00:00";
     return;
   }
 
-  // Ga door naar volgend level
+  // 👇 Volgend level
   level++;
-  resetAllBonuses();
-  // verder ongewijzigd...
+
+  // Alle tijdelijke bonussen/cooldowns resetten als je daar een helper voor hebt
+  if (typeof resetAllBonuses === "function") resetAllBonuses();
+
+  // Bricks voor het nieuwe level klaarzetten
+  resetBricks();
+
+  // Bal herstarten met level-afhankelijke snelheid
+  resetBall();
+
+  // (Optioneel) Paddle centreren en UI bijwerken, alleen als je die helpers hebt:
+  resetPaddle?.();
+  updateScoreDisplay?.();
+}
 
 
 function updateLivesDisplay() {
