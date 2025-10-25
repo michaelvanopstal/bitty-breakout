@@ -236,22 +236,173 @@ function addBonuses(levelNumber, entries) {
   entries.forEach(e => addBonus(levelNumber, e.col, e.row, e.type));
 }
 
-// 👇 Voorbeeld: snel wat blokjes in level 4 en 5
+// ===== Levels 4 t/m 20: elke level gebruikt alle bonus-types =====
+// Let op: col 0..8, row 0..14
+
+// LEVEL 4 – introductie van alle types in een kruispatroon
 addBonuses(4, [
-  { col: 4, row: 2, type: "machinegun" },
-  { col: 2, row: 3, type: "silver" },
-  { col: 6, row: 3, type: "silver" },
-  { col: 4, row: 7, type: "2x" },
-  { col: 4, row: 9, type: "rocket" },
+  {col:4,row:2,type:"machinegun"},
+  {col:4,row:4,type:"silver"},
+  {col:4,row:6,type:"stone"},
+  {col:4,row:8,type:"doubleball"},
+  {col:4,row:10,type:"rocket"},
+  {col:2,row:6,type:"speed"},
+  {col:6,row:6,type:"2x"},
+  {col:3,row:3,type:"stonefall"},
+  {col:5,row:3,type:"power"},
+  {col:3,row:9,type:"power"},
+  {col:5,row:9,type:"silver"},
+  {col:1,row:7,type:"stone"}
 ]);
 
+// LEVEL 5 – ruitvorm
 addBonuses(5, [
-  { col: 0, row: 0, type: "stone" }, { col: 8, row: 0, type: "stone" },
-  { col: 0, row: 14, type: "stone" }, { col: 8, row: 14, type: "stone" },
-  { col: 4, row: 3, type: "doubleball" },
-  { col: 3, row: 8, type: "stonefall" },
-  { col: 5, row: 8, type: "stonefall" },
+  {col:4,row:1,type:"machinegun"},
+  {col:3,row:2,type:"silver"},{col:5,row:2,type:"silver"},
+  {col:2,row:3,type:"stone"},{col:6,row:3,type:"stone"},
+  {col:1,row:4,type:"doubleball"},{col:7,row:4,type:"rocket"},
+  {col:0,row:5,type:"speed"},{col:8,row:5,type:"2x"},
+  {col:2,row:7,type:"stonefall"},{col:6,row:7,type:"power"},
+  {col:4,row:9,type:"power"}
 ]);
+
+// LEVEL 6 – horizontale banen
+addBonuses(6, [
+  {col:1,row:2,type:"machinegun"},{col:4,row:2,type:"silver"},{col:7,row:2,type:"stone"},
+  {col:0,row:5,type:"doubleball"},{col:2,row:5,type:"rocket"},{col:4,row:5,type:"speed"},{col:6,row:5,type:"2x"},{col:8,row:5,type:"stonefall"},
+  {col:2,row:8,type:"power"},{col:4,row:8,type:"silver"},{col:6,row:8,type:"stone"},
+  {col:4,row:11,type:"power"}
+]);
+
+// LEVEL 7 – diagonalen
+addBonuses(7, [
+  {col:0,row:2,type:"machinegun"},{col:1,row:3,type:"silver"},{col:2,row:4,type:"stone"},
+  {col:3,row:5,type:"doubleball"},{col:4,row:6,type:"rocket"},{col:5,row:7,type:"speed"},
+  {col:6,row:8,type:"2x"},{col:7,row:9,type:"stonefall"},{col:8,row:10,type:"power"},
+  {col:8,row:2,type:"silver"},{col:7,row:3,type:"stone"},{col:6,row:4,type:"power"}
+]);
+
+// LEVEL 8 – randen + midden
+addBonuses(8, [
+  {col:0,row:0,type:"stone"},{col:8,row:0,type:"stone"},
+  {col:0,row:14,type:"stone"},{col:8,row:14,type:"stone"},
+  {col:4,row:2,type:"machinegun"},{col:4,row:4,type:"rocket"},
+  {col:4,row:6,type:"doubleball"},{col:4,row:8,type:"speed"},
+  {col:4,row:10,type:"2x"},{col:3,row:7,type:"silver"},{col:5,row:7,type:"silver"},
+  {col:2,row:7,type:"power"},{col:6,row:7,type:"stonefall"}
+]);
+
+// LEVEL 9 – schaakbord accenten
+addBonuses(9, [
+  {col:1,row:1,type:"machinegun"},{col:3,row:1,type:"silver"},{col:5,row:1,type:"stone"},{col:7,row:1,type:"power"},
+  {col:0,row:3,type:"doubleball"},{col:2,row:3,type:"rocket"},{col:4,row:3,type:"speed"},{col:6,row:3,type:"2x"},{col:8,row:3,type:"stonefall"},
+  {col:1,row:5,type:"silver"},{col:3,row:5,type:"stone"},{col:5,row:5,type:"power"},{col:7,row:5,type:"silver"}
+]);
+
+// LEVEL 10 – ‘plus’-teken met hoeken
+addBonuses(10, [
+  {col:4,row:1,type:"machinegun"},
+  {col:4,row:3,type:"silver"},{col:4,row:5,type:"stone"},{col:4,row:7,type:"doubleball"},{col:4,row:9,type:"rocket"},
+  {col:1,row:6,type:"speed"},{col:3,row:6,type:"2x"},{col:5,row:6,type:"stonefall"},{col:7,row:6,type:"power"},
+  {col:0,row:0,type:"silver"},{col:8,row:0,type:"stone"},{col:0,row:14,type:"power"},{col:8,row:14,type:"silver"}
+]);
+
+// LEVEL 11 – ladder
+addBonuses(11, [
+  {col:2,row:2,type:"machinegun"},{col:3,row:3,type:"silver"},{col:4,row:4,type:"stone"},{col:5,row:5,type:"doubleball"},
+  {col:6,row:6,type:"rocket"},{col:5,row:7,type:"speed"},{col:4,row:8,type:"2x"},{col:3,row:9,type:"stonefall"},
+  {col:2,row:10,type:"power"},{col:1,row:11,type:"silver"},{col:0,row:12,type:"stone"},{col:7,row:2,type:"power"}
+]);
+
+// LEVEL 12 – middenlijn druk
+addBonuses(12, [
+  {col:4,row:1,type:"machinegun"},{col:4,row:3,type:"silver"},{col:4,row:5,type:"stone"},
+  {col:4,row:7,type:"doubleball"},{col:4,row:9,type:"rocket"},{col:4,row:11,type:"speed"},
+  {col:2,row:4,type:"2x"},{col:6,row:4,type:"stonefall"},
+  {col:2,row:8,type:"power"},{col:6,row:8,type:"silver"},
+  {col:1,row:6,type:"stone"},{col:7,row:6,type:"power"}
+]);
+
+// LEVEL 13 – dubbele ruit
+addBonuses(13, [
+  {col:4,row:0,type:"machinegun"},
+  {col:3,row:1,type:"silver"},{col:5,row:1,type:"stone"},
+  {col:2,row:2,type:"doubleball"},{col:6,row:2,type:"rocket"},
+  {col:1,row:3,type:"speed"},{col:7,row:3,type:"2x"},
+  {col:0,row:4,type:"stonefall"},{col:8,row:4,type:"power"},
+  {col:2,row:6,type:"silver"},{col:4,row:8,type:"power"},{col:6,row:6,type:"stone"}
+]);
+
+// LEVEL 14 – pijlvorm omlaag
+addBonuses(14, [
+  {col:4,row:2,type:"machinegun"},
+  {col:3,row:3,type:"silver"},{col:5,row:3,type:"stone"},
+  {col:2,row:4,type:"doubleball"},{col:6,row:4,type:"rocket"},
+  {col:1,row:5,type:"speed"},{col:7,row:5,type:"2x"},
+  {col:4,row:6,type:"stonefall"},
+  {col:3,row:7,type:"power"},{col:5,row:7,type:"silver"},
+  {col:2,row:8,type:"stone"},{col:6,row:8,type:"power"}
+]);
+
+// LEVEL 15 – randen zwaar, midden tricky
+addBonuses(15, [
+  {col:0,row:2,type:"stone"},{col:8,row:2,type:"stone"},
+  {col:0,row:4,type:"silver"},{col:8,row:4,type:"silver"},
+  {col:0,row:6,type:"power"},{col:8,row:6,type:"power"},
+  {col:0,row:8,type:"stonefall"},{col:8,row:8,type:"stonefall"},
+  {col:4,row:3,type:"machinegun"},{col:4,row:5,type:"doubleball"},{col:4,row:7,type:"rocket"},
+  {col:2,row:10,type:"speed"},{col:6,row:10,type:"2x"}
+]);
+
+// LEVEL 16 – zigzag midden
+addBonuses(16, [
+  {col:3,row:2,type:"machinegun"},{col:4,row:3,type:"silver"},{col:5,row:4,type:"stone"},
+  {col:3,row:5,type:"doubleball"},{col:4,row:6,type:"rocket"},{col:5,row:7,type:"speed"},
+  {col:3,row:8,type:"2x"},{col:4,row:9,type:"stonefall"},{col:5,row:10,type:"power"},
+  {col:2,row:6,type:"silver"},{col:6,row:6,type:"stone"},{col:4,row:12,type:"power"}
+]);
+
+// LEVEL 17 – ‘H’ patroon
+addBonuses(17, [
+  {col:1,row:2,type:"stone"},{col:1,row:6,type:"silver"},{col:1,row:10,type:"power"},
+  {col:7,row:2,type:"stone"},{col:7,row:6,type:"silver"},{col:7,row:10,type:"power"},
+  {col:2,row:6,type:"machinegun"},{col:3,row:6,type:"doubleball"},{col:4,row:6,type:"rocket"},
+  {col:5,row:6,type:"speed"},{col:6,row:6,type:"2x"},
+  {col:4,row:3,type:"stonefall"}
+]);
+
+// LEVEL 18 – X-patroon vol
+addBonuses(18, [
+  {col:0,row:0,type:"stone"},{col:1,row:1,type:"silver"},{col:2,row:2,type:"power"},{col:3,row:3,type:"stonefall"},
+  {col:5,row:5,type:"machinegun"},{col:6,row:6,type:"doubleball"},{col:7,row:7,type:"rocket"},{col:8,row:8,type:"speed"},
+  {col:8,row:0,type:"2x"},{col:7,row:1,type:"silver"},{col:6,row:2,type:"stone"},{col:5,row:3,type:"power"},
+  {col:3,row:5,type:"stonefall"},{col:2,row:6,type:"silver"},{col:1,row:7,type:"stone"},{col:0,row:8,type:"power"}
+]);
+
+// LEVEL 19 – compact midden + valstrikken
+addBonuses(19, [
+  {col:3,row:4,type:"machinegun"},{col:4,row:4,type:"silver"},{col:5,row:4,type:"stone"},
+  {col:3,row:6,type:"doubleball"},{col:4,row:6,type:"rocket"},{col:5,row:6,type:"speed"},
+  {col:3,row:8,type:"2x"},{col:4,row:8,type:"stonefall"},{col:5,row:8,type:"power"},
+  {col:2,row:5,type:"silver"},{col:6,row:5,type:"stone"},{col:4,row:10,type:"power"}
+]);
+
+// LEVEL 20 – finale: veel typen, centrum druk
+addBonuses(20, [
+  {col:4,row:1,type:"machinegun"},
+  {col:3,row:2,type:"silver"},{col:5,row:2,type:"silver"},
+  {col:2,row:3,type:"stone"},{col:6,row:3,type:"stone"},
+  {col:1,row:4,type:"doubleball"},{col:7,row:4,type:"rocket"},
+  {col:3,row:6,type:"speed"},{col:5,row:6,type:"2x"},
+  {col:2,row:8,type:"stonefall"},{col:6,row:8,type:"stonefall"},
+  {col:4,row:10,type:"power"},{col:0,row:12,type:"stone"},{col:8,row:12,type:"power"}
+]);
+
+// (Optioneel) kleine fine-tuning van moeilijkheid per eindlevels:
+LEVELS[16-1].params.machineGunDifficulty = 2; // L16 iets pittiger
+LEVELS[18-1].params.machineGunDifficulty = 3; // L18 max
+LEVELS[20-1].params.machineGunDifficulty = 3; // L20 max
+
 
 const resetBallSound = new Audio("resetball.mp3");
 
