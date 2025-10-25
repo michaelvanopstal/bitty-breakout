@@ -1087,14 +1087,19 @@ function drawFallingHearts() {
     }
   });
 }
+
 function pickRandomRockSprite() {
   const r = Math.random();
-  if (r < 0.40) {         // 40% klein
-    return { img: stoneSmallImg,  size: 70 + Math.random() * 12 };   // ~70–82
-  } else if (r < 0.75) {  // 35% medium
-    return { img: stoneMediumImg, size: 86 + Math.random() * 14 };   // ~86–100
-  } else {                // 25% groot
-    return { img: stoneLargeImg,  size: 102 + Math.random() * 16 };  // ~102–118
+
+  if (r < 0.40) { // 40% klein → 3x zo groot maken
+    const base = 70 + Math.random() * 12;            // ~70–82 (was)
+    return { img: stoneSmallImg, size: base * 3, kind: "small" };
+  } else if (r < 0.75) { // 35% medium (ongewijzigd)
+    const base = 86 + Math.random() * 14;            // ~86–100
+    return { img: stoneMediumImg, size: base, kind: "medium" };
+  } else { // 25% groot (ongewijzigd)
+    const base = 102 + Math.random() * 16;           // ~102–118
+    return { img: stoneLargeImg, size: base, kind: "large" };
   }
 }
 
