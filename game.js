@@ -1131,6 +1131,7 @@ function circleIntersectsRect(cx, cy, r, rx, ry, rw, rh) {
   return (dx * dx + dy * dy) <= (r * r);
 }
 
+
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
@@ -1139,11 +1140,11 @@ function drawFallingStones() {
       continue;
     }
 
-    // tekenen – per-steen sprite met fallback
+    // tekenen – per-steen sprite met fallback (geen small fallback meer)
     if (s.img && s.img.complete) {
       ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     } else {
-      ctx.drawImage(stoneSmallImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+      ctx.drawImage(stoneMediumImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     }
 
     // beweging
@@ -1152,24 +1153,41 @@ function drawFallingStones() {
     // ---- Botsing met paddle (nauwkeurig & eerlijk) ----
     // Defaults voor oudere stenen die nog geen nieuwe velden hebben
     if (s.framesInside == null) s.framesInside = 0;
-    if (s.hitboxScale == null) s.hitboxScale = 0.9; // 90% hitbox (geen transparante randen)
-    // basisradius op circa ingeschreven cirkel van de sprite
-    const baseRadius = s.size * 0.42;
-    const r = baseRadius * s.hitboxScale;
 
-    // Minimale indringing afhankelijk van grootte (max 12px)
-    if (s.minPenetration == null) s.minPenetration = Math.min(12, r * 0.4);
+    // Basisradius op circa ingeschreven cirkel van de sprite
+    const baseRadius = s.size * 0.42;
+
+    // Grootte-categorieën
+    const isLarge  = s.size >= 100;           // grote stenen blijven zoals ze nu zijn
+    const isSmOrMd = s.size < 100;            // medium + alles kleiner
+
+    // Per categorie parameters
+    let hitboxScale, minPenetration, debounceFrames;
+
+    if (isLarge) {
+      // ✅ grote stenen: behouden (voelt goed)
+      hitboxScale    = 0.90;
+      minPenetration = Math.min(12, baseRadius * 0.40);
+      debounceFrames = 2;
+    } else {
+      // 🔧 medium/kleiner: iets later laten "raken"
+      hitboxScale    = 0.80;                     // iets kleinere hitbox
+      minPenetration = Math.min(18, baseRadius * 0.55); // dieper in paddle
+      debounceFrames = 3;                        // 3 frames echt contact
+    }
+
+    const r = baseRadius * hitboxScale;
 
     // Paddle-bounds
-    const paddleLeft   = paddleX;
-    const paddleTop    = paddleY;
-    const paddleW      = paddleWidth;
-    const paddleH      = paddleHeight;
+    const paddleLeft = paddleX;
+    const paddleTop  = paddleY;
+    const paddleW    = paddleWidth;
+    const paddleH    = paddleHeight;
 
     // Cirkel vs rect overlap
     const intersects = circleIntersectsRect(s.x, s.y, r, paddleLeft, paddleTop, paddleW, paddleH);
-    // Onderkant van de cirkel moet minimaal 's.minPenetration' in de paddle-zone zitten
-    const penetrates = (s.y + r) >= (paddleTop + s.minPenetration);
+    // Onderkant van de cirkel moet minimaal 'minPenetration' in de paddle-zone zitten
+    const penetrates = (s.y + r) >= (paddleTop + minPenetration);
 
     if (intersects && penetrates) {
       s.framesInside++;
@@ -1177,8 +1195,8 @@ function drawFallingStones() {
       s.framesInside = 0;
     }
 
-    // Pas botsing laten tellen als hij 2 frames “echt” in de paddle zit
-    if (s.framesInside >= 2) {
+    // Pas botsing laten tellen na drempel-frames
+    if (s.framesInside >= debounceFrames) {
       spawnStoneDebris(s.x, s.y);
       s.active = false;
       stoneHitOverlayTimer = 18;
@@ -1215,6 +1233,7 @@ function drawFallingStones() {
     stoneClearRequested = false;
   }
 }
+
 
 
 
