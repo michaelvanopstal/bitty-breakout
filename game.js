@@ -1180,12 +1180,6 @@ function drawFallingStones() {
 
 
 
- 
-
-
-
-
-
 function drawFlyingCoins() {
   flyingCoins.forEach((coin) => {
     if (coin.active) {
