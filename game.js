@@ -345,12 +345,13 @@ addBonuses(9, [
 addBonuses(10, [
   // rand top/bottom
   {col:0,row:0,type:"stone"},{col:1,row:0,type:"stone"},{col:7,row:0,type:"stone"},{col:8,row:0,type:"stone"},
-  {col:0,row:14,type:"stone"},{col:1,row:14,type:"silver"},{col:7,row:14,type:"silver"},{col:8,row:14,type:"stone"},
+  {col:0,row:14,type:"stone"},{col:1,row:14,type:"silver"},{col:7,row:14,type:"silver"},{col:8,row:14,type:"stone"},{col:4,row:14,type:"stone"},{col:8,row:13,type:"stone"},{col:8,row:12,type:"stone"},
   // kruis midden
   {col:4,row:3,type:"silver"},{col:4,row:6,type:"stone"},{col:4,row:9,type:"silver"},
   {col:2,row:6,type:"stone"},{col:6,row:6,type:"stone"},
   // traps
-  {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},
+  {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},{col:0,row:7,type:"stonefall"},{col:1,row:7,type:"stonefall"},{col:7,row:7,type:"stonefall"},{col:8,row:7,type:"stonefall"},{col:2,row:12,type:"stonefall"},
+  {col:3,row:11,type:"stonefall"},{col:5,row:12,type:"stonefall"},{col:6,row:13,type:"stonefall"},
   // bonussen
   {col:4,row:1,type:"machinegun"},{col:3,row:5,type:"doubleball"},{col:5,row:5,type:"rocket"},
   {col:4,row:8,type:"speed"},{col:4,row:11,type:"2x"},{col:8,row:4,type:"power"}
