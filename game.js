@@ -1091,17 +1091,16 @@ function drawFallingHearts() {
 function pickRandomRockSprite() {
   const r = Math.random();
 
-  if (r < 0.40) { // 40% klein → 3x zo groot maken
-    const base = 70 + Math.random() * 12;            // ~70–82 (was)
-    return { img: stoneSmallImg, size: base * 3, kind: "small" };
-  } else if (r < 0.75) { // 35% medium (ongewijzigd)
-    const base = 86 + Math.random() * 14;            // ~86–100
-    return { img: stoneMediumImg, size: base, kind: "medium" };
-  } else { // 25% groot (ongewijzigd)
-    const base = 102 + Math.random() * 16;           // ~102–118
-    return { img: stoneLargeImg, size: base, kind: "large" };
+  // Verdeling kun je tweaken (bijv. 60/40). Nu 50/50:
+  if (r < 0.5) {  // MEDIUM
+    // zelfde range als je huidige medium
+    return { img: stoneMediumImg, size: 86 + Math.random() * 14, kind: "medium" }; // 86–100
+  } else {        // LARGE
+    // zelfde range als je huidige large
+    return { img: stoneLargeImg,  size: 102 + Math.random() * 16, kind: "large" }; // 102–118
   }
 }
+
 
 function triggerStonefall(originX, originY) {
   // 🎲 aantal vallende stenen per hit (random 1–3)
@@ -1144,36 +1143,41 @@ function drawFallingStones() {
       continue;
     }
 
-    // tekenen – per-steen sprite met fallback
+    // --- Upgrade: forceer kleine stenen naar medium ---
+    if ((s.kind === "small") || (s.img === stoneSmallImg)) {
+      s.img  = stoneMediumImg;
+      s.size = 86 + Math.random() * 14; // 86–100
+      s.kind = "medium";
+      // reset collision-afgeleiden
+      s.framesInside   = 0;
+      s.hitboxScale    = (s.hitboxScale == null) ? 0.9 : s.hitboxScale;
+      s.minPenetration = null; // laat we opnieuw afleiden hieronder
+    }
+
+    // tekenen – per-steen sprite met fallback (geen small fallback meer)
     if (s.img && s.img.complete) {
       ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     } else {
-      ctx.drawImage(stoneSmallImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+      ctx.drawImage(stoneMediumImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     }
 
     // beweging
     s.y += s.dy;
 
     // ---- Botsing met paddle (nauwkeurig & eerlijk) ----
-    // Defaults voor oudere stenen die nog geen nieuwe velden hebben
     if (s.framesInside == null) s.framesInside = 0;
-    if (s.hitboxScale == null) s.hitboxScale = 0.9; // 90% hitbox (geen transparante randen)
-    // basisradius op circa ingeschreven cirkel van de sprite
-    const baseRadius = s.size * 0.42;
+    if (s.hitboxScale == null) s.hitboxScale = 0.9; // 90% hitbox
+    const baseRadius = s.size * 0.42;               // ingeschreven cirkel
     const r = baseRadius * s.hitboxScale;
 
-    // Minimale indringing afhankelijk van grootte (max 12px)
     if (s.minPenetration == null) s.minPenetration = Math.min(12, r * 0.4);
 
-    // Paddle-bounds
-    const paddleLeft   = paddleX;
-    const paddleTop    = paddleY;
-    const paddleW      = paddleWidth;
-    const paddleH      = paddleHeight;
+    const paddleLeft = paddleX;
+    const paddleTop  = paddleY;
+    const paddleW    = paddleWidth;
+    const paddleH    = paddleHeight;
 
-    // Cirkel vs rect overlap
     const intersects = circleIntersectsRect(s.x, s.y, r, paddleLeft, paddleTop, paddleW, paddleH);
-    // Onderkant van de cirkel moet minimaal 's.minPenetration' in de paddle-zone zitten
     const penetrates = (s.y + r) >= (paddleTop + s.minPenetration);
 
     if (intersects && penetrates) {
@@ -1182,30 +1186,35 @@ function drawFallingStones() {
       s.framesInside = 0;
     }
 
-    // Pas botsing laten tellen als hij 2 frames “echt” in de paddle zit
+    // pas tellen na 2 frames "echt" in paddle
     if (s.framesInside >= 2) {
       spawnStoneDebris(s.x, s.y);
       s.active = false;
       stoneHitOverlayTimer = 18;
 
-      // ❗ logica éénmalig per salvo
       if (!stoneHitLock) {
         stoneHitLock = true;
-
-        // 🚀 Paddle-explosie / leven eraf
-        if (typeof triggerPaddleExplosion === "function") {
-          triggerPaddleExplosion();
-        }
-
-        // na de loop alle stenen weghalen (veilig)
+        if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
         stoneClearRequested = true;
-
-        // kleine cooldown voordat volgende salvo weer leven kan kosten
         setTimeout(() => { stoneHitLock = false; }, 1200);
       }
-
       continue;
     }
+
+    // onder uit beeld → vergruizen
+    if (s.y - s.size / 2 > canvas.height) {
+      spawnStoneDebris(s.x, canvas.height - 10);
+      s.active = false;
+    }
+  }
+
+  // ná de iteratie: in één keer alle stenen wissen (voorkomt loop issues)
+  if (stoneClearRequested) {
+    fallingStones.length = 0;
+    stoneClearRequested = false;
+  }
+}
+
 
     // onder uit beeld → vergruizen
     if (s.y - s.size / 2 > canvas.height) {
