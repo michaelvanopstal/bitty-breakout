@@ -246,7 +246,7 @@ addBonuses(4, [
   {col:4,row:9,type:"stonefall"},
   // diagonale stones richting midden
   {col:0,row:8,type:"stone"},{col:1,row:7,type:"stone"},{col:7,row:7,type:"stone"},{col:8,row:8,type:"stone"},{col:4,row:11,type:"stone"},
-  {col:3,row:12 type:"stone"},{col:5,row:12,type:"stone"},
+  {col:3,row:12, type:"stone"},{col:5,row:12,type:"stone"},
   // bonussen op accenten
   {col:4,row:3,type:"machinegun"},{col:4,row:6,type:"rocket"},{col:1,row:6,type:"doubleball"},
   {col:7,row:6,type:"speed"},{col:4,row:8,type:"2x"},{col:8,row:5,type:"power"}
