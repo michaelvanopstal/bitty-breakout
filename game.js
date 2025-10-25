@@ -329,9 +329,6 @@ pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
 const stoneBlockImg  = new Image();
 stoneBlockImg.src  = "stone_block.png";
 
-const stoneSmallImg  = new Image();
-stoneSmallImg.src  = "stone_small.png";
-
 const stoneMediumImg = new Image(); 
 stoneMediumImg.src = "stone_medium.png";
 
@@ -2216,7 +2213,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 27) {
+  if (imagesLoaded === 26) {
     resetBricks();
     updateLivesDisplay(); // ✅ laat bij start meteen levens zien
     resetPaddle(); // 🔥 paddletekening klaarzetten
@@ -2249,7 +2246,6 @@ silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
 
 stoneBlockImg.onload  = onImageLoad;
-stoneSmallImg.onload  = onImageLoad;
 stoneMediumImg.onload = onImageLoad;
 stoneLargeImg.onload  = onImageLoad;
 
