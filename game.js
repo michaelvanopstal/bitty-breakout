@@ -306,16 +306,18 @@ addBonuses(7, [
 // ---------- LEVEL 8: “Driebanden (4/8/12) + traps aan zijkant”
 addBonuses(8, [
   // banden
-  {col:1,row:4,type:"silver"},{col:2,row:4},{col:3,row:4},{col:5,row:4},{col:6,row:4},{col:7,row:4,type:"silver"},
-  {col:1,row:8},{col:2,row:8},{col:3,row:8},{col:5,row:8},{col:6,row:8},{col:7,row:8},
-  {col:1,row:12,type:"silver"},{col:2,row:12},{col:6,row:12},{col:7,row:12,type:"silver"},
+  {col:1,row:4,type:"silver"},{col:2,row:4,type:"silver"},{col:3,row:4,type:"silver"},{col:5,row:4,type:"silver"},{col:6,row:4,type:"silver"},{col:7,row:4,type:"silver"},
+  {col:1,row:8,type:"silver"},{col:2,row:8,type:"silver"},{col:3,row:8,type:"silver"},{col:5,row:8,type:"silver"},{col:6,row:8,type:"silver"},{col:7,row:8,type:"silver"},
+  {col:1,row:12,type:"silver"},{col:2,row:12,type:"silver"},{col:6,row:12,type:"silver"},{col:7,row:12,type:"silver"},
   // traps zijkant
-  {col:0,row:6,type:"stonefall"},{col:8,row:6,type:"stonefall"},
+  {col:0,row:6,type:"stonefall"},{col:8,row:6,type:"stonefall"},{col:1,row:6,type:"stonefall"},{col:2,row:6,type:"stonefall"},{col:3,row:6,type:"stonefall"},
+  {col:4,row:6,type:"stonefall"},{col:5,row:6,type:"stonefall"},{col:6,row:6,type:"stonefall"},{col:7,row:6,type:"stonefall"},
   // bonussen
   {col:4,row:3,type:"machinegun"},{col:4,row:7,type:"doubleball"},{col:4,row:5,type:"2x"},
   {col:4,row:9,type:"speed"},{col:4,row:11,type:"rocket"},{col:8,row:4,type:"power"},
   // ankers stone
-  {col:0,row:9,type:"stone"},{col:8,row:9,type:"stone"}
+  {col:0,row:9,type:"stone"},{col:8,row:9,type:"stone"},{col:1,row:9,type:"stone"},{col:2,row:9,type:"stone"},{col:3,row:9,type:"stone"},{col:4,row:9,type:"stone"},{col:5,row:9,type:"stone"},
+  {col:6,row:9,type:"stone"},{col:7,row:9,type:"stone"}
 ]);
 
 // ---------- LEVEL 9: “Ruit + zware baseline”
