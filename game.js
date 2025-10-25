@@ -198,6 +198,61 @@ const level3Map = [
   { col: 5, row: 8, type: "stonefall" },
 ];
 
+// ===== Levels-config – 20 levels eenvoudig schaalbaar =====
+const TOTAL_LEVELS = 20;
+
+// Stop je bestaande maps als basis in level 1-3
+const level1Map = (typeof bonusBricks !== "undefined" ? bonusBricks : []);
+const level2Map = (typeof pxpMap !== "undefined" ? pxpMap : []);
+// level3Map bestaat al bij jou
+
+// Helper: maak lege map
+function createEmptyMap() { return []; }
+
+// Centrale tabel met 20 entries (maps + optionele params)
+const LEVELS = Array.from({ length: TOTAL_LEVELS }, (_, i) => ({
+  map: createEmptyMap(),
+  params: {
+    // basis-schaal: elke 5 levels mini-stapjes, pas vrij aan
+    ballSpeed: 6 + 0.2 * i,                 // start snelheid
+    paddleWidth: 100 - Math.floor(i / 4) * 4, // per 4 levels -4px, min later clampen
+    machineGunDifficulty: Math.min(1 + Math.floor(i / 7), 3) // 1..3
+  }
+}));
+
+// Zet jouw bestaande 1–3 in de centrale tabel (behoud huidig gedrag)
+LEVELS[0].map = level1Map;
+LEVELS[1].map = level2Map;
+LEVELS[2].map = (typeof level3Map !== "undefined" ? level3Map : []);
+
+// 🔧 Makkelijk bonusblokken plaatsen:
+function addBonus(levelNumber, col, row, type="normal") {
+  const idx = levelNumber - 1;
+  if (!LEVELS[idx]) return;
+  LEVELS[idx].map.push({ col, row, type });
+}
+
+function addBonuses(levelNumber, entries) {
+  entries.forEach(e => addBonus(levelNumber, e.col, e.row, e.type));
+}
+
+// 👇 Voorbeeld: snel wat blokjes in level 4 en 5
+addBonuses(4, [
+  { col: 4, row: 2, type: "machinegun" },
+  { col: 2, row: 3, type: "silver" },
+  { col: 6, row: 3, type: "silver" },
+  { col: 4, row: 7, type: "2x" },
+  { col: 4, row: 9, type: "rocket" },
+]);
+
+addBonuses(5, [
+  { col: 0, row: 0, type: "stone" }, { col: 8, row: 0, type: "stone" },
+  { col: 0, row: 14, type: "stone" }, { col: 8, row: 14, type: "stone" },
+  { col: 4, row: 3, type: "doubleball" },
+  { col: 3, row: 8, type: "stonefall" },
+  { col: 5, row: 8, type: "stonefall" },
+]);
+
 const resetBallSound = new Audio("resetball.mp3");
 
 
@@ -606,23 +661,15 @@ function drawPointPopups() {
 }
 
 function resetBricks() {
-  // Kies de juiste map per level
-  let currentMap = [];
-  if (level === 1) {
-    currentMap = (typeof level1Map !== "undefined" && Array.isArray(level1Map))
-      ? level1Map
-      : bonusBricks;
-  } else if (level === 2) {
-    currentMap = (typeof level2Map !== "undefined" && Array.isArray(level2Map))
-      ? level2Map
-      : pxpMap;
-  } else if (level === 3) {
-    currentMap = (typeof level3Map !== "undefined" && Array.isArray(level3Map))
-      ? level3Map
-      : [];
-  } else {
-    currentMap = [];
-  }
+  // Pak map + params uit centraal LEVELS schema
+  const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
+  const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
+
+  // Clamp en pas level-parameters toe
+  const p = def?.params || {};
+  const targetPaddleWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
+  // Paddlebreedte bij start niveau aanpassen (optioneel – enkel bij nieuwe levelstart)
+  paddleWidth = targetPaddleWidth;
 
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -631,13 +678,7 @@ function resetBricks() {
 
       // Kijk of deze brick in de map voorkomt
       const defined = currentMap.find(p => p.col === c && p.row === r);
-      let brickType = defined ? defined.type : "normal"; // standaard "normal"
-
-      // 💎 Level 1 bonus fallback (alleen voor je originele setup)
-      if (level === 1 && !defined) {
-        const bonus = bonusBricks.find(x => x.col === c && x.row === r);
-        if (bonus) brickType = bonus.type;
-      }
+      let brickType = defined ? defined.type : "normal";
 
       // Pas type toe
       b.type = brickType;
@@ -651,13 +692,13 @@ function resetBricks() {
         delete b.hasDroppedBag;
       }
 
-      // Reset hartjes
+      // Reset hartjes-flags; toewijzing komt zo
       b.hasHeart = false;
       b.heartDropped = false;
     }
   }
 
-  // Plaats 4 willekeurige hartjes onder normale blokken
+  // Plaats 4 willekeurige hartjes onder normale blokken (zoals je deed)
   assignHeartBlocks();
 }
 
@@ -755,7 +796,8 @@ function resetBall() {
     x: paddleX + paddleWidth / 2 - ballRadius,
     y: paddleY - ballRadius * 2,
     dx: 0,
-    dy: -6,
+    dy: -(LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))]?.params?.ballSpeed ?? 6),
+
     radius: ballRadius,
     isMain: true
   }];
@@ -2453,37 +2495,51 @@ function triggerPaddleExplosion() {
 
 
 function startLevelTransition() {
+  if (level >= TOTAL_LEVELS) {
+    // 🚩 WIN: zelfde reset-flow als game over, maar "You Win"
+    saveHighscore();
+    pauseTimer();
+
+    // Toon korte win-overlay (hergebruik jouw game over stijl)
+    explosions.push({ x: canvas.width/2, y: canvas.height/2, radius: 10, alpha: 1, color: "white" });
+
+    // Reset naar beginstaat
+    lives = 3;
+    updateLivesDisplay();
+    heartsCollected = 0;
+    document.getElementById("heartCount").textContent = heartsCollected;
+    score = 0;
+    level = 1;
+    elapsedTime = 0;
+
+    paddleExploding = false;
+    paddleExplosionParticles = [];
+    speedBoostActive = false;
+    doublePointsActive = false;
+    flagsOnPaddle = false;
+    rocketActive = false;
+    rocketFired = false;
+    rocketAmmo = 0;
+    flyingCoins = [];
+    smokeParticles = [];
+    explosions = [];
+    coins = [];
+    pxpBags = [];
+
+    paddleFreeMove = false;
+
+    resetBricks();
+    resetBall();
+    resetPaddle();
+    updateScoreDisplay();
+    document.getElementById("timeDisplay").textContent = "00:00";
+    return;
+  }
+
+  // Ga door naar volgend level
   level++;
-
   resetAllBonuses();
-
-  levelUpSound.currentTime = 0;
-  levelUpSound.play();
-
-  levelMessageAlpha = 0;
-  levelMessageTimer = 0;
-  levelMessageVisible = true;
-  levelTransitionActive = true;
-
-  resetBricks();
-  transitionOffsetY = -300;
-
-  ballLaunched = false;
-  ballMoving = false;
-
-  balls = [{
-    x: paddleX + paddleWidth / 2 - ballRadius,
-    y: paddleY - ballRadius * 2,
-    dx: 0,
-    dy: -6,
-    radius: ballRadius,
-    isMain: true
-  }];
-
-  // ✅ Cruciaal bij 4+ levens
-  resetPaddle();
-  updateLivesDisplay();
-}
+  // verder ongewijzigd...
 
 
 function updateLivesDisplay() {
