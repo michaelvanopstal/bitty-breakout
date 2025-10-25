@@ -1479,48 +1479,43 @@ function collisionDetection() {
           }
 
           // 🪨 Steen-blok gedrag
-          if (b.type === "stone") {
-            bricksSound.currentTime = 0;
-            bricksSound.play();
-            b.hits++;
+         if (b.type === "stone") {
+  bricksSound.currentTime = 0;
+  bricksSound.play();
 
-            for (let i = 0; i < 5; i++) {
-              stoneDebris.push({
-                x: b.x + brickWidth / 2,
-                y: b.y + brickHeight / 2,
-                dx: (Math.random() - 0.5) * 3,
-                dy: (Math.random() - 0.5) * 3,
-                radius: Math.random() * 2 + 1,
-                alpha: 1
-              });
-            }
+  // 💥 1 hit = meteen kapot
+  b.status = 0;
 
-            if (b.hits === 1 || b.hits === 2) {
-              spawnCoin(b.x + brickWidth / 2, b.y);
-            }
+  // optioneel: een kleine explosie of debris
+  for (let i = 0; i < 8; i++) {
+    stoneDebris.push({
+      x: b.x + brickWidth / 2,
+      y: b.y + brickHeight / 2,
+      dx: (Math.random() - 0.5) * 3,
+      dy: (Math.random() - 0.5) * 3,
+      radius: Math.random() * 2 + 1,
+      alpha: 1
+    });
+  }
 
-            if (b.hits >= 3) {
-              b.status = 0;
+  // spawn 1 coin (was bij hit 1 of 2)
+  spawnCoin(b.x + brickWidth / 2, b.y);
 
-              if (!b.hasDroppedBag) {
-                spawnPxpBag(b.x + brickWidth / 2, b.y + brickHeight);
-                b.hasDroppedBag = true;
-              }
+  // geef punten
+  const earned = doublePointsActive ? 120 : 60;
+  score += earned;
+  updateScoreDisplay();
 
-              const earned = doublePointsActive ? 120 : 60;
-              score += earned;
-              updateScoreDisplay();
+  pointPopups.push({
+    x: b.x + brickWidth / 2,
+    y: b.y,
+    value: "+" + earned,
+    alpha: 1
+  });
 
-              pointPopups.push({
-                x: b.x + brickWidth / 2,
-                y: b.y,
-                value: "+" + earned,
-                alpha: 1
-              });
-            }
-
-            return; // klaar met deze hit
-          }
+  // stop verdere collision-afhandeling
+  return;
+}
 
           // 🪙 Gedrag voor silver blokken
           if (b.type === "silver") {
