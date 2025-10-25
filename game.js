@@ -236,167 +236,261 @@ function addBonuses(levelNumber, entries) {
   entries.forEach(e => addBonus(levelNumber, e.col, e.row, e.type));
 }
 
-// ===== Levels 4 t/m 20: elke level gebruikt alle bonus-types =====
-// Let op: col 0..8, row 0..14
-
-// LEVEL 4 – introductie van alle types in een kruispatroon
+// ---------- LEVEL 4: “Band + traps” (zet voort op L2’s band, introduceert extra traps)
 addBonuses(4, [
-  {col:4,row:2,type:"machinegun"},
-  {col:4,row:4,type:"silver"},
-  {col:4,row:6,type:"stone"},
-  {col:4,row:8,type:"doubleball"},
-  {col:4,row:10,type:"rocket"},
-  {col:2,row:6,type:"speed"},
-  {col:6,row:6,type:"2x"},
-  {col:3,row:3,type:"stonefall"},
-  {col:5,row:3,type:"power"},
-  {col:3,row:9,type:"power"},
-  {col:5,row:9,type:"silver"},
-  {col:1,row:7,type:"stone"}
+  // band midden (rows 4-5), accenten silver
+  {col:2,row:4,type:"silver"},{col:3,row:4,type:"silver"},{col:5,row:4,type:"silver"},{col:6,row:4,type:"silver"},
+  {col:2,row:5},{col:3,row:5},{col:5,row:5},{col:6,row:5},
+  // vroege valstrikken
+  {col:1,row:2,type:"stonefall"},{col:7,row:2,type:"stonefall"},
+  // diagonale stones richting midden
+  {col:0,row:8,type:"stone"},{col:1,row:7,type:"stone"},{col:7,row:7,type:"stone"},{col:8,row:8,type:"stone"},
+  // bonussen op accenten
+  {col:4,row:3,type:"machinegun"},{col:4,row:6,type:"rocket"},{col:1,row:6,type:"doubleball"},
+  {col:7,row:6,type:"speed"},{col:4,row:8,type:"2x"},{col:8,row:5,type:"power"}
 ]);
 
-// LEVEL 5 – ruitvorm
+// ---------- LEVEL 5: “Diagonaal ruit + zware onderlijn (silver/stone mix)”
 addBonuses(5, [
-  {col:4,row:1,type:"machinegun"},
-  {col:3,row:2,type:"silver"},{col:5,row:2,type:"silver"},
-  {col:2,row:3,type:"stone"},{col:6,row:3,type:"stone"},
-  {col:1,row:4,type:"doubleball"},{col:7,row:4,type:"rocket"},
-  {col:0,row:5,type:"speed"},{col:8,row:5,type:"2x"},
-  {col:2,row:7,type:"stonefall"},{col:6,row:7,type:"power"},
-  {col:4,row:9,type:"power"}
+  // diagonalen silver
+  {col:2,row:3,type:"silver"},{col:3,row:4,type:"silver"},{col:5,row:4,type:"silver"},{col:6,row:3,type:"silver"},
+  // onderlijn stevig
+  {col:0,row:14,type:"stone"},{col:1,row:14,type:"silver"},{col:2,row:14,type:"stone"},
+  {col:6,row:14,type:"silver"},{col:7,row:14,type:"stone"},{col:8,row:14,type:"silver"},
+  // traps midden
+  {col:3,row:8,type:"stonefall"},{col:5,row:8,type:"stonefall"},
+  // bonussen
+  {col:4,row:2,type:"machinegun"},{col:1,row:7,type:"doubleball"},{col:7,row:7,type:"speed"},
+  {col:4,row:9,type:"rocket"},{col:4,row:6,type:"2x"},{col:8,row:4,type:"power"}
 ]);
 
-// LEVEL 6 – horizontale banen
+// ---------- LEVEL 6: “Zijwanden + band + X-traps”
 addBonuses(6, [
-  {col:1,row:2,type:"machinegun"},{col:4,row:2,type:"silver"},{col:7,row:2,type:"stone"},
-  {col:0,row:5,type:"doubleball"},{col:2,row:5,type:"rocket"},{col:4,row:5,type:"speed"},{col:6,row:5,type:"2x"},{col:8,row:5,type:"stonefall"},
-  {col:2,row:8,type:"power"},{col:4,row:8,type:"silver"},{col:6,row:8,type:"stone"},
-  {col:4,row:11,type:"power"}
+  // zijwanden stone
+  {col:0,row:5,type:"stone"},{col:0,row:6,type:"stone"},{col:8,row:5,type:"stone"},{col:8,row:6,type:"stone"},
+  // band row 4/5
+  {col:1,row:4,type:"silver"},{col:2,row:4},{col:6,row:4},{col:7,row:4,type:"silver"},
+  {col:2,row:5},{col:3,row:5},{col:5,row:5},{col:6,row:5},
+  // X traps
+  {col:3,row:3,type:"stonefall"},{col:5,row:3,type:"stonefall"},
+  {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},
+  // bonussen
+  {col:4,row:2,type:"machinegun"},{col:1,row:7,type:"doubleball"},{col:7,row:7,type:"rocket"},
+  {col:4,row:8,type:"speed"},{col:4,row:6,type:"2x"},{col:0,row:4,type:"power"}
 ]);
 
-// LEVEL 7 – diagonalen
+// ---------- LEVEL 7: “Rand + diagonale silver + middenval”
 addBonuses(7, [
-  {col:0,row:2,type:"machinegun"},{col:1,row:3,type:"silver"},{col:2,row:4,type:"stone"},
-  {col:3,row:5,type:"doubleball"},{col:4,row:6,type:"rocket"},{col:5,row:7,type:"speed"},
-  {col:6,row:8,type:"2x"},{col:7,row:9,type:"stonefall"},{col:8,row:10,type:"power"},
-  {col:8,row:2,type:"silver"},{col:7,row:3,type:"stone"},{col:6,row:4,type:"power"}
+  // top/bottom hoeken stone
+  {col:0,row:0,type:"stone"},{col:8,row:0,type:"stone"},{col:0,row:14,type:"stone"},{col:8,row:14,type:"stone"},
+  // diagonalen silver
+  {col:1,row:3,type:"silver"},{col:2,row:4,type:"silver"},{col:6,row:4,type:"silver"},{col:7,row:3,type:"silver"},
+  // middenval
+  {col:4,row:7,type:"stonefall"},{col:3,row:8,type:"stonefall"},{col:5,row:8,type:"stonefall"},
+  // bonussen (kruis)
+  {col:4,row:2,type:"machinegun"},{col:4,row:5,type:"doubleball"},{col:4,row:9,type:"rocket"},
+  {col:2,row:6,type:"2x"},{col:6,row:6,type:"speed"},{col:4,row:11,type:"power"}
 ]);
 
-// LEVEL 8 – randen + midden
+// ---------- LEVEL 8: “Driebanden (4/8/12) + traps aan zijkant”
 addBonuses(8, [
-  {col:0,row:0,type:"stone"},{col:8,row:0,type:"stone"},
-  {col:0,row:14,type:"stone"},{col:8,row:14,type:"stone"},
-  {col:4,row:2,type:"machinegun"},{col:4,row:4,type:"rocket"},
-  {col:4,row:6,type:"doubleball"},{col:4,row:8,type:"speed"},
-  {col:4,row:10,type:"2x"},{col:3,row:7,type:"silver"},{col:5,row:7,type:"silver"},
-  {col:2,row:7,type:"power"},{col:6,row:7,type:"stonefall"}
+  // banden
+  {col:1,row:4,type:"silver"},{col:2,row:4},{col:3,row:4},{col:5,row:4},{col:6,row:4},{col:7,row:4,type:"silver"},
+  {col:1,row:8},{col:2,row:8},{col:3,row:8},{col:5,row:8},{col:6,row:8},{col:7,row:8},
+  {col:1,row:12,type:"silver"},{col:2,row:12},{col:6,row:12},{col:7,row:12,type:"silver"},
+  // traps zijkant
+  {col:0,row:6,type:"stonefall"},{col:8,row:6,type:"stonefall"},
+  // bonussen
+  {col:4,row:3,type:"machinegun"},{col:4,row:7,type:"doubleball"},{col:4,row:5,type:"2x"},
+  {col:4,row:9,type:"speed"},{col:4,row:11,type:"rocket"},{col:8,row:4,type:"power"},
+  // ankers stone
+  {col:0,row:9,type:"stone"},{col:8,row:9,type:"stone"}
 ]);
 
-// LEVEL 9 – schaakbord accenten
+// ---------- LEVEL 9: “Ruit + zware baseline”
 addBonuses(9, [
-  {col:1,row:1,type:"machinegun"},{col:3,row:1,type:"silver"},{col:5,row:1,type:"stone"},{col:7,row:1,type:"power"},
-  {col:0,row:3,type:"doubleball"},{col:2,row:3,type:"rocket"},{col:4,row:3,type:"speed"},{col:6,row:3,type:"2x"},{col:8,row:3,type:"stonefall"},
-  {col:1,row:5,type:"silver"},{col:3,row:5,type:"stone"},{col:5,row:5,type:"power"},{col:7,row:5,type:"silver"}
+  // ruit silver
+  {col:4,row:2,type:"silver"},
+  {col:3,row:3,type:"silver"},{col:5,row:3,type:"silver"},
+  {col:2,row:4,type:"silver"},{col:6,row:4,type:"silver"},
+  // baseline
+  {col:1,row:14,type:"stone"},{col:2,row:14,type:"silver"},{col:3,row:14,type:"stone"},
+  {col:5,row:14,type:"stone"},{col:6,row:14,type:"silver"},{col:7,row:14,type:"stone"},
+  // traps
+  {col:2,row:7,type:"stonefall"},{col:6,row:7,type:"stonefall"},
+  // bonussen
+  {col:4,row:1,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
+  {col:4,row:8,type:"2x"},{col:3,row:5,type:"speed"},{col:8,row:5,type:"power"},
+  // anker stones
+  {col:0,row:8,type:"stone"},{col:8,row:8,type:"stone"}
 ]);
 
-// LEVEL 10 – ‘plus’-teken met hoeken
+// ---------- LEVEL 10: “Volle rand (top/bottom) + middenkruis”
 addBonuses(10, [
-  {col:4,row:1,type:"machinegun"},
-  {col:4,row:3,type:"silver"},{col:4,row:5,type:"stone"},{col:4,row:7,type:"doubleball"},{col:4,row:9,type:"rocket"},
-  {col:1,row:6,type:"speed"},{col:3,row:6,type:"2x"},{col:5,row:6,type:"stonefall"},{col:7,row:6,type:"power"},
-  {col:0,row:0,type:"silver"},{col:8,row:0,type:"stone"},{col:0,row:14,type:"power"},{col:8,row:14,type:"silver"}
+  // rand top/bottom
+  {col:0,row:0,type:"stone"},{col:1,row:0,type:"stone"},{col:7,row:0,type:"stone"},{col:8,row:0,type:"stone"},
+  {col:0,row:14,type:"stone"},{col:1,row:14,type:"silver"},{col:7,row:14,type:"silver"},{col:8,row:14,type:"stone"},
+  // kruis midden
+  {col:4,row:3,type:"silver"},{col:4,row:6,type:"stone"},{col:4,row:9,type:"silver"},
+  {col:2,row:6,type:"stone"},{col:6,row:6,type:"stone"},
+  // traps
+  {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},
+  // bonussen
+  {col:4,row:1,type:"machinegun"},{col:3,row:5,type:"doubleball"},{col:5,row:5,type:"rocket"},
+  {col:4,row:8,type:"speed"},{col:4,row:11,type:"2x"},{col:8,row:4,type:"power"}
 ]);
 
-// LEVEL 11 – ladder
+// ---------- LEVEL 11: “Zijwanden + diagonaal silver + middencorridor”
 addBonuses(11, [
-  {col:2,row:2,type:"machinegun"},{col:3,row:3,type:"silver"},{col:4,row:4,type:"stone"},{col:5,row:5,type:"doubleball"},
-  {col:6,row:6,type:"rocket"},{col:5,row:7,type:"speed"},{col:4,row:8,type:"2x"},{col:3,row:9,type:"stonefall"},
-  {col:2,row:10,type:"power"},{col:1,row:11,type:"silver"},{col:0,row:12,type:"stone"},{col:7,row:2,type:"power"}
+  // zijwanden
+  {col:0,row:4,type:"stone"},{col:0,row:5,type:"stone"},{col:8,row:4,type:"stone"},{col:8,row:5,type:"stone"},
+  // diagonale silver
+  {col:1,row:3,type:"silver"},{col:2,row:4,type:"silver"},{col:6,row:4,type:"silver"},{col:7,row:3,type:"silver"},
+  // middencorridor traps
+  {col:4,row:6,type:"stonefall"},{col:4,row:8,type:"stonefall"},
+  // bonussen
+  {col:4,row:2,type:"machinegun"},{col:3,row:6,type:"doubleball"},{col:5,row:6,type:"rocket"},
+  {col:2,row:7,type:"2x"},{col:6,row:7,type:"speed"},{col:4,row:10,type:"power"},
+  // ankers
+  {col:1,row:8,type:"stone"},{col:7,row:8,type:"stone"}
 ]);
 
-// LEVEL 12 – middenlijn druk
+// ---------- LEVEL 12: “Driebanden compact + valkuilen onder”
 addBonuses(12, [
-  {col:4,row:1,type:"machinegun"},{col:4,row:3,type:"silver"},{col:4,row:5,type:"stone"},
-  {col:4,row:7,type:"doubleball"},{col:4,row:9,type:"rocket"},{col:4,row:11,type:"speed"},
-  {col:2,row:4,type:"2x"},{col:6,row:4,type:"stonefall"},
-  {col:2,row:8,type:"power"},{col:6,row:8,type:"silver"},
-  {col:1,row:6,type:"stone"},{col:7,row:6,type:"power"}
+  // compacte banden
+  {col:2,row:4,type:"silver"},{col:3,row:4},{col:5,row:4},{col:6,row:4,type:"silver"},
+  {col:2,row:5},{col:3,row:5},{col:5,row:5},{col:6,row:5},
+  {col:3,row:8},{col:4,row:8,type:"silver"},{col:5,row:8},
+  // valkuilen
+  {col:3,row:9,type:"stonefall"},{col:5,row:9,type:"stonefall"},
+  // bonussen
+  {col:4,row:3,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
+  {col:4,row:6,type:"2x"},{col:4,row:11,type:"speed"},{col:8,row:5,type:"power"},
+  // ankers
+  {col:0,row:8,type:"stone"},{col:8,row:8,type:"stone"}
 ]);
 
-// LEVEL 13 – dubbele ruit
+// ---------- LEVEL 13: “Ruit groot + zware zijkanten”
 addBonuses(13, [
-  {col:4,row:0,type:"machinegun"},
-  {col:3,row:1,type:"silver"},{col:5,row:1,type:"stone"},
-  {col:2,row:2,type:"doubleball"},{col:6,row:2,type:"rocket"},
-  {col:1,row:3,type:"speed"},{col:7,row:3,type:"2x"},
-  {col:0,row:4,type:"stonefall"},{col:8,row:4,type:"power"},
-  {col:2,row:6,type:"silver"},{col:4,row:8,type:"power"},{col:6,row:6,type:"stone"}
+  // ruit silver
+  {col:4,row:2,type:"silver"},{col:3,row:3,type:"silver"},{col:5,row:3,type:"silver"},
+  {col:2,row:4,type:"silver"},{col:6,row:4,type:"silver"},
+  // zijkanten
+  {col:0,row:6,type:"stone"},{col:8,row:6,type:"stone"},
+  // traps
+  {col:2,row:7,type:"stonefall"},{col:6,row:7,type:"stonefall"},
+  // bonussen
+  {col:4,row:1,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
+  {col:4,row:9,type:"2x"},{col:3,row:5,type:"speed"},{col:8,row:4,type:"power"},
+  // extra baseline ankers
+  {col:1,row:14,type:"stone"},{col:7,row:14,type:"stone"}
 ]);
 
-// LEVEL 14 – pijlvorm omlaag
+// ---------- LEVEL 14: “Volle rand + middenruit + valpoort”
 addBonuses(14, [
-  {col:4,row:2,type:"machinegun"},
-  {col:3,row:3,type:"silver"},{col:5,row:3,type:"stone"},
-  {col:2,row:4,type:"doubleball"},{col:6,row:4,type:"rocket"},
-  {col:1,row:5,type:"speed"},{col:7,row:5,type:"2x"},
-  {col:4,row:6,type:"stonefall"},
-  {col:3,row:7,type:"power"},{col:5,row:7,type:"silver"},
-  {col:2,row:8,type:"stone"},{col:6,row:8,type:"power"}
+  // rand (verzwaard)
+  {col:0,row:0,type:"stone"},{col:8,row:0,type:"stone"},{col:0,row:14,type:"stone"},{col:8,row:14,type:"stone"},
+  // middenruit silver
+  {col:4,row:3,type:"silver"},{col:3,row:4,type:"silver"},{col:5,row:4,type:"silver"},{col:4,row:5,type:"silver"},
+  // valpoort
+  {col:3,row:7,type:"stonefall"},{col:4,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},
+  // bonussen
+  {col:4,row:2,type:"machinegun"},{col:2,row:6,type:"doubleball"},{col:6,row:6,type:"rocket"},
+  {col:4,row:6,type:"2x"},{col:4,row:9,type:"speed"},{col:8,row:5,type:"power"},
+  // ankers
+  {col:1,row:8,type:"stone"},{col:7,row:8,type:"stone"}
 ]);
 
-// LEVEL 15 – randen zwaar, midden tricky
+// ---------- LEVEL 15: “Driebanden strak + heavy baseline”
 addBonuses(15, [
-  {col:0,row:2,type:"stone"},{col:8,row:2,type:"stone"},
-  {col:0,row:4,type:"silver"},{col:8,row:4,type:"silver"},
-  {col:0,row:6,type:"power"},{col:8,row:6,type:"power"},
-  {col:0,row:8,type:"stonefall"},{col:8,row:8,type:"stonefall"},
-  {col:4,row:3,type:"machinegun"},{col:4,row:5,type:"doubleball"},{col:4,row:7,type:"rocket"},
-  {col:2,row:10,type:"speed"},{col:6,row:10,type:"2x"}
+  // banden 4,6,8
+  {col:2,row:4,type:"silver"},{col:3,row:4},{col:5,row:4},{col:6,row:4,type:"silver"},
+  {col:1,row:6},{col:2,row:6},{col:6,row:6},{col:7,row:6},
+  {col:2,row:8},{col:3,row:8,type:"silver"},{col:5,row:8,type:"silver"},{col:6,row:8},
+  // baseline
+  {col:2,row:14,type:"stone"},{col:3,row:14,type:"silver"},{col:5,row:14,type:"silver"},{col:6,row:14,type:"stone"},
+  // traps
+  {col:4,row:7,type:"stonefall"},
+  // bonussen
+  {col:4,row:3,type:"machinegun"},{col:1,row:5,type:"doubleball"},{col:7,row:5,type:"rocket"},
+  {col:4,row:5,type:"2x"},{col:4,row:9,type:"speed"},{col:8,row:4,type:"power"}
 ]);
 
-// LEVEL 16 – zigzag midden
+// ---------- LEVEL 16: “Zijwanden lang + X-traps + middenas”
 addBonuses(16, [
-  {col:3,row:2,type:"machinegun"},{col:4,row:3,type:"silver"},{col:5,row:4,type:"stone"},
-  {col:3,row:5,type:"doubleball"},{col:4,row:6,type:"rocket"},{col:5,row:7,type:"speed"},
-  {col:3,row:8,type:"2x"},{col:4,row:9,type:"stonefall"},{col:5,row:10,type:"power"},
-  {col:2,row:6,type:"silver"},{col:6,row:6,type:"stone"},{col:4,row:12,type:"power"}
+  // zijwanden lang
+  {col:0,row:4,type:"stone"},{col:0,row:5,type:"stone"},{col:0,row:6,type:"stone"},
+  {col:8,row:4,type:"stone"},{col:8,row:5,type:"stone"},{col:8,row:6,type:"stone"},
+  // X-traps
+  {col:3,row:5,type:"stonefall"},{col:5,row:5,type:"stonefall"},
+  {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},
+  // middenas (silver/stone afwisselend)
+  {col:4,row:3,type:"silver"},{col:4,row:6,type:"stone"},{col:4,row:9,type:"silver"},
+  // bonussen
+  {col:4,row:2,type:"machinegun"},{col:2,row:6,type:"doubleball"},{col:6,row:6,type:"rocket"},
+  {col:4,row:8,type:"2x"},{col:3,row:6,type:"speed"},{col:4,row:11,type:"power"}
 ]);
 
-// LEVEL 17 – ‘H’ patroon
+// ---------- LEVEL 17: “H-frame (zoals jouw stijl) + middenmix”
 addBonuses(17, [
-  {col:1,row:2,type:"stone"},{col:1,row:6,type:"silver"},{col:1,row:10,type:"power"},
-  {col:7,row:2,type:"stone"},{col:7,row:6,type:"silver"},{col:7,row:10,type:"power"},
-  {col:2,row:6,type:"machinegun"},{col:3,row:6,type:"doubleball"},{col:4,row:6,type:"rocket"},
-  {col:5,row:6,type:"speed"},{col:6,row:6,type:"2x"},
-  {col:4,row:3,type:"stonefall"}
+  // H-palen
+  {col:1,row:3,type:"stone"},{col:1,row:6,type:"stone"},{col:1,row:9,type:"stone"},
+  {col:7,row:3,type:"stone"},{col:7,row:6,type:"stone"},{col:7,row:9,type:"stone"},
+  // dwarsbalk silver
+  {col:3,row:6,type:"silver"},{col:4,row:6,type:"silver"},{col:5,row:6,type:"silver"},
+  // traps
+  {col:4,row:7,type:"stonefall"},{col:3,row:5,type:"stonefall"},
+  // bonussen
+  {col:2,row:6,type:"machinegun"},{col:2,row:5,type:"doubleball"},{col:6,row:5,type:"rocket"},
+  {col:4,row:5,type:"2x"},{col:5,row:7,type:"speed"},{col:4,row:10,type:"power"}
 ]);
 
-// LEVEL 18 – X-patroon vol
+// ---------- LEVEL 18: “X/ruit gecombineerd + zware hoeken”
 addBonuses(18, [
-  {col:0,row:0,type:"stone"},{col:1,row:1,type:"silver"},{col:2,row:2,type:"power"},{col:3,row:3,type:"stonefall"},
-  {col:5,row:5,type:"machinegun"},{col:6,row:6,type:"doubleball"},{col:7,row:7,type:"rocket"},{col:8,row:8,type:"speed"},
-  {col:8,row:0,type:"2x"},{col:7,row:1,type:"silver"},{col:6,row:2,type:"stone"},{col:5,row:3,type:"power"},
-  {col:3,row:5,type:"stonefall"},{col:2,row:6,type:"silver"},{col:1,row:7,type:"stone"},{col:0,row:8,type:"power"}
+  // X/ruit silver
+  {col:4,row:2,type:"silver"},{col:3,row:3,type:"silver"},{col:5,row:3,type:"silver"},
+  {col:2,row:4,type:"silver"},{col:6,row:4,type:"silver"},
+  // hoeken (stone)
+  {col:0,row:0,type:"stone"},{col:8,row:0,type:"stone"},{col:0,row:14,type:"stone"},{col:8,row:14,type:"stone"},
+  // traps
+  {col:2,row:7,type:"stonefall"},{col:6,row:7,type:"stonefall"},{col:4,row:8,type:"stonefall"},
+  // bonussen
+  {col:4,row:1,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
+  {col:4,row:6,type:"2x"},{col:3,row:5,type:"speed"},{col:8,row:5,type:"power"},
+  // extra anchors
+  {col:0,row:6,type:"stone"},{col:8,row:6,type:"stone"}
 ]);
 
-// LEVEL 19 – compact midden + valstrikken
+// ---------- LEVEL 19: “Rand dicht + valraster midden”
 addBonuses(19, [
-  {col:3,row:4,type:"machinegun"},{col:4,row:4,type:"silver"},{col:5,row:4,type:"stone"},
-  {col:3,row:6,type:"doubleball"},{col:4,row:6,type:"rocket"},{col:5,row:6,type:"speed"},
-  {col:3,row:8,type:"2x"},{col:4,row:8,type:"stonefall"},{col:5,row:8,type:"power"},
-  {col:2,row:5,type:"silver"},{col:6,row:5,type:"stone"},{col:4,row:10,type:"power"}
+  // rand dichter
+  {col:0,row:0,type:"stone"},{col:1,row:0,type:"stone"},{col:7,row:0,type:"stone"},{col:8,row:0,type:"stone"},
+  {col:0,row:14,type:"stone"},{col:1,row:14,type:"silver"},{col:7,row:14,type:"silver"},{col:8,row:14,type:"stone"},
+  // valraster midden
+  {col:3,row:6,type:"stonefall"},{col:4,row:6,type:"stonefall"},{col:5,row:6,type:"stonefall"},
+  {col:3,row:8,type:"stonefall"},{col:4,row:8,type:"stonefall"},{col:5,row:8,type:"stonefall"},
+  // bonussen (kruis)
+  {col:4,row:3,type:"machinegun"},{col:2,row:6,type:"doubleball"},{col:6,row:6,type:"rocket"},
+  {col:4,row:5,type:"2x"},{col:4,row:9,type:"speed"},{col:4,row:11,type:"power"},
+  // silver spine
+  {col:4,row:7,type:"silver"}
 ]);
 
-// LEVEL 20 – finale: veel typen, centrum druk
+// ---------- LEVEL 20: “Finale — volle mix, middendruk + dubbele valpoort”
 addBonuses(20, [
-  {col:4,row:1,type:"machinegun"},
-  {col:3,row:2,type:"silver"},{col:5,row:2,type:"silver"},
-  {col:2,row:3,type:"stone"},{col:6,row:3,type:"stone"},
-  {col:1,row:4,type:"doubleball"},{col:7,row:4,type:"rocket"},
-  {col:3,row:6,type:"speed"},{col:5,row:6,type:"2x"},
-  {col:2,row:8,type:"stonefall"},{col:6,row:8,type:"stonefall"},
-  {col:4,row:10,type:"power"},{col:0,row:12,type:"stone"},{col:8,row:12,type:"power"}
+  // midden druk (silver/stone spine)
+  {col:4,row:2,type:"silver"},{col:4,row:4,type:"stone"},{col:4,row:6,type:"silver"},{col:4,row:8,type:"stone"},
+  // dubbele valpoort
+  {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},{col:3,row:9,type:"stonefall"},{col:5,row:9,type:"stonefall"},
+  // ankers diagonaal stones
+  {col:2,row:6,type:"stone"},{col:6,row:6,type:"stone"},{col:2,row:8,type:"stone"},{col:6,row:8,type:"stone"},
+  // bonussen (alles aanwezig)
+  {col:4,row:1,type:"machinegun"},{col:2,row:5,type:"doubleball"},{col:6,row:5,type:"rocket"},
+  {col:4,row:5,type:"2x"},{col:3,row:6,type:"speed"},{col:8,row:5,type:"power"},
+  // baseline verzwaard
+  {col:1,row:14,type:"stone"},{col:2,row:14,type:"silver"},{col:6,row:14,type:"silver"},{col:7,row:14,type:"stone"}
 ]);
+
 
 // (Optioneel) kleine fine-tuning van moeilijkheid per eindlevels:
 LEVELS[16-1].params.machineGunDifficulty = 2; // L16 iets pittiger
