@@ -290,11 +290,14 @@ addBonuses(6, [
 // ---------- LEVEL 7: “Rand + diagonale silver + middenval”
 addBonuses(7, [
   // top/bottom hoeken stone
-  {col:0,row:0,type:"stone"},{col:8,row:0,type:"stone"},{col:0,row:14,type:"stone"},{col:8,row:14,type:"stone"},
+  {col:0,row:0,type:"stone"},{col:8,row:0,type:"stone"},{col:0,row:14,type:"stone"},{col:8,row:14,type:"stone"},{col:4,row:14,type:"stone"},
+  {col:4,row:13,type:"stone"},{col:4,row:12,type:"stone"},
   // diagonalen silver
   {col:1,row:3,type:"silver"},{col:2,row:4,type:"silver"},{col:6,row:4,type:"silver"},{col:7,row:3,type:"silver"},
+  {col:1,row:14,type:"silver"},{col:2,row:14,type:"silver"},{col:3,row:14,type:"silver"},{col:5,row:14,type:"silver"},
+  {col:6,row:14,type:"silver"},{col:7,row:14,type:"silver"},
   // middenval
-  {col:4,row:7,type:"stonefall"},{col:3,row:8,type:"stonefall"},{col:5,row:8,type:"stonefall"},
+  {col:4,row:7,type:"stonefall"},{col:3,row:8,type:"stonefall"},{col:5,row:8,type:"stonefall"},{col:3,row:11,type:"stonefall"},{col:5,row:11,type:"stonefall"},
   // bonussen (kruis)
   {col:4,row:2,type:"machinegun"},{col:4,row:5,type:"doubleball"},{col:4,row:9,type:"rocket"},
   {col:2,row:6,type:"2x"},{col:6,row:6,type:"speed"},{col:4,row:11,type:"power"}
