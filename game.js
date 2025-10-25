@@ -2551,14 +2551,12 @@ if (showGameOver) {
 } // ✅ Sluit function draw() correct af
 
 
-function onImageLoad() {
-  imagesLoaded++;
-  if (imagesLoaded === 27) {
-    resetBricks();
-    updateLivesDisplay(); // ✅ laat bij start meteen levens zien
-    resetPaddle(); // 🔥 paddletekening klaarzetten
-    draw();
-  }
+if (imagesLoaded === 27) {
+  resetBricks();
+  updateLivesDisplay();
+  resetPaddle();
+  goToLevel(4, { resetScore: true, resetLives: true }); // ⬅️ hier toevoegen
+  draw();
 }
 
 blockImg.onload = onImageLoad;
