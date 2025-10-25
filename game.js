@@ -1540,33 +1540,23 @@ function collisionDetection() {
 
           // 🎁 Bonusacties
           switch (b.type) {
-           case "stonefall": {
-  // hits tellen
-  b.hits = (b.hits || 0) + 1;
+            case "stonefall": {
+              // ✨ Direct bij 1e hit: laat stenen vallen en verwijder het blok
+              const midX = b.x + brickWidth / 2;
+              const midY = b.y + brickHeight / 2;
+              triggerStonefall(midX, midY);
 
-  // spuug stenen (elke hit)
-  const midX = b.x + brickWidth / 2;
-  const midY = b.y + brickHeight / 2;
-  triggerStonefall(midX, midY);
+              b.status = 0;                                // blok meteen weg
+              const earned = doublePointsActive ? 20 : 10; // zelfde puntentelling als voorheen
+              score += earned;
+              updateScoreDisplay();
 
-  if (b.hits >= 3) {
-    // nu pas blok weg + punten + coin
-    b.status = 0;
-
-    let earned = doublePointsActive ? 20 : 10;
-    score += earned;
-    updateScoreDisplay();
-
-    spawnCoin(b.x, b.y);
-    b.type = "normal";
-    // geen return → laat na de switch de rest van de afhandeling NIET lopen,
-    // we zijn klaar voor deze botsing
-  } else {
-    // blok blijft staan tot 3e hit
-    return;
-  }
-  break;
-}
+              spawnCoin(b.x, b.y);                         // beloning consistent houden
+              b.type = "normal";
+              // geen return; → na de switch blijft de gedeelde cleanup lopen,
+              // net als voorheen, zodat gedrag/score consistent blijft
+              break;
+            }
 
             case "power":
             case "flags":
@@ -1626,7 +1616,6 @@ function collisionDetection() {
     } // <-- einde for c
   }); // <-- einde balls.forEach
 } // <-- einde function
-
 
 
 
