@@ -360,11 +360,14 @@ addBonuses(10, [
 // ---------- LEVEL 11: “Zijwanden + diagonaal silver + middencorridor”
 addBonuses(11, [
   // zijwanden
-  {col:0,row:4,type:"stone"},{col:0,row:5,type:"stone"},{col:8,row:4,type:"stone"},{col:8,row:5,type:"stone"},
+  {col:0,row:4,type:"stone"},{col:0,row:5,type:"stone"},{col:8,row:4,type:"stone"},{col:8,row:5,type:"stone"},{col:0,row:13,type:"stone"},
+  {col:1,row:13,type:"stone"},{col:2,row:13,type:"stone"},{col:6,row:13,type:"stone"},{col:7,row:13,type:"stone"},{col:8,row:13,type:"stone"},
   // diagonale silver
   {col:1,row:3,type:"silver"},{col:2,row:4,type:"silver"},{col:6,row:4,type:"silver"},{col:7,row:3,type:"silver"},
   // middencorridor traps
-  {col:4,row:6,type:"stonefall"},{col:4,row:8,type:"stonefall"},
+  {col:4,row:6,type:"stonefall"},{col:4,row:8,type:"stonefall"},{col:3,row:11,type:"stonefall"},{col:3,row:10,type:"stonefall"},
+  {col:3,row:9,type:"stonefall"},{col:4,row:9,type:"stonefall"},{col:4,row:12,type:"stonefall"},{col:5,row:9,type:"stonefall"},
+  {col:5,row:11,type:"stonefall"},{col:5,row:12,type:"stonefall"},
   // bonussen
   {col:4,row:2,type:"machinegun"},{col:3,row:6,type:"doubleball"},{col:5,row:6,type:"rocket"},
   {col:2,row:7,type:"2x"},{col:6,row:7,type:"speed"},{col:4,row:10,type:"power"},
