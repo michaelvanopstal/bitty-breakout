@@ -655,46 +655,41 @@ function drawPointPopups() {
   ctx.globalAlpha = 1; // Transparantie resetten
 }
 
+
+
 function resetBricks() {
-  // 🔎 Kies de map voor het huidige level
-  let currentMap = [];
+  // Kies de map voor het huidige level
+  var currentMap = [];
 
-  // 1) Nieuw systeem (LEVELS) heeft voorrang
-  if (typeof LEVELS !== "undefined" && Array.isArray(LEVELS) && LEVELS[level - 1]) {
+  // 1) LEVELS voorrang als die bestaat
+  if (typeof LEVELS !== 'undefined' && Array.isArray(LEVELS) && Array.isArray(LEVELS[level - 1])) {
     currentMap = LEVELS[level - 1];
-
-  // 2) Fallback naar je bestaande losse maps (houdt level 1–3 exact gelijk)
   } else {
+    // 2) Fallback: behoud je oude 1-3 maps precies
     if (level === 1) {
-      currentMap = (typeof level1Map !== "undefined" && Array.isArray(level1Map))
-        ? level1Map
-        : bonusBricks;
+      currentMap = (typeof level1Map !== 'undefined' && Array.isArray(level1Map)) ? level1Map : bonusBricks;
     } else if (level === 2) {
-      currentMap = (typeof level2Map !== "undefined" && Array.isArray(level2Map))
-        ? level2Map
-        : pxpMap;
+      currentMap = (typeof level2Map !== 'undefined' && Array.isArray(level2Map)) ? level2Map : pxpMap;
     } else if (level === 3) {
-      currentMap = (typeof level3Map !== "undefined" && Array.isArray(level3Map))
-        ? level3Map
-        : [];
+      currentMap = (typeof level3Map !== 'undefined' && Array.isArray(level3Map)) ? level3Map : [];
     } else {
       currentMap = [];
     }
   }
 
-  // 🧱 Reset en invullen
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      const b = bricks[c][r];
+  // Reset en invullen
+  for (var c = 0; c < brickColumnCount; c++) {
+    for (var r = 0; r < brickRowCount; r++) {
+      var b = bricks[c][r];
       b.status = 1;
 
-      // Check of deze positie gedefinieerd is in de huidige levelmap
-      const defined = currentMap.find(p => p.col === c && p.row === r);
-      let brickType = defined ? defined.type : "normal"; // standaard "normal"
+      // Check of deze positie in de huidige levelmap staat
+      var defined = currentMap.find(function(p){ return p.col === c && p.row === r; });
+      var brickType = defined ? defined.type : 'normal';
 
-      // (Veiligheidsfallback voor je originele level 1 layout)
+      // Extra fallback specifiek voor level 1
       if (level === 1 && !defined && Array.isArray(bonusBricks)) {
-        const bonus = bonusBricks.find(x => x.col === c && x.row === r);
+        var bonus = bonusBricks.find(function(x){ return x.col === c && x.row === r; });
         if (bonus) brickType = bonus.type;
       }
 
@@ -702,7 +697,7 @@ function resetBricks() {
       b.type = brickType;
 
       // Type-specifieke reset
-      if (brickType === "stone" || brickType === "silver") {
+      if (brickType === 'stone' || brickType === 'silver') {
         b.hits = 0;
         b.hasDroppedBag = false;
       } else {
@@ -710,20 +705,16 @@ function resetBricks() {
         delete b.hasDroppedBag;
       }
 
-      // ❤️ Hartjes resetten
+      // Hartjes reset
       b.hasHeart = false;
       b.heartDropped = false;
     }
   }
 
-  // ❤️ Plaats 4 willekeurige hartjes onder normale blokken
-  assignHeartBlocks();
-}
-
-
   // Plaats 4 willekeurige hartjes onder normale blokken
   assignHeartBlocks();
 }
+
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
 function assignHeartBlocks() {
