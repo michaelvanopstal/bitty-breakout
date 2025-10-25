@@ -329,6 +329,9 @@ pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
 const stoneBlockImg  = new Image();
 stoneBlockImg.src  = "stone_block.png";
 
+const stoneSmallImg  = new Image();
+stoneSmallImg.src  = "stone_small.png";
+
 const stoneMediumImg = new Image(); 
 stoneMediumImg.src = "stone_medium.png";
 
@@ -1084,107 +1087,92 @@ function drawFallingHearts() {
     }
   });
 }
-
 function pickRandomRockSprite() {
   const r = Math.random();
-
-  // Verdeling kun je tweaken (bijv. 60/40). Nu 50/50:
-  if (r < 0.5) {  // MEDIUM
-    // zelfde range als je huidige medium
-    return { img: stoneMediumImg, size: 86 + Math.random() * 14, kind: "medium" }; // 86–100
-  } else {        // LARGE
-    // zelfde range als je huidige large
-    return { img: stoneLargeImg,  size: 102 + Math.random() * 16, kind: "large" }; // 102–118
+  if (r < 0.40) {         // 40% klein
+    return { img: stoneSmallImg,  size: 70 + Math.random() * 12 };   // ~70–82
+  } else if (r < 0.75) {  // 35% medium
+    return { img: stoneMediumImg, size: 86 + Math.random() * 14 };   // ~86–100
+  } else {                // 25% groot
+    return { img: stoneLargeImg,  size: 102 + Math.random() * 16 };  // ~102–118
   }
 }
 
-function circleIntersectsRect(cx, cy, r, rx, ry, rw, rh) {
-  const closestX = Math.max(rx, Math.min(cx, rx + rw));
-  const closestY = Math.max(ry, Math.min(cy, ry + rh));
-  const dx = cx - closestX;
-  const dy = cy - closestY;
-  return (dx * dx + dy * dy) <= (r * r);
-}
+function triggerStonefall(originX, originY) {
+  const count = 1 + Math.floor(Math.random() * 3); // 5–8
+  for (let i = 0; i < count; i++) {
+    const rock = pickRandomRockSprite(); // kiest small/medium/large
 
-function updateBrickRects() {
-  const totalBricksWidth = brickColumnCount * brickWidth;
-  const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
-
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      const b = bricks[c][r];
-      // dezelfde y als in drawBricks(), incl. transitionOffsetY
-      b.x = offsetX + c * brickWidth;
-      b.y = r * brickHeight + (levelTransitionActive ? transitionOffsetY : 0);
-    }
+    fallingStones.push({
+      x: originX + (Math.random() - 0.5) * 40,
+      y: originY + 10,
+      dy: 3 + Math.random() * 2,
+      size: rock.size,
+      img: rock.img,          // per-steen sprite
+      active: true,
+      shattered: false
+    });
   }
 }
-
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
-    if (!s.active) {
-      fallingStones.splice(i, 1);
-      continue;
+    if (!s.active) { 
+      fallingStones.splice(i, 1); 
+      continue; 
     }
 
-   // --- Upgrade: forceer kleine stenen naar medium ---
-if (s.kind === "small") {  // ← geen stoneSmallImg meer gebruiken
-  s.img  = stoneMediumImg;
-  s.size = 86 + Math.random() * 14; // 86–100
-  s.kind = "medium";
-  // reset collision-afgeleiden
-  s.framesInside   = 0;
-  s.hitboxScale    = (s.hitboxScale == null) ? 0.9 : s.hitboxScale;
-  s.minPenetration = null; // laten we opnieuw afleiden hieronder
-}
-
-
-    // tekenen – per-steen sprite met fallback (geen small fallback meer)
+    // tekenen – per-steen sprite met fallback
     if (s.img && s.img.complete) {
-  ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-} else {
-  ctx.drawImage(stoneMediumImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-}
-
+      ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+    } else {
+      ctx.drawImage(stoneSmallImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+    }
 
     // beweging
     s.y += s.dy;
 
-    // ---- Botsing met paddle (nauwkeurig & eerlijk) ----
-    if (s.framesInside == null) s.framesInside = 0;
-    if (s.hitboxScale == null) s.hitboxScale = 0.9; // 90% hitbox
-    const baseRadius = s.size * 0.42;               // ingeschreven cirkel
-    const r = baseRadius * s.hitboxScale;
+    // paddle-collision
+    const paddleLeft   = paddleX;
+    const paddleRight  = paddleX + paddleWidth;
+    const paddleTop    = paddleY;
+    const paddleBottom = paddleY + paddleHeight;
+    const stoneLeft    = s.x - s.size / 2;
+    const stoneRight   = s.x + s.size / 2;
+    const stoneTop     = s.y - s.size / 2;
+    const stoneBottom  = s.y + s.size / 2;
 
-    if (s.minPenetration == null) s.minPenetration = Math.min(12, r * 0.4);
+    // kleine correctie zodat de steen visueel echt de paddle raakt
+const visualOffset = s.size * 0.15; // ±15% van de steenhoogte
+const hitPaddle =
+  stoneRight >= paddleLeft &&
+  stoneLeft  <= paddleRight &&
+  (stoneBottom - visualOffset) >= paddleTop &&
+  stoneTop   <= paddleBottom;
 
-    const paddleLeft = paddleX;
-    const paddleTop  = paddleY;
-    const paddleW    = paddleWidth;
-    const paddleH    = paddleHeight;
 
-    const intersects = circleIntersectsRect(s.x, s.y, r, paddleLeft, paddleTop, paddleW, paddleH);
-    const penetrates = (s.y + r) >= (paddleTop + s.minPenetration);
-
-    if (intersects && penetrates) {
-      s.framesInside++;
-    } else {
-      s.framesInside = 0;
-    }
-
-    // pas tellen na 2 frames "echt" in paddle
-    if (s.framesInside >= 2) {
+    if (hitPaddle) {
+      // effect op de steen zelf
       spawnStoneDebris(s.x, s.y);
       s.active = false;
       stoneHitOverlayTimer = 18;
 
+      // ❗ logica éénmalig per salvo
       if (!stoneHitLock) {
         stoneHitLock = true;
-        if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
+
+        // 🚀 laat de paddle ontploffen (+ 1 leven eraf + bal op paddle)
+        if (typeof triggerPaddleExplosion === "function") {
+          triggerPaddleExplosion();
+        }
+
+        // na de loop alle stenen weghalen (veilig)
         stoneClearRequested = true;
+
+        // kleine cooldown voordat volgende salvo weer leven kan kosten
         setTimeout(() => { stoneHitLock = false; }, 1200);
       }
+
       continue;
     }
 
@@ -1201,6 +1189,7 @@ if (s.kind === "small") {  // ← geen stoneSmallImg meer gebruiken
     stoneClearRequested = false;
   }
 }
+
 
 
 
@@ -1410,46 +1399,125 @@ function collisionDetection() {
           blockSound.currentTime = 0;
           blockSound.play();
 
-          // ... je bestaande bounce-correctie blijft staan ...
+          ball.dy = -ball.dy;
+          if (ball.dy < 0) {
+            ball.y = b.y - ball.radius - 1;
+          } else {
+            ball.y = b.y + brickHeight + ball.radius + 1;
+          }
 
-          // 🪨 stone
+          // 💖 Hartje laten vallen
+          if (b.hasHeart && !b.heartDropped) {
+            fallingHearts.push({
+              x: b.x + brickWidth / 2 - 12,
+              y: b.y + brickHeight,
+              dy: 2,
+              collected: false,
+              alpha: 1,
+              pulse: 0
+            });
+            b.heartDropped = true;
+          }
+
+          // 🪨 Steen-blok gedrag
           if (b.type === "stone") {
-            // ... jouw bestaande steen-logic ...
-            // let op: je eindigt hier al met `return;` → goed!
-            return; // ❗ belangrijk: stop na eerste hit voor deze bal/frame
-          }
+            bricksSound.currentTime = 0;
+            bricksSound.play();
+            b.hits++;
 
-          // 🥈 silver
-          if (b.type === "silver") {
-            // ... jouw bestaande silver-logic ...
-            return; // ❗ ook hier na afhandelen meteen stoppen
-          }
-
-          // 🎁 bonussen
-          switch (b.type) {
-            case "stonefall": {
-              b.hits = (b.hits || 0) + 1;
-
-              const midX = b.x + brickWidth / 2;
-              const midY = b.y + brickHeight / 2;
-              triggerStonefall(midX, midY);
-
-              if (b.hits >= 3) {
-                // blok pas weg bij 3e hit
-                b.status = 0;
-
-                const earned = doublePointsActive ? 20 : 10;
-                score += earned;
-                updateScoreDisplay();
-
-                spawnCoin(b.x, b.y);
-                b.type = "normal";
-
-                return; // ❗ STOP hier (niet door naar gedeelde cleanup)
-              } else {
-                return; // ❗ ook bij <3 hits: klaar voor deze frame
-              }
+            for (let i = 0; i < 5; i++) {
+              stoneDebris.push({
+                x: b.x + brickWidth / 2,
+                y: b.y + brickHeight / 2,
+                dx: (Math.random() - 0.5) * 3,
+                dy: (Math.random() - 0.5) * 3,
+                radius: Math.random() * 2 + 1,
+                alpha: 1
+              });
             }
+
+            if (b.hits === 1 || b.hits === 2) {
+              spawnCoin(b.x + brickWidth / 2, b.y);
+            }
+
+            if (b.hits >= 3) {
+              b.status = 0;
+
+              if (!b.hasDroppedBag) {
+                spawnPxpBag(b.x + brickWidth / 2, b.y + brickHeight);
+                b.hasDroppedBag = true;
+              }
+
+              const earned = doublePointsActive ? 120 : 60;
+              score += earned;
+              updateScoreDisplay();
+
+              pointPopups.push({
+                x: b.x + brickWidth / 2,
+                y: b.y,
+                value: "+" + earned,
+                alpha: 1
+              });
+            }
+
+            return; // klaar met deze hit
+          }
+
+          // 🪙 Gedrag voor silver blokken
+          if (b.type === "silver") {
+            b.hits = (b.hits || 0) + 1;
+
+            if (b.hits === 1) {
+              // silver2.png tekenen gebeurt in drawBricks()
+            } else if (b.hits >= 2) {
+              b.status = 0;
+
+              triggerSilverExplosion(b.x + brickWidth / 2, b.y + brickHeight / 2);
+
+              const earned = doublePointsActive ? 150 : 75;
+              score += earned;
+              updateScoreDisplay();
+
+              pointPopups.push({
+                x: b.x + brickWidth / 2,
+                y: b.y,
+                value: "+" + earned,
+                alpha: 1
+              });
+            }
+
+            return; // klaar met deze hit
+          }
+
+          // 🎁 Bonusacties
+          switch (b.type) {
+           case "stonefall": {
+  // hits tellen
+  b.hits = (b.hits || 0) + 1;
+
+  // spuug stenen (elke hit)
+  const midX = b.x + brickWidth / 2;
+  const midY = b.y + brickHeight / 2;
+  triggerStonefall(midX, midY);
+
+  if (b.hits >= 3) {
+    // nu pas blok weg + punten + coin
+    b.status = 0;
+
+    let earned = doublePointsActive ? 20 : 10;
+    score += earned;
+    updateScoreDisplay();
+
+    spawnCoin(b.x, b.y);
+    b.type = "normal";
+    // geen return → laat na de switch de rest van de afhandeling NIET lopen,
+    // we zijn klaar voor deze botsing
+  } else {
+    // blok blijft staan tot 3e hit
+    return;
+  }
+  break;
+}
 
             case "power":
             case "flags":
@@ -1467,6 +1535,8 @@ function collisionDetection() {
               machineGunStartTime = Date.now();
               machineGunGunX = paddleX + paddleWidth / 2 - 30;
               machineGunGunY = Math.max(paddleY - machineGunYOffset, minMachineGunY);
+              b.status = 0;
+              b.type = "normal";
               break;
 
             case "rocket":
@@ -1493,22 +1563,21 @@ function collisionDetection() {
               break;
           } // <-- einde switch
 
-          // 🔽 Gedeelde cleanup (alle reguliere bonussen & normal)
+          // 🔽 Gedeelde cleanup (voor alle reguliere bonussen)
           b.status = 0;
 
           let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
           score += earned;
           updateScoreDisplay();
 
-          spawnCoin(b.x, b.y);
           b.type = "normal";
+          spawnCoin(b.x, b.y);
+        } // <-- einde IF hit
+      } // <-- einde for r
+    } // <-- einde for c
+  }); // <-- einde balls.forEach
+} // <-- einde function
 
-          return; // ❗ STOP na eerste brick-hit voor deze bal in deze frame
-        }
-      }
-    }
-  });
-}
 
 
 function spawnExtraBall(originBall) {
@@ -1603,7 +1672,6 @@ function draw() {
 
   collisionDetection();
   drawCoins();
-  updateBrickRects();
   drawFallingHearts();
   drawFallingStones();  
   drawHeartPopup();
@@ -2107,7 +2175,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 26) {
+  if (imagesLoaded === 27) {
     resetBricks();
     updateLivesDisplay(); // ✅ laat bij start meteen levens zien
     resetPaddle(); // 🔥 paddletekening klaarzetten
@@ -2140,6 +2208,7 @@ silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
 
 stoneBlockImg.onload  = onImageLoad;
+stoneSmallImg.onload  = onImageLoad;
 stoneMediumImg.onload = onImageLoad;
 stoneLargeImg.onload  = onImageLoad;
 
