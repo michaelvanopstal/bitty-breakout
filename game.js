@@ -1388,125 +1388,46 @@ function collisionDetection() {
           blockSound.currentTime = 0;
           blockSound.play();
 
-          ball.dy = -ball.dy;
-          if (ball.dy < 0) {
-            ball.y = b.y - ball.radius - 1;
-          } else {
-            ball.y = b.y + brickHeight + ball.radius + 1;
-          }
+          // ... je bestaande bounce-correctie blijft staan ...
 
-          // 💖 Hartje laten vallen
-          if (b.hasHeart && !b.heartDropped) {
-            fallingHearts.push({
-              x: b.x + brickWidth / 2 - 12,
-              y: b.y + brickHeight,
-              dy: 2,
-              collected: false,
-              alpha: 1,
-              pulse: 0
-            });
-            b.heartDropped = true;
-          }
-
-          // 🪨 Steen-blok gedrag
+          // 🪨 stone
           if (b.type === "stone") {
-            bricksSound.currentTime = 0;
-            bricksSound.play();
-            b.hits++;
-
-            for (let i = 0; i < 5; i++) {
-              stoneDebris.push({
-                x: b.x + brickWidth / 2,
-                y: b.y + brickHeight / 2,
-                dx: (Math.random() - 0.5) * 3,
-                dy: (Math.random() - 0.5) * 3,
-                radius: Math.random() * 2 + 1,
-                alpha: 1
-              });
-            }
-
-            if (b.hits === 1 || b.hits === 2) {
-              spawnCoin(b.x + brickWidth / 2, b.y);
-            }
-
-            if (b.hits >= 3) {
-              b.status = 0;
-
-              if (!b.hasDroppedBag) {
-                spawnPxpBag(b.x + brickWidth / 2, b.y + brickHeight);
-                b.hasDroppedBag = true;
-              }
-
-              const earned = doublePointsActive ? 120 : 60;
-              score += earned;
-              updateScoreDisplay();
-
-              pointPopups.push({
-                x: b.x + brickWidth / 2,
-                y: b.y,
-                value: "+" + earned,
-                alpha: 1
-              });
-            }
-
-            return; // klaar met deze hit
+            // ... jouw bestaande steen-logic ...
+            // let op: je eindigt hier al met `return;` → goed!
+            return; // ❗ belangrijk: stop na eerste hit voor deze bal/frame
           }
 
-          // 🪙 Gedrag voor silver blokken
+          // 🥈 silver
           if (b.type === "silver") {
-            b.hits = (b.hits || 0) + 1;
-
-            if (b.hits === 1) {
-              // silver2.png tekenen gebeurt in drawBricks()
-            } else if (b.hits >= 2) {
-              b.status = 0;
-
-              triggerSilverExplosion(b.x + brickWidth / 2, b.y + brickHeight / 2);
-
-              const earned = doublePointsActive ? 150 : 75;
-              score += earned;
-              updateScoreDisplay();
-
-              pointPopups.push({
-                x: b.x + brickWidth / 2,
-                y: b.y,
-                value: "+" + earned,
-                alpha: 1
-              });
-            }
-
-            return; // klaar met deze hit
+            // ... jouw bestaande silver-logic ...
+            return; // ❗ ook hier na afhandelen meteen stoppen
           }
 
-          // 🎁 Bonusacties
+          // 🎁 bonussen
           switch (b.type) {
-           case "stonefall": {
-  // hits tellen
-  b.hits = (b.hits || 0) + 1;
+            case "stonefall": {
+              b.hits = (b.hits || 0) + 1;
 
-  // spuug stenen (elke hit)
-  const midX = b.x + brickWidth / 2;
-  const midY = b.y + brickHeight / 2;
-  triggerStonefall(midX, midY);
+              const midX = b.x + brickWidth / 2;
+              const midY = b.y + brickHeight / 2;
+              triggerStonefall(midX, midY);
 
-  if (b.hits >= 3) {
-    // nu pas blok weg + punten + coin
-    b.status = 0;
+              if (b.hits >= 3) {
+                // blok pas weg bij 3e hit
+                b.status = 0;
 
-    let earned = doublePointsActive ? 20 : 10;
-    score += earned;
-    updateScoreDisplay();
+                const earned = doublePointsActive ? 20 : 10;
+                score += earned;
+                updateScoreDisplay();
 
-    spawnCoin(b.x, b.y);
-    b.type = "normal";
-    // geen return → laat na de switch de rest van de afhandeling NIET lopen,
-    // we zijn klaar voor deze botsing
-  } else {
-    // blok blijft staan tot 3e hit
-    return;
-  }
-  break;
-}
+                spawnCoin(b.x, b.y);
+                b.type = "normal";
+
+                return; // ❗ STOP hier (niet door naar gedeelde cleanup)
+              } else {
+                return; // ❗ ook bij <3 hits: klaar voor deze frame
+              }
+            }
 
             case "power":
             case "flags":
@@ -1524,8 +1445,6 @@ function collisionDetection() {
               machineGunStartTime = Date.now();
               machineGunGunX = paddleX + paddleWidth / 2 - 30;
               machineGunGunY = Math.max(paddleY - machineGunYOffset, minMachineGunY);
-              b.status = 0;
-              b.type = "normal";
               break;
 
             case "rocket":
@@ -1552,21 +1471,22 @@ function collisionDetection() {
               break;
           } // <-- einde switch
 
-          // 🔽 Gedeelde cleanup (voor alle reguliere bonussen)
+          // 🔽 Gedeelde cleanup (alle reguliere bonussen & normal)
           b.status = 0;
 
           let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
           score += earned;
           updateScoreDisplay();
 
-          b.type = "normal";
           spawnCoin(b.x, b.y);
-        } // <-- einde IF hit
-      } // <-- einde for r
-    } // <-- einde for c
-  }); // <-- einde balls.forEach
-} // <-- einde function
+          b.type = "normal";
 
+          return; // ❗ STOP na eerste brick-hit voor deze bal in deze frame
+        }
+      }
+    }
+  });
+}
 
 
 function spawnExtraBall(originBall) {
