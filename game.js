@@ -970,6 +970,57 @@ function assignHeartBlocks() {
   }
 }
 
+// === Dev helper: snel naar elk level springen ===
+function goToLevel(n, opts = {}) {
+  const cfg = Object.assign({
+    resetScore: false,
+    resetLives: false,
+    centerPaddle: true,
+    clearEffects: true
+  }, opts);
+
+  // Clamp naar 1..TOTAL_LEVELS
+  const target = Math.max(1, Math.min(typeof TOTAL_LEVELS !== "undefined" ? TOTAL_LEVELS : 20, n));
+  level = target;
+
+  // Bonussen/overlays stoppen (alleen als die helpers/variabelen bestaan)
+  if (typeof pauseTimer === "function") pauseTimer();
+  if (typeof resetAllBonuses === "function") resetAllBonuses();
+
+  // Optioneel: score/lives resetten
+  if (cfg.resetScore) {
+    score = 0;
+    if (typeof updateScoreDisplay === "function") updateScoreDisplay();
+  }
+  if (cfg.resetLives) {
+    lives = 3;
+    if (typeof updateLivesDisplay === "function") updateLivesDisplay();
+  }
+
+  // Effect- en deeltjesbuffers leegmaken (veilig, alleen als ze bestaan)
+  try { explosions = []; } catch(e){}
+  try { smokeParticles = []; } catch(e){}
+  try { flyingCoins = []; } catch(e){}
+  try { coins = []; } catch(e){}
+  try { pxpBags = []; } catch(e){}
+  try { paddleExplosionParticles = []; } catch(e){}
+
+  // Bricks + paddle + ball klaarzetten voor dit level
+  resetBricks();
+  if (cfg.centerPaddle && typeof resetPaddle === "function") resetPaddle();
+  if (typeof balls !== "undefined") balls = [];  // bal(len) hard reset voor schone start
+  resetBall();
+
+  // UI tijd resetten (optioneel)
+  try {
+    elapsedTime = 0;
+    const timeEl = document.getElementById("timeDisplay");
+    if (timeEl) timeEl.textContent = "00:00";
+  } catch(e){}
+
+  // Klaar. Speler schiet zelf de bal weg; timer start bij jouw afschiet-logica.
+  console.log(`Jumped to level ${level}`);
+}
 
 
 function drawHeartPopup() {
