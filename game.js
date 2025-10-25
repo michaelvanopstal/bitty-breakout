@@ -260,7 +260,8 @@ addBonuses(5, [
   // diagonalen silver
   {col:2,row:3,type:"silver"},{col:3,row:4,type:"silver"},{col:5,row:4,type:"silver"},{col:6,row:3,type:"silver"},
   // onderlijn stevig
-  {col:0,row:14,type:"stone"},{col:1,row:14,type:"silver"},{col:2,row:14,type:"stone"},
+  {col:0,row:14,type:"stone"},{col:1,row:14,type:"silver"},{col:2,row:14,type:"stone"},{col:1,row:4,type:"stone"},{col:2,row:4,type:"stone"},{col:6,row:4,type:"stone"},{col:7,row:4,type:"stone"},
+  {col:7,row:5,type:"stone"},{col:8,row:5,type:"stone"},{col:0,row:5,type:"stone"},{col:1,row:5,type:"stone"},
   {col:6,row:14,type:"silver"},{col:7,row:14,type:"stone"},{col:8,row:14,type:"silver"},
   // traps midden
   {col:3,row:8,type:"stonefall"},{col:5,row:8,type:"stonefall"},
