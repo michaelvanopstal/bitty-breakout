@@ -198,6 +198,48 @@ const level3Map = [
   { col: 5, row: 8, type: "stonefall" },
 ];
 
+// Nieuw systeem: 10 levels totaal
+const LEVELS = Array.from({ length: 10 }, () => []);
+
+function defineLevel(level, mapArray) {
+  LEVELS[level - 1] = (Array.isArray(mapArray) ? mapArray.slice() : []);
+}
+function addBlock(level, col, row, type = "normal") {
+  if (!LEVELS[level - 1]) LEVELS[level - 1] = [];
+  LEVELS[level - 1].push({ col, row, type });
+}
+function addMany(level, items) {
+  items.forEach(([c, r, t = "normal"]) => addBlock(level, c, r, t));
+}
+function fillRect(level, c0, r0, c1, r1, type = "normal") {
+  for (let c = Math.min(c0, c1); c <= Math.max(c0, c1); c++) {
+    for (let r = Math.min(r0, r1); r <= Math.max(r0, r1); r++) {
+      addBlock(level, c, r, type);
+    }
+  }
+}
+function addFrame(level, type = "stone") {
+  for (let c = 0; c < brickColumnCount; c++) {
+    addBlock(level, c, 0, type);
+    addBlock(level, c, brickRowCount - 1, type);
+  }
+  for (let r = 1; r < brickRowCount - 1; r++) {
+    addBlock(level, 0, r, type);
+    addBlock(level, brickColumnCount - 1, r, type);
+  }
+}
+
+// Gebruik je bestaande layouts voor de eerste 3
+defineLevel(1, bonusBricks);
+defineLevel(2, pxpMap);
+defineLevel(3, level3Map);
+
+// Vanaf hier kun je eenvoudig nieuwe maken
+addFrame(4, "stone");                  // voorbeeldrand
+addMany(5, [[4, 2, "rocket"], [2, 4, "machinegun"], [6, 6, "2x"]]);
+fillRect(6, 3, 3, 5, 5, "silver");     // voorbeeld zilverblok
+// enzovoort...
+
 const resetBallSound = new Audio("resetball.mp3");
 
 
@@ -606,43 +648,52 @@ function drawPointPopups() {
 }
 
 function resetBricks() {
-  // Kies de juiste map per level
+  // 🔎 Kies de map voor het huidige level
   let currentMap = [];
-  if (level === 1) {
-    currentMap = (typeof level1Map !== "undefined" && Array.isArray(level1Map))
-      ? level1Map
-      : bonusBricks;
-  } else if (level === 2) {
-    currentMap = (typeof level2Map !== "undefined" && Array.isArray(level2Map))
-      ? level2Map
-      : pxpMap;
-  } else if (level === 3) {
-    currentMap = (typeof level3Map !== "undefined" && Array.isArray(level3Map))
-      ? level3Map
-      : [];
+
+  // 1) Nieuw systeem (LEVELS) heeft voorrang
+  if (typeof LEVELS !== "undefined" && Array.isArray(LEVELS) && LEVELS[level - 1]) {
+    currentMap = LEVELS[level - 1];
+
+  // 2) Fallback naar je bestaande losse maps (houdt level 1–3 exact gelijk)
   } else {
-    currentMap = [];
+    if (level === 1) {
+      currentMap = (typeof level1Map !== "undefined" && Array.isArray(level1Map))
+        ? level1Map
+        : bonusBricks;
+    } else if (level === 2) {
+      currentMap = (typeof level2Map !== "undefined" && Array.isArray(level2Map))
+        ? level2Map
+        : pxpMap;
+    } else if (level === 3) {
+      currentMap = (typeof level3Map !== "undefined" && Array.isArray(level3Map))
+        ? level3Map
+        : [];
+    } else {
+      currentMap = [];
+    }
   }
 
+  // 🧱 Reset en invullen
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
       b.status = 1;
 
-      // Kijk of deze brick in de map voorkomt
+      // Check of deze positie gedefinieerd is in de huidige levelmap
       const defined = currentMap.find(p => p.col === c && p.row === r);
       let brickType = defined ? defined.type : "normal"; // standaard "normal"
 
-      // 💎 Level 1 bonus fallback (alleen voor je originele setup)
-      if (level === 1 && !defined) {
+      // (Veiligheidsfallback voor je originele level 1 layout)
+      if (level === 1 && !defined && Array.isArray(bonusBricks)) {
         const bonus = bonusBricks.find(x => x.col === c && x.row === r);
         if (bonus) brickType = bonus.type;
       }
 
-      // Pas type toe
+      // Type toepassen
       b.type = brickType;
 
-      // Reset type-specifieke eigenschappen
+      // Type-specifieke reset
       if (brickType === "stone" || brickType === "silver") {
         b.hits = 0;
         b.hasDroppedBag = false;
@@ -651,11 +702,16 @@ function resetBricks() {
         delete b.hasDroppedBag;
       }
 
-      // Reset hartjes
+      // ❤️ Hartjes resetten
       b.hasHeart = false;
       b.heartDropped = false;
     }
   }
+
+  // ❤️ Plaats 4 willekeurige hartjes onder normale blokken
+  assignHeartBlocks();
+}
+
 
   // Plaats 4 willekeurige hartjes onder normale blokken
   assignHeartBlocks();
