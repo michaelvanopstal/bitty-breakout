@@ -1150,31 +1150,22 @@ function drawFallingStones() {
     // beweging
     s.y += s.dy;
 
-    // ---- Botsing met paddle (nauwkeurig & eerlijk) ----
-    // Defaults voor oudere stenen die nog geen nieuwe velden hebben
+    // ---- Botsing met paddle (alleen bij écht contact) ----
+    // Defaults voor oudere stenen
     if (s.framesInside == null) s.framesInside = 0;
+    if (s.prevY == null) s.prevY = s.y; // voor crossing check
 
-    // Basisradius op circa ingeschreven cirkel van de sprite
-    const baseRadius = s.size * 0.42;
-
-    // Grootte-categorieën
-    const isLarge  = s.size >= 100;           // grote stenen blijven zoals ze nu zijn
-    const isSmOrMd = s.size < 100;            // medium + alles kleiner
+    // Grootte-afgeleiden
+    const baseRadius = s.size * 0.42;     // ingeschreven cirkel
+    const isLarge = s.size >= 100;        // grote stenen houden zoals ze zijn
 
     // Per categorie parameters
-    let hitboxScale, minPenetration, debounceFrames;
-
-    if (isLarge) {
-      // ✅ grote stenen: behouden (voelt goed)
-      hitboxScale    = 0.90;
-      minPenetration = Math.min(12, baseRadius * 0.40);
-      debounceFrames = 2;
-    } else {
-      // 🔧 medium/kleiner: iets later laten "raken"
-      hitboxScale    = 0.80;                     // iets kleinere hitbox
-      minPenetration = Math.min(18, baseRadius * 0.55); // dieper in paddle
-      debounceFrames = 3;                        // 3 frames echt contact
-    }
+    const hitboxScale    = isLarge ? 0.90 : 0.80;                       // kleinere hitbox voor kleiner
+    const minPenetration = isLarge ? Math.min(12, baseRadius * 0.40)
+                                   : Math.min(18, baseRadius * 0.55);   // dieper in paddle
+    const debounceFrames = isLarge ? 2 : 3;                              // klein/medium iets langer contact
+    const minHorizOverlap = isLarge ? (baseRadius * 0.30)
+                                    : (baseRadius * 0.40);               // genoeg X-overlap
 
     const r = baseRadius * hitboxScale;
 
@@ -1184,12 +1175,30 @@ function drawFallingStones() {
     const paddleW    = paddleWidth;
     const paddleH    = paddleHeight;
 
-    // Cirkel vs rect overlap
+    // (1) Basis overlap (cirkel vs. rect)
     const intersects = circleIntersectsRect(s.x, s.y, r, paddleLeft, paddleTop, paddleW, paddleH);
-    // Onderkant van de cirkel moet minimaal 'minPenetration' in de paddle-zone zitten
+
+    // (2) Genoeg verticale diepte in de paddle
     const penetrates = (s.y + r) >= (paddleTop + minPenetration);
 
-    if (intersects && penetrates) {
+    // (3) Alleen tellen als steen neerwaarts beweegt
+    const falling = s.dy > 0;
+
+    // (4) Crossing check: vorige frame onderkant nog boven de paddle-lijn, nu eroverheen
+    const prevBottom = (s.prevY + r);
+    const nowBottom  = (s.y + r);
+    const crossed    = (prevBottom < paddleTop) && (nowBottom >= paddleTop + minPenetration);
+
+    // (5) Genoeg horizontale overlap – geen rand-tik
+    const stoneLeft  = s.x - r;
+    const stoneRight = s.x + r;
+    const overlapX   = Math.max(0, Math.min(stoneRight, paddleLeft + paddleW) - Math.max(stoneLeft, paddleLeft));
+    const wideEnough = overlapX >= minHorizOverlap;
+
+    // Combineer tot “echte” hit
+    const realHitNow = intersects && penetrates && falling && crossed && wideEnough;
+
+    if (realHitNow) {
       s.framesInside++;
     } else {
       s.framesInside = 0;
@@ -1201,22 +1210,23 @@ function drawFallingStones() {
       s.active = false;
       stoneHitOverlayTimer = 18;
 
-      // ❗ logica éénmalig per salvo
+      // ❗ éénmalige logica per salvo
       if (!stoneHitLock) {
         stoneHitLock = true;
 
-        // 🚀 Paddle-explosie / leven eraf
         if (typeof triggerPaddleExplosion === "function") {
           triggerPaddleExplosion();
         }
 
-        // na de loop alle stenen weghalen (veilig)
+        // na de loop alle stenen wissen (veilig)
         stoneClearRequested = true;
 
         // kleine cooldown voordat volgende salvo weer leven kan kosten
         setTimeout(() => { stoneHitLock = false; }, 1200);
       }
 
+      // prevY updaten vóór continue
+      s.prevY = s.y;
       continue;
     }
 
@@ -1225,6 +1235,9 @@ function drawFallingStones() {
       spawnStoneDebris(s.x, canvas.height - 10);
       s.active = false;
     }
+
+    // vorige Y bijwerken voor crossing-check in volgende frame
+    s.prevY = s.y;
   }
 
   // ná de iteratie: in één keer alle stenen wissen (voorkomt loop issues)
