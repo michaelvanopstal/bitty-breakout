@@ -327,8 +327,11 @@ addBonuses(9, [
   {col:3,row:3,type:"silver"},{col:5,row:3,type:"silver"},
   {col:2,row:4,type:"silver"},{col:6,row:4,type:"silver"},
   // baseline
-  {col:1,row:14,type:"stone"},{col:2,row:14,type:"silver"},{col:3,row:14,type:"stone"},
-  {col:5,row:14,type:"stone"},{col:6,row:14,type:"silver"},{col:7,row:14,type:"stone"},
+  {col:1,row:14,type:"stone"},{col:2,row:14,type:"silver"},{col:3,row:14,type:"stone"},{col:3,row:13,type:"stone"},
+  {col:3,row:12,type:"stone"},{col:3,row:11,type:"stone"},{col:3,row:10,type:"stone"},
+  {col:1,row:13,type:"stone"},{col:1,row:12,type:"stone"},{col:1,row:11,type:"stone"},{col:1,row:10,type:"stone"},
+  {col:5,row:14,type:"stone"},{col:6,row:14,type:"silver"}, {col:5,row:14,type:"stone"}, {col:5,row:13,type:"stone"}, {col:5,row:12,type:"stone"}, {col:5,row:11,type:"stone"}, {col:5,row:10,type:"stone"},
+   {col:7,row:14,type:"stone"}, {col:7,row:13,type:"stone"},{col:7,row:12,type:"stone"},{col:7,row:11,type:"stone"},{col:7,row:10,type:"stone"},
   // traps
   {col:2,row:7,type:"stonefall"},{col:6,row:7,type:"stonefall"},
   // bonussen
