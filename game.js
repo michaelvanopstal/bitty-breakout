@@ -281,7 +281,7 @@ addBonuses(6, [
   {col:2,row:5},{col:3,row:5},{col:5,row:5},{col:6,row:5},
   // X traps
   {col:3,row:3,type:"stonefall"},{col:5,row:3,type:"stonefall"},{col:2,row:2,type:"stonefall"},{col:1,row:1,type:"stonefall"},{col:0,row:0,type:"stonefall"},
-  {col:3,row:7,type:"stonefall"},{col:6,row:2,type:"stonefall"},{col:7,row:1,type:"stonefall"},{col:8,row:0,type:"stonefall"},
+  {col:3,row:7,type:"stonefall"},{col:6,row:2,type:"stonefall"},{col:7,row:1,type:"stonefall"},{col:8,row:0,type:"stonefall"},{col:5,row:7,type:"stonefall"},
   // bonussen
   {col:4,row:2,type:"machinegun"},{col:1,row:7,type:"doubleball"},{col:7,row:7,type:"rocket"},
   {col:4,row:8,type:"speed"},{col:4,row:6,type:"2x"},{col:0,row:4,type:"power"}
