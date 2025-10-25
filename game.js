@@ -1106,23 +1106,25 @@ function drawFallingStones() {
       continue;
     }
 
-    // --- Upgrade: forceer kleine stenen naar medium ---
-    if ((s.kind === "small") || (s.img === stoneSmallImg)) {
-      s.img  = stoneMediumImg;
-      s.size = 86 + Math.random() * 14; // 86–100
-      s.kind = "medium";
-      // reset collision-afgeleiden
-      s.framesInside   = 0;
-      s.hitboxScale    = (s.hitboxScale == null) ? 0.9 : s.hitboxScale;
-      s.minPenetration = null; // laat we opnieuw afleiden hieronder
-    }
+   // --- Upgrade: forceer kleine stenen naar medium ---
+if (s.kind === "small") {  // ← geen stoneSmallImg meer gebruiken
+  s.img  = stoneMediumImg;
+  s.size = 86 + Math.random() * 14; // 86–100
+  s.kind = "medium";
+  // reset collision-afgeleiden
+  s.framesInside   = 0;
+  s.hitboxScale    = (s.hitboxScale == null) ? 0.9 : s.hitboxScale;
+  s.minPenetration = null; // laten we opnieuw afleiden hieronder
+}
+
 
     // tekenen – per-steen sprite met fallback (geen small fallback meer)
     if (s.img && s.img.complete) {
-      ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-    } else {
-      ctx.drawImage(stoneMediumImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-    }
+  ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+} else {
+  ctx.drawImage(stoneMediumImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+}
+
 
     // beweging
     s.y += s.dy;
