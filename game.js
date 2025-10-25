@@ -274,13 +274,14 @@ addBonuses(5, [
 // ---------- LEVEL 6: “Zijwanden + band + X-traps”
 addBonuses(6, [
   // zijwanden stone
-  {col:0,row:5,type:"stone"},{col:0,row:6,type:"stone"},{col:8,row:5,type:"stone"},{col:8,row:6,type:"stone"},
+  {col:0,row:5,type:"stone"},{col:0,row:6,type:"stone"},{col:8,row:5,type:"stone"},{col:8,row:6,type:"stone"},{col:2,row:10,type:"stone"},
+  {col:1,row:11,type:"stone"},{col:0,row:12,type:"stone"},{col:6,row:10,type:"stone"},{col:7,row:11,type:"stone"},{col:8,row:12,type:"stone"},
   // band row 4/5
-  {col:1,row:4,type:"silver"},{col:2,row:4},{col:6,row:4},{col:7,row:4,type:"silver"},
+  {col:1,row:4,type:"silver"},{col:2,row:4},{col:6,row:4},{col:3,row:9,type:"silver"},{col:4,row:9,type:"silver"},{col:5,row:9,type:"silver"},
   {col:2,row:5},{col:3,row:5},{col:5,row:5},{col:6,row:5},
   // X traps
-  {col:3,row:3,type:"stonefall"},{col:5,row:3,type:"stonefall"},
-  {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},
+  {col:3,row:3,type:"stonefall"},{col:5,row:3,type:"stonefall"},{col:2,row:2,type:"stonefall"},{col:1,row:1,type:"stonefall"},{col:0,row:0,type:"stonefall"},
+  {col:3,row:7,type:"stonefall"},{col:6,row:2,type:"stonefall"},{col:7,row:1,type:"stonefall"},{col:8,row:0,type:"stonefall"},
   // bonussen
   {col:4,row:2,type:"machinegun"},{col:1,row:7,type:"doubleball"},{col:7,row:7,type:"rocket"},
   {col:4,row:8,type:"speed"},{col:4,row:6,type:"2x"},{col:0,row:4,type:"power"}
