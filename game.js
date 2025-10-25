@@ -308,7 +308,7 @@ addBonuses(8, [
   // banden
   {col:1,row:4,type:"silver"},{col:2,row:4,type:"silver"},{col:3,row:4,type:"silver"},{col:5,row:4,type:"silver"},{col:6,row:4,type:"silver"},{col:7,row:4,type:"silver"},
   {col:1,row:8,type:"silver"},{col:2,row:8,type:"silver"},{col:3,row:8,type:"silver"},{col:5,row:8,type:"silver"},{col:6,row:8,type:"silver"},{col:7,row:8,type:"silver"},
-  {col:1,row:12,type:"silver"},{col:2,row:12,type:"silver"},{col:6,row:12,type:"silver"},{col:7,row:12,type:"silver"},
+  {col:1,row:12,type:"silver"},{col:2,row:12,type:"silver"},{col:6,row:12,type:"silver"},{col:7,row:12,type:"silver"},{col:3,row:12,type:"silver"},{col:5,row:12,type:"silver"},
   // traps zijkant
   {col:0,row:6,type:"stonefall"},{col:8,row:6,type:"stonefall"},{col:1,row:6,type:"stonefall"},{col:2,row:6,type:"stonefall"},{col:3,row:6,type:"stonefall"},
   {col:4,row:6,type:"stonefall"},{col:5,row:6,type:"stonefall"},{col:6,row:6,type:"stonefall"},{col:7,row:6,type:"stonefall"},
