@@ -314,7 +314,7 @@ addBonuses(8, [
   {col:4,row:6,type:"stonefall"},{col:5,row:6,type:"stonefall"},{col:6,row:6,type:"stonefall"},{col:7,row:6,type:"stonefall"},
   // bonussen
   {col:4,row:3,type:"machinegun"},{col:4,row:7,type:"doubleball"},{col:4,row:5,type:"2x"},
-  {col:4,row:9,type:"speed"},{col:4,row:11,type:"rocket"},{col:8,row:4,type:"power"},
+  {col:4,row:0,type:"speed"},{col:4,row:11,type:"rocket"},{col:8,row:0,type:"power"},
   // ankers stone
   {col:0,row:9,type:"stone"},{col:8,row:9,type:"stone"},{col:1,row:9,type:"stone"},{col:2,row:9,type:"stone"},{col:3,row:9,type:"stone"},{col:4,row:9,type:"stone"},{col:5,row:9,type:"stone"},
   {col:6,row:9,type:"stone"},{col:7,row:9,type:"stone"}
