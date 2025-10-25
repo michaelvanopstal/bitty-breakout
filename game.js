@@ -1147,25 +1147,27 @@ function drawFallingStones() {
       ctx.drawImage(stoneMediumImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     }
 
-    // beweging
-    s.y += s.dy;
+    // ===== beweging (bewaar vorige Y vóór we s.y updaten) =====
+    if (s.prevY == null) s.prevY = s.y;
+    s.prevY = s.y;          // vorige frame Y opslaan
+    s.y += s.dy;            // val
 
     // ---- Botsing met paddle (alleen bij écht contact) ----
-    // Defaults voor oudere stenen
     if (s.framesInside == null) s.framesInside = 0;
-    if (s.prevY == null) s.prevY = s.y; // voor crossing check
 
-    // Grootte-afgeleiden
-    const baseRadius = s.size * 0.42;     // ingeschreven cirkel
-    const isLarge = s.size >= 100;        // grote stenen houden zoals ze zijn
+    // Basisradius (ingeschreven cirkel)
+    const baseRadius = s.size * 0.42;
 
-    // Per categorie parameters
-    const hitboxScale    = isLarge ? 0.90 : 0.80;                       // kleinere hitbox voor kleiner
-    const minPenetration = isLarge ? Math.min(12, baseRadius * 0.40)
-                                   : Math.min(18, baseRadius * 0.55);   // dieper in paddle
-    const debounceFrames = isLarge ? 2 : 3;                              // klein/medium iets langer contact
+    // Categorieën: large houden zoals het nu fijn voelt
+    const isLarge = s.size >= 100;
+
+    // Tunables
+    const hitboxScale     = isLarge ? 0.90 : 0.82;                    // iets kleinere hitbox voor kleiner
+    const minPenetration  = isLarge ? Math.min(12, baseRadius * 0.40)
+                                    : Math.min(18, baseRadius * 0.55); // dieper in paddle voor kleiner
+    const debounceFrames  = isLarge ? 2 : 3;
     const minHorizOverlap = isLarge ? (baseRadius * 0.30)
-                                    : (baseRadius * 0.40);               // genoeg X-overlap
+                                    : (baseRadius * 0.40);
 
     const r = baseRadius * hitboxScale;
 
@@ -1175,28 +1177,23 @@ function drawFallingStones() {
     const paddleW    = paddleWidth;
     const paddleH    = paddleHeight;
 
-    // (1) Basis overlap (cirkel vs. rect)
+    // 1) Cirkel vs rect overlap
     const intersects = circleIntersectsRect(s.x, s.y, r, paddleLeft, paddleTop, paddleW, paddleH);
 
-    // (2) Genoeg verticale diepte in de paddle
+    // 2) Voldoende verticale diepte in de paddle
     const penetrates = (s.y + r) >= (paddleTop + minPenetration);
 
-    // (3) Alleen tellen als steen neerwaarts beweegt
+    // 3) Alleen neerwaartse hits
     const falling = s.dy > 0;
 
-    // (4) Crossing check: vorige frame onderkant nog boven de paddle-lijn, nu eroverheen
-    const prevBottom = (s.prevY + r);
-    const nowBottom  = (s.y + r);
-    const crossed    = (prevBottom < paddleTop) && (nowBottom >= paddleTop + minPenetration);
-
-    // (5) Genoeg horizontale overlap – geen rand-tik
+    // 4) Genoeg horizontale overlap – geen rand-tikjes
     const stoneLeft  = s.x - r;
     const stoneRight = s.x + r;
     const overlapX   = Math.max(0, Math.min(stoneRight, paddleLeft + paddleW) - Math.max(stoneLeft, paddleLeft));
     const wideEnough = overlapX >= minHorizOverlap;
 
-    // Combineer tot “echte” hit
-    const realHitNow = intersects && penetrates && falling && crossed && wideEnough;
+    // Echte hit als aan alle vier voldaan is
+    const realHitNow = intersects && penetrates && falling && wideEnough;
 
     if (realHitNow) {
       s.framesInside++;
@@ -1225,8 +1222,6 @@ function drawFallingStones() {
         setTimeout(() => { stoneHitLock = false; }, 1200);
       }
 
-      // prevY updaten vóór continue
-      s.prevY = s.y;
       continue;
     }
 
@@ -1235,9 +1230,6 @@ function drawFallingStones() {
       spawnStoneDebris(s.x, canvas.height - 10);
       s.active = false;
     }
-
-    // vorige Y bijwerken voor crossing-check in volgende frame
-    s.prevY = s.y;
   }
 
   // ná de iteratie: in één keer alle stenen wissen (voorkomt loop issues)
@@ -1246,9 +1238,6 @@ function drawFallingStones() {
     stoneClearRequested = false;
   }
 }
-
-
-
 
 
 
