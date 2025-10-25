@@ -1431,6 +1431,7 @@ function checkCoinCollision() {
     }
   });
 }
+
 function collisionDetection() {
   balls.forEach(ball => {
     for (let c = 0; c < brickColumnCount; c++) {
@@ -1468,43 +1469,48 @@ function collisionDetection() {
           }
 
           // 🪨 Steen-blok gedrag
-         if (b.type === "stone") {
-  bricksSound.currentTime = 0;
-  bricksSound.play();
+          if (b.type === "stone") {
+            bricksSound.currentTime = 0;
+            bricksSound.play();
+            b.hits++;
 
-  // 💥 1 hit = meteen kapot
-  b.status = 0;
+            for (let i = 0; i < 5; i++) {
+              stoneDebris.push({
+                x: b.x + brickWidth / 2,
+                y: b.y + brickHeight / 2,
+                dx: (Math.random() - 0.5) * 3,
+                dy: (Math.random() - 0.5) * 3,
+                radius: Math.random() * 2 + 1,
+                alpha: 1
+              });
+            }
 
-  // optioneel: een kleine explosie of debris
-  for (let i = 0; i < 8; i++) {
-    stoneDebris.push({
-      x: b.x + brickWidth / 2,
-      y: b.y + brickHeight / 2,
-      dx: (Math.random() - 0.5) * 3,
-      dy: (Math.random() - 0.5) * 3,
-      radius: Math.random() * 2 + 1,
-      alpha: 1
-    });
-  }
+            if (b.hits === 1 || b.hits === 2) {
+              spawnCoin(b.x + brickWidth / 2, b.y);
+            }
 
-  // spawn 1 coin (was bij hit 1 of 2)
-  spawnCoin(b.x + brickWidth / 2, b.y);
+            if (b.hits >= 3) {
+              b.status = 0;
 
-  // geef punten
-  const earned = doublePointsActive ? 120 : 60;
-  score += earned;
-  updateScoreDisplay();
+              if (!b.hasDroppedBag) {
+                spawnPxpBag(b.x + brickWidth / 2, b.y + brickHeight);
+                b.hasDroppedBag = true;
+              }
 
-  pointPopups.push({
-    x: b.x + brickWidth / 2,
-    y: b.y,
-    value: "+" + earned,
-    alpha: 1
-  });
+              const earned = doublePointsActive ? 120 : 60;
+              score += earned;
+              updateScoreDisplay();
 
-  // stop verdere collision-afhandeling
-  return;
-}
+              pointPopups.push({
+                x: b.x + brickWidth / 2,
+                y: b.y,
+                value: "+" + earned,
+                alpha: 1
+              });
+            }
+
+            return; // klaar met deze hit
+          }
 
           // 🪙 Gedrag voor silver blokken
           if (b.type === "silver") {
@@ -1620,6 +1626,8 @@ function collisionDetection() {
     } // <-- einde for c
   }); // <-- einde balls.forEach
 } // <-- einde function
+
+
 
 
 
