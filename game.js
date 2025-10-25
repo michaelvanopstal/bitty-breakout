@@ -2551,12 +2551,19 @@ if (showGameOver) {
 } // ✅ Sluit function draw() correct af
 
 
-if (imagesLoaded === 27) {
-  resetBricks();
-  updateLivesDisplay();
-  resetPaddle();
-  goToLevel(4, { resetScore: true, resetLives: true }); // ⬅️ hier toevoegen
-  draw();
+function onImageLoad() {
+  imagesLoaded++;
+
+  if (imagesLoaded === 27) {
+    // Zodra alle afbeeldingen klaar zijn:
+    updateLivesDisplay();    // laat levens zien
+    goToLevel(4, {           // direct starten op level 4
+      resetScore: true,
+      resetLives: true,
+      centerPaddle: true
+    });
+    draw(); // start de render-loop
+  }
 }
 
 blockImg.onload = onImageLoad;
