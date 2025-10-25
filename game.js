@@ -197,9 +197,8 @@ const level3Map = [
   { col: 3, row: 8, type: "stonefall" },
   { col: 5, row: 8, type: "stonefall" },
 ];
-
-// Nieuw systeem: 10 levels totaal
-const LEVELS = Array.from({ length: 10 }, () => []);
+// ===== LEVEL SYSTEM: 20 levels =====
+const LEVELS = Array.from({ length: 20 }, () => []);
 
 function defineLevel(level, mapArray) {
   LEVELS[level - 1] = (Array.isArray(mapArray) ? mapArray.slice() : []);
@@ -228,17 +227,26 @@ function addFrame(level, type = "stone") {
     addBlock(level, brickColumnCount - 1, r, type);
   }
 }
-
-// Gebruik je bestaande layouts voor de eerste 3
+// Behoud level 1–3 exact zoals je ze al hebt
 defineLevel(1, bonusBricks);
 defineLevel(2, pxpMap);
 defineLevel(3, level3Map);
 
-// Vanaf hier kun je eenvoudig nieuwe maken
-addFrame(4, "stone");                  // voorbeeldrand
-addMany(5, [[4, 2, "rocket"], [2, 4, "machinegun"], [6, 6, "2x"]]);
-fillRect(6, 3, 3, 5, 5, "silver");     // voorbeeld zilverblok
-// enzovoort...
+// Voorbeeld-startpunten (optioneel, kun je wijzigen of verwijderen)
+addFrame(4, "stone");
+addMany(5, [
+  [4, 2, "rocket"],
+  [2, 4, "machinegun"],
+  [6, 6, "2x"],
+]);
+// Voorbeelddiagonaal in level 6
+for (let i = 2; i <= 6; i++) addBlock(6, i, i, "silver");
+
+// Levels 7–20 kun je vrij invullen, bv:
+// addBlock(7, 3, 8, "doubleball");
+// fillRect(8, 2, 5, 6, 7, "stonefall");
+// defineLevel(9, [ {col:4,row:2,type:"speed"}, ... ]);
+
 
 const resetBallSound = new Audio("resetball.mp3");
 
@@ -2508,14 +2516,16 @@ function triggerPaddleExplosion() {
 }
 
 
+
 function startLevelTransition() {
   level++;
+  if (level > LEVELS.length) {
+    level = 1; // of: showYouWin();
+  }
 
   resetAllBonuses();
-
   levelUpSound.currentTime = 0;
   levelUpSound.play();
-
   levelMessageAlpha = 0;
   levelMessageTimer = 0;
   levelMessageVisible = true;
@@ -2526,7 +2536,6 @@ function startLevelTransition() {
 
   ballLaunched = false;
   ballMoving = false;
-
   balls = [{
     x: paddleX + paddleWidth / 2 - ballRadius,
     y: paddleY - ballRadius * 2,
@@ -2536,7 +2545,6 @@ function startLevelTransition() {
     isMain: true
   }];
 
-  // ✅ Cruciaal bij 4+ levens
   resetPaddle();
   updateLivesDisplay();
 }
