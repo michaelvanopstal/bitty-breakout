@@ -1099,27 +1099,44 @@ function pickRandomRockSprite() {
 }
 
 function triggerStonefall(originX, originY) {
-  const count = 1 + Math.floor(Math.random() * 3); // 5–8
+  // 🎲 aantal vallende stenen per hit (random 1–3)
+  const count = 1 + Math.floor(Math.random() * 3);
+
   for (let i = 0; i < count; i++) {
-    const rock = pickRandomRockSprite(); // kiest small/medium/large
+    const rock = pickRandomRockSprite(); // kiest small / medium / large
 
     fallingStones.push({
-      x: originX + (Math.random() - 0.5) * 40,
+      x: originX + (Math.random() - 0.5) * 40,  // lichte spreiding
       y: originY + 10,
-      dy: 3 + Math.random() * 2,
+      dy: 3 + Math.random() * 2,                // val­snelheid
       size: rock.size,
-      img: rock.img,          // per-steen sprite
+      img: rock.img,                            // sprite
       active: true,
-      shattered: false
+      shattered: false,
+
+      // 🔧 nieuwe eigenschappen voor betere paddle-botsing
+      framesInside: 0,       // telt frames dat steen overlapt met paddle
+      hitboxScale: 0.9,      // 90% van diameter voor realistische hitbox
+      minPenetration: null   // wordt berekend bij eerste collision-check
     });
   }
 }
+
+// ✅ Cirkel (steen) vs rechthoek (paddle)
+function circleIntersectsRect(cx, cy, r, rx, ry, rw, rh) {
+  const closestX = Math.max(rx, Math.min(cx, rx + rw));
+  const closestY = Math.max(ry, Math.min(cy, ry + rh));
+  const dx = cx - closestX;
+  const dy = cy - closestY;
+  return (dx * dx + dy * dy) <= (r * r);
+}
+
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
-    if (!s.active) { 
-      fallingStones.splice(i, 1); 
-      continue; 
+    if (!s.active) {
+      fallingStones.splice(i, 1);
+      continue;
     }
 
     // tekenen – per-steen sprite met fallback
@@ -1132,27 +1149,36 @@ function drawFallingStones() {
     // beweging
     s.y += s.dy;
 
-    // paddle-collision
+    // ---- Botsing met paddle (nauwkeurig & eerlijk) ----
+    // Defaults voor oudere stenen die nog geen nieuwe velden hebben
+    if (s.framesInside == null) s.framesInside = 0;
+    if (s.hitboxScale == null) s.hitboxScale = 0.9; // 90% hitbox (geen transparante randen)
+    // basisradius op circa ingeschreven cirkel van de sprite
+    const baseRadius = s.size * 0.42;
+    const r = baseRadius * s.hitboxScale;
+
+    // Minimale indringing afhankelijk van grootte (max 12px)
+    if (s.minPenetration == null) s.minPenetration = Math.min(12, r * 0.4);
+
+    // Paddle-bounds
     const paddleLeft   = paddleX;
-    const paddleRight  = paddleX + paddleWidth;
     const paddleTop    = paddleY;
-    const paddleBottom = paddleY + paddleHeight;
-    const stoneLeft    = s.x - s.size / 2;
-    const stoneRight   = s.x + s.size / 2;
-    const stoneTop     = s.y - s.size / 2;
-    const stoneBottom  = s.y + s.size / 2;
+    const paddleW      = paddleWidth;
+    const paddleH      = paddleHeight;
 
-    // kleine correctie zodat de steen visueel echt de paddle raakt
-const visualOffset = s.size * 0.15; // ±15% van de steenhoogte
-const hitPaddle =
-  stoneRight >= paddleLeft &&
-  stoneLeft  <= paddleRight &&
-  (stoneBottom - visualOffset) >= paddleTop &&
-  stoneTop   <= paddleBottom;
+    // Cirkel vs rect overlap
+    const intersects = circleIntersectsRect(s.x, s.y, r, paddleLeft, paddleTop, paddleW, paddleH);
+    // Onderkant van de cirkel moet minimaal 's.minPenetration' in de paddle-zone zitten
+    const penetrates = (s.y + r) >= (paddleTop + s.minPenetration);
 
+    if (intersects && penetrates) {
+      s.framesInside++;
+    } else {
+      s.framesInside = 0;
+    }
 
-    if (hitPaddle) {
-      // effect op de steen zelf
+    // Pas botsing laten tellen als hij 2 frames “echt” in de paddle zit
+    if (s.framesInside >= 2) {
       spawnStoneDebris(s.x, s.y);
       s.active = false;
       stoneHitOverlayTimer = 18;
@@ -1161,7 +1187,7 @@ const hitPaddle =
       if (!stoneHitLock) {
         stoneHitLock = true;
 
-        // 🚀 laat de paddle ontploffen (+ 1 leven eraf + bal op paddle)
+        // 🚀 Paddle-explosie / leven eraf
         if (typeof triggerPaddleExplosion === "function") {
           triggerPaddleExplosion();
         }
@@ -1189,6 +1215,7 @@ const hitPaddle =
     stoneClearRequested = false;
   }
 }
+
 
 
 
