@@ -166,7 +166,7 @@ const pxpMap = [
   { col: 0, row: 0, type: "stone" },                                                               
 ];
 
-// Einde van level3Map (laat jouw bestaande inhoud ongewijzigd)
+// 🌋 Level 3 layout (voorbeeld)
 const level3Map = [
   // Rand van stenen (stevig)
   { col: 0, row: 0, type: "stone" }, { col: 1, row: 0, type: "stone" }, { col: 2, row: 0, type: "stone" },
@@ -193,48 +193,14 @@ const level3Map = [
   { col: 7, row: 8, type: "2x" },
   { col: 4, row: 9, type: "rocket" },
 
-  // Stonefall “valstrikken”
+  // Stonefall “valstrikken” (3 hits + laat stenen vallen)
   { col: 3, row: 8, type: "stonefall" },
-  { col: 5, row: 8, type: "stonefall" }
-]; // ← level3Map sluit hier af
+  { col: 5, row: 8, type: "stonefall" },
+];
 
-// ============================================================================
-// =============== LEVEL SYSTEM (20 levels) + HELPERS (GEEN CALLS) ============
-// ============================================================================
-const LEVELS = Array.from({ length: 20 }, () => []);
-
-function defineLevel(level, mapArray) {
-  LEVELS[level - 1] = (Array.isArray(mapArray) ? mapArray.slice() : []);
-}
-function addBlock(level, col, row, type = "normal") {
-  if (!LEVELS[level - 1]) LEVELS[level - 1] = [];
-  LEVELS[level - 1].push({ col, row, type });
-}
-function addMany(level, items) {
-  items.forEach(([c, r, t = "normal"]) => addBlock(level, c, r, t));
-}
-function fillRect(level, c0, r0, c1, r1, type = "normal") {
-  for (let c = Math.min(c0, c1); c <= Math.max(c0, c1); c++) {
-    for (let r = Math.min(r0, r1); r <= Math.max(r0, r1); r++) {
-      addBlock(level, c, r, type);
-    }
-  }
-}
-function addFrame(level, type = "stone") {
-  for (let c = 0; c < brickColumnCount; c++) {
-    addBlock(level, c, 0, type);
-    addBlock(level, c, brickRowCount - 1, type);
-  }
-  for (let r = 1; r < brickRowCount - 1; r++) {
-    addBlock(level, 0, r, type);
-    addBlock(level, brickColumnCount - 1, r, type);
-  }
-}
-
-// ============================================================================
-// =================== AUDIO / SFX (mag ook erboven staan) ====================
-// ============================================================================
 const resetBallSound = new Audio("resetball.mp3");
+
+
 const levelUpSound = new Audio("levelup.mp3");
 const paddleExplodeSound = new Audio("paddle_explode.mp3");
 const gameOverSound = new Audio("gameover.mp3");
@@ -249,101 +215,20 @@ const bricksSound = new Audio("bricks.mp3");
 const pxpBagSound = new Audio("pxpbagsound_mp3.mp3");
 
 const rocketLaunchSound = new Audio("launch.mp3");
-const rocketExplosionSound = new Audio("explosion.mp3");
-const laserSound = new Audio("laser.mp3");
+const rocketExplosionSound = new Audio("explosion.mp3"); // als dat de juiste is
+
+const laserSound = new Audio("laser.mp3"); // voeg dit bestand toe in je project
 const coinSound = new Audio("money.mp3");
 const shootSound = new Audio("shoot_arcade.mp3");
 const wallSound = new Audio("tick.mp3");
 const blockSound = new Audio("tock.mp3");
 
-// ============================================================================
-// ======================== GRID / BRICK CONSTANTS ============================
-// ============================================================================
-const customBrickWidth = 70;
-const customBrickHeight = 25;
+const customBrickWidth = 70;   // pas aan zoals jij wilt
+const customBrickHeight = 25;  // pas aan zoals jij wilt
 const brickRowCount = 15;
 const brickColumnCount = 9;
 const brickWidth = customBrickWidth;
 const brickHeight = customBrickHeight;
-
-// Behoud level 1–3 exact zoals je ze al hebt
-defineLevel(1, bonusBricks);
-defineLevel(2, pxpMap);
-defineLevel(3, level3Map);
-
-// Voorbeeld-startpunten (optioneel – kun je wijzigen of verwijderen)
-addFrame(4, "stone");
-addMany(5, [
-  [4, 2, "rocket"],
-  [2, 4, "machinegun"],
-  [6, 6, "2x"]
-]);
-// Voorbeelddiagonaal in level 6
-for (let i = 2; i <= 6; i++) addBlock(6, i, i, "silver");
-
-// Levels 7–20 kun je vrij invullen, bijv.:
-// addBlock(7, 3, 8, "doubleball");
-// fillRect(8, 2, 5, 6, 7, "stonefall");
-// defineLevel(9, [ { col: 4, row: 2, type: "speed" } ]);
-// ...
-
-
-const resetBallSound = new Audio("resetball.mp3");
-const levelUpSound = new Audio("levelup.mp3");
-const paddleExplodeSound = new Audio("paddle_explode.mp3");
-const gameOverSound = new Audio("gameover.mp3");
-
-const doubleBallSound = new Audio("double_ball.mp3");
-const speedBoostSound = new Audio("speed_boost.mp3");
-const rocketReadySound = new Audio("rocket_ready.mp3");
-const flagsActivatedSound = new Audio("flags_activated.mp3");
-const doublePointsSound = new Audio("double_points.mp3");
-
-const bricksSound = new Audio("bricks.mp3");
-const pxpBagSound = new Audio("pxpbagsound_mp3.mp3");
-
-const rocketLaunchSound = new Audio("launch.mp3");
-const rocketExplosionSound = new Audio("explosion.mp3");
-const laserSound = new Audio("laser.mp3");
-const coinSound = new Audio("money.mp3");
-const shootSound = new Audio("shoot_arcade.mp3");
-const wallSound = new Audio("tick.mp3");
-const blockSound = new Audio("tock.mp3");
-
-// ============================================================================
-// ======================== GRID / BRICK CONSTANTS ============================
-// ============================================================================
-const customBrickWidth = 70;
-const customBrickHeight = 25;
-const brickRowCount = 15;
-const brickColumnCount = 9;
-const brickWidth = customBrickWidth;
-const brickHeight = customBrickHeight;
-
-// ============================================================================
-// ==================== LEVEL REGISTRATION (NA CONSTANTS!) ====================
-// ============================================================================
-// Behoud level 1–3 exact zoals je ze al hebt
-defineLevel(1, bonusBricks);
-defineLevel(2, pxpMap);
-defineLevel(3, level3Map);
-
-// Voorbeeld-startpunten (optioneel – kun je wijzigen of verwijderen)
-addFrame(4, "stone");
-addMany(5, [
-  [4, 2, "rocket"],
-  [2, 4, "machinegun"],
-  [6, 6, "2x"]
-]);
-// Voorbeelddiagonaal in level 6
-for (let i = 2; i <= 6; i++) addBlock(6, i, i, "silver");
-
-// Levels 7–20 kun je vrij invullen, bijv.:
-// addBlock(7, 3, 8, "doubleball");
-// fillRect(8, 2, 5, 6, 7, "stonefall");
-// defineLevel(9, [ { col: 4, row: 2, type: "speed" } ]);
-
-
 
 
 const bricks = [];
@@ -720,49 +605,45 @@ function drawPointPopups() {
   ctx.globalAlpha = 1; // Transparantie resetten
 }
 
-
-
 function resetBricks() {
-  // Kies de map voor het huidige level
-  var currentMap = [];
-
-  // 1) LEVELS voorrang als die bestaat
-  if (typeof LEVELS !== 'undefined' && Array.isArray(LEVELS) && Array.isArray(LEVELS[level - 1])) {
-    currentMap = LEVELS[level - 1];
+  // Kies de juiste map per level
+  let currentMap = [];
+  if (level === 1) {
+    currentMap = (typeof level1Map !== "undefined" && Array.isArray(level1Map))
+      ? level1Map
+      : bonusBricks;
+  } else if (level === 2) {
+    currentMap = (typeof level2Map !== "undefined" && Array.isArray(level2Map))
+      ? level2Map
+      : pxpMap;
+  } else if (level === 3) {
+    currentMap = (typeof level3Map !== "undefined" && Array.isArray(level3Map))
+      ? level3Map
+      : [];
   } else {
-    // 2) Fallback: behoud je oude 1-3 maps precies
-    if (level === 1) {
-      currentMap = (typeof level1Map !== 'undefined' && Array.isArray(level1Map)) ? level1Map : bonusBricks;
-    } else if (level === 2) {
-      currentMap = (typeof level2Map !== 'undefined' && Array.isArray(level2Map)) ? level2Map : pxpMap;
-    } else if (level === 3) {
-      currentMap = (typeof level3Map !== 'undefined' && Array.isArray(level3Map)) ? level3Map : [];
-    } else {
-      currentMap = [];
-    }
+    currentMap = [];
   }
 
-  // Reset en invullen
-  for (var c = 0; c < brickColumnCount; c++) {
-    for (var r = 0; r < brickRowCount; r++) {
-      var b = bricks[c][r];
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const b = bricks[c][r];
       b.status = 1;
 
-      // Check of deze positie in de huidige levelmap staat
-      var defined = currentMap.find(function(p){ return p.col === c && p.row === r; });
-      var brickType = defined ? defined.type : 'normal';
+      // Kijk of deze brick in de map voorkomt
+      const defined = currentMap.find(p => p.col === c && p.row === r);
+      let brickType = defined ? defined.type : "normal"; // standaard "normal"
 
-      // Extra fallback specifiek voor level 1
-      if (level === 1 && !defined && Array.isArray(bonusBricks)) {
-        var bonus = bonusBricks.find(function(x){ return x.col === c && x.row === r; });
+      // 💎 Level 1 bonus fallback (alleen voor je originele setup)
+      if (level === 1 && !defined) {
+        const bonus = bonusBricks.find(x => x.col === c && x.row === r);
         if (bonus) brickType = bonus.type;
       }
 
-      // Type toepassen
+      // Pas type toe
       b.type = brickType;
 
-      // Type-specifieke reset
-      if (brickType === 'stone' || brickType === 'silver') {
+      // Reset type-specifieke eigenschappen
+      if (brickType === "stone" || brickType === "silver") {
         b.hits = 0;
         b.hasDroppedBag = false;
       } else {
@@ -770,7 +651,7 @@ function resetBricks() {
         delete b.hasDroppedBag;
       }
 
-      // Hartjes reset
+      // Reset hartjes
       b.hasHeart = false;
       b.heartDropped = false;
     }
@@ -779,7 +660,6 @@ function resetBricks() {
   // Plaats 4 willekeurige hartjes onder normale blokken
   assignHeartBlocks();
 }
-
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
 function assignHeartBlocks() {
@@ -2572,16 +2452,14 @@ function triggerPaddleExplosion() {
 }
 
 
-
 function startLevelTransition() {
   level++;
-  if (level > LEVELS.length) {
-    level = 1; // of: showYouWin();
-  }
 
   resetAllBonuses();
+
   levelUpSound.currentTime = 0;
   levelUpSound.play();
+
   levelMessageAlpha = 0;
   levelMessageTimer = 0;
   levelMessageVisible = true;
@@ -2592,6 +2470,7 @@ function startLevelTransition() {
 
   ballLaunched = false;
   ballMoving = false;
+
   balls = [{
     x: paddleX + paddleWidth / 2 - ballRadius,
     y: paddleY - ballRadius * 2,
@@ -2601,6 +2480,7 @@ function startLevelTransition() {
     isMain: true
   }];
 
+  // ✅ Cruciaal bij 4+ levens
   resetPaddle();
   updateLivesDisplay();
 }
