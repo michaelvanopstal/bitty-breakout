@@ -488,12 +488,16 @@ addBonuses(16, [
   // zijwanden lang
   {col:0,row:4,type:"stone"},{col:0,row:5,type:"stone"},{col:0,row:6,type:"stone"},
   {col:8,row:4,type:"stone"},{col:8,row:5,type:"stone"},{col:8,row:6,type:"stone"},
-  {col:4,row:6,type:"stone"},
+  {col:4,row:6,type:"stone"},{col:0,row:0,type:"stone"},{col:1,row:0,type:"stone"},{col:2,row:0,type:"stone"},{col:3,row:0,type:"stone"},{col:4,row:0,type:"stone"},
+  {col:5,row:0,type:"stone"},{col:6,row:0,type:"stone"},{col:7,row:0,type:"stone"},{col:8row:0,type:"stone"},
   // X-traps
   {col:3,row:5,type:"stonefall"},{col:5,row:5,type:"stonefall"},
   {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},
   // middenas (silver/stone afwisselend)
-  {col:4,row:3,type:"silver"},{col:4,row:9,type:"silver"},
+  {col:4,row:3,type:"silver"},{col:4,row:9,type:"silver"},{col:0,row:11,type:"silver"},{col:1,row:11,type:"silver"},{col:2,row:11,type:"silver"},
+  {col:3,row:11,type:"silver"},{col:4,row:11,type:"silver"},{col:5,row:11,type:"silver"},{col:6,row:11,type:"silver"},{col:7,row:11,type:"silver"},
+  {col:8,row:11,type:"silver"},{col:0,row:14,type:"silver"},{col:1,row:14,type:"silver"},{col:2,row:14,type:"silver"},{col:3,row:14,type:"silver"},
+  {col:4,row:14,type:"silver"},{col:5,row:14,type:"silver"},{col:6,row:14,type:"silver"},{col:7,row:14,type:"silver"},{col:8,row:14,type:"silver"},
   // bonussen
   {col:4,row:2,type:"machinegun"},{col:2,row:6,type:"doubleball"},{col:6,row:6,type:"rocket"},
   {col:4,row:8,type:"2x"},{col:3,row:6,type:"speed"},{col:4,row:11,type:"power"}
