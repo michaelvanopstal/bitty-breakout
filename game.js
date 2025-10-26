@@ -115,6 +115,78 @@ balls.push({
   isMain: true
 });
 
+// 🎉 Level overlay + confetti/vuurwerk
+let confetti = [];
+let levelMessageVisible = false;
+let levelMessageText = "";
+let levelMessageAlpha = 0;
+let levelMessageTimer = 0;
+const LEVEL_MESSAGE_DURATION = 180; // ≈3s @ 60fps
+
+function showLevelBanner(text) {
+  levelMessageText = text;
+  levelMessageVisible = true;
+  levelMessageAlpha = 1;
+  levelMessageTimer = 0;
+}
+
+function spawnConfetti(n = 160) {
+  for (let i = 0; i < n; i++) {
+    confetti.push({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 200,
+      dx: (-1 + Math.random() * 2) * 1.5,
+      dy: 2 + Math.random() * 3,
+      size: 3 + Math.random() * 4,
+      rot: Math.random() * Math.PI * 2,
+      drot: -0.05 + Math.random() * 0.1,
+    });
+  }
+}
+
+function drawConfetti() {
+  for (let i = confetti.length - 1; i >= 0; i--) {
+    const p = confetti[i];
+    p.x += p.dx;
+    p.y += p.dy;
+    p.rot += p.drot;
+    if (p.y > canvas.height + 30) { confetti.splice(i, 1); continue; }
+
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.globalAlpha = 0.9;
+    const colors = ["#ffd700", "#ff4d4d", "#4dff88", "#66a3ff", "#ff66ff"];
+    ctx.fillStyle = colors[i % colors.length];
+    if (i % 2 === 0) {
+      ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+    } else {
+      ctx.beginPath();
+      ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+function spawnFireworks(bursts = 6) {
+  // gebruikt je bestaande explosions-rendering als die er is
+  if (!Array.isArray(explosions)) return;
+  for (let i = 0; i < bursts; i++) {
+    const cx = canvas.width * (0.1 + Math.random() * 0.8);
+    const cy = canvas.height * (0.1 + Math.random() * 0.4);
+    explosions.push({ x: cx, y: cy, radius: 10, alpha: 1, color: "white" });
+    explosions.push({ x: cx, y: cy, radius: 14, alpha: 1, color: "orange" });
+  }
+}
+
+function triggerLevelCelebration(lvl, opts = {}) {
+  showLevelBanner(`Bitty Bitcoin Mascot — Level ${lvl}`);
+  spawnConfetti(opts.confettiCount ?? 160);
+  if (!opts.skipFireworks) spawnFireworks(6);
+  // Als je een sound hebt:
+  try { levelUpSound?.pause?.(); levelUpSound.currentTime = 0; levelUpSound?.play?.(); } catch (e) {}
+}
 
 
 
@@ -2645,36 +2717,38 @@ if ((machineGunActive || machineGunCooldownActive) && paddleDamageZones.length >
   // Paddle-explosie volgt automatisch bij ball loss
 }
 
-
-    
-    // ✨ Leveltekst weergeven
+// ✨ Levelbanner + fade-out
 if (levelMessageVisible) {
   ctx.save();
   ctx.globalAlpha = levelMessageAlpha;
   ctx.fillStyle = "#00ffff";
   ctx.font = "bold 36px Arial";
   ctx.textAlign = "center";
-  ctx.fillText(`BrickShift Level ${level}`, canvas.width / 2, canvas.height / 2);
+  ctx.fillText(levelMessageText || `Bitty Bitcoin Mascot — Level ${level}`, canvas.width / 2, canvas.height / 2);
   ctx.restore();
+
+  // Laat de fade-out hier lopen
+  levelMessageTimer++;
+  levelMessageAlpha = Math.max(0, 1 - (levelMessageTimer / LEVEL_MESSAGE_DURATION));
+  if (levelMessageTimer >= LEVEL_MESSAGE_DURATION) {
+    levelMessageVisible = false;
+  }
 }
 
 // 🎬 Overgangstimer & animatie
 if (levelTransitionActive) {
-  levelMessageAlpha = 1;
-
-  levelMessageTimer++;
-
-  if (levelMessageTimer >= 360) {
-    levelMessageVisible = false;
-    levelTransitionActive = false;
-  }
-
+  // NIET levelMessageAlpha forceren en NIET nogmaals levelMessageTimer++
   if (transitionOffsetY < 0) {
     transitionOffsetY += 2;
   } else {
     transitionOffsetY = 0;
+    levelTransitionActive = false;
   }
 }
+
+// 🎊 Confetti bovenop de scene tekenen
+drawConfetti();
+
 
 
 if (showGameOver) {
@@ -2985,7 +3059,6 @@ function triggerPaddleExplosion() {
     }, 1000);
   }
 }
-
 function startLevelTransition() {
   // ✅ Wincheck vóór level++ (we zitten aan het einde van het laatste level)
   if (level >= TOTAL_LEVELS) {
@@ -3033,6 +3106,10 @@ function startLevelTransition() {
 
     const timeEl = document.getElementById("timeDisplay");
     if (timeEl) timeEl.textContent = "00:00";
+
+    // 🔔 NIEUW: kleine banner als we terug zijn op Level 1 (zonder vuurwerk)
+    triggerLevelCelebration(level, { skipFireworks: true, confettiCount: 120 });
+
     return;
   }
 
@@ -3051,7 +3128,11 @@ function startLevelTransition() {
   // (Optioneel) Paddle centreren en UI bijwerken, alleen als je die helpers hebt:
   resetPaddle?.();
   updateScoreDisplay?.();
+
+  // 🔔 NIEUW: vier het nieuwe level met banner + confetti/vuurwerk
+  triggerLevelCelebration(level);
 }
+
 
 
 function updateLivesDisplay() {
