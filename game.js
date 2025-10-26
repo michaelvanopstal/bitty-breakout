@@ -389,7 +389,7 @@ addBonuses(12, [
 
   // bonussen
   {col:4,row:3,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
-  {col:4,row:6,type:"2x"},{col:4,row:11,type:"speed"},{col:8,row:5,type:"power"},
+  {col:4,row:6,type:"2x"},{col:4,row:11,type:"speed"},{col:4,row:7,type:"power"},
 
   // ankers
   {col:0,row:8,type:"stone"},{col:8,row:8,type:"stone"},{col:0,row:0,type:"stone"},
