@@ -183,10 +183,16 @@ function spawnFireworks(bursts = 6) {
 function triggerLevelCelebration(lvl, opts = {}) {
   showLevelBanner(`Bitty Bitcoin Mascot — Level ${lvl}`);
   spawnConfetti(opts.confettiCount ?? 160);
+
+  // 🚀 nieuw: gebruik rockets-optie (of schaal mee met level)
+  const rockets = opts.rockets ?? Math.min(14, 6 + Math.floor(lvl / 2));
+  if (rockets > 0) spawnFireworkRockets(rockets);
+
   if (!opts.skipFireworks) spawnFireworks(6);
-  // Als je een sound hebt:
+
   try { levelUpSound?.pause?.(); levelUpSound.currentTime = 0; levelUpSound?.play?.(); } catch (e) {}
 }
+
 
 function spawnFireworkRockets(count = 8) {
   for (let i = 0; i < count; i++) {
@@ -1799,16 +1805,20 @@ function drawFallingHearts() {
     }
   });
 }
+
 function pickRandomRockSprite() {
   const r = Math.random();
-  if (r < 0.40) {         // 40% klein
-    return { img: stoneSmallImg,  size: 70 + Math.random() * 12 };   // ~70–82
-  } else if (r < 0.75) {  // 35% medium
-    return { img: stoneMediumImg, size: 86 + Math.random() * 14 };   // ~86–100
-  } else {                // 25% groot
-    return { img: stoneLargeImg,  size: 102 + Math.random() * 16 };  // ~102–118
+
+  if (r < 0.40) { // 40% klein → VERDUBBELEN
+    const base = 70 + Math.random() * 12; // ~70–82 (was)
+    return { img: stoneSmallImg, size: base * 2 }; // ~140–164 (nieuw)
+  } else if (r < 0.75) { // 35% medium (ongewijzigd)
+    return { img: stoneMediumImg, size: 86 + Math.random() * 14 }; // ~86–100
+  } else { // 25% groot (ongewijzigd)
+    return { img: stoneLargeImg, size: 102 + Math.random() * 16 }; // ~102–118
   }
 }
+
 
 function triggerStonefall(originX, originY) {
   // 🎲 aantal vallende stenen per hit (random 1–3)
