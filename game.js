@@ -459,6 +459,8 @@ addBonuses(15, [
   {col:6,row:8,type:"stone"},
   {col:2,row:14,type:"stone"},
   {col:6,row:14,type:"stone"},
+  {col:0,row:6,type:"stone"},
+  {col:8,row:6,type:"stone"},
 
   // traps
   {col:0,row:7,type:"stonefall"},
