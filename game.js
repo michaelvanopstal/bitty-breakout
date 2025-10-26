@@ -508,10 +508,15 @@ addBonuses(17, [
   // H-palen
   {col:1,row:3,type:"stone"},{col:1,row:6,type:"stone"},{col:1,row:9,type:"stone"},
   {col:7,row:3,type:"stone"},{col:7,row:6,type:"stone"},{col:7,row:9,type:"stone"},
+  {col:4,row:14,type:"stone"},{col:4,row:13,type:"stone"},{col:4,row:12,type:"stone"},
   // dwarsbalk silver
   {col:3,row:6,type:"silver"},{col:4,row:6,type:"silver"},{col:5,row:6,type:"silver"},
+  {col:4,row:0,type:"silver"},{col:4,row:1,type:"silver"},{col:5,row:2,type:"silver"},
+  {col:2,row:1,type:"silver"},{col:4,row:1,type:"silver"},{col:5,row:6,type:"silver"},
   // traps
-  {col:4,row:7,type:"stonefall"},{col:3,row:5,type:"stonefall"},
+  {col:4,row:7,type:"stonefall"},{col:3,row:5,type:"stonefall"},{col:1,row:12,type:"stonefall"},{col:2,row:12,type:"stonefall"},
+  {col:1,row:11,type:"stonefall"},{col:2,row:11,type:"stonefall"},{col:6,row:12,type:"stonefall"},{col:7,row:12,type:"stonefall"},
+  {col:6,row:11,type:"stonefall"},{col:7,row:11,type:"stonefall"},
   // bonussen
   {col:2,row:6,type:"machinegun"},{col:2,row:5,type:"doubleball"},{col:6,row:5,type:"rocket"},
   {col:4,row:5,type:"2x"},{col:5,row:7,type:"speed"},{col:4,row:10,type:"power"}
