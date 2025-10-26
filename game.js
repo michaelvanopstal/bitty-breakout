@@ -417,7 +417,7 @@ addBonuses(13, [
 
   // extra baseline ankers
   {col:1,row:14,type:"stone"},{col:7,row:14,type:"stone"},{col:2,row:9,type:"stone"},
-  {col:3,row:10,type:"stone"},{col:4,row:11,type:"stone"},{col:5,row:10,type:"stone"},{col:5,row:9,type:"stone"}
+  {col:3,row:10,type:"stone"},{col:4,row:11,type:"stone"},{col:5,row:10,type:"stone"},{col:6,row:9,type:"stone"}
 ]);
 
 // ---------- LEVEL 14: “Volle rand + middenruit + valpoort”
