@@ -2719,21 +2719,25 @@ if (showGameOver) {
   animationFrameId = requestAnimationFrame(draw);
 } // ✅ Sluit function draw() correct af
 
-
 function onImageLoad() {
   imagesLoaded++;
-
   if (imagesLoaded === 27) {
-    // Zodra alle afbeeldingen klaar zijn:
-    updateLivesDisplay();    // laat levens zien
-    goToLevel(20, {           // direct starten op level 4
-      resetScore: true,
-      resetLives: true,
-      centerPaddle: true
-    });
-    draw(); // start de render-loop
+    // Normale spelstart
+    level = 1;                // start op level 1
+    score = 0;
+    lives = 3;
+
+    updateLivesDisplay?.();
+    resetBricks();            // bouw level 1
+    resetPaddle?.();
+    resetBall();              // bal met juiste startsnelheid (via LEVELS params)
+    updateScoreDisplay?.();
+
+    // Timer pas starten wanneer jij de bal afschiet—blijft zoals je nu hebt
+    draw();                   // start render-loop
   }
 }
+
 
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
