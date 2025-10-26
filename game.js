@@ -990,11 +990,7 @@ pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
 const stoneBlockImg  = new Image();
 stoneBlockImg.src  = "stone_block.png";
 
-const stoneSmallImg  = new Image();
-stoneSmallImg.src  = "stone_small.png";
 
-const stoneMediumImg = new Image(); 
-stoneMediumImg.src = "stone_medium.png";
 
 const stoneLargeImg  = new Image(); 
 stoneLargeImg.src  = "stone_large.png";
@@ -1807,26 +1803,19 @@ function drawFallingHearts() {
 }
 
 function pickRandomRockSprite() {
-  const r = Math.random();
-
-  if (r < 0.40) { // 40% klein → VERDUBBELEN
-    const base = 70 + Math.random() * 24; // ~70–82 (was)
-    return { img: stoneSmallImg, size: base * 2 }; // ~140–164 (nieuw)
-  } else if (r < 0.75) { // 35% medium (ongewijzigd)
-    return { img: stoneMediumImg, size: 86 + Math.random() * 14 }; // ~86–100
-  } else { // 25% groot (ongewijzigd)
-    return { img: stoneLargeImg, size: 102 + Math.random() * 16 }; // ~102–118
-  }
+  // Altijd de grote steen gebruiken (visueel consistent)
+  return { img: stoneLargeImg, size: 102 + Math.random() * 16 }; // ~102–118
 }
 
 
 
+
 function triggerStonefall(originX, originY) {
-  // 🎲 aantal vallende stenen per hit (random 1–3)
-  const count = 1 + Math.floor(Math.random() * 3);
+  // Altijd 3 stenen laten vallen
+  const count = 3;
 
   for (let i = 0; i < count; i++) {
-    const rock = pickRandomRockSprite(); // kiest small / medium / large
+    const rock = pickRandomRockSprite(); // levert nu altijd stoneLargeImg
 
     fallingStones.push({
       x: originX + (Math.random() - 0.5) * 20,  // lichte spreiding
@@ -1863,12 +1852,13 @@ function drawFallingStones() {
       continue;
     }
 
-    // tekenen – per-steen sprite met fallback (geen small fallback meer)
-    if (s.img && s.img.complete) {
-      ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-    } else {
-      ctx.drawImage(stoneMediumImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-    }
+   if (s.img && s.img.complete) {
+  ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+} else {
+  // Fallback ook de grote steen
+  ctx.drawImage(stoneLargeImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+}
+
 
     // ===== beweging (bewaar vorige Y vóór we s.y updaten) =====
     if (s.prevY == null) s.prevY = s.y;
@@ -2956,7 +2946,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 27) {
+  if (imagesLoaded === 25) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -2999,8 +2989,6 @@ silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
 
 stoneBlockImg.onload  = onImageLoad;
-stoneSmallImg.onload  = onImageLoad;
-stoneMediumImg.onload = onImageLoad;
 stoneLargeImg.onload  = onImageLoad;
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
