@@ -938,30 +938,12 @@ function keyUpHandler(e) {
   }
 }
 
-// 🖱️ Muis: alleen links-rechts sturen (NOOIT paddleY aanpassen)
+// 🖱️ Muis/touchpad: alleen links-rechts sturen (NOOIT paddleY aanpassen)
 function mouseMoveHandler(e) {
   const rect = canvas.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
 
   // Alleen horizontaal: centreer paddle op muis-X, binnen canvas-grenzen
-  const targetX = mouseX - paddleWidth / 2;
-  paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, targetX));
-
-  // ⚠️ Belangrijk: geen e.clientY gebruiken en niets doen met paddleY hier.
-}
-
-
-function updateScoreDisplay() {
-  document.getElementById("scoreDisplay").textContent = score;
-}
-
-
-function mouseMoveHandler(e) {
-  const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
-
-  // 🔁 Paddle X
   if (mouseX > 0 && mouseX < canvas.width) {
     const newX = mouseX - paddleWidth / 2;
     if (!isPaddleBlockedHorizontally(newX)) {
@@ -969,20 +951,12 @@ function mouseMoveHandler(e) {
     }
   }
 
-  // 🔁 Paddle Y met beperking vóór paddleFreeMove
-  if (mouseY > 0 && mouseY < canvas.height) {
-    const newY = mouseY - paddleHeight / 2;
-
-    if (paddleFreeMove) {
-      // ✅ Volledige vrijheid zodra paddle is vrijgegeven
-      if (!isPaddleBlockedVertically(newY)) {
-        paddleY = Math.max(0, Math.min(canvas.height - paddleHeight, newY));
-      }
-    }
-    // ⛔ Anders geen Y-beweging toegestaan
-  }
+  // ⚠️ Geen e.clientY, geen mouseY en geen wijzigingen aan paddleY hier.
 }
 
+function updateScoreDisplay() {
+  document.getElementById("scoreDisplay").textContent = score;
+}
 
 
 function drawBricks() {
