@@ -613,18 +613,50 @@ addBonuses(19, [
 
 // ---------- LEVEL 20: “Finale — volle mix, middendruk + dubbele valpoort”
 addBonuses(20, [
-  // midden druk (silver/stone spine)
-  {col:4,row:2,type:"silver"},{col:4,row:4,type:"stone"},{col:4,row:6,type:"silver"},{col:4,row:8,type:"stone"},
-  // dubbele valpoort
-  {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},{col:3,row:9,type:"stonefall"},{col:5,row:9,type:"stonefall"},
-  // ankers diagonaal stones
-  {col:2,row:6,type:"stone"},{col:6,row:6,type:"stone"},{col:2,row:8,type:"stone"},{col:6,row:8,type:"stone"},
-  // bonussen (alles aanwezig)
-  {col:4,row:1,type:"machinegun"},{col:2,row:5,type:"doubleball"},{col:6,row:5,type:"rocket"},
-  {col:4,row:5,type:"2x"},{col:3,row:6,type:"speed"},{col:8,row:5,type:"power"},
-  // baseline verzwaard
-  {col:1,row:14,type:"stone"},{col:2,row:14,type:"silver"},{col:6,row:14,type:"silver"},{col:7,row:14,type:"stone"}
+  // --- DIAMOND OUTLINE (STONE) ---
+  {col:4,row:1,type:"stone"},
+  {col:3,row:2,type:"stone"},{col:5,row:2,type:"stone"},
+  {col:2,row:3,type:"stone"},{col:6,row:3,type:"stone"},
+  {col:1,row:4,type:"stone"},{col:7,row:4,type:"stone"},
+  {col:0,row:5,type:"stone"},{col:8,row:5,type:"stone"},
+  {col:1,row:6,type:"stone"},{col:7,row:6,type:"stone"},
+  {col:1,row:8,type:"stone"},{col:7,row:8,type:"stone"},
+  {col:0,row:9,type:"stone"},{col:8,row:9,type:"stone"},
+  {col:1,row:10,type:"stone"},{col:7,row:10,type:"stone"},
+  {col:2,row:11,type:"stone"},{col:6,row:11,type:"stone"},
+  {col:3,row:12,type:"stone"},{col:5,row:12,type:"stone"},
+  {col:4,row:13,type:"stone"},
+
+  // --- FACETS (SILVER) ---
+  {col:3,row:4,type:"silver"},{col:5,row:4,type:"silver"},
+  {col:2,row:5,type:"silver"},{col:4,row:5,type:"silver"},{col:6,row:5,type:"silver"},
+  {col:3,row:6,type:"silver"},{col:5,row:6,type:"silver"},
+  {col:2,row:7,type:"silver"},{col:4,row:7,type:"silver"},{col:6,row:7,type:"silver"},
+  {col:3,row:8,type:"silver"},{col:5,row:8,type:"silver"},
+  {col:2,row:9,type:"silver"},{col:4,row:9,type:"silver"},{col:6,row:9,type:"silver"},
+  {col:3,row:10,type:"silver"},{col:5,row:10,type:"silver"},
+
+  // --- TRAPS (STONEFALL) HALO + CENTER PRESSURE ---
+  {col:4,row:3,type:"stonefall"},
+  {col:4,row:4,type:"stonefall"},
+  {col:0,row:6,type:"stonefall"},{col:8,row:6,type:"stonefall"},
+  {col:0,row:8,type:"stonefall"},{col:8,row:8,type:"stonefall"},
+  {col:4,row:8,type:"stonefall"},
+  {col:6,row:6,type:"stonefall"},
+  {col:3,row:9,type:"stonefall"},{col:5,row:9,type:"stonefall"},
+  {col:2,row:10,type:"stonefall"},{col:6,row:10,type:"stonefall"},
+  {col:2,row:12,type:"stonefall"},{col:6,row:12,type:"stonefall"},
+  {col:4,row:12,type:"stonefall"},
+
+  // --- BONUSSEN (DIEP/RISICOVOL) ---
+  {col:4,row:2,type:"machinegun"},
+  {col:2,row:8,type:"doubleball"},
+  {col:6,row:8,type:"rocket"},
+  {col:4,row:10,type:"2x"},
+  {col:4,row:11,type:"speed"},
+  {col:4,row:6,type:"power"}
 ]);
+
 
 
 // (Optioneel) kleine fine-tuning van moeilijkheid per eindlevels:
