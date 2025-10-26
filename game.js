@@ -560,7 +560,7 @@ addBonuses(18, [
 addBonuses(19, [
   // spiral frame — corners as stone (off-center)
   {col:0,row:1,type:"stone"},
-  {col:7,row:1,type:"stone"},
+  {col:8,row:1,type:"stone"},
   {col:7,row:6,type:"stone"},
   {col:1,row:6,type:"stone"},
   {col:2,row:2,type:"stone"},
