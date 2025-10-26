@@ -100,6 +100,10 @@ let thunder2 = new Audio("thunder2.mp3");
 let thunder3 = new Audio("thunder3.mp3");
 let thunderSounds = [thunder1, thunder2, thunder3];
 
+// 🎆 Firework rockets + particles
+let fireworksRockets = [];   // opstijgende pijlen
+let fireworksParticles = []; // vonken na exploderen
+
 balls.push({
   x: canvas.width / 2,
   y: canvas.height - paddleHeight - 10,
@@ -184,6 +188,120 @@ function triggerLevelCelebration(lvl, opts = {}) {
   try { levelUpSound?.pause?.(); levelUpSound.currentTime = 0; levelUpSound?.play?.(); } catch (e) {}
 }
 
+function spawnFireworkRockets(count = 8) {
+  for (let i = 0; i < count; i++) {
+    const x = canvas.width * (0.1 + Math.random() * 0.8);
+    fireworksRockets.push({
+      x,
+      y: canvas.height + 10,       // start nét onder het scherm
+      vx: (-1 + Math.random() * 2) * 1.2, // lichte scheefstand L/R
+      vy: -(6 + Math.random() * 3),       // kracht omhoog
+      ax: 0,
+      ay: 0.12,                     // “zwaartekracht”
+      color: ["#ffdf33","#ff6a00","#66a3ff","#ff66ff","#4dff88"][Math.floor(Math.random()*5)],
+      trail: [],                    // kleine rook/vonk trail
+      life: 60 + Math.floor(Math.random()*30), // frames tot auto-explode fallback
+      exploded: false
+    });
+  }
+}
+
+function explodeFirework(x, y, baseColor) {
+  const n = 48 + Math.floor(Math.random()*24); // 48–72 vonken
+  for (let i = 0; i < n; i++) {
+    const angle = (Math.PI*2) * (i / n) + Math.random() * 0.25;
+    const speed = 2 + Math.random() * 3.5;
+    fireworksParticles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      ay: 0.08,                    // lichte zwaartekracht op vonken
+      alpha: 1,
+      decay: 0.015 + Math.random()*0.02,
+      size: 2 + Math.random()*2,
+      color: baseColor
+    });
+  }
+  // optioneel: gebruik je bestaande explosions voor extra “pop”
+  explosions?.push?.({ x, y, radius: 12, alpha: 1, color: "white" });
+  explosions?.push?.({ x, y, radius: 16, alpha: 1, color: "orange" });
+}
+
+function drawFireworks() {
+  // 🚀 Update & teken rockets
+  for (let i = fireworksRockets.length - 1; i >= 0; i--) {
+    const r = fireworksRockets[i];
+    // fysica
+    r.vx += r.ax;
+    r.vy += r.ay;
+    r.x += r.vx;
+    r.y += r.vy;
+    r.life--;
+
+    // trail bijhouden (max 12 punten)
+    r.trail.push({ x: r.x, y: r.y });
+    if (r.trail.length > 12) r.trail.shift();
+
+    // explodeer op “apex” (wanneer vy > 0) of als backup op life==0
+    if (!r.exploded && (r.vy > 0 || r.life <= 0 || r.y < canvas.height*0.15)) {
+      r.exploded = true;
+      explodeFirework(r.x, r.y, r.color);
+      fireworksRockets.splice(i, 1);
+      continue;
+    }
+
+    // tekenen (trail + kop)
+    ctx.save();
+    // trail (fading line)
+    ctx.beginPath();
+    for (let t = 0; t < r.trail.length; t++) {
+      const p = r.trail[t];
+      const a = t / r.trail.length;
+      ctx.strokeStyle = `rgba(255,255,255,${0.1 + a*0.5})`;
+      if (t === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+
+    // rocket head
+    ctx.beginPath();
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = r.color;
+    ctx.arc(r.x, r.y, 3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ✨ Update & teken particles
+  for (let i = fireworksParticles.length - 1; i >= 0; i--) {
+    const p = fireworksParticles[i];
+    p.vy += p.ay;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.alpha -= p.decay;
+
+    if (p.alpha <= 0 || p.y > canvas.height + 40) {
+      fireworksParticles.splice(i, 1);
+      continue;
+    }
+
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.alpha);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // performance guard
+  if (fireworksParticles.length > 2000) {
+    fireworksParticles.splice(0, fireworksParticles.length - 2000);
+  }
+  if (fireworksRockets.length > 60) {
+    fireworksRockets.splice(0, fireworksRockets.length - 60);
+  }
+}
 
 
 
@@ -2742,9 +2860,11 @@ if (levelTransitionActive) {
   }
 }
 
+// 🎆 Fireworks (raketten + vonken)
+drawFireworks();
+
 // 🎊 Confetti bovenop de scene tekenen
 drawConfetti();
-
 
 
 if (showGameOver) {
@@ -3055,6 +3175,7 @@ function triggerPaddleExplosion() {
     }, 1000);
   }
 }
+
 function startLevelTransition() {
   // ✅ Wincheck vóór level++ (we zitten aan het einde van het laatste level)
   if (level >= TOTAL_LEVELS) {
@@ -3103,8 +3224,8 @@ function startLevelTransition() {
     const timeEl = document.getElementById("timeDisplay");
     if (timeEl) timeEl.textContent = "00:00";
 
-    // 🔔 NIEUW: kleine banner als we terug zijn op Level 1 (zonder vuurwerk)
-    triggerLevelCelebration(level, { skipFireworks: true, confettiCount: 120 });
+    // 🔔 Terug op Level 1: klein momentje (geen vuurwerk, geen raketten)
+    triggerLevelCelebration(level, { skipFireworks: true, confettiCount: 120, rockets: 0 });
 
     return;
   }
@@ -3125,11 +3246,11 @@ function startLevelTransition() {
   resetPaddle?.();
   updateScoreDisplay?.();
 
-  // 🔔 NIEUW: vier het nieuwe level met banner + confetti/vuurwerk
-  triggerLevelCelebration(level);
+  // 🔔 Vier het nieuwe level met banner + confetti + raketten (+ je bestaande bursts)
+  //    Raket-aantal schaalt lichtjes mee met het level.
+  const rockets = Math.min(14, 6 + Math.floor(level / 2));
+  triggerLevelCelebration(level, { rockets, confettiCount: 160 });
 }
-
-
 
 function updateLivesDisplay() {
   const display = document.getElementById("livesDisplay");
