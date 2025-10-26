@@ -524,18 +524,36 @@ addBonuses(17, [
 
 // ---------- LEVEL 18: “X/ruit gecombineerd + zware hoeken”
 addBonuses(18, [
-  // X/ruit silver
-  {col:4,row:2,type:"silver"},{col:3,row:3,type:"silver"},{col:5,row:3,type:"silver"},
-  {col:2,row:4,type:"silver"},{col:6,row:4,type:"silver"},
-  // hoeken (stone)
-  {col:0,row:0,type:"stone"},{col:8,row:0,type:"stone"},{col:0,row:14,type:"stone"},{col:8,row:14,type:"stone"},
-  // traps
-  {col:2,row:7,type:"stonefall"},{col:6,row:7,type:"stonefall"},{col:4,row:8,type:"stonefall"},
-  // bonussen
-  {col:4,row:1,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
-  {col:4,row:6,type:"2x"},{col:3,row:5,type:"speed"},{col:8,row:5,type:"power"},
-  // extra anchors
-  {col:0,row:6,type:"stone"},{col:8,row:6,type:"stone"}
+  // zijwanden/top & ruggengraat (stones)
+  {col:0,row:4,type:"stone"},{col:0,row:5,type:"stone"},{col:0,row:6,type:"stone"},
+  {col:8,row:4,type:"stone"},{col:8,row:5,type:"stone"},{col:8,row:6,type:"stone"},
+  {col:4,row:13,type:"stone"},{col:4,row:14,type:"stone"},
+  {col:2,row:0,type:"stone"},{col:3,row:0,type:"stone"},{col:4,row:0,type:"stone"},
+  {col:5,row:0,type:"stone"},{col:6,row:0,type:"stone"},
+
+  // verticale ruggengraat + dwarsbalk (silver)
+  {col:4,row:1,type:"silver"},{col:4,row:2,type:"silver"},{col:4,row:3,type:"silver"},
+  {col:4,row:4,type:"silver"},{col:4,row:5,type:"silver"},{col:4,row:6,type:"silver"},
+  {col:4,row:7,type:"silver"},{col:4,row:8,type:"silver"},
+  {col:2,row:5,type:"silver"},{col:3,row:5,type:"silver"},
+  {col:5,row:5,type:"silver"},{col:6,row:5,type:"silver"},
+
+  // traps (stonefall) – bredere band mid/lager
+  {col:1,row:10,type:"stonefall"},{col:2,row:10,type:"stonefall"},
+  {col:6,row:10,type:"stonefall"},{col:7,row:10,type:"stonefall"},
+  {col:1,row:11,type:"stonefall"},{col:2,row:11,type:"stonefall"},
+  {col:6,row:11,type:"stonefall"},{col:7,row:11,type:"stonefall"},
+  {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},
+  {col:3,row:9,type:"stonefall"},{col:5,row:9,type:"stonefall"},
+  {col:4,row:10,type:"stonefall"},{col:4,row:12,type:"stonefall"},
+
+  // bonussen (iets dieper/risicovoller geplaatst)
+  {col:1,row:6,type:"machinegun"},
+  {col:2,row:4,type:"doubleball"},
+  {col:6,row:4,type:"rocket"},
+  {col:4,row:9,type:"2x"},
+  {col:5,row:8,type:"speed"},
+  {col:4,row:11,type:"power"}
 ]);
 
 // ---------- LEVEL 19: “Rand dicht + valraster midden”
