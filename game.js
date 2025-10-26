@@ -54,6 +54,7 @@ let fallingStones = [];
 let stoneHitOverlayTimer = 0;
 let stoneHitLock = false;
 let stoneClearRequested = false;
+let stonesPausedUntil = 0; // hits van vallende stones negeren tot deze timestamp
 
 // 🌟 Levelovergang
 let levelTransitionActive = false;
@@ -1857,13 +1858,12 @@ function drawFallingStones() {
       continue;
     }
 
-   if (s.img && s.img.complete) {
-  ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-} else {
-  // Fallback ook de grote steen
-  ctx.drawImage(stoneLargeImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-}
-
+    if (s.img && s.img.complete) {
+      ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+    } else {
+      // Fallback ook de grote steen
+      ctx.drawImage(stoneLargeImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+    }
 
     // ===== beweging (bewaar vorige Y vóór we s.y updaten) =====
     if (s.prevY == null) s.prevY = s.y;
@@ -1910,8 +1910,11 @@ function drawFallingStones() {
     const overlapX   = Math.max(0, Math.min(stoneRight, paddleLeft + paddleW) - Math.max(stoneLeft, paddleLeft));
     const wideEnough = overlapX >= minHorizOverlap;
 
-    // Echte hit als aan alle vier voldaan is
-    const realHitNow = intersects && penetrates && falling && wideEnough;
+    // 0) Grace-periode na respawn/levenverlies: hits tijdelijk negeren
+    const hitsEnabled = (typeof stonesPausedUntil === "undefined") ? true : (Date.now() >= stonesPausedUntil);
+
+    // Echte hit als aan alle condities voldaan is én hitsEnabled
+    const realHitNow = hitsEnabled && intersects && penetrates && falling && wideEnough;
 
     if (realHitNow) {
       s.framesInside++;
@@ -1956,7 +1959,6 @@ function drawFallingStones() {
     stoneClearRequested = false;
   }
 }
-
 
 
 function drawFlyingCoins() {
@@ -3068,7 +3070,6 @@ function spawnStoneDebris(x, y) {
   }
 }
 
-
 function triggerPaddleExplosion() {
   if (lives > 1) {
     if (!resetTriggered) {
@@ -3079,6 +3080,12 @@ function triggerPaddleExplosion() {
 
     pauseTimer(); 
   
+    // 🧱 STONES: oude vallende stenen direct verwijderen + korte pauze waarin hits genegeerd worden
+    if (typeof fallingStones !== "undefined") fallingStones.length = 0;
+    if (typeof stoneClearRequested !== "undefined") stoneClearRequested = false;
+    if (typeof stoneHitLock !== "undefined") stoneHitLock = false;
+    if (typeof stonesPausedUntil !== "undefined") stonesPausedUntil = Date.now() + 1500;
+
     paddleExploding = true;
     paddleExplosionParticles = [];
 
@@ -3102,6 +3109,12 @@ function triggerPaddleExplosion() {
     setTimeout(() => {
       paddleExploding = false;
       paddleExplosionParticles = [];
+
+      // 🧱 STONES: extra zekerheid – ook na de reset nog even schoon en gepauzeerd
+      if (typeof fallingStones !== "undefined") fallingStones.length = 0;
+      if (typeof stoneClearRequested !== "undefined") stoneClearRequested = false;
+      if (typeof stoneHitLock !== "undefined") stoneHitLock = false;
+      if (typeof stonesPausedUntil !== "undefined") stonesPausedUntil = Date.now() + 1500;
 
       balls = [{
         x: paddleX + paddleWidth / 2 - ballRadius,
@@ -3146,6 +3159,12 @@ function triggerPaddleExplosion() {
     paddleExplodeSound.currentTime = 0;
     paddleExplodeSound.play();
 
+    // 🧱 STONES: bij game over absoluut alles weg + iets langere pauze
+    if (typeof fallingStones !== "undefined") fallingStones.length = 0;
+    if (typeof stoneClearRequested !== "undefined") stoneClearRequested = false;
+    if (typeof stoneHitLock !== "undefined") stoneHitLock = false;
+    if (typeof stonesPausedUntil !== "undefined") stonesPausedUntil = Date.now() + 2000;
+
     setTimeout(() => {
       saveHighscore();
       stopTimer();
@@ -3182,6 +3201,11 @@ function triggerPaddleExplosion() {
       gameOverTimer = 0;
 
       paddleFreeMove = false; // ⛓️ paddle opnieuw vergrendeld
+
+      // 🧱 STONES: nogmaals schoon bij volledige reset
+      if (typeof fallingStones !== "undefined") fallingStones.length = 0;
+      if (typeof stoneClearRequested !== "undefined") stoneClearRequested = false;
+      if (typeof stoneHitLock !== "undefined") stoneHitLock = false;
 
       resetBricks();
       resetBall();
