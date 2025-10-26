@@ -577,12 +577,13 @@ addBonuses(19, [
   {col:7,row:5,type:"silver"},
   {col:5,row:6,type:"silver"},
   {col:3,row:6,type:"silver"},
-  {col:1,row:4,type:"silver"},
-  {col:1,row:2,type:"silver"},
+  {col:1,row:5,type:"silver"},
+  {col:1,row:3,type:"silver"},
   {col:4,row:2,type:"silver"},
   {col:6,row:4,type:"silver"},
   {col:4,row:5,type:"silver"},
-  {col:2,row:3,type:"silver"},
+  {col:2,row:4,type:"silver"},
+  {col:5,row:1,type:"silver"},
 
   // mid/low sine-belt traps + central pressure
   {col:0,row:8,type:"stonefall"},
