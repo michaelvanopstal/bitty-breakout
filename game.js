@@ -439,7 +439,7 @@ addBonuses(14, [
 // ---------- LEVEL 15: “Driebanden strak + heavy baseline”
 addBonuses(15, [
   // banden 4,6,8
- [
+ 
   // silver blocks
   {col:2,row:4,type:"silver"},
   {col:3,row:4,type:"silver"},
