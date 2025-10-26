@@ -406,12 +406,14 @@ addBonuses(13, [
   // zijkanten
   {col:0,row:6,type:"stone"},{col:8,row:6,type:"stone"},
   // traps
-  {col:2,row:7,type:"stonefall"},{col:6,row:7,type:"stonefall"},
+  {col:2,row:7,type:"stonefall"},{col:6,row:7,type:"stonefall"},{col:3,row:14,type:"stonefall"},{col:4,row:14,type:"stonefall"},
+  {col:5,row:14,type:"stonefall"},
   // bonussen
   {col:4,row:1,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
   {col:4,row:9,type:"2x"},{col:3,row:5,type:"speed"},{col:8,row:4,type:"power"},
   // extra baseline ankers
-  {col:1,row:14,type:"stone"},{col:7,row:14,type:"stone"}
+  {col:1,row:14,type:"stone"},{col:7,row:14,type:"stone"},{col:2,row:9:type:"stone"},{col:3,row:10,type:"stone"},{col:4,row:11,type:"stone"},
+  {col:5,row:10,type:"stone"},{col:5,row:9,type:"stone"}
 ]);
 
 // ---------- LEVEL 14: “Volle rand + middenruit + valpoort”
