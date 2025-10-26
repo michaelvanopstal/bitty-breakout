@@ -2838,13 +2838,27 @@ if (levelMessageVisible) {
   ctx.fillStyle = "#00ffff";
   ctx.font = "bold 36px Arial";
   ctx.textAlign = "center";
-  ctx.fillText(levelMessageText || `Bitty Bitcoin Mascot — Level ${level}`, canvas.width / 2, canvas.height / 2);
+  ctx.fillText(
+    levelMessageText || `Bitty Bitcoin Mascot — Level ${level}`,
+    canvas.width / 2,
+    canvas.height / 2
+  );
   ctx.restore();
 
-  // Laat de fade-out hier lopen
+  // ⏱️ 3s volledig zichtbaar, daarna ~2s fade-out
   levelMessageTimer++;
-  levelMessageAlpha = Math.max(0, 1 - (levelMessageTimer / LEVEL_MESSAGE_DURATION));
-  if (levelMessageTimer >= LEVEL_MESSAGE_DURATION) {
+
+  const visibleTime = 180; // 3s @ 60 FPS
+  const fadeTime    = 120; // ~2s fade
+
+  if (levelMessageTimer <= visibleTime) {
+    levelMessageAlpha = 1;
+  } else {
+    const fadeProgress = (levelMessageTimer - visibleTime) / fadeTime;
+    levelMessageAlpha = Math.max(0, 1 - fadeProgress);
+  }
+
+  if (levelMessageTimer >= visibleTime + fadeTime) {
     levelMessageVisible = false;
   }
 }
@@ -2859,6 +2873,7 @@ if (levelTransitionActive) {
     levelTransitionActive = false;
   }
 }
+
 
 // 🎆 Fireworks (raketten + vonken)
 drawFireworks();
