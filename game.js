@@ -836,7 +836,6 @@ resetBtn.addEventListener("mouseleave", () => {
   tooltip.style.display = "none";
 });
 
-
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
@@ -856,6 +855,7 @@ function keyDownHandler(e) {
   } else if (
     e.key === "Up" || e.key === "ArrowUp"
   ) {
+    // ↑ alleen voor balkje omhoog
     upPressed = true;
 
   } else if (
@@ -864,11 +864,11 @@ function keyDownHandler(e) {
     downPressed = true;
   }
 
-  // 🎯 Actie: bal afschieten (alleen bij omhoogtoets of spatie) als bal nog niet gelanceerd is
-  if ((e.key === "ArrowUp" || e.code === "Space") && !ballLaunched) {
+  // 🎯 Actie: bal afschieten (alleen met spatie) als bal nog niet gelanceerd is
+  if (e.code === "Space" && !ballLaunched) {
     ballLaunched = true;
     ballMoving = true;
-    paddleFreeMove = true; // ✅ Cruciaal: laat paddle vrij bewegen na eerste schot
+    paddleFreeMove = true; // ✅ Laat paddle vrij bewegen na eerste schot
 
     shootSound.currentTime = 0;
     shootSound.play();
@@ -879,21 +879,21 @@ function keyDownHandler(e) {
     if (!timerRunning) startTimer();
   }
 
-  // 🔫 Raket afvuren
-  if ((e.code === "ArrowUp" || e.code === "Space") && rocketActive && rocketAmmo > 0 && !rocketFired) {
+  // 🔫 Raket afvuren (alleen met spatie)
+  if (e.code === "Space" && rocketActive && rocketAmmo > 0 && !rocketFired) {
     rocketFired = true;
     rocketAmmo--;
     rocketLaunchSound.currentTime = 0;
     rocketLaunchSound.play();
   }
 
-  // 🎯 Schieten met vlaggetjes
-  if (flagsOnPaddle && (e.code === "Space" || e.code === "ArrowUp")) {
+  // 🎯 Schieten met vlaggetjes (alleen met spatie)
+  if (flagsOnPaddle && e.code === "Space") {
     shootFromFlags();
   }
 
-  // 🧪 Extra beveiliging bij opnieuw starten na Game Over
-  if (!ballMoving && (e.code === "ArrowUp" || e.code === "Space")) {
+  // 🧪 Extra beveiliging bij opnieuw starten na Game Over (alleen met spatie)
+  if (!ballMoving && e.code === "Space") {
     if (lives <= 0) {
       lives = 3;
       score = 0;
@@ -914,8 +914,6 @@ function keyDownHandler(e) {
     ballMoving = true;
   }
 }
-
-
 
 function keyUpHandler(e) {
   if (
@@ -938,6 +936,18 @@ function keyUpHandler(e) {
   ) {
     downPressed = false;
   }
+}
+
+// 🖱️ Muis: alleen links-rechts sturen (NOOIT paddleY aanpassen)
+function mouseMoveHandler(e) {
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+
+  // Alleen horizontaal: centreer paddle op muis-X, binnen canvas-grenzen
+  const targetX = mouseX - paddleWidth / 2;
+  paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, targetX));
+
+  // ⚠️ Belangrijk: geen e.clientY gebruiken en niets doen met paddleY hier.
 }
 
 
