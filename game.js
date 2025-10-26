@@ -3,7 +3,6 @@ const ctx = canvas.getContext("2d");
 const paddleCanvas = document.createElement("canvas");
 const paddleCtx = paddleCanvas.getContext("2d");
 
-
 let elapsedTime = 0;
 let timerInterval = null;
 let timerRunning = false;
@@ -27,13 +26,13 @@ let rocketSpeed = 10;
 let smokeParticles = [];
 let explosions = [];
 let secondBallDuration = 60000; // 1 minuut in ms
-let rocketAmmo = 0; // aantal raketten dat nog afgevuurd mag worden
-let balls = []; // array van actieve ballen
+let rocketAmmo = 0;             // aantal raketten
+let balls = [];                 // actieve ballen
 let doublePointsActive = false;
 let doublePointsStartTime = 0;
-let doublePointsDuration = 60000; // 1 minuut in millisecondenlet imagesLoaded = 0;
-let imagesLoaded = 0;
-let pointPopups = []; // voor 10+ of 20+ bij muntjes
+const doublePointsDuration = 60000; // 1 minuut in milliseconden
+let imagesLoaded = 0;               // ← eigen regel
+let pointPopups = [];
 let pxpBags = [];
 let paddleExploding = false;
 let paddleExplosionParticles = [];
@@ -48,20 +47,22 @@ let paddleY = canvas.height - paddleHeight - 0; // beginpositie onderaan
 const paddleSpeed = 6;
 let downPressed = false;
 let upPressed = false;
-let paddleFreeMove = false; // ⛔ paddle zit eerst vast in verticale beweging
-// 🪨 Stonefall
-let fallingStones = [];  // actieve vallende stenen {x,y,dy,size,active,shattered}
-let stoneHitOverlayTimer = 0; // kort rood flash-effect bij paddle-hit
-let stoneHitLock = false;        // voorkomt meerdere leven-afnamen tegelijk
-let stoneClearRequested = false; // na de loop alle stenen weggooien
+let paddleFreeMove = false;
 
-// 🌟 Level 2 overgang
+// 🪨 Stonefall
+let fallingStones = [];
+let stoneHitOverlayTimer = 0;
+let stoneHitLock = false;
+let stoneClearRequested = false;
+
+// 🌟 Levelovergang
 let levelTransitionActive = false;
 let transitionOffsetY = -300;
 
+// (NIET NOG EENS levelMessageAlpha/Timer/Visible hier – die komen in het confetti-blok)
 
 let resetOverlayActive = false;
-let ballTrail = []; // Array om eerdere balposities te bewaren
+let ballTrail = [];
 const maxTrailLength = 10;
 
 let machineGunActive = false;
@@ -69,40 +70,35 @@ let machineGunGunX = 0;
 let machineGunGunY = 0;
 let machineGunBullets = [];
 let machineGunShotsFired = 0;
-let machineGunDifficulty = 2; // 1 = makkelijk, 2 = normaal, 3 = moeilijk
+let machineGunDifficulty = 2;
 let machineGunCooldownActive = false;
 let machineGunStartTime = 0;
-let machineGunCooldownTime = 30000; // 30 sec cooldown
-let machineGunBulletInterval = 500; // aanpasbaar per difficulty
+let machineGunCooldownTime = 30000;
+let machineGunBulletInterval = 500;
 let machineGunLastShot = 0;
-let paddleDamageZones = []; // array van kapotgemaakte stukken
-let machineGunYOffset = 140; // minimale afstand tussen paddle en machinegun
-let minMachineGunY = 0;     // bovenste limiet (canvasrand)
+let paddleDamageZones = [];
+let machineGunYOffset = 140;
+let minMachineGunY = 0;
 
 // ❤️ Hartjes-systeem
-let heartsCollected = 0;               // aantal verzamelde hartjes (reset bij 10)
-let heartBlocks = [];                  // blokken met verborgen hartjes
-let fallingHearts = [];                // actieve vallende hartjes
-let heartPopupTimer = 0;               // timer voor popup “Wow! 10 hearts – extra life!”
+let heartsCollected = 0;
+let heartBlocks = [];
+let fallingHearts = [];
+let heartPopupTimer = 0;
 let heartBoardX = 20;
 let heartBoardY = 20;
 
 let electricBursts = [];
-
 
 let speedBoostActive = false;
 let speedBoostStart = 0;
 const speedBoostDuration = 30000;
 const speedBoostMultiplier = 1.5;
 
-
 let thunder1 = new Audio("thunder1.mp3");
 let thunder2 = new Audio("thunder2.mp3");
 let thunder3 = new Audio("thunder3.mp3");
 let thunderSounds = [thunder1, thunder2, thunder3];
-
-
-
 
 balls.push({
   x: canvas.width / 2,
@@ -113,13 +109,15 @@ balls.push({
   isMain: true
 });
 
-// 🎉 Level overlay + confetti/vuurwerk
+// 🎉 Level overlay + confetti/vuurwerk (ENKEL HIER de levelMessage-variabelen)
 let confetti = [];
 let levelMessageVisible = false;
 let levelMessageText = "";
 let levelMessageAlpha = 0;
 let levelMessageTimer = 0;
-const LEVEL_MESSAGE_DURATION = 180; // ≈3s @ 60fps
+const LEVEL_MESSAGE_DURATION = 180;
+
+
 
 function showLevelBanner(text) {
   levelMessageText = text;
