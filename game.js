@@ -440,10 +440,10 @@ addBonuses(14, [
 addBonuses(15, [
   // banden 4,6,8
   {col:2,row:4,type:"silver"},{col:3,row:4},{col:5,row:4},{col:6,row:4,type:"silver"},{col:5,row:8,type:"silver"},
-  {col:3,row:14,type:"silver"},{col:5,row:14,type:"silver"}
+  {col:3,row:14,type:"silver"},{col:5,row:14,type:"silver"},{col:3,row:8,type:"silver"},
   // baseline
   {col:1,row:6,type:"stone"},{col:2,row:6,type:"stone"},{col:6,row:6,type:"stone"},{col:7,row:6,type:"stone"},
-  {col:2,row:8,type:"stone"},{col:3,row:8,type:"silver"},{col:6,row:8,type:"stone"},
+  {col:2,row:8,type:"stone"},{col:6,row:8,type:"stone"},
   {col:2,row:14,type:"stone"},{col:6,row:14,type:"stone"},
   // traps
   {col:4,row:7,type:"stonefall"},{col:3,row:7,type:"stonefall"},{col:2,row:7,type:"stonefall"},{col:1,row:7,type:"stonefall"},{col:0,row:7,type:"stonefall"},
