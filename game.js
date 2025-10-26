@@ -1834,6 +1834,19 @@ function triggerStonefall(originX, originY) {
   }
 }
 
+// 🪨 Eenvoudige en stabiele botsing: cirkel vs paddle (rect)
+function circleIntersectsRect(cx, cy, r, rx, ry, rw, rh) {
+  // Bereken het dichtstbijzijnde punt op de paddle
+  const closestX = Math.max(rx, Math.min(cx, rx + rw));
+  const closestY = Math.max(ry, Math.min(cy, ry + rh));
+
+  // Afstand tussen cirkelcentrum en dat punt
+  const dx = cx - closestX;
+  const dy = cy - closestY;
+
+  // Alleen true als de randen elkaar echt raken
+  return (dx * dx + dy * dy) <= (r * r);
+}
 
 
 function drawFallingStones() {
