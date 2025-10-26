@@ -378,20 +378,24 @@ addBonuses(11, [
 // ---------- LEVEL 12: “Driebanden compact + valkuilen onder”
 addBonuses(12, [
   // compacte banden
-  {col:2,row:4,type:"silver"},{col:3,row:4,type:"silver"},{col:5,row:4,type:"silver"},{col:6,row:4,type:"silver"type:"silver"},
+  {col:2,row:4,type:"silver"},{col:3,row:4,type:"silver"},{col:5,row:4,type:"silver"},{col:6,row:4,type:"silver"},
   {col:2,row:5,type:"silver"},{col:3,row:5,type:"silver"},{col:5,row:5,type:"silver"},{col:6,row:5,type:"silver"},
   {col:3,row:8,type:"silver"},{col:4,row:8,type:"silver"},{col:5,row:8,type:"silver"},
+
   // valkuilen
-  {col:3,row:9,type:"stonefall"},{col:5,row:9,type:"stonefall"},{col:4,row:9,type:"stonefall"},{col:3,row:8,type:"stonefall"},{col:3,row:7,type:"stonefall"},
-  {col:3,row:6,type:"stonefall"},{col:3,row:5,type:"stonefall"},{col:5,row:8,type:"stonefall"},{col:5,row:7,type:"stonefall"},{col:5,row:6,type:"stonefall"},
-  {col:5,row:5,type:"stonefall"},{col:4,row:5,type:"stonefall"},
+  {col:3,row:9,type:"stonefall"},{col:5,row:9,type:"stonefall"},{col:4,row:9,type:"stonefall"},
+  {col:3,row:7,type:"stonefall"},{col:3,row:6,type:"stonefall"},{col:5,row:7,type:"stonefall"},
+  {col:5,row:6,type:"stonefall"},{col:5,row:5,type:"stonefall"},{col:4,row:5,type:"stonefall"},
+
   // bonussen
   {col:4,row:3,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
   {col:4,row:6,type:"2x"},{col:4,row:11,type:"speed"},{col:8,row:5,type:"power"},
+
   // ankers
-  {col:0,row:8,type:"stone"},{col:8,row:8,type:"stone"},{col:0,row:0,type:"stone"},{col:9,row:0,type:"stone"},{col:3,row:14,type:"stone"},
-  {col:4,row:14,type:"stone"},{col:5,row:14,type:"stone"}
+  {col:0,row:8,type:"stone"},{col:8,row:8,type:"stone"},{col:0,row:0,type:"stone"},
+  {col:9,row:0,type:"stone"},{col:3,row:14,type:"stone"},{col:4,row:14,type:"stone"},{col:5,row:14,type:"stone"}
 ]);
+
 
 // ---------- LEVEL 13: “Ruit groot + zware zijkanten”
 addBonuses(13, [
