@@ -489,7 +489,7 @@ addBonuses(16, [
   {col:0,row:4,type:"stone"},{col:0,row:5,type:"stone"},{col:0,row:6,type:"stone"},
   {col:8,row:4,type:"stone"},{col:8,row:5,type:"stone"},{col:8,row:6,type:"stone"},
   {col:4,row:6,type:"stone"},{col:0,row:0,type:"stone"},{col:1,row:0,type:"stone"},{col:2,row:0,type:"stone"},{col:3,row:0,type:"stone"},{col:4,row:0,type:"stone"},
-  {col:5,row:0,type:"stone"},{col:6,row:0,type:"stone"},{col:7,row:0,type:"stone"},{col:8row:0,type:"stone"},
+  {col:5,row:0,type:"stone"},{col:6,row:0,type:"stone"},{col:7,row:0,type:"stone"},{col:8,row:0,type:"stone"},
   // X-traps
   {col:3,row:5,type:"stonefall"},{col:5,row:5,type:"stonefall"},
   {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},
