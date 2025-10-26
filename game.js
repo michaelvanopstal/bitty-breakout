@@ -646,7 +646,7 @@ addBonuses(20, [
   {col:3,row:9,type:"stonefall"},{col:5,row:9,type:"stonefall"},
   {col:2,row:10,type:"stonefall"},{col:6,row:10,type:"stonefall"},
   {col:2,row:12,type:"stonefall"},{col:6,row:12,type:"stonefall"},
-  {col:4,row:12,type:"stonefall"},
+  {col:4,row:12,type:"stonefall"},{col:2,row:6,type:"stonefall"},
 
   // --- BONUSSEN (DIEP/RISICOVOL) ---
   {col:4,row:2,type:"machinegun"},
