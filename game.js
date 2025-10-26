@@ -2627,7 +2627,7 @@ function onImageLoad() {
   if (imagesLoaded === 27) {
     // Zodra alle afbeeldingen klaar zijn:
     updateLivesDisplay();    // laat levens zien
-    goToLevel(15, {           // direct starten op level 4
+    goToLevel(16, {           // direct starten op level 4
       resetScore: true,
       resetLives: true,
       centerPaddle: true
