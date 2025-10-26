@@ -1265,22 +1265,57 @@ function resetBall() {
 
 
 function resetPaddle(skipBallReset = false, skipCentering = false) {
-  // 🎯 Zet paddle terug in het midden (alleen als NIET geskiped en NIET machinegun)
-  if (!skipCentering && !machineGunCooldownActive && !machineGunActive) {
+  // 🔐 Niet centreren/resetten tijdens machinegun-fase
+  const gunLocked = (typeof machineGunCooldownActive !== "undefined" && machineGunCooldownActive)
+                 || (typeof machineGunActive !== "undefined" && machineGunActive);
+
+  // 🎯 Paddle terug naar midden-onder (als niet geskiped en niet gelockt)
+  if (!skipCentering && !gunLocked) {
+    // center X
     paddleX = (canvas.width - paddleWidth) / 2;
+
+    // bottom Y (met fallback marge van 12 px als constante niet bestaat)
+    const margin = (typeof PADDLE_MARGIN_BOTTOM !== "undefined") ? PADDLE_MARGIN_BOTTOM : 12;
+    paddleY = canvas.height - paddleHeight - margin;
+
+    // besturing netjes resetten
+    upPressed = false;
+    downPressed = false;
+    leftPressed = false;
+    rightPressed = false;
+
+    // na levenverlies: geen vrije muis Y-beweging
+    paddleFreeMove = false;
   }
 
-  // 🔁 Reset paddle-tekening inclusief schadeherstel
+  // 🧽 Reset paddle-tekening inclusief schadeherstel
   paddleCanvas.width = paddleWidth;
   paddleCanvas.height = paddleHeight;
   paddleCtx.clearRect(0, 0, paddleWidth, paddleHeight);
   paddleCtx.drawImage(pointpayPaddleImg, 0, 0, paddleWidth, paddleHeight);
 
-  // 🟢 Bal resetten als dat moet
-  if (!skipBallReset && !machineGunCooldownActive && !machineGunActive) {
-    resetBall();  // maakt de eerste bal aan
+  // 🟢 Bal resetten en op paddle leggen (als niet geskiped en niet gelockt)
+  if (!skipBallReset && !gunLocked) {
+    // Als je een helper hebt die expliciet op de paddle centreert, gebruik die:
+    if (typeof resetBallOnPaddle === "function") {
+      resetBallOnPaddle();
+    } else {
+      // anders je bestaande resetBall() en dan zeker weten centreren
+      resetBall?.();
+
+      if (typeof balls !== "undefined" && balls.length > 0) {
+        balls[0].x = paddleX + paddleWidth / 2;
+        balls[0].y = paddleY - ballRadius - 1; // net boven de paddle
+        balls[0].dx = 0;
+        balls[0].dy = 0;
+      }
+
+      if (typeof ballLaunched !== "undefined") ballLaunched = false;
+      if (typeof ballMoving  !== "undefined") ballMoving  = false;
+    }
   }
 }
+
 
 
 
