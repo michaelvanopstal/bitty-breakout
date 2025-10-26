@@ -427,10 +427,11 @@ addBonuses(14, [
   // middenruit silver
   {col:4,row:3,type:"silver"},{col:3,row:4,type:"silver"},{col:5,row:4,type:"silver"},{col:4,row:5,type:"silver"},
   // valpoort
-  {col:3,row:7,type:"stonefall"},{col:4,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},
+  {col:3,row:7,type:"stonefall"},{col:4,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},{col:2,row:12,type:"stonefall"},{col:3,row:13,type:"stonefall"},
+  {col:4,row:14,type:"stonefall"},{col:5,row:13,type:"stonefall"},{col:6,row:12,type:"stonefall"},
   // bonussen
   {col:4,row:2,type:"machinegun"},{col:2,row:6,type:"doubleball"},{col:6,row:6,type:"rocket"},
-  {col:4,row:6,type:"2x"},{col:4,row:9,type:"speed"},{col:8,row:5,type:"power"},
+  {col:4,row:6,type:"2x"},{col:4,row:9,type:"speed"},{col:4,row:4,type:"power"},
   // ankers
   {col:1,row:8,type:"stone"},{col:7,row:8,type:"stone"}
 ]);
