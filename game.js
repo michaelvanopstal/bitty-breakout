@@ -1810,7 +1810,7 @@ function pickRandomRockSprite() {
   const r = Math.random();
 
   if (r < 0.40) { // 40% klein → VERDUBBELEN
-    const base = 70 + Math.random() * 12; // ~70–82 (was)
+    const base = 70 + Math.random() * 24; // ~70–82 (was)
     return { img: stoneSmallImg, size: base * 2 }; // ~140–164 (nieuw)
   } else if (r < 0.75) { // 35% medium (ongewijzigd)
     return { img: stoneMediumImg, size: 86 + Math.random() * 14 }; // ~86–100
@@ -1818,6 +1818,7 @@ function pickRandomRockSprite() {
     return { img: stoneLargeImg, size: 102 + Math.random() * 16 }; // ~102–118
   }
 }
+
 
 
 function triggerStonefall(originX, originY) {
