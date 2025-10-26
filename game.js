@@ -558,18 +558,57 @@ addBonuses(18, [
 
 // ---------- LEVEL 19: “Rand dicht + valraster midden”
 addBonuses(19, [
-  // rand dichter
-  {col:0,row:0,type:"stone"},{col:1,row:0,type:"stone"},{col:7,row:0,type:"stone"},{col:8,row:0,type:"stone"},
-  {col:0,row:14,type:"stone"},{col:1,row:14,type:"silver"},{col:7,row:14,type:"silver"},{col:8,row:14,type:"stone"},
-  // valraster midden
-  {col:3,row:6,type:"stonefall"},{col:4,row:6,type:"stonefall"},{col:5,row:6,type:"stonefall"},
-  {col:3,row:8,type:"stonefall"},{col:4,row:8,type:"stonefall"},{col:5,row:8,type:"stonefall"},
-  // bonussen (kruis)
-  {col:4,row:3,type:"machinegun"},{col:2,row:6,type:"doubleball"},{col:6,row:6,type:"rocket"},
-  {col:4,row:5,type:"2x"},{col:4,row:9,type:"speed"},{col:4,row:11,type:"power"},
-  // silver spine
-  {col:4,row:7,type:"silver"}
+  // spiral frame — corners as stone (off-center)
+  {col:0,row:1,type:"stone"},
+  {col:7,row:1,type:"stone"},
+  {col:7,row:6,type:"stone"},
+  {col:1,row:6,type:"stone"},
+  {col:2,row:2,type:"stone"},
+  {col:6,row:2,type:"stone"},
+  {col:6,row:5,type:"stone"},
+  {col:2,row:5,type:"stone"},
+
+  // spiral edges — sparse silver segments
+  {col:2,row:1,type:"silver"},
+  {col:3,row:1,type:"silver"},
+  {col:4,row:1,type:"silver"},
+  {col:6,row:1,type:"silver"},
+  {col:7,row:3,type:"silver"},
+  {col:7,row:5,type:"silver"},
+  {col:5,row:6,type:"silver"},
+  {col:3,row:6,type:"silver"},
+  {col:1,row:4,type:"silver"},
+  {col:1,row:2,type:"silver"},
+  {col:4,row:2,type:"silver"},
+  {col:6,row:4,type:"silver"},
+  {col:4,row:5,type:"silver"},
+  {col:2,row:3,type:"silver"},
+
+  // mid/low sine-belt traps + central pressure
+  {col:0,row:8,type:"stonefall"},
+  {col:1,row:9,type:"stonefall"},
+  {col:2,row:10,type:"stonefall"},
+  {col:3,row:11,type:"stonefall"},
+  {col:4,row:12,type:"stonefall"},
+  {col:5,row:11,type:"stonefall"},
+  {col:6,row:10,type:"stonefall"},
+  {col:7,row:9,type:"stonefall"},
+  {col:8,row:8,type:"stonefall"},
+  {col:2,row:13,type:"stonefall"},
+  {col:4,row:13,type:"stonefall"},
+  {col:6,row:13,type:"stonefall"},
+  {col:4,row:10,type:"stonefall"},
+  {col:4,row:11,type:"stonefall"},
+
+  // bonuses — placed deeper/riskier
+  {col:0,row:9,type:"machinegun"},
+  {col:2,row:7,type:"doubleball"},
+  {col:6,row:7,type:"rocket"},
+  {col:4,row:9,type:"2x"},
+  {col:5,row:8,type:"speed"},
+  {col:3,row:12,type:"power"}
 ]);
+
 
 // ---------- LEVEL 20: “Finale — volle mix, middendruk + dubbele valpoort”
 addBonuses(20, [
