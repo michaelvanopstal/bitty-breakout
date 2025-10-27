@@ -2677,34 +2677,30 @@ function isPaddleBlockedHorizontally(newX) {
   return false;
 }
 
-
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawElectricBursts(); // 🔄 VOORAF tekenen, zodat het ONDER alles ligt
+  drawElectricBursts(); // onder alles
 
+  // reset blending (anders blijven bricks onzichtbaar)
+  ctx.globalCompositeOperation = "source-over";
+
+  // 🧱 eerst de blokjes tekenen
+  drawBricks();
+
+  // daarna physics en bewegende elementen
   collisionDetection();
   drawCoins();
   drawFallingHearts();
-  drawFallingStones();  
-  drawMagnetHUD(ctx);
-
-
+  drawFallingStones();
   drawHeartPopup();
 
-  // 🧲 MAGNET: timeout check vóór alle pickup-collisions
-  if (magnetActive && Date.now() >= magnetEndTime) {
-    stopMagnet();
-  }
-
-  // 🧲 MAGNET: pickups aantrekken NA hun val/tekenstap en VÓÓR collision checks
-  // Let op: GEEN stonefall toevoegen!
+  // Magnet effect
+  if (magnetActive && Date.now() >= magnetEndTime) stopMagnet();
   if (magnetActive) {
-    // Pas aan op jouw array-namen; fallingHearts / coins / pxpBags zijn meest gebruikt
     applyMagnetToArray(fallingHearts);
     applyMagnetToArray(coins);
     applyMagnetToArray(pxpBags);
-    // voeg evt. andere pickup-arrays toe (niet fallingStones!)
   }
 
   checkCoinCollision();
@@ -2712,6 +2708,18 @@ function draw() {
   drawFlyingCoins();
   checkFlyingCoinHits();
   drawPointPopups();
+
+  // Paddle tekenen en daarna aura
+  drawPaddle();
+  drawMagnetAura(ctx);
+
+  // HUD / overlay
+  drawMagnetHUD(ctx);
+  drawHeartsHUD();
+  drawScoreHUD();
+  drawLivesHUD();
+}
+
 
   // ⏱️ Paddle-size effect verlopen?
   if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
@@ -2868,7 +2876,7 @@ if (stoneHitOverlayTimer > 0) {
     triggerPaddleExplosion(); // pas nu verlies van leven
   }
 
- drawBricks();
+
 
   
 if (leftPressed) {
@@ -2902,10 +2910,6 @@ if (downPressed) {
     paddleY = newY;
   }
 }
-
-
-  drawPaddle();
-  drawMagnetAura(ctx); // visuele gloed bovenop paddle
 
 
 
