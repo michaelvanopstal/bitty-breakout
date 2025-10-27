@@ -144,36 +144,37 @@ let paddleBaseWidth = 100;   // actuele 'basis' breedte voor dit level (zonder t
 const PADDLE_LONG_DURATION  = 30000;
 const PADDLE_SMALL_DURATION = 30000;
 
-// 🎙️ VOICE-OVER GATE
-const VO_COOLDOWN_MS = 3000;     // pauze/afstand tussen voice-overs
-let voLockedUntil = 0;           // tijd tot wanneer nieuwe VO's geblokkeerd zijn (performance.now())
-let voCurrent = null;            // huidige Audio die speelt (optioneel)
+// ==========================================================
+// 🎙️ VOICE-OVER: single-channel + cooldown
+// ==========================================================
+const VO_COOLDOWN_MS = 3000;    // minimaal 3s tussen voices
+let voIsPlaying = false;        // speelt er nu een voice?
+let voLockedUntil = 0;          // tot wanneer blokkeren (ms sinds pageload)
 
-// Speelt een voice-over als de gate open is; anders slaat hij over.
+
 function playVoiceOver(audio, opts = {}) {
-  const { cooldown = VO_COOLDOWN_MS, skipIfLocked = true } = opts;
+  const { cooldown = VO_COOLDOWN_MS } = opts;
   const now = performance.now();
 
   // Gate dicht? → overslaan
-  if (skipIfLocked && now < voLockedUntil) return false;
+  if (voIsPlaying || now < voLockedUntil) return false;
 
+  voIsPlaying = true; // ⛓️ meteen locken, zodat dezelfde tik geen tweede VO kan starten
   try {
-    // (optioneel) Je kunt ervoor kiezen om niet te onderbreken:
-    // Als je onderbreken wilt, uncomment de volgende twee regels:
-    // if (voCurrent && voCurrent !== audio) { voCurrent.pause(); voCurrent.currentTime = 0; }
-  } catch(e) {}
-
-  voCurrent = audio || null;
-  if (audio) {
-    try {
-      audio.currentTime = 0;
-      audio.onended = () => { if (voCurrent === audio) voCurrent = null; };
-      audio.play().catch(()=>{});
-    } catch(e) {}
+    audio.currentTime = 0;
+    audio.onended = () => {
+      voIsPlaying = false;
+      voLockedUntil = performance.now() + cooldown; // cooldown NA afloop
+    };
+    audio.play().catch(() => {
+      // Als play faalt, meteen unlock + korte cooldown om spam te voorkomen
+      voIsPlaying = false;
+      voLockedUntil = performance.now() + 500;
+    });
+  } catch (e) {
+    voIsPlaying = false;
+    voLockedUntil = performance.now() + 500;
   }
-
-  // Zet lock vanaf nu
-  voLockedUntil = now + cooldown;
   return true;
 }
 
