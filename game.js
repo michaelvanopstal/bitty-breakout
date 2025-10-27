@@ -320,8 +320,8 @@ function drawFireworks() {
 
 
 const bonusBricks = [
-  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },{ col: 7, row: 10, type: "paddle_long" },
-  { col: 4, row: 0, type: "paddle_small" },
+  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" }, 
+  { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" },
 
 
 
@@ -351,15 +351,14 @@ const pxpMap = [
   { col: 3, row: 4, type: "silver" }, { col: 3, row: 5 },   { col: 3, row: 8 },      { col: 3, row: 14 },     { col: 4, row: 7, type: "2x" },       { col: 7, row: 13, type: "stonefall" },
   { col: 4, row: 4, type: "silver" }, { col: 4, row: 5 },   { col: 4, row: 8 },      { col: 4, row: 14 },     { col: 1, row: 7, type: "doubleball" },  { col: 8, row: 14, type: "stonefall" },       
   { col: 5, row: 4, type: "silver" }, { col: 5, row: 5 },   { col: 5, row: 8 },      { col: 5, row: 14 },      { col: 0, row: 14, type: "stonefall" },     { col: 2, row: 8, type: "stone" },   
-  { col: 6, row: 4, type: "silver" }, { col: 6, row: 5 },   { col: 6, row: 8 },      { col: 6, row: 14 },       { col: 1, row: 13, type: "stonefall" },               
-  { col: 7, row: 4, type: "silver" }, { col: 7, row: 5 },   { col: 7, row: 8 },      { col: 7, row: 14 },        { col: 2, row: 12, type: "stonefall" },                                
+  { col: 6, row: 4, type: "silver" }, { col: 6, row: 5 },   { col: 6, row: 8 },      { col: 6, row: 14 },       { col: 1, row: 13, type: "stonefall" },    { col: 4, row: 0, type: "paddle_small" },         
+  { col: 7, row: 4, type: "silver" }, { col: 7, row: 5 },   { col: 7, row: 8 },      { col: 7, row: 14 },        { col: 2, row: 12, type: "stonefall" },    { col: 7, row: 10, type: "paddle_long" },                            
   { col: 8, row: 4, type: "silver" }, { col: 8, row: 5 },   { col: 8, row: 8 },      { col: 8, row: 14 },         { col: 3, row: 11, type: "stonefall" },                     
-   { col: 0, row: 7, type: "stone" },  { col: 1, row: 1, type: "stone" },                                          { col: 0, row: 6, type: "paddle_long" },
-                                                                                                                  { col: 4, row: ,11 type: "paddle_small" },  
+  { col: 0, row: 7, type: "stone" },  { col: 1, row: 1, type: "stone" },                                                                                                                                                         
   { col: 1, row: 6, type: "stone" },  
   { col: 2, row: 2, type: "stone" },
-  { col: 2, row: 7, type: "stone" },  { col: 8, row: 0, type: "stone" },
-  { col: 7, row: 1, type: "stone" }, { col: 0, row: 14, type: "stone" },
+  { col: 2, row: 7, type: "stone" },  
+  { col: 7, row: 1, type: "stone" }, 
   { col: 6, row: 2, type: "stone" },
   { col: 8, row: 0, type: "stone" },
   { col: 7, row: 1, type: "stone" },
@@ -367,7 +366,8 @@ const pxpMap = [
   { col: 8, row: 7, type: "stone" },
   { col: 7, row: 6, type: "stone" },
   { col: 6, row: 7, type: "stone" },
-  { col: 0, row: 0, type: "stone" },                                                               
+  { col: 0, row: 0, type: "stone" },  
+  { col: 0, row: 14, type: "stone" },
 ];
 
 // 🌋 Level 3 layout (voorbeeld)
