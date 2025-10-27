@@ -320,8 +320,8 @@ function drawFireworks() {
 
 
 const bonusBricks = [
-  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },{ col: 0, row: 13, type: "paddle_long" },
-  { col: 1, row: 13, type: "paddle_small" },
+  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },{ col: 7, row: 10, type: "paddle_long" },
+  { col: 4, row: 0, type: "paddle_small" },
 
 
 
