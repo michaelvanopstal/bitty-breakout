@@ -3283,7 +3283,7 @@ silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
 paddleLongBlockImg.onload = onImageLoad;
 paddleSmallBlockImg.onload = onImageLoad;
-
+magnetImg.onload = onImageLoad;
 stoneBlockImg.onload  = onImageLoad;
 stoneLargeImg.onload  = onImageLoad;
 
