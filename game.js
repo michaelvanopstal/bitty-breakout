@@ -523,7 +523,8 @@ addBonuses(8, [
   {col:0,row:6,type:"stonefall"},{col:8,row:6,type:"stonefall"},{col:1,row:6,type:"stonefall"},{col:2,row:6,type:"stonefall"},{col:3,row:6,type:"stonefall"},
   {col:4,row:6,type:"stonefall"},{col:5,row:6,type:"stonefall"},{col:6,row:6,type:"stonefall"},{col:7,row:6,type:"stonefall"},
   // bonussen
-  {col:4,row:3,type:"machinegun"},{col:4,row:7,type:"doubleball"},{col:4,row:5,type:"2x"},
+  {col:4,row:3,type:"machinegun"},{col:4,row:7,type:"doubleball"},{col:4,row:5,type:"2x"}, { col: 5, row: 10, type: "paddle_long" },
+  { col: 0, row: 10, type: "paddle_small" },
   {col:4,row:0,type:"speed"},{col:4,row:11,type:"rocket"},{col:8,row:0,type:"power"},
   // ankers stone
   {col:0,row:9,type:"stone"},{col:8,row:9,type:"stone"},{col:1,row:9,type:"stone"},{col:2,row:9,type:"stone"},{col:3,row:9,type:"stone"},{col:4,row:9,type:"stone"},{col:5,row:9,type:"stone"},
@@ -546,7 +547,8 @@ addBonuses(9, [
   {col:2,row:7,type:"stonefall"},{col:6,row:7,type:"stonefall"},
   // bonussen
   {col:4,row:1,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
-  {col:4,row:8,type:"2x"},{col:3,row:5,type:"speed"},{col:8,row:5,type:"power"},
+  {col:4,row:8,type:"2x"},{col:3,row:5,type:"speed"},{col:8,row:5,type:"power"}, { col: 5, row: 10, type: "paddle_long" },
+  { col: 0, row: 10, type: "paddle_small" },
   // anker stones
   {col:0,row:8,type:"stone"},{col:8,row:8,type:"stone"}
 ]);
@@ -563,7 +565,8 @@ addBonuses(10, [
   {col:3,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},{col:0,row:7,type:"stonefall"},{col:1,row:7,type:"stonefall"},{col:7,row:7,type:"stonefall"},{col:8,row:7,type:"stonefall"},{col:2,row:12,type:"stonefall"},
   {col:3,row:11,type:"stonefall"},{col:5,row:12,type:"stonefall"},{col:6,row:13,type:"stonefall"},
   // bonussen
-  {col:4,row:1,type:"machinegun"},{col:3,row:5,type:"doubleball"},{col:5,row:5,type:"rocket"},
+  {col:4,row:1,type:"machinegun"},{col:3,row:5,type:"doubleball"},{col:5,row:5,type:"rocket"}, { col: 5, row: 8, type: "paddle_long" },
+  { col: 0, row: 10, type: "paddle_small" },
   {col:4,row:8,type:"speed"},{col:4,row:11,type:"2x"},{col:8,row:4,type:"power"}
 ]);
 
@@ -579,7 +582,8 @@ addBonuses(11, [
   {col:3,row:9,type:"stonefall"},{col:4,row:9,type:"stonefall"},{col:4,row:12,type:"stonefall"},{col:5,row:9,type:"stonefall"},
   {col:5,row:11,type:"stonefall"},{col:5,row:12,type:"stonefall"},
   // bonussen
-  {col:4,row:2,type:"machinegun"},{col:3,row:6,type:"doubleball"},{col:5,row:6,type:"rocket"},
+  {col:4,row:2,type:"machinegun"},{col:3,row:6,type:"doubleball"},{col:5,row:6,type:"rocket"}, { col: 5, row: 1, type: "paddle_long" },
+  { col: 5, row: 10, type: "paddle_small" },
   {col:2,row:7,type:"2x"},{col:6,row:7,type:"speed"},{col:4,row:10,type:"power"},
   // ankers
   {col:1,row:8,type:"stone"},{col:7,row:8,type:"stone"}
@@ -598,7 +602,8 @@ addBonuses(12, [
   {col:5,row:6,type:"stonefall"},{col:5,row:5,type:"stonefall"},{col:4,row:5,type:"stonefall"},{col:3,row:5,type:"stonefall"},
 
   // bonussen
-  {col:4,row:3,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
+  {col:4,row:3,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"}, { col: 2, row: 10, type: "paddle_long" },
+  { col: 0, row: 4, type: "paddle_small" },
   {col:4,row:6,type:"2x"},{col:4,row:7,type:"speed"},{col:4,row:11,type:"power"},
 
   // ankers
@@ -622,7 +627,8 @@ addBonuses(13, [
   {col:3,row:14,type:"stonefall"},{col:4,row:14,type:"stonefall"},{col:5,row:14,type:"stonefall"},
 
   // bonussen
-  {col:4,row:1,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"},
+  {col:4,row:1,type:"machinegun"},{col:1,row:6,type:"doubleball"},{col:7,row:6,type:"rocket"}, { col: 8, row: 3, type: "paddle_long" },
+  { col: 3, row: 5, type: "paddle_small" },
   {col:4,row:9,type:"2x"},{col:3,row:5,type:"speed"},{col:4,row:3,type:"power"},
 
   // extra baseline ankers
@@ -640,7 +646,8 @@ addBonuses(14, [
   {col:3,row:7,type:"stonefall"},{col:4,row:7,type:"stonefall"},{col:5,row:7,type:"stonefall"},{col:2,row:12,type:"stonefall"},{col:3,row:13,type:"stonefall"},
   {col:4,row:14,type:"stonefall"},{col:5,row:13,type:"stonefall"},{col:6,row:12,type:"stonefall"},
   // bonussen
-  {col:4,row:2,type:"machinegun"},{col:2,row:6,type:"doubleball"},{col:6,row:6,type:"rocket"},
+  {col:4,row:2,type:"machinegun"},{col:2,row:6,type:"doubleball"},{col:6,row:6,type:"rocket"}, { col: 2, row: 5, type: "paddle_long" },
+  { col: 3, row: 10, type: "paddle_small" },
   {col:4,row:6,type:"2x"},{col:4,row:9,type:"speed"},{col:4,row:4,type:"power"},
   // ankers
   {col:1,row:8,type:"stone"},{col:7,row:8,type:"stone"}
@@ -689,7 +696,9 @@ addBonuses(15, [
   {col:7,row:5,type:"rocket"},
   {col:4,row:5,type:"2x"},
   {col:4,row:9,type:"speed"},
-  {col:8,row:4,type:"power"}
+  {col:8,row:4,type:"power"},
+  { col: 4, row: 8, type: "paddle_long" },
+  { col: 0, row: 1, type: "paddle_small" }
 
 ]);
 
@@ -710,7 +719,8 @@ addBonuses(16, [
   {col:4,row:14,type:"silver"},{col:5,row:14,type:"silver"},{col:6,row:14,type:"silver"},{col:7,row:14,type:"silver"},{col:8,row:14,type:"silver"},
   // bonussen
   {col:4,row:2,type:"machinegun"},{col:2,row:6,type:"doubleball"},{col:6,row:6,type:"rocket"},
-  {col:4,row:8,type:"2x"},{col:3,row:6,type:"speed"},{col:4,row:11,type:"power"}
+  {col:4,row:8,type:"2x"},{col:3,row:6,type:"speed"},{col:4,row:11,type:"power"}, { col: 1, row: 7, type: "paddle_long" },
+  { col: 8, row: 7, type: "paddle_small" }
 ]);
 
 // ---------- LEVEL 17: “H-frame (zoals jouw stijl) + middenmix”
@@ -729,7 +739,8 @@ addBonuses(17, [
   {col:6,row:11,type:"stonefall"},{col:7,row:11,type:"stonefall"},{col:5,row:5,type:"stonefall"},
   // bonussen
   {col:2,row:6,type:"machinegun"},{col:2,row:5,type:"doubleball"},{col:6,row:5,type:"rocket"},
-  {col:4,row:5,type:"2x"},{col:5,row:7,type:"speed"},{col:4,row:10,type:"power"}
+  {col:4,row:5,type:"2x"},{col:5,row:7,type:"speed"},{col:4,row:10,type:"power"}, { col: 1, row: 1, type: "paddle_long" },
+  { col: 8, row: 10, type: "paddle_small" }
 ]);
 
 // ---------- LEVEL 18: “X/ruit gecombineerd + zware hoeken”
@@ -763,7 +774,9 @@ addBonuses(18, [
   {col:6,row:4,type:"rocket"},
   {col:4,row:9,type:"2x"},
   {col:5,row:8,type:"speed"},
-  {col:4,row:11,type:"power"}
+  {col:4,row:11,type:"power"},
+  { col: 5, row: 10, type: "paddle_long" },
+  { col: 5, row: 6, type: "paddle_small" }
 ]);
 
 // ---------- LEVEL 19: “Rand dicht + valraster midden”
@@ -817,7 +830,9 @@ addBonuses(19, [
   {col:6,row:7,type:"rocket"},
   {col:4,row:9,type:"2x"},
   {col:5,row:8,type:"speed"},
-  {col:3,row:12,type:"power"}
+  {col:3,row:12,type:"power"},
+  { col: 5, row: 10, type: "paddle_long" },
+  { col: 4, row: 11, type: "paddle_small" }
 ]);
 
 
@@ -864,7 +879,9 @@ addBonuses(20, [
   {col:6,row:8,type:"rocket"},
   {col:4,row:10,type:"2x"},
   {col:4,row:11,type:"speed"},
-  {col:4,row:6,type:"power"}
+  {col:4,row:6,type:"power"},
+  { col: 2, row: 3, type: "paddle_long" },
+  { col: 8, row: 8, type: "paddle_small" }
 ]);
 
 
