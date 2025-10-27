@@ -144,6 +144,60 @@ let paddleBaseWidth = 100;   // actuele 'basis' breedte voor dit level (zonder t
 const PADDLE_LONG_DURATION  = 30000;
 const PADDLE_SMALL_DURATION = 30000;
 
+// 🎙️ VOICE-OVER GATE
+const VO_COOLDOWN_MS = 3000;     // pauze/afstand tussen voice-overs
+let voLockedUntil = 0;           // tijd tot wanneer nieuwe VO's geblokkeerd zijn (performance.now())
+let voCurrent = null;            // huidige Audio die speelt (optioneel)
+
+// Speelt een voice-over als de gate open is; anders slaat hij over.
+function playVoiceOver(audio, opts = {}) {
+  const { cooldown = VO_COOLDOWN_MS, skipIfLocked = true } = opts;
+  const now = performance.now();
+
+  // Gate dicht? → overslaan
+  if (skipIfLocked && now < voLockedUntil) return false;
+
+  try {
+    // (optioneel) Je kunt ervoor kiezen om niet te onderbreken:
+    // Als je onderbreken wilt, uncomment de volgende twee regels:
+    // if (voCurrent && voCurrent !== audio) { voCurrent.pause(); voCurrent.currentTime = 0; }
+  } catch(e) {}
+
+  voCurrent = audio || null;
+  if (audio) {
+    try {
+      audio.currentTime = 0;
+      audio.onended = () => { if (voCurrent === audio) voCurrent = null; };
+      audio.play().catch(()=>{});
+    } catch(e) {}
+  }
+
+  // Zet lock vanaf nu
+  voLockedUntil = now + cooldown;
+  return true;
+}
+
+function playVoiceOver(audio, opts = {}) {
+  const { cooldown = VO_COOLDOWN_MS, skipIfLocked = true } = opts;
+  const now = performance.now();
+  if (skipIfLocked && now < voLockedUntil) return false;
+
+  voCurrent = audio || null;
+  if (audio) {
+    try {
+      audio.currentTime = 0;
+      audio.onended = () => {
+        if (voCurrent === audio) voCurrent = null;
+        voLockedUntil = performance.now() + cooldown; // lock NA afloop
+      };
+      audio.play().catch(()=>{});
+    } catch (e) {}
+  } else {
+    voLockedUntil = performance.now() + cooldown;
+  }
+  return true;
+}
+
 
 
 function showLevelBanner(text) {
@@ -2536,14 +2590,14 @@ function collisionDetection() {
               const midY = b.y + brickHeight / 2;
               triggerStonefall(midX, midY);
 
-              // 🎙️ Bitty waarschuwing — 1× per game op 1e of 3e geraakt stonefall-blok
               if (!RWS.played) {
-                RWS.hits++;
-                if (RWS.hits === RWS.triggerIndex && RWS.audio) {
-                  try { RWS.audio.currentTime = 0; RWS.audio.play(); } catch (e) {}
-                  RWS.played = true;
-                }
-              }
+              RWS.hits++;
+           if (RWS.hits === RWS.triggerIndex && RWS.audio) {
+              const ok = playVoiceOver(RWS.audio, { cooldown: 3000, skipIfLocked: true });
+              if (ok) RWS.played = true; // alleen “gebruikt” markeren als het ook echt gespeeld is
+            }
+         }
+
 
               b.status = 0;                                // blok meteen weg
               const earned = doublePointsActive ? 20 : 10; // zelfde puntentelling als voorheen
