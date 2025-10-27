@@ -393,11 +393,13 @@ function getPaddleCenter() {
   return { cx, cy };
 }
 
+// en gebruik:
 function activateMagnet(durationMs = 20000) {
   magnetActive = true;
   magnetEndTime = performance.now() + durationMs;
-  try { doublePointsSound?.play?.(); } catch(e) {} // evt. eigen SFX vervangen
+  try { magnetSound.currentTime = 0; magnetSound.play(); } catch(e){}
 }
+
 
 function stopMagnet() {
   if (!magnetActive) return;
