@@ -80,6 +80,14 @@ let paddleDamageZones = [];
 let machineGunYOffset = 140;
 let minMachineGunY = 0;
 
+// 🧲 Magnet bonus
+let magnetActive = false;
+let magnetEndTime = 0;           // ms timestamp
+let magnetStrength = 0.35;       // aantrekkings-"accel"
+let magnetMaxSpeed = 7.5;        // limiet voor trekkende snelheid
+let magnetCatchRadius = 22;      // auto-catch radius rond paddle
+
+
 // ❤️ Hartjes-systeem
 let heartsCollected = 0;
 let heartBlocks = [];
@@ -315,6 +323,22 @@ function drawFireworks() {
   }
 }
 
+function getPaddleCenter() {
+  const cx = paddleX + paddleWidth / 2;
+  const cy = paddleY + paddleHeight / 2;
+  return { cx, cy };
+}
+
+function activateMagnet(durationMs = 20000) {
+  magnetActive = true;
+  magnetEndTime = performance.now() + durationMs;
+  try { doublePointsSound?.play?.(); } catch(e) {} // evt. eigen SFX vervangen
+}
+
+function stopMagnet() {
+  if (!magnetActive) return;
+  magnetActive = false;
+}
 
 
 
@@ -322,6 +346,10 @@ function drawFireworks() {
 const bonusBricks = [
   { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" }, 
   { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" },
+
+
+  { col: 4, row: 4, type: "magnet" },
+
 
 
 
@@ -1036,6 +1064,10 @@ paddleLongBlockImg.src = "paddlelong.png";   // jouw upload
 const paddleSmallBlockImg = new Image();
 paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 
+const magnetImg = new Image();
+magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
+
+
 // Vergeet niet je 'expected' imagesLoaded maximale aantal met +4 te verhogen.
 
 
@@ -1225,6 +1257,10 @@ function drawBricks() {
 
           case "speed":
             ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
+            break;
+
+            case "magnet":
+            ctx.drawImage(magnetImg, brickX, brickY, brickWidth, brickHeight);
             break;
 
             case "paddle_long":
@@ -1447,6 +1483,49 @@ function drawPaddle() {
   ctx.drawImage(paddleCanvas, paddleX, paddleY);
 }
 
+function drawMagnetAura(ctx) {
+  if (!magnetActive) return; // alleen tekenen als hij aanstaat
+
+  // centrum van paddle berekenen
+  const cx = paddleX + paddleWidth / 2;
+  const cy = paddleY + paddleHeight / 2;
+
+  // klein pulserend effect
+  const t = performance.now() * 0.004;
+  const radius = Math.max(paddleWidth, paddleHeight) * 0.75 + 6 * Math.sin(t);
+
+  ctx.save();
+  const grad = ctx.createRadialGradient(cx, cy, 4, cx, cy, radius);
+  grad.addColorStop(0, "rgba(135,206,250,0.6)"); // binnenkant lichtblauw
+  grad.addColorStop(1, "rgba(135,206,250,0.0)"); // buitenkant transparant
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawMagnetHUD(ctx) {
+  if (!magnetActive) return;
+
+  const msLeft = Math.max(0, magnetEndTime - Date.now());
+  const sLeft = Math.ceil(msLeft / 1000);
+
+  ctx.save();
+  ctx.font = "14px Arial";
+  ctx.fillStyle = "#88d0ff";
+  ctx.fillText(`Magnet: ${sLeft}s`, 16, 68);
+
+  // simpele voortgangsbalk eronder
+  const full = 100; // breedte in pixels
+  const w = (msLeft / 20000) * full;
+  ctx.strokeStyle = "#88d0ff";
+  ctx.strokeRect(16, 74, full, 6);
+  ctx.fillStyle = "#88d0ff";
+  ctx.fillRect(16, 74, w, 6);
+  ctx.restore();
+}
+
 function resetAllBonuses() {
   // 🔁 Ballen en bonussen resetten
   balls = [{
@@ -1488,7 +1567,11 @@ function resetAllBonuses() {
   machineGunGunX = 0;
   machineGunGunY = 0;
 
+
+
   if (typeof stopPaddleSizeEffect === "function" && paddleSizeEffect) stopPaddleSizeEffect();
+
+  stopMagnet();
 
 }
 
@@ -1749,6 +1832,10 @@ function checkFlyingCoinHits() {
               speedBoostStart = Date.now();
               speedBoostSound.play();
               break;
+              case "magnet":
+              activateMagnet(20000);
+              break;
+
           }
 
           b.status = 0;
@@ -1908,6 +1995,52 @@ function drawFallingHearts() {
       fallingHearts.splice(i, 1);
     }
   });
+}
+
+function tryCatchItem(item) {
+  // Hearts worden in drawFallingHearts() al via overlap verwerkt,
+  // coins via checkCoinCollision(), bags in de zakje-loop.
+  // Daarom doen we hier alleen een "instant-catch" fallback:
+  item.__forceCatch = true; // marker; afhandeling volgt in bestaande catch-logica
+}
+
+function applyMagnetToArray(items) {
+  if (!magnetActive || !items || !items.length) return;
+  const { cx, cy } = getPaddleCenter();
+
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    if (!it) continue;
+
+    // Bepaal itempositievelden
+    let ix = it.x, iy = it.y;
+    if (typeof ix !== "number" || typeof iy !== "number") continue;
+
+    const dx = cx - ix;
+    const dy = cy - iy;
+    const dist = Math.hypot(dx, dy);
+
+    // auto-catch heel dichtbij
+    if (dist <= magnetCatchRadius) {
+      tryCatchItem(it);
+      continue;
+    }
+
+    // snelheid-velden (optioneel) opbouwen
+    it.vx = (it.vx || 0) + (dx / (dist || 1)) * magnetStrength;
+    it.vy = (it.vy || 0) + (dy / (dist || 1)) * magnetStrength;
+
+    // clamp
+    const sp = Math.hypot(it.vx, it.vy);
+    if (sp > magnetMaxSpeed) {
+      const k = magnetMaxSpeed / (sp || 1);
+      it.vx *= k; it.vy *= k;
+    }
+
+    // positie bijwerken
+    it.x += it.vx;
+    it.y += it.vy;
+  }
 }
 
 
@@ -2414,6 +2547,10 @@ function collisionDetection() {
             startPaddleSizeEffect("small");
             break;
 
+            case "magnet":
+            activateMagnet(20000);
+            break;
+
             case "rocket":
               rocketActive = true;
               rocketAmmo = 3;
@@ -2550,17 +2687,36 @@ function draw() {
   drawCoins();
   drawFallingHearts();
   drawFallingStones();  
+  drawMagnetHUD(ctx);
+
+
   drawHeartPopup();
+
+  // 🧲 MAGNET: timeout check vóór alle pickup-collisions
+  if (magnetActive && Date.now() >= magnetEndTime) {
+    stopMagnet();
+  }
+
+  // 🧲 MAGNET: pickups aantrekken NA hun val/tekenstap en VÓÓR collision checks
+  // Let op: GEEN stonefall toevoegen!
+  if (magnetActive) {
+    // Pas aan op jouw array-namen; fallingHearts / coins / pxpBags zijn meest gebruikt
+    applyMagnetToArray(fallingHearts);
+    applyMagnetToArray(coins);
+    applyMagnetToArray(pxpBags);
+    // voeg evt. andere pickup-arrays toe (niet fallingStones!)
+  }
+
   checkCoinCollision();
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
   drawPointPopups();
 
-// ⏱️ Paddle-size effect verlopen?
-if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
-  stopPaddleSizeEffect();
-}
+  // ⏱️ Paddle-size effect verlopen?
+  if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
+    stopPaddleSizeEffect();
+  }
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
     doublePointsActive = false;
@@ -2575,7 +2731,6 @@ if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
     } else {
        ball.x = paddleX + paddleWidth / 2 - ballRadius;
        ball.y = paddleY - ballRadius * 2;
-
     }
     
     if (!ball.trail) ball.trail = [];
@@ -2583,15 +2738,14 @@ if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
     let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
     let steps = 3; // hoe meer hoe vloeiender
     for (let i = 1; i <= steps; i++) {
-    let px = last.x + (ball.x - last.x) * (i / steps);
-    let py = last.y + (ball.y - last.y) * (i / steps);
-    ball.trail.push({ x: px, y: py });
-  }
+      let px = last.x + (ball.x - last.x) * (i / steps);
+      let py = last.y + (ball.y - last.y) * (i / steps);
+      ball.trail.push({ x: px, y: py });
+    }
 
     while (ball.trail.length > 20) {
-    ball.trail.shift();
- }
-
+      ball.trail.shift();
+    }
 
     // Veiliger links/rechts
     if (ball.x <= ball.radius + 1 && ball.dx < 0) {
@@ -2614,33 +2768,36 @@ if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
       wallSound.currentTime = 0;
       wallSound.play();
     }
-if (
-  ball.y + ball.radius > paddleY &&
-  ball.y - ball.radius < paddleY + paddleHeight &&
-  ball.x + ball.radius > paddleX &&
-  ball.x - ball.radius < paddleX + paddleWidth
-) {
-  let reflect = true;
 
-  if (machineGunActive || machineGunCooldownActive) {
-    const segmentWidth = paddleWidth / 10;
-    for (let i = 0; i < 10; i++) {
-      const segX = paddleX + i * segmentWidth;
-      const isDamaged = paddleDamageZones.some(hitX =>
-        hitX >= segX && hitX <= segX + segmentWidth
-      );
+    if (
+      ball.y + ball.radius > paddleY &&
+      ball.y - ball.radius < paddleY + paddleHeight &&
+      ball.x + ball.radius > paddleX &&
+      ball.x - ball.radius < paddleX + paddleWidth
+    ) {
+      let reflect = true;
 
-      const ballCenterX = ball.x;
-      if (
-        ballCenterX >= segX &&
-        ballCenterX < segX + segmentWidth &&
-        isDamaged
-      ) {
-        reflect = false;
-        break;
+      if (machineGunActive || machineGunCooldownActive) {
+        const segmentWidth = paddleWidth / 10;
+        for (let i = 0; i < 10; i++) {
+          const segX = paddleX + i * segmentWidth;
+          const isDamaged = paddleDamageZones.some(hitX =>
+            hitX >= segX && hitX <= segX + segmentWidth
+          );
+
+          const ballCenterX = ball.x;
+          if (
+            ballCenterX >= segX &&
+            ballCenterX < segX + segmentWidth &&
+            isDamaged
+          ) {
+            reflect = false;
+            break;
+          }
+        }
       }
-    }
-  }
+  
+
 
   if (reflect) {
     const hitPos = (ball.x - paddleX) / paddleWidth;
@@ -2748,6 +2905,8 @@ if (downPressed) {
 
 
   drawPaddle();
+  drawMagnetAura(ctx); // visuele gloed bovenop paddle
+
 
 
   if (rocketActive && !rocketFired && rocketAmmo > 0) {
@@ -3227,6 +3386,9 @@ function triggerPaddleExplosion() {
     paddleExplodeSound.currentTime = 0;
     paddleExplodeSound.play();
 
+    // 🧲 Magnet stoppen bij leven-verlies
+    stopMagnet();
+
     setTimeout(() => {
       paddleExploding = false;
       paddleExplosionParticles = [];
@@ -3270,7 +3432,6 @@ function triggerPaddleExplosion() {
         alpha: 1
       });
     }
-
     paddleExplodeSound.currentTime = 0;
     paddleExplodeSound.play();
 
@@ -3291,6 +3452,9 @@ function triggerPaddleExplosion() {
 
       paddleExploding = false;
       paddleExplosionParticles = [];
+
+      // 🧲 Magnet stoppen bij Game Over
+      stopMagnet();
 
       speedBoostActive = false;
       speedBoostStart = 0;
@@ -3322,6 +3486,7 @@ function triggerPaddleExplosion() {
     }, 1000);
   }
 }
+
 
 function startLevelTransition() {
   // ✅ Wincheck vóór level++ (we zitten aan het einde van het laatste level)
