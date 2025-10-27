@@ -2698,16 +2698,15 @@ function draw() {
   drawPointPopups();
 
 
-  // A) Time-out check heel vroeg in draw()
+// A) Time-out check heel vroeg in draw()
 if (magnetActive && performance.now() >= magnetEndTime) {
   stopMagnet();
 }
 
 // B) Toepassen op arrays (na physics update van items, vóór render)
 applyMagnetToArray(fallingHearts);
-applyMagnetToArray(fallingCoins);
-applyMagnetToArray(fallingFlags);
-applyMagnetToArray(fallingBags);
+applyMagnetToArray(coins);     // muntjes worden al aangestuurd via 'coins'
+applyMagnetToArray(pxpBags);   // zakjes vallen in 'pxpBags'
 
 
 if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
