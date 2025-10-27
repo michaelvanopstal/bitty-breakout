@@ -3232,7 +3232,8 @@ function onImageLoad() {
     score = 0;
     lives = 3;
 
-    updateLivesDisplay?.();      
+    updateLivesDisplay?.(); 
+    resetBricks();
     resetPaddle?.();
     resetBall();              // bal met juiste startsnelheid (via LEVELS params)
     updateScoreDisplay?.();
