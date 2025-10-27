@@ -1462,6 +1462,9 @@ function resetAllBonuses() {
 
   machineGunGunX = 0;
   machineGunGunY = 0;
+
+  if (typeof stopPaddleSizeEffect === "function" && paddleSizeEffect) stopPaddleSizeEffect();
+
 }
 
 
