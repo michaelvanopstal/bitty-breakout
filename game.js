@@ -354,8 +354,10 @@ const pxpMap = [
   { col: 6, row: 4, type: "silver" }, { col: 6, row: 5 },   { col: 6, row: 8 },      { col: 6, row: 14 },       { col: 1, row: 13, type: "stonefall" },               
   { col: 7, row: 4, type: "silver" }, { col: 7, row: 5 },   { col: 7, row: 8 },      { col: 7, row: 14 },        { col: 2, row: 12, type: "stonefall" },                                
   { col: 8, row: 4, type: "silver" }, { col: 8, row: 5 },   { col: 8, row: 8 },      { col: 8, row: 14 },         { col: 3, row: 11, type: "stonefall" },                     
-   { col: 0, row: 7, type: "stone" },  { col: 1, row: 1, type: "stone" },
-  { col: 1, row: 6, type: "stone" },   { col: 2, row: 2, type: "stone" },
+   { col: 0, row: 7, type: "stone" },  { col: 1, row: 1, type: "stone" },                                          { col: 0, row: 6, type: "paddle_long" },
+                                                                                                                  { col: 4, row: ,11 type: "paddle_small" },  
+  { col: 1, row: 6, type: "stone" },  
+  { col: 2, row: 2, type: "stone" },
   { col: 2, row: 7, type: "stone" },  { col: 8, row: 0, type: "stone" },
   { col: 7, row: 1, type: "stone" }, { col: 0, row: 14, type: "stone" },
   { col: 6, row: 2, type: "stone" },
@@ -394,6 +396,8 @@ const level3Map = [
   { col: 1, row: 8, type: "2x" },
   { col: 7, row: 8, type: "2x" },
   { col: 4, row: 9, type: "rocket" },
+  { col: 5, row: 10, type: "paddle_long" },
+  { col: 0, row: 10, type: "paddle_small" },
 
   // Stonefall “valstrikken” (3 hits + laat stenen vallen)
   { col: 3, row: 8, type: "stonefall" },
@@ -454,7 +458,9 @@ addBonuses(4, [
 
   // bonussen op accenten
   { col: 4, row: 3, type: "machinegun" }, { col: 4, row: 6, type: "rocket" }, { col: 1, row: 6, type: "doubleball" },
-  { col: 7, row: 6, type: "speed" }, { col: 4, row: 8, type: "2x" }, { col: 8, row: 5, type: "power" }
+  { col: 7, row: 6, type: "speed" }, { col: 4, row: 8, type: "2x" }, { col: 8, row: 5, type: "power" },{ col: 3, row: 13, type: "paddle_long" },
+  { col: 1, row: 5, type: "paddle_small" }
+
 ]);
 
 // ---------- LEVEL 5: “Diagonaal ruit + zware onderlijn (silver/stone mix)”
@@ -470,7 +476,9 @@ addBonuses(5, [
   {col:8,row:0,type:"stonefall"},{col:7,row:1,type:"stonefall"},
   // bonussen
   {col:4,row:2,type:"machinegun"},{col:1,row:7,type:"doubleball"},{col:7,row:7,type:"speed"},
-  {col:4,row:9,type:"rocket"},{col:4,row:6,type:"2x"},{col:8,row:4,type:"power"}
+  {col:4,row:9,type:"rocket"},{col:4,row:6,type:"2x"},{col:8,row:4,type:"power"}{ col: 6, row: 6, type: "paddle_long" },
+  { col: 8, row: 1, type: "paddle_small" }
+
 ]);
 
 // ---------- LEVEL 6: “Zijwanden + band + X-traps”
