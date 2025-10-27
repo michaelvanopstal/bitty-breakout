@@ -121,6 +121,12 @@ let levelMessageAlpha = 0;
 let levelMessageTimer = 0;
 const LEVEL_MESSAGE_DURATION = 180;
 
+// 🧱 Paddle-size bonus
+let paddleSizeEffect = null; // { type: "long"|"small", end: timestamp, multiplier: number }
+let paddleBaseWidth = 100;   // actuele 'basis' breedte voor dit level (zonder tijdelijke bonus)
+const PADDLE_LONG_DURATION  = 30000;
+const PADDLE_SMALL_DURATION = 30000;
+
 
 
 function showLevelBanner(text) {
@@ -314,7 +320,11 @@ function drawFireworks() {
 
 
 const bonusBricks = [
-  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },
+  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },{ col: 0, row: 13, type: "paddle_long" },
+  { col: 1, row: 13, type: "paddle_small" },
+
+
+
   { col: 8, row: 4, type: "power" },   { col: 4, row: 14, type: "stonefall" },
 
   { col: 2, row: 7, type: "doubleball" }, { col: 7, row: 14, type: "silver" },{ col: 8, row: 14, type: "silver" },{ col: 6, row: 14, type: "silver" },
@@ -995,6 +1005,12 @@ stoneBlockImg.src  = "stone_block.png";
 const stoneLargeImg  = new Image(); 
 stoneLargeImg.src  = "stone_large.png";
 
+const paddleLongBlockImg = new Image();
+paddleLongBlockImg.src = "paddlelong.png";   // jouw upload
+
+const paddleSmallBlockImg = new Image();
+paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
+
 // Vergeet niet je 'expected' imagesLoaded maximale aantal met +4 te verhogen.
 
 
@@ -1186,6 +1202,14 @@ function drawBricks() {
             ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
             break;
 
+            case "paddle_long":
+            ctx.drawImage(paddleLongBlockImg, brickX, brickY, brickWidth, brickHeight);
+            break;
+
+            case "paddle_small":
+            ctx.drawImage(paddleSmallBlockImg, brickX, brickY, brickWidth, brickHeight);
+            break;
+
           case "silver":
             if (!b.hits || b.hits === 0) {
               ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
@@ -1214,7 +1238,6 @@ function drawBricks() {
     ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
   }
   break;
-
 
           default:
             ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
@@ -1254,9 +1277,23 @@ function resetBricks() {
   // Clamp en pas level-parameters toe
   const p = def?.params || {};
   const targetPaddleWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
-  // Paddlebreedte bij start niveau aanpassen (optioneel – enkel bij nieuwe levelstart)
-  paddleWidth = targetPaddleWidth;
 
+  // Basisbreedte van dit level vastzetten
+  paddleBaseWidth = targetPaddleWidth;
+
+  // Eventuele lopende size-bonus netjes stoppen (herstelt naar paddleBaseWidth + redraw)
+  if (paddleSizeEffect) {
+    // gebruikt helpers uit het plan
+    stopPaddleSizeEffect();
+  } else {
+    // Geen actief effect? Zorg dat paddle meteen de basisbreedte van dit level heeft
+    const centerX = paddleX + paddleWidth / 2;
+    paddleWidth = paddleBaseWidth;
+    paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
+    if (typeof redrawPaddleCanvas === 'function') redrawPaddleCanvas();
+  }
+
+  // Bricks resetten en types toepassen
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
@@ -1264,7 +1301,7 @@ function resetBricks() {
 
       // Kijk of deze brick in de map voorkomt
       const defined = currentMap.find(p => p.col === c && p.row === r);
-      let brickType = defined ? defined.type : "normal";
+      const brickType = defined ? defined.type : "normal";
 
       // Pas type toe
       b.type = brickType;
@@ -1287,6 +1324,7 @@ function resetBricks() {
   // Plaats 4 willekeurige hartjes onder normale blokken (zoals je deed)
   assignHeartBlocks();
 }
+
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
 function assignHeartBlocks() {
@@ -1504,6 +1542,48 @@ function resetPaddle(skipBallReset = false, skipCentering = false) {
   }
 }
 
+function redrawPaddleCanvas() {
+  // tekent huidige paddleWidth opnieuw op paddleCanvas (en wist schade)
+  paddleCanvas.width = paddleWidth;
+  paddleCanvas.height = paddleHeight;
+  paddleCtx.clearRect(0, 0, paddleWidth, paddleHeight);
+  paddleCtx.globalCompositeOperation = 'source-over';
+  paddleCtx.drawImage(pointpayPaddleImg, 0, 0, paddleWidth, paddleHeight);
+
+  // bij resize: damage-zones leeg, anders kloppen gaten niet meer
+  if (Array.isArray(paddleDamageZones)) paddleDamageZones = [];
+}
+
+function applyPaddleWidthFromMultiplier(mult) {
+  const centerX = paddleX + paddleWidth / 2;
+
+  paddleWidth = Math.round(paddleBaseWidth * mult);
+  // houd center vast en clamp binnen canvas
+  paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
+
+  redrawPaddleCanvas();
+}
+
+function startPaddleSizeEffect(type) {
+  // type: "long" | "small"
+  const now = Date.now();
+  if (type === "long") {
+    paddleSizeEffect = { type, end: now + PADDLE_LONG_DURATION, multiplier: 2.0 };
+    applyPaddleWidthFromMultiplier(2.0);
+  } else {
+    paddleSizeEffect = { type, end: now + PADDLE_SMALL_DURATION, multiplier: 0.5 };
+    applyPaddleWidthFromMultiplier(0.5);
+  }
+}
+
+function stopPaddleSizeEffect() {
+  paddleSizeEffect = null;
+  // terug naar basisbreedte van het level
+  const centerX = paddleX + paddleWidth / 2;
+  paddleWidth = paddleBaseWidth;
+  paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
+  redrawPaddleCanvas();
+}
 
 
 
@@ -2298,6 +2378,14 @@ function collisionDetection() {
               b.type = "normal";
               break;
 
+            case "paddle_long":
+            startPaddleSizeEffect("long");
+            break;
+
+            case "paddle_small":
+            startPaddleSizeEffect("small");
+            break;
+
             case "rocket":
               rocketActive = true;
               rocketAmmo = 3;
@@ -2441,6 +2529,10 @@ function draw() {
   checkFlyingCoinHits();
   drawPointPopups();
 
+// ⏱️ Paddle-size effect verlopen?
+if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
+  stopPaddleSizeEffect();
+}
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
     doublePointsActive = false;
@@ -2957,7 +3049,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 25) {
+  if (imagesLoaded === 27) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -2998,6 +3090,8 @@ heartImg.onload = onImageLoad;
 heartBoardImg.onload = onImageLoad;
 silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
+paddleLongBlockImg.onload = onImageLoad;
+paddleSmallBlockImg.onload = onImageLoad;
 
 stoneBlockImg.onload  = onImageLoad;
 stoneLargeImg.onload  = onImageLoad;
