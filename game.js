@@ -2680,51 +2680,35 @@ function isPaddleBlockedHorizontally(newX) {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawElectricBursts(); // onder alles
+  drawElectricBursts(); // 🔄 VOORAF tekenen, zodat het ONDER alles ligt
 
-  // reset blending (anders blijven bricks onzichtbaar)
-  ctx.globalCompositeOperation = "source-over";
-
-  // 🧱 eerst de blokjes tekenen
-  drawBricks();
-
-  // daarna physics en bewegende elementen
   collisionDetection();
   drawCoins();
   drawFallingHearts();
-  drawFallingStones();
+  drawFallingStones();  
   drawHeartPopup();
-
-  // Magnet effect
-  if (magnetActive && Date.now() >= magnetEndTime) stopMagnet();
-  if (magnetActive) {
-    applyMagnetToArray(fallingHearts);
-    applyMagnetToArray(coins);
-    applyMagnetToArray(pxpBags);
-  }
-
   checkCoinCollision();
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
   drawPointPopups();
 
-  // Paddle tekenen en daarna aura
-  drawPaddle();
-  drawMagnetAura(ctx);
 
-  // HUD / overlay
-  drawMagnetHUD(ctx);
-  drawHeartsHUD();
-  drawScoreHUD();
-  drawLivesHUD();
+  // A) Time-out check heel vroeg in draw()
+if (magnetActive && performance.now() >= magnetEndTime) {
+  stopMagnet();
 }
 
+// B) Toepassen op arrays (na physics update van items, vóór render)
+applyMagnetToArray(fallingHearts);
+applyMagnetToArray(fallingCoins);
+applyMagnetToArray(fallingFlags);
+applyMagnetToArray(fallingBags);
 
-  // ⏱️ Paddle-size effect verlopen?
-  if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
-    stopPaddleSizeEffect();
-  }
+
+if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
+  stopPaddleSizeEffect();
+}
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
     doublePointsActive = false;
@@ -2739,6 +2723,7 @@ function draw() {
     } else {
        ball.x = paddleX + paddleWidth / 2 - ballRadius;
        ball.y = paddleY - ballRadius * 2;
+
     }
     
     if (!ball.trail) ball.trail = [];
@@ -2746,14 +2731,15 @@ function draw() {
     let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
     let steps = 3; // hoe meer hoe vloeiender
     for (let i = 1; i <= steps; i++) {
-      let px = last.x + (ball.x - last.x) * (i / steps);
-      let py = last.y + (ball.y - last.y) * (i / steps);
-      ball.trail.push({ x: px, y: py });
-    }
+    let px = last.x + (ball.x - last.x) * (i / steps);
+    let py = last.y + (ball.y - last.y) * (i / steps);
+    ball.trail.push({ x: px, y: py });
+  }
 
     while (ball.trail.length > 20) {
-      ball.trail.shift();
-    }
+    ball.trail.shift();
+ }
+
 
     // Veiliger links/rechts
     if (ball.x <= ball.radius + 1 && ball.dx < 0) {
@@ -2776,36 +2762,33 @@ function draw() {
       wallSound.currentTime = 0;
       wallSound.play();
     }
+if (
+  ball.y + ball.radius > paddleY &&
+  ball.y - ball.radius < paddleY + paddleHeight &&
+  ball.x + ball.radius > paddleX &&
+  ball.x - ball.radius < paddleX + paddleWidth
+) {
+  let reflect = true;
 
-    if (
-      ball.y + ball.radius > paddleY &&
-      ball.y - ball.radius < paddleY + paddleHeight &&
-      ball.x + ball.radius > paddleX &&
-      ball.x - ball.radius < paddleX + paddleWidth
-    ) {
-      let reflect = true;
+  if (machineGunActive || machineGunCooldownActive) {
+    const segmentWidth = paddleWidth / 10;
+    for (let i = 0; i < 10; i++) {
+      const segX = paddleX + i * segmentWidth;
+      const isDamaged = paddleDamageZones.some(hitX =>
+        hitX >= segX && hitX <= segX + segmentWidth
+      );
 
-      if (machineGunActive || machineGunCooldownActive) {
-        const segmentWidth = paddleWidth / 10;
-        for (let i = 0; i < 10; i++) {
-          const segX = paddleX + i * segmentWidth;
-          const isDamaged = paddleDamageZones.some(hitX =>
-            hitX >= segX && hitX <= segX + segmentWidth
-          );
-
-          const ballCenterX = ball.x;
-          if (
-            ballCenterX >= segX &&
-            ballCenterX < segX + segmentWidth &&
-            isDamaged
-          ) {
-            reflect = false;
-            break;
-          }
-        }
+      const ballCenterX = ball.x;
+      if (
+        ballCenterX >= segX &&
+        ballCenterX < segX + segmentWidth &&
+        isDamaged
+      ) {
+        reflect = false;
+        break;
       }
-  
-
+    }
+  }
 
   if (reflect) {
     const hitPos = (ball.x - paddleX) / paddleWidth;
@@ -2876,7 +2859,7 @@ if (stoneHitOverlayTimer > 0) {
     triggerPaddleExplosion(); // pas nu verlies van leven
   }
 
-
+ drawBricks();
 
   
 if (leftPressed) {
@@ -2912,6 +2895,9 @@ if (downPressed) {
 }
 
 
+  drawPaddle();
+  drawMagnetAura(ctx);
+  drawMagnetHUD(ctx);
 
   if (rocketActive && !rocketFired && rocketAmmo > 0) {
     rocketX = paddleX + paddleWidth / 2 - 12;
