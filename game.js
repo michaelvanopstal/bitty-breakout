@@ -1499,7 +1499,7 @@ function drawMagnetAura(ctx) {
 
   ctx.save();
   const grad = ctx.createRadialGradient(cx, cy, 4, cx, cy, radius);
-  grad.addColorStop(0, "rgba(135,206,250,0.6)"); // binnenkant lichtblauw
+  grad.addColorStop(0, "rgba(135,206,250,0.25)");
   grad.addColorStop(1, "rgba(135,206,250,0.0)"); // buitenkant transparant
   ctx.fillStyle = grad;
   ctx.beginPath();
