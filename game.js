@@ -2821,7 +2821,11 @@ if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCoo
   machineGunCooldownActive = false;
   machineGunActive = false;
   paddleDamageZones = [];
+
+  // ✅ +500 punten en UI direct bijwerken
   score += 500;
+  if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
+
   pointPopups.push({
     x: paddleX + paddleWidth / 2,
     y: canvas.height - 30,
@@ -2832,12 +2836,12 @@ if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCoo
   resetPaddle(true, true); // ✅ geen ball reset, geen centrering
 }
 
-// 💀 Paddle vernietigd?
+// 💀 Paddle “vernietigd” tijdens machinegun? → stop kogels, laat 30s-timer/cooldown doorlopen
 if ((machineGunActive || machineGunCooldownActive) && paddleDamageZones.length >= 10) {
-  machineGunActive = false;
-  machineGunCooldownActive = false;
-  // Paddle-explosie volgt automatisch bij ball loss
+  machineGunBullets = []; // stop vuren
 }
+
+
 
 // ✨ Levelbanner + fade-out
 if (levelMessageVisible) {
