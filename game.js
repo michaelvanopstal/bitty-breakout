@@ -1221,6 +1221,7 @@ function updateScoreDisplay() {
 
 
 function drawBricks() {
+  console.log("bricks getekend", totalActiveBricks);
   const totalBricksWidth = brickColumnCount * brickWidth;
   const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
 
