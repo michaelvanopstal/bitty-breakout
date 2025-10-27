@@ -1575,24 +1575,11 @@ function drawMagnetAura(ctx) {
 
 function drawMagnetHUD(ctx) {
   if (!magnetActive) return;
-
-  const msLeft = Math.max(0, magnetEndTime - Date.now());
+  const msLeft = Math.max(0, magnetEndTime - performance.now());
   const sLeft = Math.ceil(msLeft / 1000);
-
-  ctx.save();
-  ctx.font = "14px Arial";
-  ctx.fillStyle = "#88d0ff";
-  ctx.fillText(`Magnet: ${sLeft}s`, 16, 68);
-
-  // simpele voortgangsbalk eronder
-  const full = 100; // breedte in pixels
-  const w = (msLeft / 20000) * full;
-  ctx.strokeStyle = "#88d0ff";
-  ctx.strokeRect(16, 74, full, 6);
-  ctx.fillStyle = "#88d0ff";
-  ctx.fillRect(16, 74, w, 6);
-  ctx.restore();
+  // ...
 }
+
 
 function resetAllBonuses() {
   // 🔁 Ballen en bonussen resetten
