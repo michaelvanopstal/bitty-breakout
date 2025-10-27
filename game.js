@@ -999,7 +999,7 @@ const speedBoostSound = new Audio("speed_boost.mp3");
 const rocketReadySound = new Audio("rocket_ready.mp3");
 const flagsActivatedSound = new Audio("flags_activated.mp3");
 const doublePointsSound = new Audio("double_points.mp3");
-
+const magnetSound = new Audio("magnet.mp3");
 const bricksSound = new Audio("bricks.mp3");
 const pxpBagSound = new Audio("pxpbagsound_mp3.mp3");
 
