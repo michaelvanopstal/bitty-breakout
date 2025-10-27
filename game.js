@@ -87,6 +87,10 @@ let magnetStrength = 0.35;       // aantrekkings-"accel"
 let magnetMaxSpeed = 7.5;        // limiet voor trekkende snelheid
 let magnetCatchRadius = 22;      // auto-catch radius rond paddle
 
+let fallingCoins = [];
+let fallingFlags = [];
+let fallingBags = [];
+
 
 // ❤️ Hartjes-systeem
 let heartsCollected = 0;
