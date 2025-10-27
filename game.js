@@ -115,6 +115,12 @@ let thunderSounds = [thunder1, thunder2, thunder3];
 let fireworksRockets = [];   // opstijgende pijlen
 let fireworksParticles = []; // vonken na exploderen
 
+
+// 🧮 Flags
+let stonefallHitsThisGame = 0;
+let rockWarnPlayed = false;
+let rockWarnTriggerIndex = Math.random() < 0.5 ? 1 : 3; // 1e of 3e keer
+
 balls.push({
   x: canvas.width / 2,
   y: canvas.height - paddleHeight - 10,
@@ -948,6 +954,9 @@ const coinSound = new Audio("money.mp3");
 const shootSound = new Audio("shoot_arcade.mp3");
 const wallSound = new Audio("tick.mp3");
 const blockSound = new Audio("tock.mp3");
+
+const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
+rockWarning.volume = 0.85;
 
 const customBrickWidth = 70;   // pas aan zoals jij wilt
 const customBrickHeight = 25;  // pas aan zoals jij wilt
@@ -2396,8 +2405,24 @@ function checkCoinCollision() {
     }
   });
 }
-
 function collisionDetection() {
+  // 🎙️ Lazy init van voice line + state (1× per game)
+  if (typeof window.rockWarnState === "undefined") {
+    window.rockWarnState = {
+      played: false,                          // al afgespeeld in deze game?
+      hits: 0,                                // aantal *geraakte* stonefall-blokken
+      triggerIndex: Math.random() < 0.5 ? 1 : 3,  // 1e of 3e keer
+      audio: (() => {
+        try {
+          const a = new Audio("bitty_watch_out.mp3"); // zet jouw mp3-bestandsnaam/pad
+          a.volume = 0.85;
+          return a;
+        } catch (e) { return null; }
+      })()
+    };
+  }
+  const RWS = window.rockWarnState;
+
   balls.forEach(ball => {
     for (let c = 0; c < brickColumnCount; c++) {
       for (let r = 0; r < brickRowCount; r++) {
@@ -2511,6 +2536,15 @@ function collisionDetection() {
               const midY = b.y + brickHeight / 2;
               triggerStonefall(midX, midY);
 
+              // 🎙️ Bitty waarschuwing — 1× per game op 1e of 3e geraakt stonefall-blok
+              if (!RWS.played) {
+                RWS.hits++;
+                if (RWS.hits === RWS.triggerIndex && RWS.audio) {
+                  try { RWS.audio.currentTime = 0; RWS.audio.play(); } catch (e) {}
+                  RWS.played = true;
+                }
+              }
+
               b.status = 0;                                // blok meteen weg
               const earned = doublePointsActive ? 20 : 10; // zelfde puntentelling als voorheen
               score += earned;
@@ -2544,16 +2578,16 @@ function collisionDetection() {
               break;
 
             case "paddle_long":
-            startPaddleSizeEffect("long");
-            break;
+              startPaddleSizeEffect("long");
+              break;
 
             case "paddle_small":
-            startPaddleSizeEffect("small");
-            break;
+              startPaddleSizeEffect("small");
+              break;
 
             case "magnet":
-            activateMagnet(20000);
-            break;
+              activateMagnet(20000);
+              break;
 
             case "rocket":
               rocketActive = true;
@@ -2593,6 +2627,7 @@ function collisionDetection() {
     } // <-- einde for c
   }); // <-- einde balls.forEach
 } // <-- einde function
+
 
 
 
@@ -3246,6 +3281,22 @@ function onImageLoad() {
   }
 }
 
+// 🎙️ Init Bitty-voice-line bij eerste spelstart
+  if (typeof window.rockWarnState === "undefined") {
+    window.rockWarnState = {
+      played: false,
+      hits: 0,
+      triggerIndex: Math.random() < 0.5 ? 1 : 3,
+      audio: (() => {
+        try {
+          const a = new Audio("bitty_watch_out.mp3"); // jouw mp3-bestand
+          a.volume = 0.85;
+          return a;
+        } catch (e) { return null; }
+      })()
+    };
+  }
+
 
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
@@ -3357,8 +3408,8 @@ function triggerPaddleExplosion() {
       // 💖 Hartjes blijven behouden – reset alleen bij game over
     }
 
-    pauseTimer(); 
-  
+    pauseTimer();
+
     paddleExploding = true;
     paddleExplosionParticles = [];
 
@@ -3449,6 +3500,7 @@ function triggerPaddleExplosion() {
       // 🧲 Magnet stoppen bij Game Over
       stopMagnet();
 
+      // ⏩ Alle tijdelijke effecten/arrays resetten
       speedBoostActive = false;
       speedBoostStart = 0;
       doublePointsActive = false;
@@ -3474,6 +3526,13 @@ function triggerPaddleExplosion() {
 
       updateScoreDisplay();
       document.getElementById("timeDisplay").textContent = "00:00";
+
+      // 🎙️ Reset Bitty-waarschuwing voor nieuwe game (1× per game, random op 1e/3e hit)
+      if (window.rockWarnState) {
+        window.rockWarnState.played = false;
+        window.rockWarnState.hits = 0;
+        window.rockWarnState.triggerIndex = Math.random() < 0.5 ? 1 : 3;
+      }
 
       resetTriggered = false;
     }, 1000);
