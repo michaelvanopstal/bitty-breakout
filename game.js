@@ -1438,39 +1438,45 @@ function clearAllFrozenFlags() {
 }
 // roepen in resetBricks() en/of in je leven-verlies reset-flow
 
+// ❄️ Draw animated ice layer — call as drawIceLayer(ctx, x,y,w,h, seed, progress)
+function drawIceLayer(ctx, x, y, w, h, seed = 0, progress = 1) {
+  if (progress <= 0) return; // niets tekenen zolang nog niet begonnen
 
-function drawIceLayer(ctx, x, y, w, h, seed = 0) {
   ctx.save();
 
-  // IJsbody: nette haakse buitenrand, subtiele verticale gradient
+  // Basisbody: alpha groeit mee met progress
+  const topA = 0.85 * progress;
+  const midA = 0.55 * progress;
+  const botA = 0.85 * progress;
+
   const g = ctx.createLinearGradient(x, y, x, y + h);
-  g.addColorStop(0,   "rgba(185, 225, 255, 0.85)");
-  g.addColorStop(0.5, "rgba(160, 205, 255, 0.55)");
-  g.addColorStop(1,   "rgba(205, 240, 255, 0.85)");
+  g.addColorStop(0,   `rgba(185,225,255,${topA})`);
+  g.addColorStop(0.5, `rgba(160,205,255,${midA})`);
+  g.addColorStop(1,   `rgba(205,240,255,${botA})`);
   ctx.fillStyle = g;
   ctx.fillRect(x, y, w, h);
 
-  // Randlicht om de contour strak te houden
-  ctx.strokeStyle = "rgba(255,255,255,0.65)";
+  // Randglans
+  ctx.strokeStyle = `rgba(255,255,255,${0.65 * progress})`;
   ctx.lineWidth = 1;
   ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
 
-  // Deterministische random
+  // Deterministisch random voor vaste textuur
   let s = seed | 0;
   function rnd(){ s = (s * 1664525 + 1013904223) | 0; return ((s >>> 0) % 1000) / 1000; }
 
-  // Frost speckles (kleine kristallen)
-  const dots = 16;
-  ctx.fillStyle = "rgba(255,255,255,0.35)";
+  // Frost-speckles
+  const dots = Math.floor(16 * progress);
+  ctx.fillStyle = `rgba(255,255,255,${0.35 * progress})`;
   for (let i = 0; i < dots; i++) {
     const dx = x + 2 + rnd() * (w - 4);
     const dy = y + 2 + rnd() * (h - 4);
     ctx.fillRect(dx, dy, 1, 1);
   }
 
-  // Haarscheurtjes (fijne barsten binnenin)
-  ctx.strokeStyle = "rgba(235,245,255,0.8)";
-  ctx.lineWidth = 0.75;
+  // Haarscheurtjes
+  ctx.strokeStyle = `rgba(235,245,255,${0.8 * progress})`;
+  ctx.lineWidth = 0.75 * progress;
   ctx.beginPath();
   const cracks = 3 + Math.floor(rnd() * 3);
   for (let c = 0; c < cracks; c++) {
@@ -1489,6 +1495,7 @@ function drawIceLayer(ctx, x, y, w, h, seed = 0) {
 
   ctx.restore();
 }
+
 
 
 
