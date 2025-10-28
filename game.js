@@ -3494,21 +3494,30 @@ const IMAGE_NAMES = [
 let imagesLoaded = 0;
 
 function registerImageOnloads() {
+  // Controleer of de lijst bestaat en gevuld is
+  if (!Array.isArray(IMAGE_NAMES) || IMAGE_NAMES.length === 0) {
+    console.error("[IMG] IMAGE_NAMES is leeg of niet gedefinieerd!");
+    return;
+  }
+
   const definedImages = IMAGE_NAMES
-    .map(name => ({ name, img: (typeof window[name] !== "undefined") ? window[name] : null }))
+    .map(name => ({
+      name,
+      img: (typeof window[name] !== "undefined") ? window[name] : null
+    }))
     .filter(entry => {
       if (!entry.img) {
-        console.error(`[IMG] ${entry.name} is undefined bij onload-registratie`);
+        console.warn(`[IMG] ${entry.name} is undefined bij onload-registratie`);
         return false;
       }
       return true;
     });
 
   const EXPECTED = definedImages.length;
-  console.log(`[IMG] onload registreren voor ${EXPECTED} images`);
+  console.log(`[IMG] onload-registratie voor ${EXPECTED} images`);
 
   if (EXPECTED === 0) {
-    console.error("[IMG] Er zijn 0 images gevonden. Waarschijnlijk staat de registratie NÁ bovenstaand blok maar NÓG STEEDS vóór je new Image() declaraties. Verplaats de aanroep van registerImageOnloads() verder naar beneden.");
+    console.error("[IMG] Geen geldige afbeeldingen gevonden. Controleer of je window.*Img variabelen hierboven gedeclareerd zijn.");
     return;
   }
 
@@ -3516,12 +3525,13 @@ function registerImageOnloads() {
     imagesLoaded++;
     if (imagesLoaded >= EXPECTED) startGameAfterImages();
   }
+
   function onImageError(ev) {
-    console.error(`[IMG] load ERROR: ${ev?.target?.src || "(unknown)"}`);
-    onImageLoad(); // toch doorstarten
+    console.error(`[IMG] Load ERROR: ${ev?.target?.src || "(unknown)"}`);
+    onImageLoad(); // ondanks fout toch doorstarten
   }
 
-  // reken ook cache-hits mee
+  // rekening houden met cache-hits
   definedImages.forEach(({ img }) => {
     if (img.complete && img.naturalWidth > 0) {
       imagesLoaded++;
@@ -3538,7 +3548,7 @@ function startGameAfterImages() {
   if (window.__gameStarted) return;
   window.__gameStarted = true;
 
-  // jouw oude start-code hier
+  // ✅ spelstart-reset
   level = 1;
   score = 0;
   lives = 3;
@@ -3550,8 +3560,6 @@ function startGameAfterImages() {
   updateScoreDisplay?.();
   draw();
 }
-
-
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
