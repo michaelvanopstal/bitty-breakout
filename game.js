@@ -1075,95 +1075,90 @@ for (let c = 0; c < brickColumnCount; c++) {
 }
 
 
-
-const silver1Img = new Image();
+window.silver1Img = new Image();
 silver1Img.src = "silver1.png";
 
-const silver2Img = new Image();
+window.silver2Img = new Image();
 silver2Img.src = "silver2.png";
 
-const heartBoardImg = new Image();
+window.heartBoardImg = new Image();
 heartBoardImg.src = "heart_board.png";
 
-const heartImg = new Image();
-heartImg.src = "heart.png"; // zorg dat je dit bestand hebt!
+window.heartImg = new Image();
+heartImg.src = "heart.png";
 
-
-const machinegunBlockImg = new Image();
+window.machinegunBlockImg = new Image();
 machinegunBlockImg.src = "machinegun_block.png";
 
-const machinegunGunImg = new Image();
+window.machinegunGunImg = new Image();
 machinegunGunImg.src = "machinegun_gun.png";
 
-const lifeImg = new Image();
+window.lifeImg = new Image();
 lifeImg.src = "level.png";
 
-const dollarPxpImg = new Image();
+window.dollarPxpImg = new Image();
 dollarPxpImg.src = "dollarpxp.png";
 
+window.doubleBallImg = new Image();
+doubleBallImg.src = "2 balls.png";
 
-const doubleBallImg = new Image();
-doubleBallImg.src = "2 balls.png";  // upload dit naar dezelfde map
-
-
-const blockImg = new Image();
+window.blockImg = new Image();
 blockImg.src = "block_logo.png";
 
-const ballImg = new Image();
+window.ballImg = new Image();
 ballImg.src = "ball_logo.png";
 
-const vlagImgLeft = new Image();
+window.vlagImgLeft = new Image();
 vlagImgLeft.src = "vlaggetje1.png";
 
-const vlagImgRight = new Image();
+window.vlagImgRight = new Image();
 vlagImgRight.src = "vlaggetje2.png";
 
-const shootCoinImg = new Image();
+window.shootCoinImg = new Image();
 shootCoinImg.src = "3.png";
 
-const powerBlockImg = new Image(); // Voor bonusblok type 'power'
+window.powerBlockImg = new Image();
 powerBlockImg.src = "power_block_logo.png";
 
-const powerBlock2Img = new Image(); // Voor bonusblok type 'rocket'
+window.powerBlock2Img = new Image();
 powerBlock2Img.src = "signalblock2.png";
 
-const rocketImg = new Image();
+window.rocketImg = new Image();
 rocketImg.src = "raket1.png";
 
-const doublePointsImg = new Image();
+window.doublePointsImg = new Image();
 doublePointsImg.src = "2x.png";
 
-const speedImg = new Image();
+window.speedImg = new Image();
 speedImg.src = "speed.png";
 
-const pointpayPaddleImg = new Image();
+window.pointpayPaddleImg = new Image();
 pointpayPaddleImg.src = "balkje.png";
 
-const stone1Img = new Image();
+window.stone1Img = new Image();
 stone1Img.src = "stone1.png";
 
-const stone2Img = new Image();
+window.stone2Img = new Image();
 stone2Img.src = "stone2.png";
 
-const pxpBagImg = new Image();
-pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
+window.pxpBagImg = new Image();
+pxpBagImg.src = "pxp_bag.png";
 
-const stoneBlockImg  = new Image();
-stoneBlockImg.src  = "stone_block.png";
+window.stoneBlockImg = new Image();
+stoneBlockImg.src = "stone_block.png";
 
+window.stoneLargeImg = new Image();
+stoneLargeImg.src = "stone_large.png";
 
+window.paddleLongBlockImg = new Image();
+paddleLongBlockImg.src = "paddlelong.png";
 
-const stoneLargeImg  = new Image(); 
-stoneLargeImg.src  = "stone_large.png";
+window.paddleSmallBlockImg = new Image();
+paddleSmallBlockImg.src = "paddlesmall.png";
 
-const paddleLongBlockImg = new Image();
-paddleLongBlockImg.src = "paddlelong.png";   // jouw upload
+window.magnetImg = new Image();
+magnetImg.src = "magnet.png";
 
-const paddleSmallBlockImg = new Image();
-paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
-
-const magnetImg = new Image();
-magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
 
 // Vergeet niet je 'expected' imagesLoaded maximale aantal met +4 te verhogen.
