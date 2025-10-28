@@ -31,7 +31,6 @@ let balls = [];                 // actieve ballen
 let doublePointsActive = false;
 let doublePointsStartTime = 0;
 const doublePointsDuration = 60000; // 1 minuut in milliseconden
-let imagesLoaded = 0;               // ← eigen regel
 let pointPopups = [];
 let pxpBags = [];
 let paddleExploding = false;
