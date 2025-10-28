@@ -2949,14 +2949,13 @@ function isPaddleBlockedHorizontally(newX) {
   }
   return false;
 }
-
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Laag-volgorde (achtergrond effecten onder alles)
   drawElectricBursts();
 
-  // Fysica/colldet voor bricks/items die jij al vroeg doet
+  // Core collisions / visuals voor bricks & items
   collisionDetection();
   drawCoins();
   drawFallingHearts();
@@ -2968,32 +2967,20 @@ function draw() {
   checkFlyingCoinHits();
   drawPointPopups();
 
-  // A) Time-out check heel vroeg in draw()
-  if (magnetActive && performance.now() >= magnetEndTime) {
-    stopMagnet();
-  }
-
-  // B) Toepassen op arrays (na physics update van items, vóór render)
+  // A) Timers / effecten
+  if (magnetActive && performance.now() >= magnetEndTime) stopMagnet();
   applyMagnetToArray(fallingHearts);
   applyMagnetToArray(coins);
   applyMagnetToArray(pxpBags);
 
-  // Tijdelijke effecten opruimen
-  if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
-    stopPaddleSizeEffect();
-  }
-  if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
-    doublePointsActive = false;
-  }
+  if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) stopPaddleSizeEffect();
+  if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) doublePointsActive = false;
 
   // 🔵 Ballen updaten + randen + trails + tekenen
   balls.forEach((ball, index) => {
     // Positie-update
     if (ballLaunched) {
-      const speedMultiplier =
-        (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
-          ? speedBoostMultiplier
-          : 1;
+      const speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration) ? speedBoostMultiplier : 1;
       ball.x += ball.dx * speedMultiplier;
       ball.y += ball.dy * speedMultiplier;
     } else {
@@ -3002,49 +2989,43 @@ function draw() {
       ball.y = paddleY - ballRadius * 2;
     }
 
-    // Trail bijhouden
+    // Trail
     if (!ball.trail) ball.trail = [];
     let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
-    const steps = 3;
-    for (let i = 1; i <= steps; i++) {
-      const px = last.x + (ball.x - last.x) * (i / steps);
-      const py = last.y + (ball.y - last.y) * (i / steps);
+    for (let i = 1; i <= 3; i++) {
+      const px = last.x + (ball.x - last.x) * (i / 3);
+      const py = last.y + (ball.y - last.y) * (i / 3);
       ball.trail.push({ x: px, y: py });
     }
     while (ball.trail.length > 20) ball.trail.shift();
 
     // Zijwanden (altijd reflecteren)
     if (ball.x <= ball.radius + 1 && ball.dx < 0) {
-      ball.x = ball.radius + 1;
-      ball.dx *= -1;
+      ball.x = ball.radius + 1; ball.dx *= -1;
       try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
     }
     if (ball.x >= canvas.width - ball.radius - 1 && ball.dx > 0) {
-      ball.x = canvas.width - ball.radius - 1;
-      ball.dx *= -1;
+      ball.x = canvas.width - ball.radius - 1; ball.dx *= -1;
       try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
     }
 
-    // Bovenrand
+    // Bovenrand / onderrand per modus
     if (!duelModeActive) {
-      // Normale game: bounce
       if (ball.y <= ball.radius + 1 && ball.dy < 0) {
-        ball.y = ball.radius + 1;
-        ball.dy *= -1;
+        ball.y = ball.radius + 1; ball.dy *= -1;
         try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
       }
     } else {
-      // Duel: geen bounce — punt voor speler als hij over top gaat
       if (ball.y - ball.radius <= 0) {
         duelPlayerScore++;
-        duelExplodePaddle(false);        // CPU paddle explodeert (visueel)
+        duelExplodePaddle(false);
         duelBallBaseSpeed += DUEL_BALL_SPEED_STEP;
-        startDuelRound(false);           // nieuwe rally
-        return; // stop verdere verwerking van deze bal in deze frame
+        startDuelRound(false);
+        return;
       }
     }
 
-    // Botsing met speler-paddle (met jouw damage-zones)
+    // Botsing met spelerpaddle (inclusief damage-zones)
     if (
       ball.y + ball.radius > paddleY &&
       ball.y - ball.radius < paddleY + paddleHeight &&
@@ -3052,22 +3033,15 @@ function draw() {
       ball.x - ball.radius < paddleX + paddleWidth
     ) {
       let reflect = true;
-
       if (machineGunActive || machineGunCooldownActive) {
         const segmentWidth = paddleWidth / 10;
         for (let i = 0; i < 10; i++) {
           const segX = paddleX + i * segmentWidth;
-          const isDamaged = paddleDamageZones.some(hitX =>
-            hitX >= segX && hitX <= segX + segmentWidth
-          );
+          const isDamaged = paddleDamageZones.some(hitX => hitX >= segX && hitX <= segX + segmentWidth);
           const ballCenterX = ball.x;
-          if (ballCenterX >= segX && ballCenterX < segX + segmentWidth && isDamaged) {
-            reflect = false;
-            break;
-          }
+          if (ballCenterX >= segX && ballCenterX < segX + segmentWidth && isDamaged) { reflect = false; break; }
         }
       }
-
       if (reflect) {
         const hitPos = (ball.x - paddleX) / paddleWidth;
         const angle = (hitPos - 0.5) * Math.PI / 2;
@@ -3078,24 +3052,21 @@ function draw() {
       }
     }
 
-    // Onderrand
     if (!duelModeActive) {
-      // Normale game: bal verwijderen (leven elders afgehandeld)
       if (ball.y + ball.dy > canvas.height) {
         balls.splice(index, 1);
       }
     } else {
-      // Duel: punt voor CPU als speler-lijn gepasseerd
       if (ball.y + ball.radius >= canvas.height) {
         duelCPUScore++;
-        duelExplodePaddle(true);         // speler paddle explodeert (visueel)
+        duelExplodePaddle(true);
         duelBallBaseSpeed += DUEL_BALL_SPEED_STEP;
         startDuelRound(false);
-        return; // stop verdere verwerking
+        return;
       }
     }
 
-    // ✨ Energie-staart tekenen
+    // ✨ Trail tekenen
     if (ball.trail.length >= 2) {
       const head = ball.trail[ball.trail.length - 1];
       const tail = ball.trail[0];
@@ -3133,48 +3104,35 @@ function draw() {
     stoneHitOverlayTimer--;
   }
 
-  // Geen auto-levenverlies in duel wanneer alle ballen weg zijn
+  // Geen auto-levenverlies in duel als ballen op zijn
   if (!duelModeActive) {
     if (balls.length === 0 && !paddleExploding) {
-      triggerPaddleExplosion(); // pas nu verlies van leven
+      triggerPaddleExplosion();
     }
   }
 
-  // Bricks (tekenen blijft veilig; in duel staan ze op status=0)
+  // Bricks tekenen
   drawBricks();
 
-  // 🎮 Spelerinput verwerken (na physics)
-  if (leftPressed) {
-    const newX = paddleX - paddleSpeed;
-    if (newX > 0 && !isPaddleBlockedHorizontally(newX)) paddleX = newX;
-  }
-  if (rightPressed) {
-    const newX = paddleX + paddleSpeed;
-    if (newX + paddleWidth < canvas.width && !isPaddleBlockedHorizontally(newX)) paddleX = newX;
-  }
-  if (upPressed) {
-    const newY = paddleY - paddleSpeed;
-    if (paddleFreeMove) {
-      if (newY > 0 && !isPaddleBlockedVertically(newY)) paddleY = newY;
-    }
+  // 🎮 Spelerinput verwerken
+  if (leftPressed)  { const nx = paddleX - paddleSpeed; if (nx > 0 && !isPaddleBlockedHorizontally(nx)) paddleX = nx; }
+  if (rightPressed) { const nx = paddleX + paddleSpeed; if (nx + paddleWidth < canvas.width && !isPaddleBlockedHorizontally(nx)) paddleX = nx; }
+  if (upPressed && paddleFreeMove) {
+    const ny = paddleY - paddleSpeed; if (ny > 0 && !isPaddleBlockedVertically(ny)) paddleY = ny;
   }
   if (downPressed) {
-    const newY = paddleY + paddleSpeed;
-    if (newY + paddleHeight < canvas.height && !isPaddleBlockedVertically(newY)) paddleY = newY;
+    const ny = paddleY + paddleSpeed; if (ny + paddleHeight < canvas.height && !isPaddleBlockedVertically(ny)) paddleY = ny;
   }
 
-  // 🤖 CPU Paddle (alleen in duel) — AI + collision
+  // 🏓 CPU Paddle (alleen in duel) — AI + collision + tekenen + HUD
   if (duelModeActive) {
     const cfg = CPU_CONFIG[cpuDifficulty] || CPU_CONFIG[2];
 
-    // Periodieke herberekening target
     if (performance.now() >= _cpuNextReactAt) {
       _cpuNextReactAt = performance.now() + cfg.reactMs;
-
       const mainBall = balls[0];
       if (mainBall) {
         if (mainBall.dy < 0) {
-          // eenvoudige voorspelling + ruis + wandwrap
           const t = ((cpuPaddleY + cpuPaddleHeight) - mainBall.y) / mainBall.dy;
           let predX = mainBall.x + mainBall.dx * t;
           const w = canvas.width;
@@ -3209,49 +3167,241 @@ function draw() {
         const angle = (hitPos - 0.5) * Math.PI / 2;
         const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
         ball.dx = speed * Math.sin(angle);
-        ball.dy = Math.abs(speed * Math.cos(angle)); // omlaag
+        ball.dy = Math.abs(speed * Math.cos(angle));
         try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
       }
     });
-  }
 
-  // 🎨 Tekenen van paddles en duel HUD (NB: jouw drawPaddle() kan elders al worden aangeroepen)
-  // Teken in elk geval CPU paddle + mini-scoreboards hier als duel actief is:
-  if (duelModeActive) {
-    // CPU paddle
+    // CPU paddle tekenen + duel HUD
     ctx.save();
     ctx.fillStyle = "#88aaff";
     ctx.fillRect(cpuPaddleX, cpuPaddleY, cpuPaddleWidth, cpuPaddleHeight);
     ctx.restore();
 
-    // Mini-scoreboards
     ctx.save();
     ctx.font = "bold 18px Arial";
     ctx.textAlign = "left";
     ctx.fillStyle = "#ffffff";
     ctx.fillText(`YOU: ${duelPlayerScore}`, 12, 24);
-
     ctx.textAlign = "right";
     ctx.fillText(`CPU: ${duelCPUScore}`, canvas.width - 12, 24);
     ctx.restore();
   }
 
-  // 🏁 Duel win/lose check (aan het eind van frame)
+  // 🎨 Spelerpaddle + magnet visuals
+  drawPaddle();
+  drawMagnetAura(ctx);
+  drawMagnetHUD(ctx);
+
+  // 🚀 Raket tekenen/aansturen
+  if (rocketActive && !rocketFired && rocketAmmo > 0) {
+    rocketX = paddleX + paddleWidth / 2 - 12;
+    rocketY = paddleY - 48;
+    ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
+  }
+  if (rocketFired) {
+    rocketY -= rocketSpeed;
+    smokeParticles.push({ x: rocketX + 15, y: rocketY + 65, radius: Math.random()*6 + 4, alpha: 1 });
+    if (rocketY < -48) {
+      rocketFired = false;
+      if (rocketAmmo <= 0) rocketActive = false;
+    } else {
+      ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
+      checkRocketCollision();
+    }
+  }
+
+  // 🔁 Start volgend level zodra alle bricks weg zijn
+  if (bricks.every(col => col.every(b => b.status === 0)) && !levelTransitionActive) {
+    startLevelTransition();
+  }
+
+  // 💥 Explosies
+  explosions.forEach(e => {
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+    ctx.fillStyle = e.color === "white" ? `rgba(255, 255, 255, ${e.alpha})` : `rgba(255, 165, 0, ${e.alpha})`;
+    ctx.fill();
+    e.radius += 2; e.alpha -= 0.05;
+  });
+  explosions = explosions.filter(e => e.alpha > 0);
+
+  // Rook
+  smokeParticles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(150, 150, 150, ${p.alpha})`;
+    ctx.fill();
+    p.y += 1; p.radius += 0.3; p.alpha -= 0.02;
+  });
+  smokeParticles = smokeParticles.filter(p => p.alpha > 0);
+
+  if (speedBoostActive && Date.now() - speedBoostStart >= speedBoostDuration) speedBoostActive = false;
+
+  // 🎒 Zakjes tekenen en vangen
+  for (let i = pxpBags.length - 1; i >= 0; i--) {
+    const bag = pxpBags[i];
+    bag.y += bag.dy;
+    ctx.drawImage(pxpBagImg, bag.x - 20, bag.y, 40, 40);
+
+    const bagLeft = bag.x - 20, bagRight = bag.x + 20, bagTop = bag.y, bagBottom = bag.y + 40;
+    const paddleLeft = paddleX, paddleRight = paddleX + paddleWidth, paddleTop = paddleY, paddleBottom = paddleY + paddleHeight;
+
+    const isOverlap = bagRight >= paddleLeft && bagLeft <= paddleRight && bagBottom >= paddleTop && bagTop <= paddleBottom;
+
+    if (isOverlap) {
+      try { pxpBagSound.currentTime = 0; pxpBagSound.play(); } catch(e){}
+      const earned = doublePointsActive ? 160 : 80;
+      score += earned; if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
+      pointPopups.push({ x: bag.x, y: bag.y, value: "+" + earned, alpha: 1 });
+      pxpBags.splice(i, 1);
+    } else if (bag.y > canvas.height) {
+      pxpBags.splice(i, 1);
+    }
+  }
+
+  // 🔫 Machinegun logica
+  if (machineGunActive && !machineGunCooldownActive) {
+    const verticalOffset = machineGunYOffset;
+    const minY = 0, maxY = paddleY - 10;
+    const targetX = paddleX + paddleWidth / 2 - 30;
+    let targetY = Math.max(minY, Math.min(paddleY - verticalOffset, maxY));
+    const followSpeed = machineGunDifficulty === 1 ? 1 : machineGunDifficulty === 2 ? 2 : 3;
+
+    if (machineGunGunX < targetX) machineGunGunX += followSpeed; else if (machineGunGunX > targetX) machineGunGunX -= followSpeed;
+    if (machineGunGunY < targetY) machineGunGunY += followSpeed; else if (machineGunGunY > targetY) machineGunGunY -= followSpeed;
+
+    ctx.drawImage(machinegunGunImg, machineGunGunX, machineGunGunY, 60, 60);
+
+    if (Date.now() - machineGunLastShot > machineGunBulletInterval && machineGunShotsFired < 30) {
+      machineGunBullets.push({ x: machineGunGunX + 30, y: machineGunGunY + 60, dy: 6 });
+      machineGunShotsFired++;
+      machineGunLastShot = Date.now();
+      try { shootSound.currentTime = 0; shootSound.play(); } catch(e){}
+    }
+
+    machineGunBullets.forEach((bullet, i) => {
+      bullet.y += bullet.dy;
+      ctx.beginPath(); ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2); ctx.fillStyle = "red"; ctx.fill();
+
+      if (bullet.y >= paddleY && bullet.x >= paddleX && bullet.x <= paddleX + paddleWidth) {
+        const hitX = bullet.x - paddleX, radius = 6;
+        if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
+          paddleDamageZones.push(bullet.x);
+          paddleCtx.globalCompositeOperation = 'destination-out';
+          paddleCtx.beginPath();
+          paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
+          paddleCtx.fill();
+          paddleCtx.globalCompositeOperation = 'source-over';
+        }
+        machineGunBullets.splice(i, 1);
+      } else if (bullet.y > canvas.height) {
+        machineGunBullets.splice(i, 1);
+      }
+    });
+
+    if (machineGunShotsFired >= 30 && machineGunBullets.length === 0 && !machineGunCooldownActive) {
+      machineGunCooldownActive = true;
+      machineGunStartTime = Date.now();
+    }
+  }
+
+  if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCooldownTime) {
+    machineGunCooldownActive = false;
+    machineGunActive = false;
+    paddleDamageZones = [];
+    score += 500; if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
+    pointPopups.push({ x: paddleX + paddleWidth / 2, y: canvas.height - 30, value: "+500", alpha: 1 });
+    resetPaddle(true, true); // geen ball reset, geen centrering
+  }
+
+  if ((machineGunActive || machineGunCooldownActive) && paddleDamageZones.length >= 10) {
+    machineGunBullets = []; // stop vuren
+  }
+
+  // ✨ Levelbanner + fade-out
+  if (levelMessageVisible) {
+    ctx.save();
+    ctx.globalAlpha = levelMessageAlpha;
+    ctx.fillStyle = "#00ffff";
+    ctx.font = "bold 36px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(levelMessageText || `Bitty Bitcoin Mascot — Level ${level}`, canvas.width / 2, canvas.height / 2);
+    ctx.restore();
+
+    levelMessageTimer++;
+    const visibleTime = 180, fadeTime = 120;
+    if (levelMessageTimer <= visibleTime) levelMessageAlpha = 1;
+    else {
+      const fadeProgress = (levelMessageTimer - visibleTime) / fadeTime;
+      levelMessageAlpha = Math.max(0, 1 - fadeProgress);
+    }
+    if (levelMessageTimer >= visibleTime + fadeTime) levelMessageVisible = false;
+  }
+
+  // 🎬 Overgangstimer & animatie
+  if (levelTransitionActive) {
+    if (transitionOffsetY < 0) transitionOffsetY += 2;
+    else { transitionOffsetY = 0; levelTransitionActive = false; }
+  }
+
+  // 🎆 Fireworks & 🎊 Confetti
+  drawFireworks();
+  drawConfetti();
+
+  // GAME OVER overlay
+  if (showGameOver) {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, Math.min(1, gameOverAlpha));
+    ctx.fillStyle = "#B0B0B0";
+    ctx.font = "bold 48px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
+    ctx.restore();
+
+    if (gameOverTimer < 60) gameOverAlpha = Math.min(1, gameOverAlpha + 0.05);
+    else if (gameOverTimer < 120) gameOverAlpha = Math.max(0, gameOverAlpha - 0.05);
+
+    gameOverTimer++;
+    if (gameOverTimer >= 120) showGameOver = false;
+  }
+
+  // 🎇 Paddle-explosie tekenen
+  if (paddleExploding) {
+    paddleExplosionParticles.forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 100, 0, ${p.alpha})`; ctx.fill();
+      p.x += p.dx; p.y += p.dy; p.alpha -= 0.02;
+    });
+    paddleExplosionParticles = paddleExplosionParticles.filter(p => p.alpha > 0);
+  }
+
+  // 🔴 Reset overlay (sirene)
+  if (resetOverlayActive) {
+    if (Date.now() % 1000 < 500) {
+      ctx.save(); ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.restore();
+    }
+  }
+
+  // 🧱 Steenpuin tekenen
+  stoneDebris.forEach(p => {
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(140, 120, 100, ${p.alpha})`; ctx.fill();
+    p.x += p.dx; p.y += p.dy; p.alpha -= 0.02;
+  });
+  stoneDebris = stoneDebris.filter(p => p.alpha > 0);
+
+  // 🏁 Duel win/lose check
   if (duelModeActive) {
     if (duelPlayerScore >= DUEL_TARGET || duelCPUScore >= DUEL_TARGET) {
       const playerWon = duelPlayerScore >= DUEL_TARGET;
-
       if (playerWon) {
-        // +1 leven en door naar volgend level
-        lives = Math.min(lives + 1, 9);
-        if (typeof updateLivesDisplay === 'function') updateLivesDisplay();
+        lives = Math.min(lives + 1, 9); if (typeof updateLivesDisplay === 'function') updateLivesDisplay();
         level = Math.min(level + 1, (typeof TOTAL_LEVELS !== "undefined" ? TOTAL_LEVELS : 20));
       } else {
-        // level terug
         level = Math.max(1, level - 1);
       }
-
-      // Duel uit en normale flow herstellen
       duelModeActive = false;
       if (typeof resetAllBonuses === 'function') resetAllBonuses();
       resetBricks();
@@ -3261,361 +3411,10 @@ function draw() {
     }
   }
 
-  // Next frame
+  // Volgende frame
   animationFrameId = requestAnimationFrame(draw);
 }
 
-  drawPaddle();
-  drawMagnetAura(ctx);
-  drawMagnetHUD(ctx);
-
-  // 🖼️ CPU paddle + mini-scoreboards
-  if (duelModeActive) {
-    // CPU paddle
-    ctx.save();
-    ctx.fillStyle = "#88aaff";
-    ctx.fillRect(cpuPaddleX, cpuPaddleY, cpuPaddleWidth, cpuPaddleHeight);
-    ctx.restore();
-
-    // Score left/right klein
-    ctx.save();
-    ctx.font = "bold 18px Arial";
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(`YOU: ${duelPlayerScore}`, 12, 24);
-
-    ctx.textAlign = "right";
-    ctx.fillText(`CPU: ${duelCPUScore}`, canvas.width - 12, 24);
-    ctx.restore();
-  }
-
-
-
-
-  if (rocketActive && !rocketFired && rocketAmmo > 0) {
-    rocketX = paddleX + paddleWidth / 2 - 12;
-    rocketY = paddleY - 48; // ✅ boven de paddle, waar die zich ook bevindt
-    ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
-  }
-
-  if (rocketFired) {
-    rocketY -= rocketSpeed;
-
-    smokeParticles.push({
-      x: rocketX + 15,
-      y: rocketY + 65,
-      radius: Math.random() * 6 + 4,
-      alpha: 1
-    });
-
-    if (rocketY < -48) {
-      rocketFired = false;
-      if (rocketAmmo <= 0) {
-        rocketActive = false;
-      }
-    } else {
-      ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
-      checkRocketCollision();
-    }
-  } // ✅ DIT is de juiste afsluitende accolade voor rocketFired-block
-
-  // 🔁 Start level 2 zodra alle blokjes weg zijn
-  if (bricks.every(col => col.every(b => b.status === 0)) && !levelTransitionActive) {
-    startLevelTransition();
-  }
-
- // Explosies tekenen
-explosions.forEach(e => {
-  ctx.beginPath();
-  ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
-  ctx.fillStyle = e.color === "white"
-    ? `rgba(255, 255, 255, ${e.alpha})`
-    : `rgba(255, 165, 0, ${e.alpha})`;
-  ctx.fill();
-  e.radius += 2;
-  e.alpha -= 0.05;
-});
-explosions = explosions.filter(e => e.alpha > 0);
-
-  // Rook tekenen
-  smokeParticles.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(150, 150, 150, ${p.alpha})`;
-    ctx.fill();
-    p.y += 1;
-    p.radius += 0.3;
-    p.alpha -= 0.02;
-  });
-  smokeParticles = smokeParticles.filter(p => p.alpha > 0);
-
-  if (speedBoostActive && Date.now() - speedBoostStart >= speedBoostDuration) {
-    speedBoostActive = false;
-  }
-
-  // Zakjes tekenen en vangen
-for (let i = pxpBags.length - 1; i >= 0; i--) {
-  let bag = pxpBags[i];
-  bag.y += bag.dy;
-
-  ctx.drawImage(pxpBagImg, bag.x - 20, bag.y, 40, 40);
-
-  // Bounding box van zakje
-  const bagLeft = bag.x - 20;
-  const bagRight = bag.x + 20;
-  const bagTop = bag.y;
-  const bagBottom = bag.y + 40;
-
-  // Bounding box van paddle (gebruik huidige Y!)
-  const paddleLeft = paddleX;
-  const paddleRight = paddleX + paddleWidth;
-  const paddleTop = paddleY;
-  const paddleBottom = paddleY + paddleHeight;
-
-  // Controleer volledige overlapping
-  const isOverlap =
-    bagRight >= paddleLeft &&
-    bagLeft <= paddleRight &&
-    bagBottom >= paddleTop &&
-    bagTop <= paddleBottom;
-
-  if (isOverlap) {
-    pxpBagSound.currentTime = 0;
-    pxpBagSound.play();
-
-    const earned = doublePointsActive ? 160 : 80;
-    score += earned;
-    updateScoreDisplay(); // 👈 aangepaste regel
-
-    pointPopups.push({
-      x: bag.x,
-      y: bag.y,
-      value: "+" + earned,
-      alpha: 1
-    });
-
-    pxpBags.splice(i, 1);
-  } else if (bag.y > canvas.height) {
-    pxpBags.splice(i, 1); // uit beeld
-  }
-}
-
-if (machineGunActive && !machineGunCooldownActive) {
-  // 📍 Instelbare offset tussen paddle en gun
-  const verticalOffset = machineGunYOffset;
-  const minY = 0;                  // bovenste limiet
-  const maxY = paddleY - 10;       // optioneel: niet te dicht bij paddle
-
-  // Targetposities voor X en Y
-  const targetX = paddleX + paddleWidth / 2 - 30;
-  let targetY = paddleY - verticalOffset;
-  targetY = Math.max(minY, targetY);
-  targetY = Math.min(targetY, maxY);
-
-  const followSpeed = machineGunDifficulty === 1 ? 1 : machineGunDifficulty === 2 ? 2 : 3;
-
-  // 🟢 Volg paddle horizontaal
-  if (machineGunGunX < targetX) machineGunGunX += followSpeed;
-  else if (machineGunGunX > targetX) machineGunGunX -= followSpeed;
-
-  // 🟢 Volg paddle verticaal
-  if (machineGunGunY < targetY) machineGunGunY += followSpeed;
-  else if (machineGunGunY > targetY) machineGunGunY -= followSpeed;
-
-  // 🔫 Teken geweer
-  ctx.drawImage(machinegunGunImg, machineGunGunX, machineGunGunY, 60, 60);
-
-  // 🔥 Vuur kogels
-  if (Date.now() - machineGunLastShot > machineGunBulletInterval && machineGunShotsFired < 30) {
-    machineGunBullets.push({
-      x: machineGunGunX + 30,
-      y: machineGunGunY + 60,
-      dy: 6
-    });
-    machineGunShotsFired++;
-    machineGunLastShot = Date.now();
-    shootSound.currentTime = 0;
-    shootSound.play();
-  }
-
-  // 💥 Verwerk kogels
-  machineGunBullets.forEach((bullet, i) => {
-    bullet.y += bullet.dy;
-    ctx.beginPath();
-    ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = "red";
-    ctx.fill();
-
-    // 🎯 Check botsing met paddle
-    if (
-      bullet.y >= paddleY &&
-      bullet.x >= paddleX &&
-      bullet.x <= paddleX + paddleWidth
-    ) {
-      const hitX = bullet.x - paddleX;
-      const radius = 6;
-
-      if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
-        paddleDamageZones.push(bullet.x);
-
-        // ❗ GAT MAKEN
-        paddleCtx.globalCompositeOperation = 'destination-out';
-        paddleCtx.beginPath();
-        paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
-        paddleCtx.fill();
-        paddleCtx.globalCompositeOperation = 'source-over';
-      }
-
-      machineGunBullets.splice(i, 1);
-    } else if (bullet.y > canvas.height) {
-      machineGunBullets.splice(i, 1);
-    }
-  });
-
-  // ⏳ Start cooldown als alle 30 kogels zijn afgevuurd
-  if (machineGunShotsFired >= 30 && machineGunBullets.length === 0 && !machineGunCooldownActive) {
-    machineGunCooldownActive = true;
-    machineGunStartTime = Date.now();
-  }
-}
-
-if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCooldownTime) {
-  machineGunCooldownActive = false;
-  machineGunActive = false;
-  paddleDamageZones = [];
-
-  // ✅ +500 punten en UI direct bijwerken
-  score += 500;
-  if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
-
-  pointPopups.push({
-    x: paddleX + paddleWidth / 2,
-    y: canvas.height - 30,
-    value: "+500",
-    alpha: 1
-  });
-
-  resetPaddle(true, true); // ✅ geen ball reset, geen centrering
-}
-
-// 💀 Paddle “vernietigd” tijdens machinegun? → stop kogels, laat 30s-timer/cooldown doorlopen
-if ((machineGunActive || machineGunCooldownActive) && paddleDamageZones.length >= 10) {
-  machineGunBullets = []; // stop vuren
-}
-
-
-
-// ✨ Levelbanner + fade-out
-if (levelMessageVisible) {
-  ctx.save();
-  ctx.globalAlpha = levelMessageAlpha;
-  ctx.fillStyle = "#00ffff";
-  ctx.font = "bold 36px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText(
-    levelMessageText || `Bitty Bitcoin Mascot — Level ${level}`,
-    canvas.width / 2,
-    canvas.height / 2
-  );
-  ctx.restore();
-
-  // ⏱️ 3s volledig zichtbaar, daarna ~2s fade-out
-  levelMessageTimer++;
-
-  const visibleTime = 180; // 3s @ 60 FPS
-  const fadeTime    = 120; // ~2s fade
-
-  if (levelMessageTimer <= visibleTime) {
-    levelMessageAlpha = 1;
-  } else {
-    const fadeProgress = (levelMessageTimer - visibleTime) / fadeTime;
-    levelMessageAlpha = Math.max(0, 1 - fadeProgress);
-  }
-
-  if (levelMessageTimer >= visibleTime + fadeTime) {
-    levelMessageVisible = false;
-  }
-}
-
-// 🎬 Overgangstimer & animatie
-if (levelTransitionActive) {
-  // NIET levelMessageAlpha forceren en NIET nogmaals levelMessageTimer++
-  if (transitionOffsetY < 0) {
-    transitionOffsetY += 2;
-  } else {
-    transitionOffsetY = 0;
-    levelTransitionActive = false;
-  }
-}
-
-
-// 🎆 Fireworks (raketten + vonken)
-drawFireworks();
-
-// 🎊 Confetti bovenop de scene tekenen
-drawConfetti();
-
-
-if (showGameOver) {
-  ctx.save();
-  ctx.globalAlpha = gameOverAlpha;
-  ctx.fillStyle = "#B0B0B0";
-  ctx.font = "bold 48px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
-  ctx.restore();
-
-  if (gameOverTimer < 60) {
-    gameOverAlpha += 0.05; // fade-in
-  } else if (gameOverTimer >= 60 && gameOverTimer < 120) {
-    gameOverAlpha -= 0.05; // fade-out
-  }
-
-  gameOverTimer++;
-
-  if (gameOverTimer >= 120) {
-    showGameOver = false;
-  }
-}
-
-
-  // 🎇 Paddle-explosie tekenen
-  if (paddleExploding) {
-    paddleExplosionParticles.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 100, 0, ${p.alpha})`;
-      ctx.fill();
-      p.x += p.dx;
-      p.y += p.dy;
-      p.alpha -= 0.02;
-    });
-
-    paddleExplosionParticles = paddleExplosionParticles.filter(p => p.alpha > 0);
-  }
-  
-  if (resetOverlayActive) {
-  if (Date.now() % 1000 < 500) {
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-}
-
-  // 🧱 Steenpuin tekenen
-  stoneDebris.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(140, 120, 100, ${p.alpha})`;
-    ctx.fill();
-    p.x += p.dx;
-    p.y += p.dy;
-    p.alpha -= 0.02;
-  });
-
-  stoneDebris = stoneDebris.filter(p => p.alpha > 0);
-
-  animationFrameId = requestAnimationFrame(draw);
-} // ✅ Sluit function draw() correct af
 
 function onImageLoad() {
   imagesLoaded++;
