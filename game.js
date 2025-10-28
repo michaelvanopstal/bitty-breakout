@@ -1160,6 +1160,11 @@ window.magnetImg = new Image();
 magnetImg.src = "magnet.png";
 
 
+// ✅ Registratie pas na aanmaken en src-koppeling
+registerImageOnloads();
+
+
+
 
 // Vergeet niet je 'expected' imagesLoaded maximale aantal met +4 te verhogen.
 
