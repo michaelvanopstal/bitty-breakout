@@ -1307,7 +1307,6 @@ function updateScoreDisplay() {
   document.getElementById("scoreDisplay").textContent = score;
 }
 
-
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
   const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
@@ -1326,7 +1325,7 @@ function drawBricks() {
 
       switch (b.type) {
         case "freeze":
-          if (freezeBlockImg && freezeBlockImg.complete) {
+          if (freezeBlockImg && (freezeBlockImg.loaded || freezeBlockImg.complete)) {
             ctx.drawImage(freezeBlockImg, brickX, brickY, brickWidth, brickHeight);
           } else {
             // fallback (strak rechthoekig)
@@ -1407,15 +1406,24 @@ function drawBricks() {
           break;
       }
 
-      // ❄️ Teken procedurale ijslaag op elk bevroren blok (geen extra image nodig)
+      // ❄️ Teken procedurale ijslaag op elk bevroren blok met langzame opbouw
       if (b.frozen) {
-        // zaad (seed) op basis van gridpositie → stabiel patroon
         const seed = (c * 73856093) ^ (r * 19349663);
-        drawIceLayer(ctx, brickX, brickY, brickWidth, brickHeight, seed);
+
+        // progress 0..1 o.b.v. tijd sinds freezeStart
+        const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+        const start = b.freezeStart || now;
+        const raw = Math.max(0, Math.min(1, (now - start) / (typeof FREEZE_GROW_MS !== "undefined" ? FREEZE_GROW_MS : 800)));
+
+        // Easing (ease-out): sneller in het begin, langzamer op het einde
+        const progress = 1 - Math.pow(1 - raw, 2);
+
+        drawIceLayer(ctx, brickX, brickY, brickWidth, brickHeight, seed, progress);
       }
     }
   }
 }
+
 
 function clearAllFrozenFlags() {
   for (let c = 0; c < brickColumnCount; c++) {
