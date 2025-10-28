@@ -3463,7 +3463,8 @@ if (showGameOver) {
   ctx.textAlign = "center";
   ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
   ctx.restore();
-
+// 🎮 GAME OVER overlay (fade in/out)
+if (showGameOver) {
   if (gameOverTimer < 60) {
     gameOverAlpha += 0.05; // fade-in
   } else if (gameOverTimer >= 60 && gameOverTimer < 120) {
@@ -3475,24 +3476,22 @@ if (showGameOver) {
   if (gameOverTimer >= 120) {
     showGameOver = false;
   }
+} // ✅ sluit if (showGameOver)
+
+// 🎇 Paddle-explosie tekenen
+if (paddleExploding) {
+  paddleExplosionParticles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 100, 0, ${p.alpha})`;
+    ctx.fill();
+    p.x += p.dx;
+    p.y += p.dy;
+    p.alpha -= 0.02;
+  });
+  paddleExplosionParticles = paddleExplosionParticles.filter(p => p.alpha > 0);
 }
 
-
-  // 🎇 Paddle-explosie tekenen
-  if (paddleExploding) {
-    paddleExplosionParticles.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 100, 0, ${p.alpha})`;
-      ctx.fill();
-      p.x += p.dx;
-      p.y += p.dy;
-      p.alpha -= 0.02;
-    });
-
-    paddleExplosionParticles = paddleExplosionParticles.filter(p => p.alpha > 0);
-  }
-  
 // Reset overlay flits
 if (resetOverlayActive) {
   if (Date.now() % 1000 < 500) {
@@ -3507,7 +3506,7 @@ if (Array.isArray(stoneDebris) && stoneDebris.length > 0) {
     const p = stoneDebris[i];
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(140, 120, 100, ${p.alpha})`;
+    ctx.fillStyle = `rgba(140, 120, 100, ${Math.max(0, p.alpha)})`;
     ctx.fill();
 
     // update
@@ -3519,28 +3518,10 @@ if (Array.isArray(stoneDebris) && stoneDebris.length > 0) {
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
 }
 
-// Vraag nieuw frame aan
+// Volgend frame
 animationFrameId = requestAnimationFrame(draw);
-} // ✅ sluit function draw() correct af
+} // ✅ sluit function draw()
 
-function onImageLoad() {
-  imagesLoaded++;
-  if (imagesLoaded === 28) {
-    // Normale spelstart
-    level = 1;                // start op level 1
-    score = 0;
-    lives = 3;
-
-    updateLivesDisplay?.(); 
-    resetBricks();
-    resetPaddle?.();
-    resetBall();              // bal met juiste startsnelheid (via LEVELS params)
-    updateScoreDisplay?.();
-
-    // Timer pas starten wanneer jij de bal afschiet—blijft zoals je nu hebt
-    draw();                   // start render-loop
-  }
-}
 
 // 🎙️ Init Bitty-voice-line bij eerste spelstart
   if (typeof window.rockWarnState === "undefined") {
