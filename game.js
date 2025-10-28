@@ -1438,17 +1438,16 @@ function clearAllFrozenFlags() {
 }
 // roepen in resetBricks() en/of in je leven-verlies reset-flow
 
-// ❄️ Draw animated ice layer — call as drawIceLayer(ctx, x,y,w,h, seed, progress)
+// ❄️ Procedural ice overlay – gebruikt progress van 0..1
 function drawIceLayer(ctx, x, y, w, h, seed = 0, progress = 1) {
-  if (progress <= 0) return; // niets tekenen zolang nog niet begonnen
+  if (progress <= 0) return; // nog niks tekenen
 
   ctx.save();
 
-  // Basisbody: alpha groeit mee met progress
+  // Basis-body: transparantie groeit mee
   const topA = 0.85 * progress;
   const midA = 0.55 * progress;
   const botA = 0.85 * progress;
-
   const g = ctx.createLinearGradient(x, y, x, y + h);
   g.addColorStop(0,   `rgba(185,225,255,${topA})`);
   g.addColorStop(0.5, `rgba(160,205,255,${midA})`);
@@ -1457,15 +1456,18 @@ function drawIceLayer(ctx, x, y, w, h, seed = 0, progress = 1) {
   ctx.fillRect(x, y, w, h);
 
   // Randglans
-  ctx.strokeStyle = `rgba(255,255,255,${0.65 * progress})`;
+  ctx.strokeStyle = `rgba(255,255,255,${0.6 * progress})`;
   ctx.lineWidth = 1;
   ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
 
-  // Deterministisch random voor vaste textuur
+  // Deterministische random (stabiel patroon)
   let s = seed | 0;
-  function rnd(){ s = (s * 1664525 + 1013904223) | 0; return ((s >>> 0) % 1000) / 1000; }
+  function rnd() {
+    s = (s * 1664525 + 1013904223) | 0;
+    return ((s >>> 0) % 1000) / 1000;
+  }
 
-  // Frost-speckles
+  // Frost-puntjes
   const dots = Math.floor(16 * progress);
   ctx.fillStyle = `rgba(255,255,255,${0.35 * progress})`;
   for (let i = 0; i < dots; i++) {
@@ -1495,8 +1497,6 @@ function drawIceLayer(ctx, x, y, w, h, seed = 0, progress = 1) {
 
   ctx.restore();
 }
-
-
 
 
 function drawPointPopups() {
