@@ -1022,6 +1022,8 @@ const freezeActivateSfx = new Audio("freeze_activate.mp3");
 const iceShatterSfx     = new Audio("ice_shatter.mp3");
 // 1 laag = direct boven/onder/links/rechts; zet op 2 als je verder wil.
 const FREEZE_LAYERS = 1;
+// ❄️ Tijdsduur voor opbouw van de ijslaag (ms)
+const FREEZE_GROW_MS = 1200; // maak 1200 als je het trager wilt
 
 const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
 rockWarning.volume = 0.85;
@@ -1062,7 +1064,7 @@ for (let c = 0; c < brickColumnCount; c++) {
 const freezeBlockImg = new Image();
 freezeBlockImg.src = "freeze_block.png";
 
-console.log("Freeze image loaded?", freezeBlockImg.complete);
+
 
 const silver1Img = new Image();
 silver1Img.src = "silver1.png";
