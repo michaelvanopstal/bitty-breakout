@@ -1505,7 +1505,7 @@ function resetBricks() {
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
 
   if (typeof clearAllFrozenFlags === "function") clearAllFrozenFlags();
-}
+
 
   // Clamp en pas level-parameters toe
   const p = def?.params || {};
