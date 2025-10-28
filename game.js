@@ -3560,6 +3560,8 @@ paddleSmallBlockImg.onload = onImageLoad;
 magnetImg.onload = onImageLoad;
 stoneBlockImg.onload  = onImageLoad;
 stoneLargeImg.onload  = onImageLoad;
+freezeBlockImg.onload = onImageLoad;
+
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
