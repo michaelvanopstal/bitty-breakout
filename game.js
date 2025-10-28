@@ -65,30 +65,6 @@ let resetOverlayActive = false;
 let ballTrail = [];
 const maxTrailLength = 10;
 
-// 🎮 Duel Mode (Pong-achtig level)
-let duelModeActive = false;
-let duelPlayerScore = 0;
-let duelCPUScore = 0;
-const DUEL_TARGET = 10;
-let duelBallBaseSpeed = 6;        // start
-const DUEL_BALL_SPEED_STEP = 0.4; // per punt erbij
-let cpuPaddleX = 0;
-let cpuPaddleWidth = 100;
-let cpuPaddleHeight = 15;
-let cpuPaddleY = 18;              // vlak onder top
-let cpuVX = 0;
-
-// Moeilijkheid (1=easy, 2=normal, 3=hard)
-let cpuDifficulty = 2;
-const CPU_CONFIG = {
-  1: { maxSpeed: 5, reactMs: 120, noise: 28 },
-  2: { maxSpeed: 7, reactMs: 70,  noise: 16 },
-  3: { maxSpeed: 10, reactMs: 35, noise: 7  }
-};
-let _cpuNextReactAt = 0;
-let _cpuTargetX = null;
-
-
 let machineGunActive = false;
 let machineGunGunX = 0;
 let machineGunGunY = 0;
@@ -432,9 +408,7 @@ function stopMagnet() {
 
 
 
-// ======================= MAPS =======================
 
-// Bonusblokken voor level 1
 const bonusBricks = [
   { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" }, 
   { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" },
@@ -463,7 +437,7 @@ const bonusBricks = [
   { col: 7, row: 6, type: "stone" },
   { col: 6, row: 7, type: "stone" },
 ];
-
+// 📦 PXP layout voor level 2 (alleen steen-blokken)
 const pxpMap = [
   { col: 0, row: 4, type: "silver" }, { col: 0, row: 5 },   { col: 0, row: 8 },      { col: 0, row: 14 },     { col: 5, row: 3, type: "rocket" },{ col: 4, row: 10, type: "stonefall" },
   { col: 1, row: 4, type: "silver" }, { col: 1, row: 5 },   { col: 1, row: 8 },      { col: 1, row: 14 },     { col: 8, row: 5, type: "power" },   { col: 5, row: 11, type: "stonefall" },     
@@ -524,47 +498,46 @@ const level3Map = [
   { col: 3, row: 8, type: "stonefall" },
   { col: 5, row: 8, type: "stonefall" },
 ];
-// ================== LEVELS-CONFIG ==================
 
+// ===== Levels-config – 20 levels eenvoudig schaalbaar =====
 const TOTAL_LEVELS = 20;
 
+// Stop je bestaande maps als basis in level 1-3
 const level1Map = (typeof bonusBricks !== "undefined" ? bonusBricks : []);
 const level2Map = (typeof pxpMap !== "undefined" ? pxpMap : []);
-// level3Map bestaat hierboven
+// level3Map bestaat al bij jou
 
+// Helper: maak lege map
 function createEmptyMap() { return []; }
 
+// Centrale tabel met 20 entries (maps + optionele params)
 const LEVELS = Array.from({ length: TOTAL_LEVELS }, (_, i) => ({
   map: createEmptyMap(),
   params: {
-    ballSpeed: 6 + 0.2 * i,
-    paddleWidth: 100 - Math.floor(i / 4) * 4,     // min/max nog geclamped in resetBricks()
+    // basis-schaal: elke 5 levels mini-stapjes, pas vrij aan
+    ballSpeed: 6 + 0.2 * i,                 // start snelheid
+    paddleWidth: 100 - Math.floor(i / 4) * 4, // per 4 levels -4px, min later clampen
     machineGunDifficulty: Math.min(1 + Math.floor(i / 7), 3) // 1..3
   }
 }));
 
-// Zet level 1–3
-LEVELS[0].map = level1Map;                  // L1
-LEVELS[1].map = level2Map;                  // L2
-LEVELS[2].map = (typeof level3Map !== "undefined" ? level3Map : []); // L3 = jouw nieuwe map
+// Zet jouw bestaande 1–3 in de centrale tabel (behoud huidig gedrag)
+LEVELS[0].map = level1Map;
+LEVELS[1].map = level2Map;
+LEVELS[2].map = (typeof level3Map !== "undefined" ? level3Map : []);
 
-// ⚔️ DUEL verplaatst naar Level 5 (lege map + flags)
-LEVELS[4].map = [];                         // L5 leeg
-LEVELS[4].params.isDuel = true;
-LEVELS[4].params.ballSpeed = 6;             // basis
-LEVELS[4].params.paddleWidth = 100;         // beide paddles
-
-// ====== Helpers om bonusblokken makkelijk toe te voegen ======
-function addBonus(levelNumber, col, row, type = "normal") {
+// 🔧 Makkelijk bonusblokken plaatsen:
+function addBonus(levelNumber, col, row, type="normal") {
   const idx = levelNumber - 1;
   if (!LEVELS[idx]) return;
   LEVELS[idx].map.push({ col, row, type });
 }
+
 function addBonuses(levelNumber, entries) {
   entries.forEach(e => addBonus(levelNumber, e.col, e.row, e.type));
 }
 
-// ---------- LEVEL 4 extra layout (zoals je had) ----------
+// ---------- LEVEL 4: “Band + traps” (zet voort op L2’s band, introduceert extra traps)
 addBonuses(4, [
   // band midden (rows 4-5), accenten silver
   { col: 2, row: 4, type: "silver" }, { col: 3, row: 4, type: "silver" }, { col: 5, row: 4, type: "silver" }, { col: 6, row: 4, type: "silver" },
@@ -1436,9 +1409,6 @@ function resetBricks() {
   const p = def?.params || {};
   const targetPaddleWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
 
-  // ⚔️ Duel-vlag vanuit level-params
-  duelModeActive = !!(p.isDuel);
-
   // Basisbreedte van dit level vastzetten
   paddleBaseWidth = targetPaddleWidth;
 
@@ -1482,116 +1452,9 @@ function resetBricks() {
     }
   }
 
-  if (duelModeActive && typeof startDuelRound !== "function") {
-  console.warn("[DUEL] startDuelRound ontbreekt — duel uitgeschakeld voor debug");
-  duelModeActive = false;
+  // Plaats 4 willekeurige hartjes onder normale blokken (zoals je deed)
+  assignHeartBlocks();
 }
-
-  // Plaats 4 willekeurige hartjes onder normale blokken (zoals je deed) – niet in duel
-  if (!duelModeActive) {
-    assignHeartBlocks();
-  }
-
-  // 🏟️ Duel-mode: bricks uit, paddle centreren en duel starten
-  if (duelModeActive) {
-    for (let c = 0; c < brickColumnCount; c++) {
-      for (let r = 0; r < brickRowCount; r++) {
-        bricks[c][r].status = 0; // alles leeg in duel
-      }
-    }
-
-    // Zorg dat de actuele paddle-breedte toegepast blijft en netjes gecentreerd is
-    const centerX = paddleX + paddleWidth / 2;
-    paddleWidth = paddleBaseWidth;
-    paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
-    if (typeof redrawPaddleCanvas === 'function') redrawPaddleCanvas();
-
-    // Start een frisse duel-ronde (reset scores/snelheid elders geregeld)
-    if (typeof startDuelRound === 'function') {
-      startDuelRound(true);
-    }
-  }
-}
-
-function goToLevel(n, opts = {}) {
-  const cfg = Object.assign({
-    resetScore: false,
-    resetLives: false,
-    centerPaddle: true,
-    clearEffects: true,
-    cpuDifficulty: null   // nieuw: 1 (easy), 2 (normal), 3 (hard) of null
-  }, opts);
-
-  // Clamp naar 1..TOTAL_LEVELS
-  const maxLevels = (typeof TOTAL_LEVELS !== "undefined") ? TOTAL_LEVELS : 20;
-  const target = Math.max(1, Math.min(maxLevels, n));
-  level = target;
-
-  // Timer & bonussen pauzeren
-  if (typeof pauseTimer === "function") pauseTimer();
-  if (typeof resetAllBonuses === "function") resetAllBonuses();
-
-  // Optioneel: score/lives resetten
-  if (cfg.resetScore) {
-    score = 0;
-    if (typeof updateScoreDisplay === "function") updateScoreDisplay();
-  }
-  if (cfg.resetLives) {
-    lives = 3;
-    if (typeof updateLivesDisplay === "function") updateLivesDisplay();
-  }
-
-  // Effect- en deeltjesbuffers leegmaken (veilig, alleen als ze bestaan)
-  try { explosions = []; } catch(e){}
-  try { smokeParticles = []; } catch(e){}
-  try { flyingCoins = []; } catch(e){}
-  try { coins = []; } catch(e){}
-  try { pxpBags = []; } catch(e){}
-  try { paddleExplosionParticles = []; } catch(e){}
-
-  // Level-specifieke setup
-  // resetBricks() zet duelModeActive o.b.v. LEVELS[level-1].params.isDuel
-  resetBricks();
-
-  // Optioneel paddle centreren
-  if (cfg.centerPaddle && typeof resetPaddle === "function") {
-    resetPaddle();
-  }
-
-  // CPU moeilijkheid zetten als meegegeven
-  if (cfg.cpuDifficulty != null) {
-    if (typeof setCpuDifficulty === "function") {
-      setCpuDifficulty(cfg.cpuDifficulty);
-    } else {
-      // Fallback als setter niet bestaat
-      try {
-        cpuDifficulty = Math.max(1, Math.min(3, cfg.cpuDifficulty|0));
-      } catch(e){}
-    }
-  }
-
-  // Bal(len) klaarmaken:
-  // - In DUEL: resetBricks() heeft al startDuelRound(true) aangeroepen,
-  //            dus GEEN balls flushen en GEEN resetBall()!
-  // - Normaal: schone start zoals voorheen.
-  if (!duelModeActive) {
-    if (typeof balls !== "undefined") balls = [];
-    resetBall();
-  }
-
-  // UI tijd resetten (optioneel)
-  try {
-    elapsedTime = 0;
-    const timeEl = document.getElementById("timeDisplay");
-    if (timeEl) timeEl.textContent = "00:00";
-  } catch(e){}
-
-  console.log(
-    `Jumped to level ${level} ` +
-    `(duel=${!!duelModeActive}${cfg.cpuDifficulty!=null ? `, cpuDiff=${cfg.cpuDifficulty}` : ""})`
-  );
-}
-
 
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
@@ -1689,59 +1552,6 @@ function drawPaddle() {
 
   ctx.drawImage(paddleCanvas, paddleX, paddleY);
 }
-
-function startDuelRound(isFresh=false) {
-  // Gebruik huidige paddle-breedte als basis
-  cpuPaddleWidth = paddleWidth;
-  cpuPaddleX = (canvas.width - cpuPaddleWidth) / 2;
-
-  // Bal naar midden
-  const b = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    radius: ballRadius,
-    isMain: true
-  };
-
-  // Willekeurige start naar boven/beneden, maar niet te vlak
-  const speed = duelBallBaseSpeed;
-  const ang = (Math.random() * 0.6 + 0.2) * Math.PI; // 36°..144°
-  const dirUp = Math.random() < 0.5 ? -1 : 1;
-  b.dx = Math.cos(ang) * speed * (Math.random()<0.5?-1:1);
-  b.dy = Math.sin(ang) * speed * dirUp;
-
-  balls = [b];
-  ballLaunched = true;
-  ballMoving  = true;
-
-  // Reset cpu timing
-  _cpuNextReactAt = performance.now();
-  _cpuTargetX = null;
-
-  if (isFresh) {
-    duelPlayerScore = 0;
-    duelCPUScore = 0;
-    duelBallBaseSpeed = LEVELS[Math.max(0, level-1)]?.params?.ballSpeed ?? 6;
-  }
-}
-
-function duelExplodePaddle(isPlayer) {
-  // Visuele explosie zonder levenslogica
-  const cx = isPlayer ? (paddleX + paddleWidth / 2) : (cpuPaddleX + cpuPaddleWidth / 2);
-  const cy = isPlayer ? (paddleY + paddleHeight / 2) : (cpuPaddleY + cpuPaddleHeight / 2);
-  for (let i = 0; i < 48; i++) {
-    paddleExplosionParticles.push({
-      x: cx,
-      y: cy,
-      dx: (Math.random() - 0.5) * 9,
-      dy: (Math.random() - 0.5) * 9,
-      radius: Math.random() * 3 + 2,
-      alpha: 1
-    });
-  }
-  try { paddleExplodeSound.currentTime = 0; paddleExplodeSound.play(); } catch(e){}
-}
-
 
 function drawMagnetAura(ctx) {
   if (!magnetActive) return; // alleen tekenen als hij aanstaat
@@ -2949,17 +2759,16 @@ function isPaddleBlockedHorizontally(newX) {
   }
   return false;
 }
+
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Laag-volgorde (achtergrond effecten onder alles)
-  drawElectricBursts();
+  drawElectricBursts(); // 🔄 VOORAF tekenen, zodat het ONDER alles ligt
 
-  // Core collisions / visuals voor bricks & items
   collisionDetection();
   drawCoins();
   drawFallingHearts();
-  drawFallingStones();
+  drawFallingStones();  
   drawHeartPopup();
   checkCoinCollision();
   drawPaddleFlags();
@@ -2967,454 +2776,535 @@ function draw() {
   checkFlyingCoinHits();
   drawPointPopups();
 
-  // A) Timers / effecten
-  if (magnetActive && performance.now() >= magnetEndTime) stopMagnet();
-  applyMagnetToArray(fallingHearts);
-  applyMagnetToArray(coins);
-  applyMagnetToArray(pxpBags);
 
-  if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) stopPaddleSizeEffect();
-  if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) doublePointsActive = false;
+// A) Time-out check heel vroeg in draw()
+if (magnetActive && performance.now() >= magnetEndTime) {
+  stopMagnet();
+}
 
-  // 🔵 Ballen updaten + randen + trails + tekenen
+// B) Toepassen op arrays (na physics update van items, vóór render)
+applyMagnetToArray(fallingHearts);
+applyMagnetToArray(coins);     // muntjes worden al aangestuurd via 'coins'
+applyMagnetToArray(pxpBags);   // zakjes vallen in 'pxpBags'
+
+
+if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
+  stopPaddleSizeEffect();
+}
+
+  if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
+    doublePointsActive = false;
+  }
+
   balls.forEach((ball, index) => {
-    // Positie-update
     if (ballLaunched) {
-      const speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration) ? speedBoostMultiplier : 1;
+      let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
+        ? speedBoostMultiplier : 1;
       ball.x += ball.dx * speedMultiplier;
       ball.y += ball.dy * speedMultiplier;
     } else {
-      // nog niet gelanceerd: mee op paddle
-      ball.x = paddleX + paddleWidth / 2 - ballRadius;
-      ball.y = paddleY - ballRadius * 2;
-    }
+       ball.x = paddleX + paddleWidth / 2 - ballRadius;
+       ball.y = paddleY - ballRadius * 2;
 
-    // Trail
+    }
+    
     if (!ball.trail) ball.trail = [];
-    let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
-    for (let i = 1; i <= 3; i++) {
-      const px = last.x + (ball.x - last.x) * (i / 3);
-      const py = last.y + (ball.y - last.y) * (i / 3);
-      ball.trail.push({ x: px, y: py });
-    }
-    while (ball.trail.length > 20) ball.trail.shift();
 
-    // Zijwanden (altijd reflecteren)
+    let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
+    let steps = 3; // hoe meer hoe vloeiender
+    for (let i = 1; i <= steps; i++) {
+    let px = last.x + (ball.x - last.x) * (i / steps);
+    let py = last.y + (ball.y - last.y) * (i / steps);
+    ball.trail.push({ x: px, y: py });
+  }
+
+    while (ball.trail.length > 20) {
+    ball.trail.shift();
+ }
+
+
+    // Veiliger links/rechts
     if (ball.x <= ball.radius + 1 && ball.dx < 0) {
-      ball.x = ball.radius + 1; ball.dx *= -1;
-      try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
+      ball.x = ball.radius + 1;
+      ball.dx *= -1;
+      wallSound.currentTime = 0;
+      wallSound.play();
     }
     if (ball.x >= canvas.width - ball.radius - 1 && ball.dx > 0) {
-      ball.x = canvas.width - ball.radius - 1; ball.dx *= -1;
-      try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
+      ball.x = canvas.width - ball.radius - 1;
+      ball.dx *= -1;
+      wallSound.currentTime = 0;
+      wallSound.play();
     }
 
-    // Bovenrand / onderrand per modus
-    if (!duelModeActive) {
-      if (ball.y <= ball.radius + 1 && ball.dy < 0) {
-        ball.y = ball.radius + 1; ball.dy *= -1;
-        try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
-      }
-    } else {
-      if (ball.y - ball.radius <= 0) {
-        duelPlayerScore++;
-        duelExplodePaddle(false);
-        duelBallBaseSpeed += DUEL_BALL_SPEED_STEP;
-        startDuelRound(false);
-        return;
-      }
+    // Veiliger bovenkant
+    if (ball.y <= ball.radius + 1 && ball.dy < 0) {
+      ball.y = ball.radius + 1;
+      ball.dy *= -1;
+      wallSound.currentTime = 0;
+      wallSound.play();
     }
+if (
+  ball.y + ball.radius > paddleY &&
+  ball.y - ball.radius < paddleY + paddleHeight &&
+  ball.x + ball.radius > paddleX &&
+  ball.x - ball.radius < paddleX + paddleWidth
+) {
+  let reflect = true;
 
-    // Botsing met spelerpaddle (inclusief damage-zones)
-    if (
-      ball.y + ball.radius > paddleY &&
-      ball.y - ball.radius < paddleY + paddleHeight &&
-      ball.x + ball.radius > paddleX &&
-      ball.x - ball.radius < paddleX + paddleWidth
-    ) {
-      let reflect = true;
-      if (machineGunActive || machineGunCooldownActive) {
-        const segmentWidth = paddleWidth / 10;
-        for (let i = 0; i < 10; i++) {
-          const segX = paddleX + i * segmentWidth;
-          const isDamaged = paddleDamageZones.some(hitX => hitX >= segX && hitX <= segX + segmentWidth);
-          const ballCenterX = ball.x;
-          if (ballCenterX >= segX && ballCenterX < segX + segmentWidth && isDamaged) { reflect = false; break; }
-        }
-      }
-      if (reflect) {
-        const hitPos = (ball.x - paddleX) / paddleWidth;
-        const angle = (hitPos - 0.5) * Math.PI / 2;
-        const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-        ball.dx = speed * Math.sin(angle);
-        ball.dy = -Math.abs(speed * Math.cos(angle));
-        try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
-      }
-    }
-
-    if (!duelModeActive) {
-      if (ball.y + ball.dy > canvas.height) {
-        balls.splice(index, 1);
-      }
-    } else {
-      if (ball.y + ball.radius >= canvas.height) {
-        duelCPUScore++;
-        duelExplodePaddle(true);
-        duelBallBaseSpeed += DUEL_BALL_SPEED_STEP;
-        startDuelRound(false);
-        return;
-      }
-    }
-
-    // ✨ Trail tekenen
-    if (ball.trail.length >= 2) {
-      const head = ball.trail[ball.trail.length - 1];
-      const tail = ball.trail[0];
-      ctx.save();
-      const gradient = ctx.createLinearGradient(
-        head.x + ball.radius, head.y + ball.radius,
-        tail.x + ball.radius, tail.y + ball.radius
+  if (machineGunActive || machineGunCooldownActive) {
+    const segmentWidth = paddleWidth / 10;
+    for (let i = 0; i < 10; i++) {
+      const segX = paddleX + i * segmentWidth;
+      const isDamaged = paddleDamageZones.some(hitX =>
+        hitX >= segX && hitX <= segX + segmentWidth
       );
-      gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
-      gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
-      ctx.beginPath();
-      ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
-      ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
-      ctx.strokeStyle = gradient;
-      ctx.lineWidth = ball.radius * 2.2;
-      ctx.lineCap = "round";
-      ctx.stroke();
-      ctx.restore();
-    }
 
-    // Bal sprite
+      const ballCenterX = ball.x;
+      if (
+        ballCenterX >= segX &&
+        ballCenterX < segX + segmentWidth &&
+        isDamaged
+      ) {
+        reflect = false;
+        break;
+      }
+    }
+  }
+
+  if (reflect) {
+    const hitPos = (ball.x - paddleX) / paddleWidth;
+    const angle = (hitPos - 0.5) * Math.PI / 2;
+    const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+    ball.dx = speed * Math.sin(angle);
+    ball.dy = -Math.abs(speed * Math.cos(angle));
+
+    wallSound.currentTime = 0;
+    wallSound.play();
+  }
+}
+
+
+
+    if (ball.y + ball.dy > canvas.height) {
+      balls.splice(index, 1); // verwijder bal zonder actie
+    }
+// ✨ Gouden smalle energie-staart (taps en iets smaller dan bal)
+// ✨ Rechte gouden energie-staart — iets groter dan de bal en 2x zo lang
+if (ball.trail.length >= 2) {
+  const head = ball.trail[ball.trail.length - 1]; // meest recente positie
+  const tail = ball.trail[0]; // oudste positie (ver weg van bal)
+
+  ctx.save();
+
+  const gradient = ctx.createLinearGradient(
+    head.x + ball.radius, head.y + ball.radius,
+    tail.x + ball.radius, tail.y + ball.radius
+  );
+
+  ctx.lineWidth = ball.radius * 2.0; // iets kleiner dan 2.2
+  gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
+  gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
+
+  ctx.beginPath();
+  ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
+  ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = ball.radius * 2.2; // net iets groter dan de bal
+  ctx.lineCap = "round";
+  ctx.stroke();
+
+  ctx.restore();
+}
+
     ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
   });
 
-  // Overlays
+
   if (resetOverlayActive) {
     if (Date.now() % 1000 < 500) {
       ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
   }
-  if (stoneHitOverlayTimer > 0) {
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    stoneHitOverlayTimer--;
+
+  // 🔴 Korte hit-flash bij steen op paddle
+if (stoneHitOverlayTimer > 0) {
+  ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  stoneHitOverlayTimer--;
+}
+
+
+  // ✅ Na de loop: check of alle ballen weg zijn
+  if (balls.length === 0 && !paddleExploding) {
+    triggerPaddleExplosion(); // pas nu verlies van leven
   }
 
-  // Geen auto-levenverlies in duel als ballen op zijn
-  if (!duelModeActive) {
-    if (balls.length === 0 && !paddleExploding) {
-      triggerPaddleExplosion();
+ drawBricks();
+
+  
+if (leftPressed) {
+  const newX = paddleX - paddleSpeed;
+  if (newX > 0 && !isPaddleBlockedHorizontally(newX)) {
+    paddleX = newX;
+  }
+}
+
+if (rightPressed) {
+  const newX = paddleX + paddleSpeed;
+  if (newX + paddleWidth < canvas.width && !isPaddleBlockedHorizontally(newX)) {
+    paddleX = newX;
+  }
+}
+
+// 🔁 Alleen omhoogbeweging beperken tot na afschieten
+if (upPressed) {
+  const newY = paddleY - paddleSpeed;
+
+  if (paddleFreeMove) {
+    if (newY > 0 && !isPaddleBlockedVertically(newY)) {
+      paddleY = newY;
     }
   }
+}
 
-  // Bricks tekenen
-  drawBricks();
-
-  // 🎮 Spelerinput verwerken
-  if (leftPressed)  { const nx = paddleX - paddleSpeed; if (nx > 0 && !isPaddleBlockedHorizontally(nx)) paddleX = nx; }
-  if (rightPressed) { const nx = paddleX + paddleSpeed; if (nx + paddleWidth < canvas.width && !isPaddleBlockedHorizontally(nx)) paddleX = nx; }
-  if (upPressed && paddleFreeMove) {
-    const ny = paddleY - paddleSpeed; if (ny > 0 && !isPaddleBlockedVertically(ny)) paddleY = ny;
+if (downPressed) {
+  const newY = paddleY + paddleSpeed;
+  if (newY + paddleHeight < canvas.height && !isPaddleBlockedVertically(newY)) {
+    paddleY = newY;
   }
-  if (downPressed) {
-    const ny = paddleY + paddleSpeed; if (ny + paddleHeight < canvas.height && !isPaddleBlockedVertically(ny)) paddleY = ny;
-  }
+}
 
-  // 🏓 CPU Paddle (alleen in duel) — AI + collision + tekenen + HUD
-  if (duelModeActive) {
-    const cfg = CPU_CONFIG[cpuDifficulty] || CPU_CONFIG[2];
 
-    if (performance.now() >= _cpuNextReactAt) {
-      _cpuNextReactAt = performance.now() + cfg.reactMs;
-      const mainBall = balls[0];
-      if (mainBall) {
-        if (mainBall.dy < 0) {
-          const t = ((cpuPaddleY + cpuPaddleHeight) - mainBall.y) / mainBall.dy;
-          let predX = mainBall.x + mainBall.dx * t;
-          const w = canvas.width;
-          while (predX < 0 || predX > w) {
-            if (predX < 0) predX = -predX;
-            if (predX > w) predX = w - (predX - w);
-          }
-          predX += (Math.random() - 0.5) * cfg.noise;
-          _cpuTargetX = Math.max(0, Math.min(w - cpuPaddleWidth, predX - cpuPaddleWidth / 2));
-        } else {
-          _cpuTargetX = (canvas.width - cpuPaddleWidth) / 2;
-        }
-      }
-    }
-
-    if (_cpuTargetX != null) {
-      const dx = _cpuTargetX - cpuPaddleX;
-      const step = Math.max(-cfg.maxSpeed, Math.min(cfg.maxSpeed, dx));
-      cpuPaddleX += step;
-    }
-
-    // Botsing bal met CPU paddle
-    balls.forEach(ball => {
-      if (
-        ball.y - ball.radius <= cpuPaddleY + cpuPaddleHeight &&
-        ball.y + ball.radius >= cpuPaddleY &&
-        ball.x + ball.radius >= cpuPaddleX &&
-        ball.x - ball.radius <= cpuPaddleX + cpuPaddleWidth &&
-        ball.dy < 0
-      ) {
-        const hitPos = (ball.x - cpuPaddleX) / cpuPaddleWidth;
-        const angle = (hitPos - 0.5) * Math.PI / 2;
-        const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-        ball.dx = speed * Math.sin(angle);
-        ball.dy = Math.abs(speed * Math.cos(angle));
-        try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
-      }
-    });
-
-    // CPU paddle tekenen + duel HUD
-    ctx.save();
-    ctx.fillStyle = "#88aaff";
-    ctx.fillRect(cpuPaddleX, cpuPaddleY, cpuPaddleWidth, cpuPaddleHeight);
-    ctx.restore();
-
-    ctx.save();
-    ctx.font = "bold 18px Arial";
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(`YOU: ${duelPlayerScore}`, 12, 24);
-    ctx.textAlign = "right";
-    ctx.fillText(`CPU: ${duelCPUScore}`, canvas.width - 12, 24);
-    ctx.restore();
-  }
-
-  // 🎨 Spelerpaddle + magnet visuals
   drawPaddle();
   drawMagnetAura(ctx);
   drawMagnetHUD(ctx);
 
-  // 🚀 Raket tekenen/aansturen
   if (rocketActive && !rocketFired && rocketAmmo > 0) {
     rocketX = paddleX + paddleWidth / 2 - 12;
-    rocketY = paddleY - 48;
+    rocketY = paddleY - 48; // ✅ boven de paddle, waar die zich ook bevindt
     ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
   }
+
   if (rocketFired) {
     rocketY -= rocketSpeed;
-    smokeParticles.push({ x: rocketX + 15, y: rocketY + 65, radius: Math.random()*6 + 4, alpha: 1 });
+
+    smokeParticles.push({
+      x: rocketX + 15,
+      y: rocketY + 65,
+      radius: Math.random() * 6 + 4,
+      alpha: 1
+    });
+
     if (rocketY < -48) {
       rocketFired = false;
-      if (rocketAmmo <= 0) rocketActive = false;
+      if (rocketAmmo <= 0) {
+        rocketActive = false;
+      }
     } else {
       ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
       checkRocketCollision();
     }
-  }
+  } // ✅ DIT is de juiste afsluitende accolade voor rocketFired-block
 
-  // 🔁 Start volgend level zodra alle bricks weg zijn
+  // 🔁 Start level 2 zodra alle blokjes weg zijn
   if (bricks.every(col => col.every(b => b.status === 0)) && !levelTransitionActive) {
     startLevelTransition();
   }
 
-  // 💥 Explosies
-  explosions.forEach(e => {
-    ctx.beginPath();
-    ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
-    ctx.fillStyle = e.color === "white" ? `rgba(255, 255, 255, ${e.alpha})` : `rgba(255, 165, 0, ${e.alpha})`;
-    ctx.fill();
-    e.radius += 2; e.alpha -= 0.05;
-  });
-  explosions = explosions.filter(e => e.alpha > 0);
+ // Explosies tekenen
+explosions.forEach(e => {
+  ctx.beginPath();
+  ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+  ctx.fillStyle = e.color === "white"
+    ? `rgba(255, 255, 255, ${e.alpha})`
+    : `rgba(255, 165, 0, ${e.alpha})`;
+  ctx.fill();
+  e.radius += 2;
+  e.alpha -= 0.05;
+});
+explosions = explosions.filter(e => e.alpha > 0);
 
-  // Rook
+  // Rook tekenen
   smokeParticles.forEach(p => {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(150, 150, 150, ${p.alpha})`;
     ctx.fill();
-    p.y += 1; p.radius += 0.3; p.alpha -= 0.02;
+    p.y += 1;
+    p.radius += 0.3;
+    p.alpha -= 0.02;
   });
   smokeParticles = smokeParticles.filter(p => p.alpha > 0);
 
-  if (speedBoostActive && Date.now() - speedBoostStart >= speedBoostDuration) speedBoostActive = false;
-
-  // 🎒 Zakjes tekenen en vangen
-  for (let i = pxpBags.length - 1; i >= 0; i--) {
-    const bag = pxpBags[i];
-    bag.y += bag.dy;
-    ctx.drawImage(pxpBagImg, bag.x - 20, bag.y, 40, 40);
-
-    const bagLeft = bag.x - 20, bagRight = bag.x + 20, bagTop = bag.y, bagBottom = bag.y + 40;
-    const paddleLeft = paddleX, paddleRight = paddleX + paddleWidth, paddleTop = paddleY, paddleBottom = paddleY + paddleHeight;
-
-    const isOverlap = bagRight >= paddleLeft && bagLeft <= paddleRight && bagBottom >= paddleTop && bagTop <= paddleBottom;
-
-    if (isOverlap) {
-      try { pxpBagSound.currentTime = 0; pxpBagSound.play(); } catch(e){}
-      const earned = doublePointsActive ? 160 : 80;
-      score += earned; if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
-      pointPopups.push({ x: bag.x, y: bag.y, value: "+" + earned, alpha: 1 });
-      pxpBags.splice(i, 1);
-    } else if (bag.y > canvas.height) {
-      pxpBags.splice(i, 1);
-    }
+  if (speedBoostActive && Date.now() - speedBoostStart >= speedBoostDuration) {
+    speedBoostActive = false;
   }
 
-  // 🔫 Machinegun logica
-  if (machineGunActive && !machineGunCooldownActive) {
-    const verticalOffset = machineGunYOffset;
-    const minY = 0, maxY = paddleY - 10;
-    const targetX = paddleX + paddleWidth / 2 - 30;
-    let targetY = Math.max(minY, Math.min(paddleY - verticalOffset, maxY));
-    const followSpeed = machineGunDifficulty === 1 ? 1 : machineGunDifficulty === 2 ? 2 : 3;
+  // Zakjes tekenen en vangen
+for (let i = pxpBags.length - 1; i >= 0; i--) {
+  let bag = pxpBags[i];
+  bag.y += bag.dy;
 
-    if (machineGunGunX < targetX) machineGunGunX += followSpeed; else if (machineGunGunX > targetX) machineGunGunX -= followSpeed;
-    if (machineGunGunY < targetY) machineGunGunY += followSpeed; else if (machineGunGunY > targetY) machineGunGunY -= followSpeed;
+  ctx.drawImage(pxpBagImg, bag.x - 20, bag.y, 40, 40);
 
-    ctx.drawImage(machinegunGunImg, machineGunGunX, machineGunGunY, 60, 60);
+  // Bounding box van zakje
+  const bagLeft = bag.x - 20;
+  const bagRight = bag.x + 20;
+  const bagTop = bag.y;
+  const bagBottom = bag.y + 40;
 
-    if (Date.now() - machineGunLastShot > machineGunBulletInterval && machineGunShotsFired < 30) {
-      machineGunBullets.push({ x: machineGunGunX + 30, y: machineGunGunY + 60, dy: 6 });
-      machineGunShotsFired++;
-      machineGunLastShot = Date.now();
-      try { shootSound.currentTime = 0; shootSound.play(); } catch(e){}
-    }
+  // Bounding box van paddle (gebruik huidige Y!)
+  const paddleLeft = paddleX;
+  const paddleRight = paddleX + paddleWidth;
+  const paddleTop = paddleY;
+  const paddleBottom = paddleY + paddleHeight;
 
-    machineGunBullets.forEach((bullet, i) => {
-      bullet.y += bullet.dy;
-      ctx.beginPath(); ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2); ctx.fillStyle = "red"; ctx.fill();
+  // Controleer volledige overlapping
+  const isOverlap =
+    bagRight >= paddleLeft &&
+    bagLeft <= paddleRight &&
+    bagBottom >= paddleTop &&
+    bagTop <= paddleBottom;
 
-      if (bullet.y >= paddleY && bullet.x >= paddleX && bullet.x <= paddleX + paddleWidth) {
-        const hitX = bullet.x - paddleX, radius = 6;
-        if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
-          paddleDamageZones.push(bullet.x);
-          paddleCtx.globalCompositeOperation = 'destination-out';
-          paddleCtx.beginPath();
-          paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
-          paddleCtx.fill();
-          paddleCtx.globalCompositeOperation = 'source-over';
-        }
-        machineGunBullets.splice(i, 1);
-      } else if (bullet.y > canvas.height) {
-        machineGunBullets.splice(i, 1);
-      }
+  if (isOverlap) {
+    pxpBagSound.currentTime = 0;
+    pxpBagSound.play();
+
+    const earned = doublePointsActive ? 160 : 80;
+    score += earned;
+    updateScoreDisplay(); // 👈 aangepaste regel
+
+    pointPopups.push({
+      x: bag.x,
+      y: bag.y,
+      value: "+" + earned,
+      alpha: 1
     });
 
-    if (machineGunShotsFired >= 30 && machineGunBullets.length === 0 && !machineGunCooldownActive) {
-      machineGunCooldownActive = true;
-      machineGunStartTime = Date.now();
+    pxpBags.splice(i, 1);
+  } else if (bag.y > canvas.height) {
+    pxpBags.splice(i, 1); // uit beeld
+  }
+}
+
+if (machineGunActive && !machineGunCooldownActive) {
+  // 📍 Instelbare offset tussen paddle en gun
+  const verticalOffset = machineGunYOffset;
+  const minY = 0;                  // bovenste limiet
+  const maxY = paddleY - 10;       // optioneel: niet te dicht bij paddle
+
+  // Targetposities voor X en Y
+  const targetX = paddleX + paddleWidth / 2 - 30;
+  let targetY = paddleY - verticalOffset;
+  targetY = Math.max(minY, targetY);
+  targetY = Math.min(targetY, maxY);
+
+  const followSpeed = machineGunDifficulty === 1 ? 1 : machineGunDifficulty === 2 ? 2 : 3;
+
+  // 🟢 Volg paddle horizontaal
+  if (machineGunGunX < targetX) machineGunGunX += followSpeed;
+  else if (machineGunGunX > targetX) machineGunGunX -= followSpeed;
+
+  // 🟢 Volg paddle verticaal
+  if (machineGunGunY < targetY) machineGunGunY += followSpeed;
+  else if (machineGunGunY > targetY) machineGunGunY -= followSpeed;
+
+  // 🔫 Teken geweer
+  ctx.drawImage(machinegunGunImg, machineGunGunX, machineGunGunY, 60, 60);
+
+  // 🔥 Vuur kogels
+  if (Date.now() - machineGunLastShot > machineGunBulletInterval && machineGunShotsFired < 30) {
+    machineGunBullets.push({
+      x: machineGunGunX + 30,
+      y: machineGunGunY + 60,
+      dy: 6
+    });
+    machineGunShotsFired++;
+    machineGunLastShot = Date.now();
+    shootSound.currentTime = 0;
+    shootSound.play();
+  }
+
+  // 💥 Verwerk kogels
+  machineGunBullets.forEach((bullet, i) => {
+    bullet.y += bullet.dy;
+    ctx.beginPath();
+    ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = "red";
+    ctx.fill();
+
+    // 🎯 Check botsing met paddle
+    if (
+      bullet.y >= paddleY &&
+      bullet.x >= paddleX &&
+      bullet.x <= paddleX + paddleWidth
+    ) {
+      const hitX = bullet.x - paddleX;
+      const radius = 6;
+
+      if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
+        paddleDamageZones.push(bullet.x);
+
+        // ❗ GAT MAKEN
+        paddleCtx.globalCompositeOperation = 'destination-out';
+        paddleCtx.beginPath();
+        paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
+        paddleCtx.fill();
+        paddleCtx.globalCompositeOperation = 'source-over';
+      }
+
+      machineGunBullets.splice(i, 1);
+    } else if (bullet.y > canvas.height) {
+      machineGunBullets.splice(i, 1);
     }
+  });
+
+  // ⏳ Start cooldown als alle 30 kogels zijn afgevuurd
+  if (machineGunShotsFired >= 30 && machineGunBullets.length === 0 && !machineGunCooldownActive) {
+    machineGunCooldownActive = true;
+    machineGunStartTime = Date.now();
+  }
+}
+
+if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCooldownTime) {
+  machineGunCooldownActive = false;
+  machineGunActive = false;
+  paddleDamageZones = [];
+
+  // ✅ +500 punten en UI direct bijwerken
+  score += 500;
+  if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
+
+  pointPopups.push({
+    x: paddleX + paddleWidth / 2,
+    y: canvas.height - 30,
+    value: "+500",
+    alpha: 1
+  });
+
+  resetPaddle(true, true); // ✅ geen ball reset, geen centrering
+}
+
+// 💀 Paddle “vernietigd” tijdens machinegun? → stop kogels, laat 30s-timer/cooldown doorlopen
+if ((machineGunActive || machineGunCooldownActive) && paddleDamageZones.length >= 10) {
+  machineGunBullets = []; // stop vuren
+}
+
+
+
+// ✨ Levelbanner + fade-out
+if (levelMessageVisible) {
+  ctx.save();
+  ctx.globalAlpha = levelMessageAlpha;
+  ctx.fillStyle = "#00ffff";
+  ctx.font = "bold 36px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(
+    levelMessageText || `Bitty Bitcoin Mascot — Level ${level}`,
+    canvas.width / 2,
+    canvas.height / 2
+  );
+  ctx.restore();
+
+  // ⏱️ 3s volledig zichtbaar, daarna ~2s fade-out
+  levelMessageTimer++;
+
+  const visibleTime = 180; // 3s @ 60 FPS
+  const fadeTime    = 120; // ~2s fade
+
+  if (levelMessageTimer <= visibleTime) {
+    levelMessageAlpha = 1;
+  } else {
+    const fadeProgress = (levelMessageTimer - visibleTime) / fadeTime;
+    levelMessageAlpha = Math.max(0, 1 - fadeProgress);
   }
 
-  if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCooldownTime) {
-    machineGunCooldownActive = false;
-    machineGunActive = false;
-    paddleDamageZones = [];
-    score += 500; if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
-    pointPopups.push({ x: paddleX + paddleWidth / 2, y: canvas.height - 30, value: "+500", alpha: 1 });
-    resetPaddle(true, true); // geen ball reset, geen centrering
+  if (levelMessageTimer >= visibleTime + fadeTime) {
+    levelMessageVisible = false;
+  }
+}
+
+// 🎬 Overgangstimer & animatie
+if (levelTransitionActive) {
+  // NIET levelMessageAlpha forceren en NIET nogmaals levelMessageTimer++
+  if (transitionOffsetY < 0) {
+    transitionOffsetY += 2;
+  } else {
+    transitionOffsetY = 0;
+    levelTransitionActive = false;
+  }
+}
+
+
+// 🎆 Fireworks (raketten + vonken)
+drawFireworks();
+
+// 🎊 Confetti bovenop de scene tekenen
+drawConfetti();
+
+
+if (showGameOver) {
+  ctx.save();
+  ctx.globalAlpha = gameOverAlpha;
+  ctx.fillStyle = "#B0B0B0";
+  ctx.font = "bold 48px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
+  ctx.restore();
+
+  if (gameOverTimer < 60) {
+    gameOverAlpha += 0.05; // fade-in
+  } else if (gameOverTimer >= 60 && gameOverTimer < 120) {
+    gameOverAlpha -= 0.05; // fade-out
   }
 
-  if ((machineGunActive || machineGunCooldownActive) && paddleDamageZones.length >= 10) {
-    machineGunBullets = []; // stop vuren
+  gameOverTimer++;
+
+  if (gameOverTimer >= 120) {
+    showGameOver = false;
   }
+}
 
-  // ✨ Levelbanner + fade-out
-  if (levelMessageVisible) {
-    ctx.save();
-    ctx.globalAlpha = levelMessageAlpha;
-    ctx.fillStyle = "#00ffff";
-    ctx.font = "bold 36px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(levelMessageText || `Bitty Bitcoin Mascot — Level ${level}`, canvas.width / 2, canvas.height / 2);
-    ctx.restore();
-
-    levelMessageTimer++;
-    const visibleTime = 180, fadeTime = 120;
-    if (levelMessageTimer <= visibleTime) levelMessageAlpha = 1;
-    else {
-      const fadeProgress = (levelMessageTimer - visibleTime) / fadeTime;
-      levelMessageAlpha = Math.max(0, 1 - fadeProgress);
-    }
-    if (levelMessageTimer >= visibleTime + fadeTime) levelMessageVisible = false;
-  }
-
-  // 🎬 Overgangstimer & animatie
-  if (levelTransitionActive) {
-    if (transitionOffsetY < 0) transitionOffsetY += 2;
-    else { transitionOffsetY = 0; levelTransitionActive = false; }
-  }
-
-  // 🎆 Fireworks & 🎊 Confetti
-  drawFireworks();
-  drawConfetti();
-
-  // GAME OVER overlay
-  if (showGameOver) {
-    ctx.save();
-    ctx.globalAlpha = Math.max(0, Math.min(1, gameOverAlpha));
-    ctx.fillStyle = "#B0B0B0";
-    ctx.font = "bold 48px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
-    ctx.restore();
-
-    if (gameOverTimer < 60) gameOverAlpha = Math.min(1, gameOverAlpha + 0.05);
-    else if (gameOverTimer < 120) gameOverAlpha = Math.max(0, gameOverAlpha - 0.05);
-
-    gameOverTimer++;
-    if (gameOverTimer >= 120) showGameOver = false;
-  }
 
   // 🎇 Paddle-explosie tekenen
   if (paddleExploding) {
     paddleExplosionParticles.forEach(p => {
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 100, 0, ${p.alpha})`; ctx.fill();
-      p.x += p.dx; p.y += p.dy; p.alpha -= 0.02;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 100, 0, ${p.alpha})`;
+      ctx.fill();
+      p.x += p.dx;
+      p.y += p.dy;
+      p.alpha -= 0.02;
     });
+
     paddleExplosionParticles = paddleExplosionParticles.filter(p => p.alpha > 0);
   }
-
-  // 🔴 Reset overlay (sirene)
+  
   if (resetOverlayActive) {
-    if (Date.now() % 1000 < 500) {
-      ctx.save(); ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.restore();
-    }
+  if (Date.now() % 1000 < 500) {
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
+}
 
   // 🧱 Steenpuin tekenen
   stoneDebris.forEach(p => {
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(140, 120, 100, ${p.alpha})`; ctx.fill();
-    p.x += p.dx; p.y += p.dy; p.alpha -= 0.02;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(140, 120, 100, ${p.alpha})`;
+    ctx.fill();
+    p.x += p.dx;
+    p.y += p.dy;
+    p.alpha -= 0.02;
   });
+
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
 
-  // 🏁 Duel win/lose check
-  if (duelModeActive) {
-    if (duelPlayerScore >= DUEL_TARGET || duelCPUScore >= DUEL_TARGET) {
-      const playerWon = duelPlayerScore >= DUEL_TARGET;
-      if (playerWon) {
-        lives = Math.min(lives + 1, 9); if (typeof updateLivesDisplay === 'function') updateLivesDisplay();
-        level = Math.min(level + 1, (typeof TOTAL_LEVELS !== "undefined" ? TOTAL_LEVELS : 20));
-      } else {
-        level = Math.max(1, level - 1);
-      }
-      duelModeActive = false;
-      if (typeof resetAllBonuses === 'function') resetAllBonuses();
-      resetBricks();
-      if (typeof resetPaddle === 'function') resetPaddle();
-      resetBall();
-      if (typeof pauseTimer === 'function') pauseTimer();
-    }
-  }
-
-  // Volgende frame
   animationFrameId = requestAnimationFrame(draw);
-}
-
+} // ✅ Sluit function draw() correct af
 
 function onImageLoad() {
   imagesLoaded++;
@@ -4008,55 +3898,4 @@ function triggerBallReset() {
 
 // 🟢 BELANGRIJK: knop koppelen aan functie
 document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
-
-// ==== DEBUG/BOOT HARNESS (zet dit ONDERAAN je script) ====
-let animationFrameId;       // zorg dat deze bestaat
-let __drawStarted = false;  // guard tegen dubbele starts
-let __frameCount = 0;
-
-function __startLoopOnce() {
-  if (__drawStarted) return;
-  __drawStarted = true;
-  console.log("[BOOT] starting draw loop…");
-  try {
-    animationFrameId = requestAnimationFrame(__safeDrawWrapper);
-  } catch (e) {
-    console.error("[BOOT] requestAnimationFrame failed:", e);
-  }
-}
-
-function __safeDrawWrapper(ts) {
-  try {
-    draw(ts);
-    __frameCount++;
-    if (__frameCount % 60 === 0) console.log("[DRAW] still running, frame", __frameCount);
-  } catch (e) {
-    console.error("[DRAW ERROR]", e);
-    // probeer niet in infinite crash-loop te blijven
-    return;
-  }
-  animationFrameId = requestAnimationFrame(__safeDrawWrapper);
-}
-
-// Globale error logger (laat exact zien waar het knalt)
-window.onerror = function (msg, src, line, col, err) {
-  console.error("[WINDOW ERROR]", msg, "at", src + ":" + line + ":" + col, err);
-};
-
-// Start zo veilig mogelijk na DOM load
-if (document.readyState === "complete" || document.readyState === "interactive") {
-  setTimeout(__startLoopOnce, 0);
-} else {
-  window.addEventListener("DOMContentLoaded", __startLoopOnce);
-  window.addEventListener("load", __startLoopOnce);
-}
-
-// Fallback: als iets anders de start blokkeert, forceer toch
-setTimeout(() => {
-  if (!__drawStarted) {
-    console.warn("[BOOT] fallback start after 1500ms");
-    __startLoopOnce();
-  }
-}, 1500);
-
 
