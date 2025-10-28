@@ -55,8 +55,6 @@ let stoneHitOverlayTimer = 0;
 let stoneHitLock = false;
 let stoneClearRequested = false;
 
-let nextFrozenGroupId = 1;
-
 // 🌟 Levelovergang
 let levelTransitionActive = false;
 let transitionOffsetY = -300;
@@ -91,7 +89,6 @@ let magnetCatchRadius = 22;      // auto-catch radius rond paddle
 
 let fallingCoins = [];
 let fallingBags = [];
-
 
 
 // ❤️ Hartjes-systeem
@@ -413,10 +410,7 @@ function stopMagnet() {
 
 
 const bonusBricks = [
-  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" },{ col: 5, row: 13, type: "freeze" },
-
-
-
+  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" }, 
   { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" },
 
 
@@ -1016,13 +1010,7 @@ const laserSound = new Audio("laser.mp3"); // voeg dit bestand toe in je project
 const coinSound = new Audio("money.mp3");
 const shootSound = new Audio("shoot_arcade.mp3");
 const wallSound = new Audio("tick.mp3");
-
 const blockSound = new Audio("tock.mp3");
-const freezeActivateSfx = new Audio("freeze_activate.mp3");
-const iceShatterSfx     = new Audio("ice_shatter.mp3");
-// 1 laag = direct boven/onder/links/rechts; zet op 2 als je verder wil.
-const FREEZE_LAYERS = 1;
-
 
 const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
 rockWarning.volume = 0.85;
@@ -1057,11 +1045,6 @@ for (let c = 0; c < brickColumnCount; c++) {
     };
   }
 }
-
-
-// ❄️ Alleen jouw BTTY freeze-tegel (rechte randen)
-const freezeBlockImg = new Image();
-freezeBlockImg.src = "freeze_block.png";
 
 
 
@@ -1306,6 +1289,7 @@ function updateScoreDisplay() {
   document.getElementById("scoreDisplay").textContent = score;
 }
 
+
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
   const offsetX = Math.floor((canvas.width - totalBricksWidth) / 2 - 3);
@@ -1313,188 +1297,86 @@ function drawBricks() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
-      if (b.status !== 1) continue;
+      if (b.status === 1) {
+        const brickX = offsetX + c * brickWidth;
+        const brickY = r * brickHeight + (levelTransitionActive ? transitionOffsetY : 0);
 
-      const brickX = offsetX + c * brickWidth;
-      const brickY = r * brickHeight + (levelTransitionActive ? transitionOffsetY : 0);
+        b.x = brickX;
+        b.y = brickY;
 
-      // schrijf posities terug (worden elders gebruikt)
-      b.x = brickX;
-      b.y = brickY;
+        switch (b.type) {
+          case "2x":
+            ctx.drawImage(doublePointsImg, brickX, brickY, brickWidth, brickHeight);
+            break;
 
-      switch (b.type) {
-        case "freeze":
-          if (freezeBlockImg && (freezeBlockImg.loaded || freezeBlockImg.complete)) {
-            ctx.drawImage(freezeBlockImg, brickX, brickY, brickWidth, brickHeight);
-          } else {
-            // fallback (strak rechthoekig)
-            ctx.fillStyle = "#cfe9ff";
-            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-            ctx.strokeStyle = "rgba(255,255,255,0.7)";
-            ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
-          }
-          break;
+          case "rocket":
+            ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
+            break;
 
-        case "2x":
-          ctx.drawImage(doublePointsImg, brickX, brickY, brickWidth, brickHeight);
-          break;
+          case "power":
+            ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
+            break;
 
-        case "rocket":
-          ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
-          break;
+          case "doubleball":
+            ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
+            break;
 
-        case "power":
-          ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
-          break;
+          case "machinegun":
+            ctx.drawImage(machinegunBlockImg, brickX, brickY, brickWidth, brickHeight);
+            break;
 
-        case "doubleball":
-          ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
-          break;
+          case "speed":
+            ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
+            break;
 
-        case "machinegun":
-          ctx.drawImage(machinegunBlockImg, brickX, brickY, brickWidth, brickHeight);
-          break;
+            case "magnet":
+            ctx.drawImage(magnetImg, brickX, brickY, brickWidth, brickHeight);
+            break;
 
-        case "speed":
-          ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
-          break;
+            case "paddle_long":
+            ctx.drawImage(paddleLongBlockImg, brickX, brickY, brickWidth, brickHeight);
+            break;
 
-        case "magnet":
-          ctx.drawImage(magnetImg, brickX, brickY, brickWidth, brickHeight);
-          break;
+            case "paddle_small":
+            ctx.drawImage(paddleSmallBlockImg, brickX, brickY, brickWidth, brickHeight);
+            break;
 
-        case "paddle_long":
-          ctx.drawImage(paddleLongBlockImg, brickX, brickY, brickWidth, brickHeight);
-          break;
+          case "silver":
+            if (!b.hits || b.hits === 0) {
+              ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
+            } else if (b.hits === 1) {
+              ctx.drawImage(silver2Img, brickX, brickY, brickWidth, brickHeight);
+            }
+            break;
 
-        case "paddle_small":
-          ctx.drawImage(paddleSmallBlockImg, brickX, brickY, brickWidth, brickHeight);
-          break;
+          case "stone":
+            if (b.hits === 0) {
+              ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
+            } else if (b.hits === 1) {
+              ctx.drawImage(stone2Img, brickX, brickY, brickWidth, brickHeight);
+            } else {
+              ctx.drawImage(dollarPxpImg, brickX, brickY, brickWidth, brickHeight);
+            }
+            break;
 
-        case "silver":
-          if (!b.hits || b.hits === 0) {
-            ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
-          } else if (b.hits === 1) {
-            ctx.drawImage(silver2Img, brickX, brickY, brickWidth, brickHeight);
-          }
-          break;
+              case "stonefall":
+  if (stoneBlockImg && stoneBlockImg.complete) {
+    ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
+  } else {
+    ctx.fillStyle = "#6f6b66";
+    ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+    ctx.strokeStyle = "#5a554f";
+    ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
+  }
+  break;
 
-        case "stone":
-          if (b.hits === 0) {
-            ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
-          } else if (b.hits === 1) {
-            ctx.drawImage(stone2Img, brickX, brickY, brickWidth, brickHeight);
-          } else {
-            ctx.drawImage(dollarPxpImg, brickX, brickY, brickWidth, brickHeight);
-          }
-          break;
-
-        case "stonefall":
-          if (stoneBlockImg && stoneBlockImg.complete) {
-            ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
-          } else {
-            ctx.fillStyle = "#6f6b66";
-            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-            ctx.strokeStyle = "#5a554f";
-            ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
-          }
-          break;
-
-        default:
-          ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
-          break;
-      }
-
-      // ❄️ Teken procedurale ijslaag op elk bevroren blok met langzame opbouw
-      if (b.frozen) {
-        const seed = (c * 73856093) ^ (r * 19349663);
-
-        // progress 0..1 o.b.v. tijd sinds freezeStart
-        const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
-        const start = b.freezeStart || now;
-        const raw = Math.max(0, Math.min(1, (now - start) / (typeof FREEZE_GROW_MS !== "undefined" ? FREEZE_GROW_MS : 800)));
-
-        // Easing (ease-out): sneller in het begin, langzamer op het einde
-        const progress = 1 - Math.pow(1 - raw, 2);
-
-        drawIceLayer(ctx, brickX, brickY, brickWidth, brickHeight, seed, progress);
+          default:
+            ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
+            break;
+        }
       }
     }
   }
-}
-
-
-function clearAllFrozenFlags() {
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      const b = bricks[c][r]; if (!b) continue;
-      b.frozen = false;
-      b.frozenGroupId = null;
-      b.freezeOriginGroupId = null;
-      b.freezeWasActivated = false;
-    }
-  }
-}
-// roepen in resetBricks() en/of in je leven-verlies reset-flow
-
-// ❄️ Procedural ice overlay – gebruikt progress van 0..1
-function drawIceLayer(ctx, x, y, w, h, seed = 0, progress = 1) {
-  if (progress <= 0) return; // nog niks tekenen
-
-  ctx.save();
-
-  // Basis-body: transparantie groeit mee
-  const topA = 0.85 * progress;
-  const midA = 0.55 * progress;
-  const botA = 0.85 * progress;
-  const g = ctx.createLinearGradient(x, y, x, y + h);
-  g.addColorStop(0,   `rgba(185,225,255,${topA})`);
-  g.addColorStop(0.5, `rgba(160,205,255,${midA})`);
-  g.addColorStop(1,   `rgba(205,240,255,${botA})`);
-  ctx.fillStyle = g;
-  ctx.fillRect(x, y, w, h);
-
-  // Randglans
-  ctx.strokeStyle = `rgba(255,255,255,${0.6 * progress})`;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
-
-  // Deterministische random (stabiel patroon)
-  let s = seed | 0;
-  function rnd() {
-    s = (s * 1664525 + 1013904223) | 0;
-    return ((s >>> 0) % 1000) / 1000;
-  }
-
-  // Frost-puntjes
-  const dots = Math.floor(16 * progress);
-  ctx.fillStyle = `rgba(255,255,255,${0.35 * progress})`;
-  for (let i = 0; i < dots; i++) {
-    const dx = x + 2 + rnd() * (w - 4);
-    const dy = y + 2 + rnd() * (h - 4);
-    ctx.fillRect(dx, dy, 1, 1);
-  }
-
-  // Haarscheurtjes
-  ctx.strokeStyle = `rgba(235,245,255,${0.8 * progress})`;
-  ctx.lineWidth = 0.75 * progress;
-  ctx.beginPath();
-  const cracks = 3 + Math.floor(rnd() * 3);
-  for (let c = 0; c < cracks; c++) {
-    let cx = x + 4 + rnd() * (w - 8);
-    let cy = y + 4 + rnd() * (h - 8);
-    const segs = 2 + Math.floor(rnd() * 2);
-    for (let k = 0; k < segs; k++) {
-      const nx = cx + (rnd() * 2 - 1) * (w * 0.35);
-      const ny = cy + (rnd() * 2 - 1) * (h * 0.35);
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(nx, ny);
-      cx = nx; cy = ny;
-    }
-  }
-  ctx.stroke();
-
-  ctx.restore();
 }
 
 
@@ -1523,9 +1405,6 @@ function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
 
-  // ❄️ Frost schoonvegen bij elk nieuw level / reset
-  if (typeof clearAllFrozenFlags === "function") clearAllFrozenFlags();
-
   // Clamp en pas level-parameters toe
   const p = def?.params || {};
   const targetPaddleWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
@@ -1535,8 +1414,10 @@ function resetBricks() {
 
   // Eventuele lopende size-bonus netjes stoppen (herstelt naar paddleBaseWidth + redraw)
   if (paddleSizeEffect) {
+    // gebruikt helpers uit het plan
     stopPaddleSizeEffect();
   } else {
+    // Geen actief effect? Zorg dat paddle meteen de basisbreedte van dit level heeft
     const centerX = paddleX + paddleWidth / 2;
     paddleWidth = paddleBaseWidth;
     paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
@@ -1565,13 +1446,13 @@ function resetBricks() {
         delete b.hasDroppedBag;
       }
 
-      // Reset hartjes-flags
+      // Reset hartjes-flags; toewijzing komt zo
       b.hasHeart = false;
       b.heartDropped = false;
     }
   }
 
-  // Plaats 4 willekeurige hartjes onder normale blokken
+  // Plaats 4 willekeurige hartjes onder normale blokken (zoals je deed)
   assignHeartBlocks();
 }
 
@@ -2568,226 +2449,28 @@ function checkCoinCollision() {
     }
   });
 }
-
-function drawIceLayer(ctx, x, y, w, h, seed = 0, progress = 1) {
-  // progress: 0 → onzichtbaar, 1 → volledig ijs
-
-  ctx.save();
-
-  // Basis body opbouwen: alpha groeit mee met progress
-  const baseAlphaTop    = 0.85 * progress;
-  const baseAlphaMid    = 0.55 * progress;
-  const baseAlphaBottom = 0.85 * progress;
-
-  const g = ctx.createLinearGradient(x, y, x, y + h);
-  g.addColorStop(0,   `rgba(185,225,255,${baseAlphaTop})`);
-  g.addColorStop(0.5, `rgba(160,205,255,${baseAlphaMid})`);
-  g.addColorStop(1,   `rgba(205,240,255,${baseAlphaBottom})`);
-  ctx.fillStyle = g;
-  ctx.fillRect(x, y, w, h);
-
-  // Randlicht: ook laten inblenden
-  ctx.strokeStyle = `rgba(255,255,255,${0.65 * progress})`;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
-
-  // Deterministische random
-  let s = seed | 0;
-  function rnd(){ s = (s * 1664525 + 1013904223) | 0; return ((s >>> 0) % 1000) / 1000; }
-
-  // Frost speckles groeien in aantal en zichtbaarheid met progress
-  const dotsMax = 16;
-  const dots = Math.max(0, Math.floor(dotsMax * progress));
-  ctx.fillStyle = `rgba(255,255,255,${0.35 * progress})`;
-  for (let i = 0; i < dots; i++) {
-    const dx = x + 2 + rnd() * (w - 4);
-    const dy = y + 2 + rnd() * (h - 4);
-    ctx.fillRect(dx, dy, 1, 1);
-  }
-
-  // Barsten (cracks) komen ook geleidelijk op
-  const cracksMax = 6;                        // 3..6 in oude versie
-  const cracks = Math.max(0, Math.floor((3 + Math.floor(rnd()*3)) * progress));
-  ctx.strokeStyle = `rgba(235,245,255,${0.8 * progress})`;
-  ctx.lineWidth = Math.max(0.5, 0.75 * progress);
-  ctx.beginPath();
-  for (let c = 0; c < Math.min(cracks, cracksMax); c++) {
-    let cx = x + 4 + rnd() * (w - 8);
-    let cy = y + 4 + rnd() * (h - 8);
-    const segs = 2 + Math.floor(rnd() * 2);
-    for (let k = 0; k < segs; k++) {
-      const nx = cx + (rnd() * 2 - 1) * (w * 0.35);
-      const ny = cy + (rnd() * 2 - 1) * (h * 0.35);
-      ctx.moveTo(cx, cy); ctx.lineTo(nx, ny);
-      cx = nx; cy = ny;
-    }
-  }
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-
-function clearAllFrozenFlags() {
-  for (let c=0;c<brickColumnCount;c++) for (let r=0;r<brickRowCount;r++) {
-    const b = bricks[c][r]; if (!b) continue;
-    b.frozen = false; b.frozenGroupId = null; b.freezeOriginGroupId = null; b.freezeWasActivated = false;
-  }
-}
-
-// 🔹 Freeze helpers inline zodat alles intact blijft
-const freezeNeighborsFrom = (c, r) => {
-  const origin = bricks[c][r];
-  if (!origin) return;
-
-  const groupId = nextFrozenGroupId++;
-  origin.freezeOriginGroupId = groupId;
-
-  const neighbors = [
-    { dc: -1, dr: -1 }, { dc: 0, dr: -1 }, { dc: 1, dr: -1 },
-    { dc: -1, dr:  0 },                     { dc: 1, dr:  0 },
-    { dc: -1, dr:  1 }, { dc: 0, dr:  1 }, { dc: 1, dr:  1 }
-  ];
-
-  const now = performance.now();
-  for (const { dc, dr } of neighbors) {
-    const nc = c + dc, nr = r + dr;
-    if (nc < 0 || nr < 0 || nc >= brickColumnCount || nr >= brickRowCount) continue;
-
-    const nb = bricks[nc][nr];
-    if (nb && nb.status === 1) {
-      nb.frozen = true;
-      nb.frozenGroupId = groupId;
-
-      // 🧊 Nieuw: animatiegegevens voor langzaam bevriezen
-      nb.freezeStart = now;        // tijdstip waarop bevriezing begon
-      nb.freezeProgress = 0;       // initieel geen zichtbare ijslaag
-    }
-  }
-
-  // Speel activatiegeluid
-  try {
-    freezeActivateSfx.currentTime = 0;
-    freezeActivateSfx.play();
-  } catch (e) {}
-};
-
-
-// ❄️ alle leden van de groep + bijbehorend freeze-blok weg
-function shatterFrozenGroup(groupId) {
-  if (groupId==null) return;
-  try { iceShatterSfx.currentTime = 0; iceShatterSfx.play(); } catch(e){}
-
-  for (let c=0;c<brickColumnCount;c++) for (let r=0;r<brickRowCount;r++) {
-    const b = bricks[c][r]; if (!b || b.status!==1) continue;
-
-    // bevroren blokken van dezelfde groep
-    if (b.frozen && b.frozenGroupId === groupId) {
-      spawnIceShards(b.x+brickWidth/2, b.y+brickHeight/2);
-      b.frozen = false; b.frozenGroupId = null;
-      // vernietig zoals normale brick-score
-      b.status = 0; score += 10; updateScoreDisplay?.();
-    }
-
-    // het oorspronkelijke freeze-blok van deze groep
-    if (b.type === "freeze" && b.freezeOriginGroupId === groupId) {
-      spawnIceShards(b.x+brickWidth/2, b.y+brickHeight/2);
-      b.status = 0; b.freezeOriginGroupId = null; b.freezeWasActivated = false;
-      score += 10; updateScoreDisplay?.();
-    }
-  }
-}
-
-// simpele ijs-deeltjes (hergebruik je debris-systeem indien aanwezig)
-function spawnIceShards(x, y) {
-  const n = 18;
-  for (let i=0;i<n;i++) {
-    const a = (i/n)*Math.PI*2 + Math.random()*0.3;
-    const s = 2 + Math.random()*4;
-    stoneDebris?.push?.({ x, y, dx: Math.cos(a)*s, dy: Math.sin(a)*s, radius: 1+Math.random()*2, alpha:1, type:"ice" });
-  }
-}
 function collisionDetection() {
   // 🎙️ Lazy init van voice line + state (1× per game)
   if (typeof window.rockWarnState === "undefined") {
     window.rockWarnState = {
-      played: false,
-      hits: 0,
-      triggerIndex: Math.random() < 0.5 ? 1 : 3,
+      played: false,                          // al afgespeeld in deze game?
+      hits: 0,                                // aantal *geraakte* stonefall-blokken
+      triggerIndex: Math.random() < 0.5 ? 1 : 3,  // 1e of 3e keer
       audio: (() => {
         try {
-          const a = new Audio("bitty_watch_out.mp3");
+          const a = new Audio("bitty_watch_out.mp3"); // zet jouw mp3-bestandsnaam/pad
           a.volume = 0.85;
           return a;
         } catch (e) { return null; }
       })()
     };
   }
-
   const RWS = window.rockWarnState;
 
-  // 🔹 Freeze helpers inline zodat alles intact blijft
-  const freezeNeighborsFrom = (c, r) => {
-    const origin = bricks[c][r];
-    if (!origin) return;
-    const groupId = nextFrozenGroupId++;
-    origin.freezeOriginGroupId = groupId;
-
-    const neighbors = [
-      {dc:-1, dr:-1}, {dc:0, dr:-1}, {dc:1, dr:-1},
-      {dc:-1, dr:0},                {dc:1, dr:0},
-      {dc:-1, dr:1},  {dc:0, dr:1}, {dc:1, dr:1}
-    ];
-    for (const {dc, dr} of neighbors) {
-      const nc = c + dc, nr = r + dr;
-      if (nc < 0 || nr < 0 || nc >= brickColumnCount || nr >= brickRowCount) continue;
-      const nb = bricks[nc][nr];
-      if (nb && nb.status === 1) {
-        nb.frozen = true;
-        nb.frozenGroupId = groupId;
-      }
-    }
-    try { freezeActivateSfx.currentTime = 0; freezeActivateSfx.play(); } catch(e){}
-  };
-
-  const shatterFrozenGroup = (groupId) => {
-    if (!groupId) return;
-    try { iceShatterSfx.currentTime = 0; iceShatterSfx.play(); } catch(e){}
-
-    for (let c = 0; c < brickColumnCount; c++) {
-      for (let r = 0; r < brickRowCount; r++) {
-        const b = bricks[c][r];
-        if (!b || b.status !== 1) continue;
-
-        // bevroren buren
-        if (b.frozen && b.frozenGroupId === groupId) {
-          spawnIceShards(b.x + brickWidth/2, b.y + brickHeight/2);
-          b.status = 0;
-          b.frozen = false;
-          b.frozenGroupId = null;
-          score += 10;
-          updateScoreDisplay?.();
-        }
-
-        // het freeze-blok zelf
-        if (b.type === "freeze" && b.freezeOriginGroupId === groupId) {
-          spawnIceShards(b.x + brickWidth/2, b.y + brickHeight/2);
-          b.status = 0;
-          b.freezeOriginGroupId = null;
-          b.freezeWasActivated = false;
-          score += 10;
-          updateScoreDisplay?.();
-        }
-      }
-    }
-  };
-
-  // hoofd-loop
   balls.forEach(ball => {
     for (let c = 0; c < brickColumnCount; c++) {
       for (let r = 0; r < brickRowCount; r++) {
         const b = bricks[c][r];
-        if (!b) continue;
 
         if (
           b.status === 1 &&
@@ -2800,14 +2483,10 @@ function collisionDetection() {
           blockSound.play();
 
           ball.dy = -ball.dy;
-          if (ball.dy < 0) ball.y = b.y - ball.radius - 1;
-          else ball.y = b.y + brickHeight + ball.radius + 1;
-
-          // ❄️ Als het een bevroren blok is → hele groep breken
-          if (b.frozen) {
-            const gid = b.frozenGroupId;
-            shatterFrozenGroup(gid);
-            return;
+          if (ball.dy < 0) {
+            ball.y = b.y - ball.radius - 1;
+          } else {
+            ball.y = b.y + brickHeight + ball.radius + 1;
           }
 
           // 💖 Hartje laten vallen
@@ -2840,16 +2519,22 @@ function collisionDetection() {
               });
             }
 
-            if (b.hits === 1 || b.hits === 2) spawnCoin(b.x + brickWidth / 2, b.y);
+            if (b.hits === 1 || b.hits === 2) {
+              spawnCoin(b.x + brickWidth / 2, b.y);
+            }
+
             if (b.hits >= 3) {
               b.status = 0;
+
               if (!b.hasDroppedBag) {
                 spawnPxpBag(b.x + brickWidth / 2, b.y + brickHeight);
                 b.hasDroppedBag = true;
               }
+
               const earned = doublePointsActive ? 120 : 60;
               score += earned;
               updateScoreDisplay();
+
               pointPopups.push({
                 x: b.x + brickWidth / 2,
                 y: b.y,
@@ -2857,18 +2542,25 @@ function collisionDetection() {
                 alpha: 1
               });
             }
-            return;
+
+            return; // klaar met deze hit
           }
 
-          // 🪙 Silver blok
+          // 🪙 Gedrag voor silver blokken
           if (b.type === "silver") {
             b.hits = (b.hits || 0) + 1;
-            if (b.hits >= 2) {
+
+            if (b.hits === 1) {
+              // silver2.png tekenen gebeurt in drawBricks()
+            } else if (b.hits >= 2) {
               b.status = 0;
+
               triggerSilverExplosion(b.x + brickWidth / 2, b.y + brickHeight / 2);
+
               const earned = doublePointsActive ? 150 : 75;
               score += earned;
               updateScoreDisplay();
+
               pointPopups.push({
                 x: b.x + brickWidth / 2,
                 y: b.y,
@@ -2876,40 +2568,36 @@ function collisionDetection() {
                 alpha: 1
               });
             }
-            return;
+
+            return; // klaar met deze hit
           }
 
           // 🎁 Bonusacties
           switch (b.type) {
-            case "freeze": {
-              // 1e hit → buren bevriezen, blok blijft
-              if (!b.freezeWasActivated) {
-                freezeNeighborsFrom(c, r);
-                b.freezeWasActivated = true;
-              }
-              // reflecteer alleen
-              return;
-            }
-
             case "stonefall": {
+              // ✨ Direct bij 1e hit: laat stenen vallen en verwijder het blok
               const midX = b.x + brickWidth / 2;
               const midY = b.y + brickHeight / 2;
               triggerStonefall(midX, midY);
 
               if (!RWS.played) {
-                RWS.hits++;
-                if (RWS.hits === RWS.triggerIndex && RWS.audio) {
-                  const ok = playVoiceOver(RWS.audio, { cooldown: 3000, skipIfLocked: true });
-                  if (ok) RWS.played = true;
-                }
-              }
+              RWS.hits++;
+           if (RWS.hits === RWS.triggerIndex && RWS.audio) {
+              const ok = playVoiceOver(RWS.audio, { cooldown: 3000, skipIfLocked: true });
+              if (ok) RWS.played = true; // alleen “gebruikt” markeren als het ook echt gespeeld is
+            }
+         }
 
-              b.status = 0;
-              const earned = doublePointsActive ? 20 : 10;
+
+              b.status = 0;                                // blok meteen weg
+              const earned = doublePointsActive ? 20 : 10; // zelfde puntentelling als voorheen
               score += earned;
               updateScoreDisplay();
-              spawnCoin(b.x, b.y);
+
+              spawnCoin(b.x, b.y);                         // beloning consistent houden
               b.type = "normal";
+              // geen return; → na de switch blijft de gedeelde cleanup lopen,
+              // net als voorheen, zodat gedrag/score consistent blijft
               break;
             }
 
@@ -2933,30 +2621,56 @@ function collisionDetection() {
               b.type = "normal";
               break;
 
-            case "paddle_long": startPaddleSizeEffect("long"); break;
-            case "paddle_small": startPaddleSizeEffect("small"); break;
-            case "magnet": activateMagnet(20000); break;
-            case "rocket":
-              rocketActive = true; rocketAmmo = 3; rocketReadySound.play(); break;
-            case "doubleball": spawnExtraBall(ball); doubleBallSound.play(); break;
-            case "2x":
-              doublePointsActive = true; doublePointsStartTime = Date.now(); doublePointsSound.play(); break;
-            case "speed":
-              speedBoostActive = true; speedBoostStart = Date.now(); speedBoostSound.play(); break;
-          }
+            case "paddle_long":
+              startPaddleSizeEffect("long");
+              break;
 
-          // 🔽 Cleanup
+            case "paddle_small":
+              startPaddleSizeEffect("small");
+              break;
+
+            case "magnet":
+              activateMagnet(20000);
+              break;
+
+            case "rocket":
+              rocketActive = true;
+              rocketAmmo = 3;
+              rocketReadySound.play();
+              break;
+
+            case "doubleball":
+              spawnExtraBall(ball);
+              doubleBallSound.play();
+              break;
+
+            case "2x":
+              doublePointsActive = true;
+              doublePointsStartTime = Date.now();
+              doublePointsSound.play();
+              break;
+
+            case "speed":
+              speedBoostActive = true;
+              speedBoostStart = Date.now();
+              speedBoostSound.play();
+              break;
+          } // <-- einde switch
+
+          // 🔽 Gedeelde cleanup (voor alle reguliere bonussen)
           b.status = 0;
+
           let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
           score += earned;
           updateScoreDisplay();
+
           b.type = "normal";
           spawnCoin(b.x, b.y);
-        }
-      }
-    }
-  });
-}
+        } // <-- einde IF hit
+      } // <-- einde for r
+    } // <-- einde for c
+  }); // <-- einde balls.forEach
+} // <-- einde function
 
 
 
@@ -3594,7 +3308,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 29) {
+  if (imagesLoaded === 28) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -3656,8 +3370,6 @@ paddleSmallBlockImg.onload = onImageLoad;
 magnetImg.onload = onImageLoad;
 stoneBlockImg.onload  = onImageLoad;
 stoneLargeImg.onload  = onImageLoad;
-freezeBlockImg.onload = onImageLoad;
-
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
