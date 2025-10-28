@@ -1012,6 +1012,13 @@ const shootSound = new Audio("shoot_arcade.mp3");
 const wallSound = new Audio("tick.mp3");
 const blockSound = new Audio("tock.mp3");
 
+
+const tntBeepSound = new Audio("tnt_beep.mp3");
+tntBeepSound.volume = 0.7;
+const tntExplodeSound = new Audio("tnt_explode.mp3");
+tntExplodeSound.volume = 0.9;
+
+
 const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
 rockWarning.volume = 0.85;
 
@@ -1136,6 +1143,15 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
+
+
+// 🧨 TNT blok
+const tntImg = new Image();      
+tntImg.src = "tnt.png";
+
+const tntBlinkImg = new Image(); 
+tntBlinkImg.src = "tnt_blink.png";
+
 
 
 // Vergeet niet je 'expected' imagesLoaded maximale aantal met +4 te verhogen.
@@ -1370,6 +1386,25 @@ function drawBricks() {
   }
   break;
 
+            case "tnt": {
+  const armed = !!b.tntArmed;
+  const blink = armed && (Math.floor(performance.now() / 200) % 2 === 0);
+  const img = blink ? tntBlinkImg : tntImg;
+
+  if (img.complete) {
+    ctx.drawImage(img, brickX, brickY, brickWidth, brickHeight);
+  } else {
+    ctx.fillStyle = blink ? "#ff5555" : "#bb0000";
+    ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 13px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("TNT", brickX + brickWidth / 2, brickY + brickHeight / 2 + 4);
+  }
+  break;
+}
+
+            
           default:
             ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
             break;
@@ -1411,6 +1446,12 @@ function resetBricks() {
 
   // Basisbreedte van dit level vastzetten
   paddleBaseWidth = targetPaddleWidth;
+
+  if (brickType === "tnt") {
+  b.tntArmed = false;
+  b.tntStart = 0;
+  b.tntBeepNext = 0;
+}
 
   // Eventuele lopende size-bonus netjes stoppen (herstelt naar paddleBaseWidth + redraw)
   if (paddleSizeEffect) {
@@ -2257,6 +2298,52 @@ function drawFallingStones() {
   }
 }
 
+ function updateTNTs() {
+  const now = performance.now();
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const b = bricks[c][r];
+      if (!b || b.status !== 1 || b.type !== "tnt" || !b.tntArmed) continue;
+
+      const elapsed = now - b.tntStart;
+      const timeToExplode = 10000; // 10 sec
+
+      if (now >= b.tntBeepNext) {
+        try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
+        const remain = Math.max(0, timeToExplode - elapsed);
+        const interval = Math.max(120, remain / 10);
+        b.tntBeepNext = now + interval;
+      }
+
+      if (elapsed >= timeToExplode) explodeTNT(c, r);
+    }
+  }
+}
+
+function explodeTNT(col, row) {
+  const center = bricks[col][row];
+  if (!center || center.status !== 1) return;
+  try { tntExplodeSound.play(); } catch {}
+
+  const dirs = [
+    [ 0,-1],[ 1,-1],[ 1, 0],[ 1, 1],
+    [ 0, 1],[-1, 1],[-1, 0],[-1,-1]
+  ];
+
+  dirs.forEach(([dx, dy]) => {
+    const c = col + dx, r = row + dy;
+    if (c<0||r<0||c>=brickColumnCount||r>=brickRowCount) return;
+    const n = bricks[c][r];
+    if (n && n.status === 1) n.status = 0;
+  });
+
+  center.status = 0;
+  explosions.push({
+    x: center.x + brickWidth/2,
+    y: center.y + brickHeight/2,
+    radius: 22, alpha: 1, color: "orange"
+  });
+}
 
 
 function drawFlyingCoins() {
@@ -2587,6 +2674,14 @@ function collisionDetection() {
               if (ok) RWS.played = true; // alleen “gebruikt” markeren als het ook echt gespeeld is
             }
          }
+             if (b.type === "tnt") {
+             if (!b.tntArmed) {
+              b.tntArmed = true;
+              b.tntStart = performance.now();
+              b.tntBeepNext = b.tntStart;
+             }
+               return; // geen directe vernietiging
+            }
 
 
               b.status = 0;                                // blok meteen weg
@@ -2941,7 +3036,9 @@ if (stoneHitOverlayTimer > 0) {
     triggerPaddleExplosion(); // pas nu verlies van leven
   }
 
- drawBricks();
+drawBricks();
+updateTNTs();
+
 
   
 if (leftPressed) {
@@ -3308,7 +3405,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 28) {
+  if (imagesLoaded === 30) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -3370,6 +3467,9 @@ paddleSmallBlockImg.onload = onImageLoad;
 magnetImg.onload = onImageLoad;
 stoneBlockImg.onload  = onImageLoad;
 stoneLargeImg.onload  = onImageLoad;
+tntImg.onload = onImageLoad;
+tntBlinkImg.onload = onImageLoad;
+
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
