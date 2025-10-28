@@ -1436,49 +1436,34 @@ function drawPointPopups() {
 }
 
 function resetBricks() {
-  // Pak map + params uit centraal LEVELS schema
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
-
-  // Clamp en pas level-parameters toe
   const p = def?.params || {};
   const targetPaddleWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
-
-  // Basisbreedte van dit level vastzetten
   paddleBaseWidth = targetPaddleWidth;
 
-  if (brickType === "tnt") {
-  b.tntArmed = false;
-  b.tntStart = 0;
-  b.tntBeepNext = 0;
-}
-
-  // Eventuele lopende size-bonus netjes stoppen (herstelt naar paddleBaseWidth + redraw)
+  // event. size-effect opruimen
   if (paddleSizeEffect) {
-    // gebruikt helpers uit het plan
     stopPaddleSizeEffect();
   } else {
-    // Geen actief effect? Zorg dat paddle meteen de basisbreedte van dit level heeft
     const centerX = paddleX + paddleWidth / 2;
     paddleWidth = paddleBaseWidth;
     paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
     if (typeof redrawPaddleCanvas === 'function') redrawPaddleCanvas();
   }
 
-  // Bricks resetten en types toepassen
+  // ⬇️ HIER alles per brick resetten
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
       b.status = 1;
 
-      // Kijk of deze brick in de map voorkomt
+      // type bepalen uit levelmap
       const defined = currentMap.find(p => p.col === c && p.row === r);
       const brickType = defined ? defined.type : "normal";
-
-      // Pas type toe
       b.type = brickType;
 
-      // Reset type-specifieke eigenschappen
+      // type-specifiek resetten
       if (brickType === "stone" || brickType === "silver") {
         b.hits = 0;
         b.hasDroppedBag = false;
@@ -1487,13 +1472,23 @@ function resetBricks() {
         delete b.hasDroppedBag;
       }
 
-      // Reset hartjes-flags; toewijzing komt zo
+      // 🧨 TNT goed initialiseren (en opruimen wanneer geen TNT)
+      if (brickType === "tnt") {
+        b.tntArmed = false;
+        b.tntStart = 0;
+        b.tntBeepNext = 0;
+      } else {
+        delete b.tntArmed;
+        delete b.tntStart;
+        delete b.tntBeepNext;
+      }
+
+      // hearts reset
       b.hasHeart = false;
       b.heartDropped = false;
     }
   }
 
-  // Plaats 4 willekeurige hartjes onder normale blokken (zoals je deed)
   assignHeartBlocks();
 }
 
