@@ -1105,8 +1105,6 @@ window.stoneLargeImg = new Image();      stoneLargeImg.src = "stone_large.png";
 
 
 
-// ✅ Registratie pas na aanmaken en src-koppeling
-registerImageOnloads();
 
 
 
@@ -3560,6 +3558,9 @@ function startGameAfterImages() {
   updateScoreDisplay?.();
   draw();
 }
+
+// 👉 BELANGRIJK: Aanroep PAS NA de functies hierboven
+registerImageOnloads();
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
