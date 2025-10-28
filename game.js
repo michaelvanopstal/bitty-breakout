@@ -1504,6 +1504,9 @@ function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
 
+  if (typeof clearAllFrozenFlags === "function") clearAllFrozenFlags();
+}
+
   // Clamp en pas level-parameters toe
   const p = def?.params || {};
   const targetPaddleWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
