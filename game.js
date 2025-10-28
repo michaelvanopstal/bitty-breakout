@@ -65,6 +65,30 @@ let resetOverlayActive = false;
 let ballTrail = [];
 const maxTrailLength = 10;
 
+// 🎮 Duel Mode (Pong-achtig level)
+let duelModeActive = false;
+let duelPlayerScore = 0;
+let duelCPUScore = 0;
+const DUEL_TARGET = 10;
+let duelBallBaseSpeed = 6;        // start
+const DUEL_BALL_SPEED_STEP = 0.4; // per punt erbij
+let cpuPaddleX = 0;
+let cpuPaddleWidth = 100;
+let cpuPaddleHeight = 15;
+let cpuPaddleY = 18;              // vlak onder top
+let cpuVX = 0;
+
+// Moeilijkheid (1=easy, 2=normal, 3=hard)
+let cpuDifficulty = 2;
+const CPU_CONFIG = {
+  1: { maxSpeed: 5, reactMs: 120, noise: 28 },
+  2: { maxSpeed: 7, reactMs: 70,  noise: 16 },
+  3: { maxSpeed: 10, reactMs: 35, noise: 7  }
+};
+let _cpuNextReactAt = 0;
+let _cpuTargetX = null;
+
+
 let machineGunActive = false;
 let machineGunGunX = 0;
 let machineGunGunY = 0;
@@ -525,6 +549,11 @@ const LEVELS = Array.from({ length: TOTAL_LEVELS }, (_, i) => ({
 LEVELS[0].map = level1Map;
 LEVELS[1].map = level2Map;
 LEVELS[2].map = (typeof level3Map !== "undefined" ? level3Map : []);
+// ⚔️ Level 3 is ons Duel-level (geen bricks, alleen paddles & score)
+LEVELS[2].map = []; // leeg
+LEVELS[2].params.isDuel = true;
+LEVELS[2].params.ballSpeed = 6;     // basis
+LEVELS[2].params.paddleWidth = 100; // beide paddles
 
 // 🔧 Makkelijk bonusblokken plaatsen:
 function addBonus(levelNumber, col, row, type="normal") {
@@ -1409,6 +1438,9 @@ function resetBricks() {
   const p = def?.params || {};
   const targetPaddleWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
 
+  // ⚔️ Duel-vlag vanuit level-params
+  duelModeActive = !!(p.isDuel);
+
   // Basisbreedte van dit level vastzetten
   paddleBaseWidth = targetPaddleWidth;
 
@@ -1452,9 +1484,111 @@ function resetBricks() {
     }
   }
 
-  // Plaats 4 willekeurige hartjes onder normale blokken (zoals je deed)
-  assignHeartBlocks();
+  // Plaats 4 willekeurige hartjes onder normale blokken (zoals je deed) – niet in duel
+  if (!duelModeActive) {
+    assignHeartBlocks();
+  }
+
+  // 🏟️ Duel-mode: bricks uit, paddle centreren en duel starten
+  if (duelModeActive) {
+    for (let c = 0; c < brickColumnCount; c++) {
+      for (let r = 0; r < brickRowCount; r++) {
+        bricks[c][r].status = 0; // alles leeg in duel
+      }
+    }
+
+    // Zorg dat de actuele paddle-breedte toegepast blijft en netjes gecentreerd is
+    const centerX = paddleX + paddleWidth / 2;
+    paddleWidth = paddleBaseWidth;
+    paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
+    if (typeof redrawPaddleCanvas === 'function') redrawPaddleCanvas();
+
+    // Start een frisse duel-ronde (reset scores/snelheid elders geregeld)
+    if (typeof startDuelRound === 'function') {
+      startDuelRound(true);
+    }
+  }
 }
+
+function goToLevel(n, opts = {}) {
+  const cfg = Object.assign({
+    resetScore: false,
+    resetLives: false,
+    centerPaddle: true,
+    clearEffects: true,
+    cpuDifficulty: null   // nieuw: 1 (easy), 2 (normal), 3 (hard) of null
+  }, opts);
+
+  // Clamp naar 1..TOTAL_LEVELS
+  const maxLevels = (typeof TOTAL_LEVELS !== "undefined") ? TOTAL_LEVELS : 20;
+  const target = Math.max(1, Math.min(maxLevels, n));
+  level = target;
+
+  // Timer & bonussen pauzeren
+  if (typeof pauseTimer === "function") pauseTimer();
+  if (typeof resetAllBonuses === "function") resetAllBonuses();
+
+  // Optioneel: score/lives resetten
+  if (cfg.resetScore) {
+    score = 0;
+    if (typeof updateScoreDisplay === "function") updateScoreDisplay();
+  }
+  if (cfg.resetLives) {
+    lives = 3;
+    if (typeof updateLivesDisplay === "function") updateLivesDisplay();
+  }
+
+  // Effect- en deeltjesbuffers leegmaken (veilig, alleen als ze bestaan)
+  try { explosions = []; } catch(e){}
+  try { smokeParticles = []; } catch(e){}
+  try { flyingCoins = []; } catch(e){}
+  try { coins = []; } catch(e){}
+  try { pxpBags = []; } catch(e){}
+  try { paddleExplosionParticles = []; } catch(e){}
+
+  // Level-specifieke setup
+  // resetBricks() zet duelModeActive o.b.v. LEVELS[level-1].params.isDuel
+  resetBricks();
+
+  // Optioneel paddle centreren
+  if (cfg.centerPaddle && typeof resetPaddle === "function") {
+    resetPaddle();
+  }
+
+  // CPU moeilijkheid zetten als meegegeven
+  if (cfg.cpuDifficulty != null) {
+    if (typeof setCpuDifficulty === "function") {
+      setCpuDifficulty(cfg.cpuDifficulty);
+    } else {
+      // Fallback als setter niet bestaat
+      try {
+        cpuDifficulty = Math.max(1, Math.min(3, cfg.cpuDifficulty|0));
+      } catch(e){}
+    }
+  }
+
+  // Bal(len) klaarmaken:
+  // - In DUEL: resetBricks() heeft al startDuelRound(true) aangeroepen,
+  //            dus GEEN balls flushen en GEEN resetBall()!
+  // - Normaal: schone start zoals voorheen.
+  if (!duelModeActive) {
+    if (typeof balls !== "undefined") balls = [];
+    resetBall();
+  }
+
+  // UI tijd resetten (optioneel)
+  try {
+    elapsedTime = 0;
+    const timeEl = document.getElementById("timeDisplay");
+    if (timeEl) timeEl.textContent = "00:00";
+  } catch(e){}
+
+  console.log(
+    `Jumped to level ${level} ` +
+    `(duel=${!!duelModeActive}${cfg.cpuDifficulty!=null ? `, cpuDiff=${cfg.cpuDifficulty}` : ""})`
+  );
+}
+
 
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
@@ -1552,6 +1686,59 @@ function drawPaddle() {
 
   ctx.drawImage(paddleCanvas, paddleX, paddleY);
 }
+
+function startDuelRound(isFresh=false) {
+  // Gebruik huidige paddle-breedte als basis
+  cpuPaddleWidth = paddleWidth;
+  cpuPaddleX = (canvas.width - cpuPaddleWidth) / 2;
+
+  // Bal naar midden
+  const b = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: ballRadius,
+    isMain: true
+  };
+
+  // Willekeurige start naar boven/beneden, maar niet te vlak
+  const speed = duelBallBaseSpeed;
+  const ang = (Math.random() * 0.6 + 0.2) * Math.PI; // 36°..144°
+  const dirUp = Math.random() < 0.5 ? -1 : 1;
+  b.dx = Math.cos(ang) * speed * (Math.random()<0.5?-1:1);
+  b.dy = Math.sin(ang) * speed * dirUp;
+
+  balls = [b];
+  ballLaunched = true;
+  ballMoving  = true;
+
+  // Reset cpu timing
+  _cpuNextReactAt = performance.now();
+  _cpuTargetX = null;
+
+  if (isFresh) {
+    duelPlayerScore = 0;
+    duelCPUScore = 0;
+    duelBallBaseSpeed = LEVELS[Math.max(0, level-1)]?.params?.ballSpeed ?? 6;
+  }
+}
+
+function duelExplodePaddle(isPlayer) {
+  // Visuele explosie zonder levenslogica
+  const cx = isPlayer ? (paddleX + paddleWidth / 2) : (cpuPaddleX + cpuPaddleWidth / 2);
+  const cy = isPlayer ? (paddleY + paddleHeight / 2) : (cpuPaddleY + cpuPaddleHeight / 2);
+  for (let i = 0; i < 48; i++) {
+    paddleExplosionParticles.push({
+      x: cx,
+      y: cy,
+      dx: (Math.random() - 0.5) * 9,
+      dy: (Math.random() - 0.5) * 9,
+      radius: Math.random() * 3 + 2,
+      alpha: 1
+    });
+  }
+  try { paddleExplodeSound.currentTime = 0; paddleExplodeSound.play(); } catch(e){}
+}
+
 
 function drawMagnetAura(ctx) {
   if (!magnetActive) return; // alleen tekenen als hij aanstaat
@@ -2763,12 +2950,14 @@ function isPaddleBlockedHorizontally(newX) {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawElectricBursts(); // 🔄 VOORAF tekenen, zodat het ONDER alles ligt
+  // Laag-volgorde (achtergrond effecten onder alles)
+  drawElectricBursts();
 
+  // Fysica/colldet voor bricks/items die jij al vroeg doet
   collisionDetection();
   drawCoins();
   drawFallingHearts();
-  drawFallingStones();  
+  drawFallingStones();
   drawHeartPopup();
   checkCoinCollision();
   drawPaddleFlags();
@@ -2776,210 +2965,329 @@ function draw() {
   checkFlyingCoinHits();
   drawPointPopups();
 
+  // A) Time-out check heel vroeg in draw()
+  if (magnetActive && performance.now() >= magnetEndTime) {
+    stopMagnet();
+  }
 
-// A) Time-out check heel vroeg in draw()
-if (magnetActive && performance.now() >= magnetEndTime) {
-  stopMagnet();
-}
+  // B) Toepassen op arrays (na physics update van items, vóór render)
+  applyMagnetToArray(fallingHearts);
+  applyMagnetToArray(coins);
+  applyMagnetToArray(pxpBags);
 
-// B) Toepassen op arrays (na physics update van items, vóór render)
-applyMagnetToArray(fallingHearts);
-applyMagnetToArray(coins);     // muntjes worden al aangestuurd via 'coins'
-applyMagnetToArray(pxpBags);   // zakjes vallen in 'pxpBags'
-
-
-if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
-  stopPaddleSizeEffect();
-}
-
+  // Tijdelijke effecten opruimen
+  if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
+    stopPaddleSizeEffect();
+  }
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
     doublePointsActive = false;
   }
 
+  // 🔵 Ballen updaten + randen + trails + tekenen
   balls.forEach((ball, index) => {
+    // Positie-update
     if (ballLaunched) {
-      let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
-        ? speedBoostMultiplier : 1;
+      const speedMultiplier =
+        (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
+          ? speedBoostMultiplier
+          : 1;
       ball.x += ball.dx * speedMultiplier;
       ball.y += ball.dy * speedMultiplier;
     } else {
-       ball.x = paddleX + paddleWidth / 2 - ballRadius;
-       ball.y = paddleY - ballRadius * 2;
-
+      // nog niet gelanceerd: mee op paddle
+      ball.x = paddleX + paddleWidth / 2 - ballRadius;
+      ball.y = paddleY - ballRadius * 2;
     }
-    
+
+    // Trail bijhouden
     if (!ball.trail) ball.trail = [];
-
     let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
-    let steps = 3; // hoe meer hoe vloeiender
+    const steps = 3;
     for (let i = 1; i <= steps; i++) {
-    let px = last.x + (ball.x - last.x) * (i / steps);
-    let py = last.y + (ball.y - last.y) * (i / steps);
-    ball.trail.push({ x: px, y: py });
-  }
+      const px = last.x + (ball.x - last.x) * (i / steps);
+      const py = last.y + (ball.y - last.y) * (i / steps);
+      ball.trail.push({ x: px, y: py });
+    }
+    while (ball.trail.length > 20) ball.trail.shift();
 
-    while (ball.trail.length > 20) {
-    ball.trail.shift();
- }
-
-
-    // Veiliger links/rechts
+    // Zijwanden (altijd reflecteren)
     if (ball.x <= ball.radius + 1 && ball.dx < 0) {
       ball.x = ball.radius + 1;
       ball.dx *= -1;
-      wallSound.currentTime = 0;
-      wallSound.play();
+      try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
     }
     if (ball.x >= canvas.width - ball.radius - 1 && ball.dx > 0) {
       ball.x = canvas.width - ball.radius - 1;
       ball.dx *= -1;
-      wallSound.currentTime = 0;
-      wallSound.play();
+      try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
     }
 
-    // Veiliger bovenkant
-    if (ball.y <= ball.radius + 1 && ball.dy < 0) {
-      ball.y = ball.radius + 1;
-      ball.dy *= -1;
-      wallSound.currentTime = 0;
-      wallSound.play();
-    }
-if (
-  ball.y + ball.radius > paddleY &&
-  ball.y - ball.radius < paddleY + paddleHeight &&
-  ball.x + ball.radius > paddleX &&
-  ball.x - ball.radius < paddleX + paddleWidth
-) {
-  let reflect = true;
-
-  if (machineGunActive || machineGunCooldownActive) {
-    const segmentWidth = paddleWidth / 10;
-    for (let i = 0; i < 10; i++) {
-      const segX = paddleX + i * segmentWidth;
-      const isDamaged = paddleDamageZones.some(hitX =>
-        hitX >= segX && hitX <= segX + segmentWidth
-      );
-
-      const ballCenterX = ball.x;
-      if (
-        ballCenterX >= segX &&
-        ballCenterX < segX + segmentWidth &&
-        isDamaged
-      ) {
-        reflect = false;
-        break;
+    // Bovenrand
+    if (!duelModeActive) {
+      // Normale game: bounce
+      if (ball.y <= ball.radius + 1 && ball.dy < 0) {
+        ball.y = ball.radius + 1;
+        ball.dy *= -1;
+        try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
+      }
+    } else {
+      // Duel: geen bounce — punt voor speler als hij over top gaat
+      if (ball.y - ball.radius <= 0) {
+        duelPlayerScore++;
+        duelExplodePaddle(false);        // CPU paddle explodeert (visueel)
+        duelBallBaseSpeed += DUEL_BALL_SPEED_STEP;
+        startDuelRound(false);           // nieuwe rally
+        return; // stop verdere verwerking van deze bal in deze frame
       }
     }
-  }
 
-  if (reflect) {
-    const hitPos = (ball.x - paddleX) / paddleWidth;
-    const angle = (hitPos - 0.5) * Math.PI / 2;
-    const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-    ball.dx = speed * Math.sin(angle);
-    ball.dy = -Math.abs(speed * Math.cos(angle));
+    // Botsing met speler-paddle (met jouw damage-zones)
+    if (
+      ball.y + ball.radius > paddleY &&
+      ball.y - ball.radius < paddleY + paddleHeight &&
+      ball.x + ball.radius > paddleX &&
+      ball.x - ball.radius < paddleX + paddleWidth
+    ) {
+      let reflect = true;
 
-    wallSound.currentTime = 0;
-    wallSound.play();
-  }
-}
+      if (machineGunActive || machineGunCooldownActive) {
+        const segmentWidth = paddleWidth / 10;
+        for (let i = 0; i < 10; i++) {
+          const segX = paddleX + i * segmentWidth;
+          const isDamaged = paddleDamageZones.some(hitX =>
+            hitX >= segX && hitX <= segX + segmentWidth
+          );
+          const ballCenterX = ball.x;
+          if (ballCenterX >= segX && ballCenterX < segX + segmentWidth && isDamaged) {
+            reflect = false;
+            break;
+          }
+        }
+      }
 
-
-
-    if (ball.y + ball.dy > canvas.height) {
-      balls.splice(index, 1); // verwijder bal zonder actie
+      if (reflect) {
+        const hitPos = (ball.x - paddleX) / paddleWidth;
+        const angle = (hitPos - 0.5) * Math.PI / 2;
+        const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+        ball.dx = speed * Math.sin(angle);
+        ball.dy = -Math.abs(speed * Math.cos(angle));
+        try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
+      }
     }
-// ✨ Gouden smalle energie-staart (taps en iets smaller dan bal)
-// ✨ Rechte gouden energie-staart — iets groter dan de bal en 2x zo lang
-if (ball.trail.length >= 2) {
-  const head = ball.trail[ball.trail.length - 1]; // meest recente positie
-  const tail = ball.trail[0]; // oudste positie (ver weg van bal)
 
-  ctx.save();
+    // Onderrand
+    if (!duelModeActive) {
+      // Normale game: bal verwijderen (leven elders afgehandeld)
+      if (ball.y + ball.dy > canvas.height) {
+        balls.splice(index, 1);
+      }
+    } else {
+      // Duel: punt voor CPU als speler-lijn gepasseerd
+      if (ball.y + ball.radius >= canvas.height) {
+        duelCPUScore++;
+        duelExplodePaddle(true);         // speler paddle explodeert (visueel)
+        duelBallBaseSpeed += DUEL_BALL_SPEED_STEP;
+        startDuelRound(false);
+        return; // stop verdere verwerking
+      }
+    }
 
-  const gradient = ctx.createLinearGradient(
-    head.x + ball.radius, head.y + ball.radius,
-    tail.x + ball.radius, tail.y + ball.radius
-  );
+    // ✨ Energie-staart tekenen
+    if (ball.trail.length >= 2) {
+      const head = ball.trail[ball.trail.length - 1];
+      const tail = ball.trail[0];
+      ctx.save();
+      const gradient = ctx.createLinearGradient(
+        head.x + ball.radius, head.y + ball.radius,
+        tail.x + ball.radius, tail.y + ball.radius
+      );
+      gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
+      gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
+      ctx.beginPath();
+      ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
+      ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = ball.radius * 2.2;
+      ctx.lineCap = "round";
+      ctx.stroke();
+      ctx.restore();
+    }
 
-  ctx.lineWidth = ball.radius * 2.0; // iets kleiner dan 2.2
-  gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
-  gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
-
-  ctx.beginPath();
-  ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
-  ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
-  ctx.strokeStyle = gradient;
-  ctx.lineWidth = ball.radius * 2.2; // net iets groter dan de bal
-  ctx.lineCap = "round";
-  ctx.stroke();
-
-  ctx.restore();
-}
-
+    // Bal sprite
     ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
   });
 
-
+  // Overlays
   if (resetOverlayActive) {
     if (Date.now() % 1000 < 500) {
       ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
   }
-
-  // 🔴 Korte hit-flash bij steen op paddle
-if (stoneHitOverlayTimer > 0) {
-  ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  stoneHitOverlayTimer--;
-}
-
-
-  // ✅ Na de loop: check of alle ballen weg zijn
-  if (balls.length === 0 && !paddleExploding) {
-    triggerPaddleExplosion(); // pas nu verlies van leven
+  if (stoneHitOverlayTimer > 0) {
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    stoneHitOverlayTimer--;
   }
 
- drawBricks();
-
-  
-if (leftPressed) {
-  const newX = paddleX - paddleSpeed;
-  if (newX > 0 && !isPaddleBlockedHorizontally(newX)) {
-    paddleX = newX;
-  }
-}
-
-if (rightPressed) {
-  const newX = paddleX + paddleSpeed;
-  if (newX + paddleWidth < canvas.width && !isPaddleBlockedHorizontally(newX)) {
-    paddleX = newX;
-  }
-}
-
-// 🔁 Alleen omhoogbeweging beperken tot na afschieten
-if (upPressed) {
-  const newY = paddleY - paddleSpeed;
-
-  if (paddleFreeMove) {
-    if (newY > 0 && !isPaddleBlockedVertically(newY)) {
-      paddleY = newY;
+  // Geen auto-levenverlies in duel wanneer alle ballen weg zijn
+  if (!duelModeActive) {
+    if (balls.length === 0 && !paddleExploding) {
+      triggerPaddleExplosion(); // pas nu verlies van leven
     }
   }
-}
 
-if (downPressed) {
-  const newY = paddleY + paddleSpeed;
-  if (newY + paddleHeight < canvas.height && !isPaddleBlockedVertically(newY)) {
-    paddleY = newY;
+  // Bricks (tekenen blijft veilig; in duel staan ze op status=0)
+  drawBricks();
+
+  // 🎮 Spelerinput verwerken (na physics)
+  if (leftPressed) {
+    const newX = paddleX - paddleSpeed;
+    if (newX > 0 && !isPaddleBlockedHorizontally(newX)) paddleX = newX;
   }
-}
+  if (rightPressed) {
+    const newX = paddleX + paddleSpeed;
+    if (newX + paddleWidth < canvas.width && !isPaddleBlockedHorizontally(newX)) paddleX = newX;
+  }
+  if (upPressed) {
+    const newY = paddleY - paddleSpeed;
+    if (paddleFreeMove) {
+      if (newY > 0 && !isPaddleBlockedVertically(newY)) paddleY = newY;
+    }
+  }
+  if (downPressed) {
+    const newY = paddleY + paddleSpeed;
+    if (newY + paddleHeight < canvas.height && !isPaddleBlockedVertically(newY)) paddleY = newY;
+  }
 
+  // 🤖 CPU Paddle (alleen in duel) — AI + collision
+  if (duelModeActive) {
+    const cfg = CPU_CONFIG[cpuDifficulty] || CPU_CONFIG[2];
+
+    // Periodieke herberekening target
+    if (performance.now() >= _cpuNextReactAt) {
+      _cpuNextReactAt = performance.now() + cfg.reactMs;
+
+      const mainBall = balls[0];
+      if (mainBall) {
+        if (mainBall.dy < 0) {
+          // eenvoudige voorspelling + ruis + wandwrap
+          const t = ((cpuPaddleY + cpuPaddleHeight) - mainBall.y) / mainBall.dy;
+          let predX = mainBall.x + mainBall.dx * t;
+          const w = canvas.width;
+          while (predX < 0 || predX > w) {
+            if (predX < 0) predX = -predX;
+            if (predX > w) predX = w - (predX - w);
+          }
+          predX += (Math.random() - 0.5) * cfg.noise;
+          _cpuTargetX = Math.max(0, Math.min(w - cpuPaddleWidth, predX - cpuPaddleWidth / 2));
+        } else {
+          _cpuTargetX = (canvas.width - cpuPaddleWidth) / 2;
+        }
+      }
+    }
+
+    if (_cpuTargetX != null) {
+      const dx = _cpuTargetX - cpuPaddleX;
+      const step = Math.max(-cfg.maxSpeed, Math.min(cfg.maxSpeed, dx));
+      cpuPaddleX += step;
+    }
+
+    // Botsing bal met CPU paddle
+    balls.forEach(ball => {
+      if (
+        ball.y - ball.radius <= cpuPaddleY + cpuPaddleHeight &&
+        ball.y + ball.radius >= cpuPaddleY &&
+        ball.x + ball.radius >= cpuPaddleX &&
+        ball.x - ball.radius <= cpuPaddleX + cpuPaddleWidth &&
+        ball.dy < 0
+      ) {
+        const hitPos = (ball.x - cpuPaddleX) / cpuPaddleWidth;
+        const angle = (hitPos - 0.5) * Math.PI / 2;
+        const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+        ball.dx = speed * Math.sin(angle);
+        ball.dy = Math.abs(speed * Math.cos(angle)); // omlaag
+        try { wallSound.currentTime = 0; wallSound.play(); } catch(e){}
+      }
+    });
+  }
+
+  // 🎨 Tekenen van paddles en duel HUD (NB: jouw drawPaddle() kan elders al worden aangeroepen)
+  // Teken in elk geval CPU paddle + mini-scoreboards hier als duel actief is:
+  if (duelModeActive) {
+    // CPU paddle
+    ctx.save();
+    ctx.fillStyle = "#88aaff";
+    ctx.fillRect(cpuPaddleX, cpuPaddleY, cpuPaddleWidth, cpuPaddleHeight);
+    ctx.restore();
+
+    // Mini-scoreboards
+    ctx.save();
+    ctx.font = "bold 18px Arial";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(`YOU: ${duelPlayerScore}`, 12, 24);
+
+    ctx.textAlign = "right";
+    ctx.fillText(`CPU: ${duelCPUScore}`, canvas.width - 12, 24);
+    ctx.restore();
+  }
+
+  // 🏁 Duel win/lose check (aan het eind van frame)
+  if (duelModeActive) {
+    if (duelPlayerScore >= DUEL_TARGET || duelCPUScore >= DUEL_TARGET) {
+      const playerWon = duelPlayerScore >= DUEL_TARGET;
+
+      if (playerWon) {
+        // +1 leven en door naar volgend level
+        lives = Math.min(lives + 1, 9);
+        if (typeof updateLivesDisplay === 'function') updateLivesDisplay();
+        level = Math.min(level + 1, (typeof TOTAL_LEVELS !== "undefined" ? TOTAL_LEVELS : 20));
+      } else {
+        // level terug
+        level = Math.max(1, level - 1);
+      }
+
+      // Duel uit en normale flow herstellen
+      duelModeActive = false;
+      if (typeof resetAllBonuses === 'function') resetAllBonuses();
+      resetBricks();
+      if (typeof resetPaddle === 'function') resetPaddle();
+      resetBall();
+      if (typeof pauseTimer === 'function') pauseTimer();
+    }
+  }
+
+  // Next frame
+  animationFrameId = requestAnimationFrame(draw);
+}
 
   drawPaddle();
   drawMagnetAura(ctx);
   drawMagnetHUD(ctx);
+
+  // 🖼️ CPU paddle + mini-scoreboards
+  if (duelModeActive) {
+    // CPU paddle
+    ctx.save();
+    ctx.fillStyle = "#88aaff";
+    ctx.fillRect(cpuPaddleX, cpuPaddleY, cpuPaddleWidth, cpuPaddleHeight);
+    ctx.restore();
+
+    // Score left/right klein
+    ctx.save();
+    ctx.font = "bold 18px Arial";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(`YOU: ${duelPlayerScore}`, 12, 24);
+
+    ctx.textAlign = "right";
+    ctx.fillText(`CPU: ${duelCPUScore}`, canvas.width - 12, 24);
+    ctx.restore();
+  }
+
+
+
 
   if (rocketActive && !rocketFired && rocketAmmo > 0) {
     rocketX = paddleX + paddleWidth / 2 - 12;
