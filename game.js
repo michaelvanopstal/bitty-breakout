@@ -3493,28 +3493,35 @@ if (showGameOver) {
     paddleExplosionParticles = paddleExplosionParticles.filter(p => p.alpha > 0);
   }
   
-  if (resetOverlayActive) {
+// Reset overlay flits
+if (resetOverlayActive) {
   if (Date.now() % 1000 < 500) {
     ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
 
-  // 🧱 Steenpuin tekenen
-  stoneDebris.forEach(p => {
+// 🧱 Steenpuin tekenen (alleen als er iets is)
+if (Array.isArray(stoneDebris) && stoneDebris.length > 0) {
+  for (let i = 0; i < stoneDebris.length; i++) {
+    const p = stoneDebris[i];
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(140, 120, 100, ${p.alpha})`;
     ctx.fill();
+
+    // update
     p.x += p.dx;
     p.y += p.dy;
     p.alpha -= 0.02;
-  });
-
+  }
+  // opruimen
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
+}
 
-  animationFrameId = requestAnimationFrame(draw);
-} // ✅ Sluit function draw() correct af
+// Vraag nieuw frame aan
+animationFrameId = requestAnimationFrame(draw);
+} // ✅ sluit function draw() correct af
 
 function onImageLoad() {
   imagesLoaded++;
