@@ -1062,6 +1062,8 @@ for (let c = 0; c < brickColumnCount; c++) {
 const freezeBlockImg = new Image();
 freezeBlockImg.src = "freeze_block.png";
 
+console.log("Freeze image loaded?", freezeBlockImg.complete);
+
 const silver1Img = new Image();
 silver1Img.src = "silver1.png";
 
