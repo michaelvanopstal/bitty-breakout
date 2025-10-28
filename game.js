@@ -2555,6 +2555,64 @@ function checkCoinCollision() {
   });
 }
 
+function drawIceLayer(ctx, x, y, w, h, seed = 0, progress = 1) {
+  // progress: 0 → onzichtbaar, 1 → volledig ijs
+
+  ctx.save();
+
+  // Basis body opbouwen: alpha groeit mee met progress
+  const baseAlphaTop    = 0.85 * progress;
+  const baseAlphaMid    = 0.55 * progress;
+  const baseAlphaBottom = 0.85 * progress;
+
+  const g = ctx.createLinearGradient(x, y, x, y + h);
+  g.addColorStop(0,   `rgba(185,225,255,${baseAlphaTop})`);
+  g.addColorStop(0.5, `rgba(160,205,255,${baseAlphaMid})`);
+  g.addColorStop(1,   `rgba(205,240,255,${baseAlphaBottom})`);
+  ctx.fillStyle = g;
+  ctx.fillRect(x, y, w, h);
+
+  // Randlicht: ook laten inblenden
+  ctx.strokeStyle = `rgba(255,255,255,${0.65 * progress})`;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+
+  // Deterministische random
+  let s = seed | 0;
+  function rnd(){ s = (s * 1664525 + 1013904223) | 0; return ((s >>> 0) % 1000) / 1000; }
+
+  // Frost speckles groeien in aantal en zichtbaarheid met progress
+  const dotsMax = 16;
+  const dots = Math.max(0, Math.floor(dotsMax * progress));
+  ctx.fillStyle = `rgba(255,255,255,${0.35 * progress})`;
+  for (let i = 0; i < dots; i++) {
+    const dx = x + 2 + rnd() * (w - 4);
+    const dy = y + 2 + rnd() * (h - 4);
+    ctx.fillRect(dx, dy, 1, 1);
+  }
+
+  // Barsten (cracks) komen ook geleidelijk op
+  const cracksMax = 6;                        // 3..6 in oude versie
+  const cracks = Math.max(0, Math.floor((3 + Math.floor(rnd()*3)) * progress));
+  ctx.strokeStyle = `rgba(235,245,255,${0.8 * progress})`;
+  ctx.lineWidth = Math.max(0.5, 0.75 * progress);
+  ctx.beginPath();
+  for (let c = 0; c < Math.min(cracks, cracksMax); c++) {
+    let cx = x + 4 + rnd() * (w - 8);
+    let cy = y + 4 + rnd() * (h - 8);
+    const segs = 2 + Math.floor(rnd() * 2);
+    for (let k = 0; k < segs; k++) {
+      const nx = cx + (rnd() * 2 - 1) * (w * 0.35);
+      const ny = cy + (rnd() * 2 - 1) * (h * 0.35);
+      ctx.moveTo(cx, cy); ctx.lineTo(nx, ny);
+      cx = nx; cy = ny;
+    }
+  }
+  ctx.stroke();
+
+  ctx.restore();
+}
+
 
 function clearAllFrozenFlags() {
   for (let c=0;c<brickColumnCount;c++) for (let r=0;r<brickRowCount;r++) {
@@ -2563,26 +2621,43 @@ function clearAllFrozenFlags() {
   }
 }
 
-// ❄️ buren in kruisvorm bevriezen; freeze-blok zelf blijft bestaan
-function freezeNeighborsFrom(c, r) {
+// 🔹 Freeze helpers inline zodat alles intact blijft
+const freezeNeighborsFrom = (c, r) => {
   const origin = bricks[c][r];
   if (!origin) return;
+
   const groupId = nextFrozenGroupId++;
   origin.freezeOriginGroupId = groupId;
 
-  for (let L=1; L<=FREEZE_LAYERS; L++) {
-    const nbrs = [
-      {dc:0, dr:-L}, {dc:0, dr:L}, {dc:-L, dr:0}, {dc:L, dr:0}
-    ];
-    for (const {dc,dr} of nbrs) {
-      const nc=c+dc, nr=r+dr;
-      if (nc<0||nr<0||nc>=brickColumnCount||nr>=brickRowCount) continue;
-      const nb = bricks[nc][nr];
-      if (nb && nb.status===1) { nb.frozen = true; nb.frozenGroupId = groupId; }
+  const neighbors = [
+    { dc: -1, dr: -1 }, { dc: 0, dr: -1 }, { dc: 1, dr: -1 },
+    { dc: -1, dr:  0 },                     { dc: 1, dr:  0 },
+    { dc: -1, dr:  1 }, { dc: 0, dr:  1 }, { dc: 1, dr:  1 }
+  ];
+
+  const now = performance.now();
+  for (const { dc, dr } of neighbors) {
+    const nc = c + dc, nr = r + dr;
+    if (nc < 0 || nr < 0 || nc >= brickColumnCount || nr >= brickRowCount) continue;
+
+    const nb = bricks[nc][nr];
+    if (nb && nb.status === 1) {
+      nb.frozen = true;
+      nb.frozenGroupId = groupId;
+
+      // 🧊 Nieuw: animatiegegevens voor langzaam bevriezen
+      nb.freezeStart = now;        // tijdstip waarop bevriezing begon
+      nb.freezeProgress = 0;       // initieel geen zichtbare ijslaag
     }
   }
-  try { freezeActivateSfx.currentTime = 0; freezeActivateSfx.play(); } catch(e){}
-}
+
+  // Speel activatiegeluid
+  try {
+    freezeActivateSfx.currentTime = 0;
+    freezeActivateSfx.play();
+  } catch (e) {}
+};
+
 
 // ❄️ alle leden van de groep + bijbehorend freeze-blok weg
 function shatterFrozenGroup(groupId) {
