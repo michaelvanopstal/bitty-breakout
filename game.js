@@ -1482,6 +1482,11 @@ function resetBricks() {
     }
   }
 
+  if (duelModeActive && typeof startDuelRound !== "function") {
+  console.warn("[DUEL] startDuelRound ontbreekt — duel uitgeschakeld voor debug");
+  duelModeActive = false;
+}
+
   // Plaats 4 willekeurige hartjes onder normale blokken (zoals je deed) – niet in duel
   if (!duelModeActive) {
     assignHeartBlocks();
@@ -4204,4 +4209,55 @@ function triggerBallReset() {
 
 // 🟢 BELANGRIJK: knop koppelen aan functie
 document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
+
+// ==== DEBUG/BOOT HARNESS (zet dit ONDERAAN je script) ====
+let animationFrameId;       // zorg dat deze bestaat
+let __drawStarted = false;  // guard tegen dubbele starts
+let __frameCount = 0;
+
+function __startLoopOnce() {
+  if (__drawStarted) return;
+  __drawStarted = true;
+  console.log("[BOOT] starting draw loop…");
+  try {
+    animationFrameId = requestAnimationFrame(__safeDrawWrapper);
+  } catch (e) {
+    console.error("[BOOT] requestAnimationFrame failed:", e);
+  }
+}
+
+function __safeDrawWrapper(ts) {
+  try {
+    draw(ts);
+    __frameCount++;
+    if (__frameCount % 60 === 0) console.log("[DRAW] still running, frame", __frameCount);
+  } catch (e) {
+    console.error("[DRAW ERROR]", e);
+    // probeer niet in infinite crash-loop te blijven
+    return;
+  }
+  animationFrameId = requestAnimationFrame(__safeDrawWrapper);
+}
+
+// Globale error logger (laat exact zien waar het knalt)
+window.onerror = function (msg, src, line, col, err) {
+  console.error("[WINDOW ERROR]", msg, "at", src + ":" + line + ":" + col, err);
+};
+
+// Start zo veilig mogelijk na DOM load
+if (document.readyState === "complete" || document.readyState === "interactive") {
+  setTimeout(__startLoopOnce, 0);
+} else {
+  window.addEventListener("DOMContentLoaded", __startLoopOnce);
+  window.addEventListener("load", __startLoopOnce);
+}
+
+// Fallback: als iets anders de start blokkeert, forceer toch
+setTimeout(() => {
+  if (!__drawStarted) {
+    console.warn("[BOOT] fallback start after 1500ms");
+    __startLoopOnce();
+  }
+}, 1500);
+
 
