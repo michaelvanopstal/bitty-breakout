@@ -414,7 +414,7 @@ const bonusBricks = [
   { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" },
 
 
-  { col: 4, row: 4, type: "magnet" },
+  { col: 4, row: 4, type: "magnet" },{ col: 6, row: 13, type: "tnt" }
 
 
 
