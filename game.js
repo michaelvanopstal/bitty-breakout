@@ -1023,7 +1023,7 @@ const iceShatterSfx     = new Audio("ice_shatter.mp3");
 // 1 laag = direct boven/onder/links/rechts; zet op 2 als je verder wil.
 const FREEZE_LAYERS = 1;
 // ❄️ Tijdsduur voor opbouw van de ijslaag (ms)
-const FREEZE_GROW_MS = 1200; // maak 1200 als je het trager wilt
+const FREEZE_GROW_MS = 600; // maak 1200 als je het trager wilt
 
 const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
 rockWarning.volume = 0.85;
