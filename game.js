@@ -1092,7 +1092,7 @@ window.pxpBagImg = new Image();          pxpBagImg.src = "pxp_bag.png";
 window.dollarPxpImg = new Image();       dollarPxpImg.src = "dollarpxp.png";
 window.machinegunBlockImg = new Image(); machinegunBlockImg.src = "machinegun_block.png";
 window.machinegunGunImg = new Image();   machinegunGunImg.src = "machinegun_gun.png";
-window.coinImg = new Image();            coinImg.src = "coin.png";           // << zorg dat bestandsnaam klopt
+window.coinImg = new Image();            coinImg.src = "pxp coin perfect_clipped_rev_1.png";           // << zorg dat bestandsnaam klopt
 window.heartImg = new Image();           heartImg.src = "heart.png";
 window.heartBoardImg = new Image();      heartBoardImg.src = "heart_board.png";
 window.silver1Img = new Image();         silver1Img.src = "silver1.png";
