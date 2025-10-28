@@ -1504,8 +1504,8 @@ function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
 
+  // ❄️ Frost schoonvegen bij elk nieuw level / reset
   if (typeof clearAllFrozenFlags === "function") clearAllFrozenFlags();
-
 
   // Clamp en pas level-parameters toe
   const p = def?.params || {};
@@ -1516,10 +1516,8 @@ function resetBricks() {
 
   // Eventuele lopende size-bonus netjes stoppen (herstelt naar paddleBaseWidth + redraw)
   if (paddleSizeEffect) {
-    // gebruikt helpers uit het plan
     stopPaddleSizeEffect();
   } else {
-    // Geen actief effect? Zorg dat paddle meteen de basisbreedte van dit level heeft
     const centerX = paddleX + paddleWidth / 2;
     paddleWidth = paddleBaseWidth;
     paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
@@ -1548,13 +1546,13 @@ function resetBricks() {
         delete b.hasDroppedBag;
       }
 
-      // Reset hartjes-flags; toewijzing komt zo
+      // Reset hartjes-flags
       b.hasHeart = false;
       b.heartDropped = false;
     }
   }
 
-  // Plaats 4 willekeurige hartjes onder normale blokken (zoals je deed)
+  // Plaats 4 willekeurige hartjes onder normale blokken
   assignHeartBlocks();
 }
 
