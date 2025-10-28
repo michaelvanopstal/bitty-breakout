@@ -3498,7 +3498,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 28) {
+  if (imagesLoaded === 29) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
