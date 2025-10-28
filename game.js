@@ -413,7 +413,7 @@ function stopMagnet() {
 
 
 const bonusBricks = [
-  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" }, { col: 5, row: 3, type: "freeze" },
+  { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" }, { col: 5, row: 13, type: "freeze" },
 
 
   { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" },
