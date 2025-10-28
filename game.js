@@ -3539,35 +3539,34 @@ animationFrameId = requestAnimationFrame(draw);
     };
   }
 
+// Veilige bulk-registratie (logt meteen welke undefined zijn)
+(function registerImageOnloads(){
+  const names = [
+    "blockImg","ballImg","powerBlockImg","powerBlock2Img","rocketImg",
+    "doubleBallImg","doublePointsImg","vlagImgLeft","vlagImgRight","shootCoinImg",
+    "speedImg","pointpayPaddleImg","stone1Img","stone2Img","pxpBagImg",
+    "dollarPxpImg","machinegunBlockImg","machinegunGunImg","coinImg","heartImg",
+    "heartBoardImg","silver1Img","silver2Img","paddleLongBlockImg","paddleSmallBlockImg",
+    "magnetImg","stoneBlockImg","stoneLargeImg"
+  ];
 
-blockImg.onload = onImageLoad;
-ballImg.onload = onImageLoad;
-powerBlockImg.onload = onImageLoad;
-powerBlock2Img.onload = onImageLoad;
-rocketImg.onload = onImageLoad;
-doubleBallImg.onload = onImageLoad;
-doublePointsImg.onload = onImageLoad;
-vlagImgLeft.onload = onImageLoad;
-vlagImgRight.onload = onImageLoad;
-shootCoinImg.onload = onImageLoad;
-speedImg.onload = onImageLoad;
-pointpayPaddleImg.onload = onImageLoad;
-stone1Img.onload = onImageLoad;
-stone2Img.onload = onImageLoad;
-pxpBagImg.onload = onImageLoad;
-dollarPxpImg.onload = onImageLoad;
-machinegunBlockImg.onload = onImageLoad;
-machinegunGunImg.onload = onImageLoad;
-coinImg.onload = onImageLoad;
-heartImg.onload = onImageLoad; 
-heartBoardImg.onload = onImageLoad;
-silver1Img.onload = onImageLoad;
-silver2Img.onload = onImageLoad;
-paddleLongBlockImg.onload = onImageLoad;
-paddleSmallBlockImg.onload = onImageLoad;
-magnetImg.onload = onImageLoad;
-stoneBlockImg.onload  = onImageLoad;
-stoneLargeImg.onload  = onImageLoad;
+  names.forEach(n => {
+    const img = (typeof window[n] !== "undefined") ? window[n] : null;
+    if (!img) {
+      console.error(`[IMG] ${n} is undefined bij onload-registratie`);
+      return;
+    }
+    if (typeof img.onload !== "function") {
+      // oké: sommige browsers geven hier 'null', dat is ook prima
+    }
+    img.onload = onImageLoad;
+  });
+
+  // Handige sanity-check: tel hoeveel er écht bestonden
+  const definedCount = names.filter(n => typeof window[n] !== "undefined").length;
+  console.log(`[IMG] onload geregistreerd voor ${definedCount} images`);
+})();
+
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
