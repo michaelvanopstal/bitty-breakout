@@ -3539,33 +3539,76 @@ animationFrameId = requestAnimationFrame(draw);
     };
   }
 
-// Veilige bulk-registratie (logt meteen welke undefined zijn)
-(function registerImageOnloads(){
-  const names = [
-    "blockImg","ballImg","powerBlockImg","powerBlock2Img","rocketImg",
-    "doubleBallImg","doublePointsImg","vlagImgLeft","vlagImgRight","shootCoinImg",
-    "speedImg","pointpayPaddleImg","stone1Img","stone2Img","pxpBagImg",
-    "dollarPxpImg","machinegunBlockImg","machinegunGunImg","coinImg","heartImg",
-    "heartBoardImg","silver1Img","silver2Img","paddleLongBlockImg","paddleSmallBlockImg",
-    "magnetImg","stoneBlockImg","stoneLargeImg"
-  ];
+// === ROBUUSTE IMAGE-LOADER ===
+const IMAGE_NAMES = [
+  "blockImg","ballImg","powerBlockImg","powerBlock2Img","rocketImg",
+  "doubleBallImg","doublePointsImg","vlagImgLeft","vlagImgRight","shootCoinImg",
+  "speedImg","pointpayPaddleImg","stone1Img","stone2Img","pxpBagImg",
+  "dollarPxpImg","machinegunBlockImg","machinegunGunImg","coinImg","heartImg",
+  "heartBoardImg","silver1Img","silver2Img","paddleLongBlockImg","paddleSmallBlockImg",
+  "magnetImg","stoneBlockImg","stoneLargeImg"
+];
 
-  names.forEach(n => {
-    const img = (typeof window[n] !== "undefined") ? window[n] : null;
-    if (!img) {
-      console.error(`[IMG] ${n} is undefined bij onload-registratie`);
-      return;
+let imagesLoaded = 0;
+
+function registerImageOnloads() {
+  const definedImages = IMAGE_NAMES
+    .map(name => ({ name, img: (typeof window[name] !== "undefined") ? window[name] : null }))
+    .filter(entry => {
+      if (!entry.img) {
+        console.error(`[IMG] ${entry.name} is undefined bij onload-registratie`);
+        return false;
+      }
+      return true;
+    });
+
+  const EXPECTED = definedImages.length;
+  console.log(`[IMG] onload registreren voor ${EXPECTED} images`);
+
+  if (EXPECTED === 0) {
+    console.error("[IMG] Er zijn 0 images gevonden. Waarschijnlijk staat de registratie NÁ bovenstaand blok maar NÓG STEEDS vóór je new Image() declaraties. Verplaats de aanroep van registerImageOnloads() verder naar beneden.");
+    return;
+  }
+
+  function onImageLoad() {
+    imagesLoaded++;
+    if (imagesLoaded >= EXPECTED) startGameAfterImages();
+  }
+  function onImageError(ev) {
+    console.error(`[IMG] load ERROR: ${ev?.target?.src || "(unknown)"}`);
+    onImageLoad(); // toch doorstarten
+  }
+
+  // reken ook cache-hits mee
+  definedImages.forEach(({ img }) => {
+    if (img.complete && img.naturalWidth > 0) {
+      imagesLoaded++;
+    } else {
+      img.addEventListener("load", onImageLoad, { once: true });
+      img.addEventListener("error", onImageError, { once: true });
     }
-    if (typeof img.onload !== "function") {
-      // oké: sommige browsers geven hier 'null', dat is ook prima
-    }
-    img.onload = onImageLoad;
   });
 
-  // Handige sanity-check: tel hoeveel er écht bestonden
-  const definedCount = names.filter(n => typeof window[n] !== "undefined").length;
-  console.log(`[IMG] onload geregistreerd voor ${definedCount} images`);
-})();
+  if (imagesLoaded >= EXPECTED) startGameAfterImages();
+}
+
+function startGameAfterImages() {
+  if (window.__gameStarted) return;
+  window.__gameStarted = true;
+
+  // jouw oude start-code hier
+  level = 1;
+  score = 0;
+  lives = 3;
+
+  updateLivesDisplay?.();
+  resetBricks();
+  resetPaddle?.();
+  resetBall();
+  updateScoreDisplay?.();
+  draw();
+}
+
 
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
