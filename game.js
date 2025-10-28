@@ -432,51 +432,50 @@ function stopMagnet() {
 
 
 
+// ======================= MAPS =======================
 
+// Bonusblokken voor level 1
 const bonusBricks = [
   { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" }, 
-  { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" },
-
+  { col: 4, row: 0, type: "paddle_small" }, { col: 7, row: 10, type: "paddle_long" },
 
   { col: 4, row: 4, type: "magnet" },
 
+  { col: 8, row: 4, type: "power" }, { col: 4, row: 14, type: "stonefall" },
 
-
-
-  { col: 8, row: 4, type: "power" },   { col: 4, row: 14, type: "stonefall" },
-
-  { col: 2, row: 7, type: "doubleball" }, { col: 7, row: 14, type: "silver" },{ col: 8, row: 14, type: "silver" },{ col: 6, row: 14, type: "silver" },
+  { col: 2, row: 7, type: "doubleball" },
+  { col: 7, row: 14, type: "silver" }, { col: 8, row: 14, type: "silver" }, { col: 6, row: 14, type: "silver" },
   { col: 0, row: 14, type: "silver" }, { col: 1, row: 14, type: "silver" }, { col: 2, row: 14, type: "silver" },
 
-
-  { col: 4, row: 7, type: "2x" },         
-  { col: 2, row: 3, type: "speed" },       { col: 2, row: 2, type: "stonefall" },      
-  { col: 3, row: 14, type: "stone" },      { col: 1, row: 2, type: "stonefall" },
-  { col: 4, row: 14, type: "stone" },      { col: 0, row: 2, type: "stonefall" },
-  { col: 5, row: 14, type: "stone" },      { col: 6, row: 2, type: "stonefall" },
-  { col: 0, row: 8, type: "stone" },       { col: 7, row: 2, type: "stonefall" },
-  { col: 1, row: 8, type: "stone" },       { col: 8, row: 2, type: "stonefall" },
+  { col: 4, row: 7, type: "2x" },
+  { col: 2, row: 3, type: "speed" },    { col: 2, row: 2, type: "stonefall" },
+  { col: 3, row: 14, type: "stone" },   { col: 1, row: 2, type: "stonefall" },
+  { col: 4, row: 14, type: "stone" },   { col: 0, row: 2, type: "stonefall" },
+  { col: 5, row: 14, type: "stone" },   { col: 6, row: 2, type: "stonefall" },
+  { col: 0, row: 8, type: "stone" },    { col: 7, row: 2, type: "stonefall" },
+  { col: 1, row: 8, type: "stone" },    { col: 8, row: 2, type: "stonefall" },
   { col: 2, row: 8, type: "stone" },
   { col: 8, row: 5, type: "stone" },
   { col: 7, row: 6, type: "stone" },
   { col: 6, row: 7, type: "stone" },
 ];
-// 📦 PXP layout voor level 2 (alleen steen-blokken)
+
+// PXP layout voor level 2
 const pxpMap = [
-  { col: 0, row: 4, type: "silver" }, { col: 0, row: 5 },   { col: 0, row: 8 },      { col: 0, row: 14 },     { col: 5, row: 3, type: "rocket" },{ col: 4, row: 10, type: "stonefall" },
-  { col: 1, row: 4, type: "silver" }, { col: 1, row: 5 },   { col: 1, row: 8 },      { col: 1, row: 14 },     { col: 8, row: 5, type: "power" },   { col: 5, row: 11, type: "stonefall" },     
-  { col: 2, row: 4, type: "silver" }, { col: 2, row: 5 },   { col: 2, row: 8 },      { col: 2, row: 14 },     { col: 3, row: 3, type: "speed" },      { col: 6, row: 12, type: "stonefall" },   
-  { col: 3, row: 4, type: "silver" }, { col: 3, row: 5 },   { col: 3, row: 8 },      { col: 3, row: 14 },     { col: 4, row: 7, type: "2x" },       { col: 7, row: 13, type: "stonefall" },
-  { col: 4, row: 4, type: "silver" }, { col: 4, row: 5 },   { col: 4, row: 8 },      { col: 4, row: 14 },     { col: 1, row: 7, type: "doubleball" },  { col: 8, row: 14, type: "stonefall" },       
-  { col: 5, row: 4, type: "silver" }, { col: 5, row: 5 },   { col: 5, row: 8 },      { col: 5, row: 14 },      { col: 0, row: 14, type: "stonefall" },     { col: 2, row: 8, type: "stone" },   
-  { col: 6, row: 4, type: "silver" }, { col: 6, row: 5 },   { col: 6, row: 8 },      { col: 6, row: 14 },       { col: 1, row: 13, type: "stonefall" },    { col: 4, row: 0, type: "paddle_small" },         
-  { col: 7, row: 4, type: "silver" }, { col: 7, row: 5 },   { col: 7, row: 8 },      { col: 7, row: 14 },        { col: 2, row: 12, type: "stonefall" },    { col: 7, row: 10, type: "paddle_long" },                            
-  { col: 8, row: 4, type: "silver" }, { col: 8, row: 5 },   { col: 8, row: 8 },      { col: 8, row: 14 },         { col: 3, row: 11, type: "stonefall" },        { col: 4, row: 13, type: "magnet" },               
-  { col: 0, row: 7, type: "stone" },  { col: 1, row: 1, type: "stone" },                                                                                                                                                         
-  { col: 1, row: 6, type: "stone" },  
+  { col: 0, row: 4, type: "silver" }, { col: 0, row: 5 },   { col: 0, row: 8 },      { col: 0, row: 14 },     { col: 5, row: 3, type: "rocket" }, { col: 4, row: 10, type: "stonefall" },
+  { col: 1, row: 4, type: "silver" }, { col: 1, row: 5 },   { col: 1, row: 8 },      { col: 1, row: 14 },     { col: 8, row: 5, type: "power" },  { col: 5, row: 11, type: "stonefall" },
+  { col: 2, row: 4, type: "silver" }, { col: 2, row: 5 },   { col: 2, row: 8 },      { col: 2, row: 14 },     { col: 3, row: 3, type: "speed" },  { col: 6, row: 12, type: "stonefall" },
+  { col: 3, row: 4, type: "silver" }, { col: 3, row: 5 },   { col: 3, row: 8 },      { col: 3, row: 14 },     { col: 4, row: 7, type: "2x" },     { col: 7, row: 13, type: "stonefall" },
+  { col: 4, row: 4, type: "silver" }, { col: 4, row: 5 },   { col: 4, row: 8 },      { col: 4, row: 14 },     { col: 1, row: 7, type: "doubleball" }, { col: 8, row: 14, type: "stonefall" },
+  { col: 5, row: 4, type: "silver" }, { col: 5, row: 5 },   { col: 5, row: 8 },      { col: 5, row: 14 },     { col: 0, row: 14, type: "stonefall" }, { col: 2, row: 8, type: "stone" },
+  { col: 6, row: 4, type: "silver" }, { col: 6, row: 5 },   { col: 6, row: 8 },      { col: 6, row: 14 },     { col: 1, row: 13, type: "stonefall" }, { col: 4, row: 0, type: "paddle_small" },
+  { col: 7, row: 4, type: "silver" }, { col: 7, row: 5 },   { col: 7, row: 8 },      { col: 7, row: 14 },     { col: 2, row: 12, type: "stonefall" }, { col: 7, row: 10, type: "paddle_long" },
+  { col: 8, row: 4, type: "silver" }, { col: 8, row: 5 },   { col: 8, row: 8 },      { col: 8, row: 14 },     { col: 3, row: 11, type: "stonefall" }, { col: 4, row: 13, type: "magnet" },
+  { col: 0, row: 7, type: "stone" },  { col: 1, row: 1, type: "stone" },
+  { col: 1, row: 6, type: "stone" },
   { col: 2, row: 2, type: "stone" },
-  { col: 2, row: 7, type: "stone" },  
-  { col: 7, row: 1, type: "stone" }, 
+  { col: 2, row: 7, type: "stone" },
+  { col: 7, row: 1, type: "stone" },
   { col: 6, row: 2, type: "stone" },
   { col: 8, row: 0, type: "stone" },
   { col: 7, row: 1, type: "stone" },
@@ -484,11 +483,11 @@ const pxpMap = [
   { col: 8, row: 7, type: "stone" },
   { col: 7, row: 6, type: "stone" },
   { col: 6, row: 7, type: "stone" },
-  { col: 0, row: 0, type: "stone" },  
+  { col: 0, row: 0, type: "stone" },
   { col: 0, row: 14, type: "stone" },
 ];
 
-// 🌋 Level 3 layout (voorbeeld)
+// 🌋 Level 3 layout (jouw nieuwe level)
 const level3Map = [
   // Rand van stenen (stevig)
   { col: 0, row: 0, type: "stone" }, { col: 1, row: 0, type: "stone" }, { col: 2, row: 0, type: "stone" },
@@ -502,12 +501,12 @@ const level3Map = [
   { col: 0, row: 4, type: "stone" }, { col: 0, row: 5, type: "stone" }, { col: 0, row: 6, type: "stone" },
   { col: 8, row: 4, type: "stone" }, { col: 8, row: 5, type: "stone" }, { col: 8, row: 6, type: "stone" },
 
-  // Diagonalen van silver (2 hits + elektriciteitseffect)
+  // Diagonalen van silver
   { col: 1, row: 3, type: "silver" }, { col: 2, row: 4, type: "silver" }, { col: 3, row: 5, type: "silver" },
   { col: 4, row: 6, type: "silver" }, { col: 5, row: 5, type: "silver" }, { col: 6, row: 4, type: "silver" },
   { col: 7, row: 3, type: "silver" },
 
-  // Bonussen verspreid
+  // Bonussen
   { col: 4, row: 2, type: "machinegun" },
   { col: 2, row: 2, type: "doubleball" },
   { col: 6, row: 2, type: "speed" },
@@ -518,55 +517,52 @@ const level3Map = [
   { col: 0, row: 10, type: "paddle_small" },
   { col: 7, row: 4, type: "magnet" },
 
-  // Stonefall “valstrikken” (3 hits + laat stenen vallen)
+  // Stonefall
   { col: 3, row: 8, type: "stonefall" },
   { col: 5, row: 8, type: "stonefall" },
 ];
 
-// ===== Levels-config – 20 levels eenvoudig schaalbaar =====
+// ================== LEVELS-CONFIG ==================
+
 const TOTAL_LEVELS = 20;
 
-// Stop je bestaande maps als basis in level 1-3
 const level1Map = (typeof bonusBricks !== "undefined" ? bonusBricks : []);
 const level2Map = (typeof pxpMap !== "undefined" ? pxpMap : []);
-// level3Map bestaat al bij jou
+// level3Map bestaat hierboven
 
-// Helper: maak lege map
 function createEmptyMap() { return []; }
 
-// Centrale tabel met 20 entries (maps + optionele params)
 const LEVELS = Array.from({ length: TOTAL_LEVELS }, (_, i) => ({
   map: createEmptyMap(),
   params: {
-    // basis-schaal: elke 5 levels mini-stapjes, pas vrij aan
-    ballSpeed: 6 + 0.2 * i,                 // start snelheid
-    paddleWidth: 100 - Math.floor(i / 4) * 4, // per 4 levels -4px, min later clampen
+    ballSpeed: 6 + 0.2 * i,
+    paddleWidth: 100 - Math.floor(i / 4) * 4,     // min/max nog geclamped in resetBricks()
     machineGunDifficulty: Math.min(1 + Math.floor(i / 7), 3) // 1..3
   }
 }));
 
-// Zet jouw bestaande 1–3 in de centrale tabel (behoud huidig gedrag)
-LEVELS[0].map = level1Map;
-LEVELS[1].map = level2Map;
-LEVELS[2].map = (typeof level3Map !== "undefined" ? level3Map : []);
-// ⚔️ Level 3 is ons Duel-level (geen bricks, alleen paddles & score)
-LEVELS[2].map = []; // leeg
-LEVELS[2].params.isDuel = true;
-LEVELS[2].params.ballSpeed = 6;     // basis
-LEVELS[2].params.paddleWidth = 100; // beide paddles
+// Zet level 1–3
+LEVELS[0].map = level1Map;                  // L1
+LEVELS[1].map = level2Map;                  // L2
+LEVELS[2].map = (typeof level3Map !== "undefined" ? level3Map : []); // L3 = jouw nieuwe map
 
-// 🔧 Makkelijk bonusblokken plaatsen:
-function addBonus(levelNumber, col, row, type="normal") {
+// ⚔️ DUEL verplaatst naar Level 5 (lege map + flags)
+LEVELS[4].map = [];                         // L5 leeg
+LEVELS[4].params.isDuel = true;
+LEVELS[4].params.ballSpeed = 6;             // basis
+LEVELS[4].params.paddleWidth = 100;         // beide paddles
+
+// ====== Helpers om bonusblokken makkelijk toe te voegen ======
+function addBonus(levelNumber, col, row, type = "normal") {
   const idx = levelNumber - 1;
   if (!LEVELS[idx]) return;
   LEVELS[idx].map.push({ col, row, type });
 }
-
 function addBonuses(levelNumber, entries) {
   entries.forEach(e => addBonus(levelNumber, e.col, e.row, e.type));
 }
 
-// ---------- LEVEL 4: “Band + traps” (zet voort op L2’s band, introduceert extra traps)
+// ---------- LEVEL 4 extra layout (zoals je had) ----------
 addBonuses(4, [
   // band midden (rows 4-5), accenten silver
   { col: 2, row: 4, type: "silver" }, { col: 3, row: 4, type: "silver" }, { col: 5, row: 4, type: "silver" }, { col: 6, row: 4, type: "silver" },
@@ -578,14 +574,14 @@ addBonuses(4, [
 
   // diagonale stones richting midden
   { col: 0, row: 8, type: "stone" }, { col: 1, row: 7, type: "stone" }, { col: 7, row: 7, type: "stone" }, { col: 8, row: 8, type: "stone" }, { col: 4, row: 11, type: "stone" },
-  { col: 3, row: 12, type: "stone" }, { col: 5, row: 12, type: "stone" },   // ⬅️ komma toegevoegd hier
+  { col: 3, row: 12, type: "stone" }, { col: 5, row: 12, type: "stone" },
 
   // bonussen op accenten
-  { col: 4, row: 3, type: "machinegun" }, { col: 4, row: 6, type: "rocket" }, { col: 1, row: 6, type: "doubleball" },  { col: 8, row: 4, type: "magnet" },
-  { col: 7, row: 6, type: "speed" }, { col: 4, row: 8, type: "2x" }, { col: 8, row: 5, type: "power" },{ col: 3, row: 13, type: "paddle_long" },
+  { col: 4, row: 3, type: "machinegun" }, { col: 4, row: 6, type: "rocket" }, { col: 1, row: 6, type: "doubleball" }, { col: 8, row: 4, type: "magnet" },
+  { col: 7, row: 6, type: "speed" }, { col: 4, row: 8, type: "2x" }, { col: 8, row: 5, type: "power" }, { col: 3, row: 13, type: "paddle_long" },
   { col: 1, row: 5, type: "paddle_small" }
-
 ]);
+
 
 // ---------- LEVEL 5: “Diagonaal ruit + zware onderlijn (silver/stone mix)”
 addBonuses(5, [
