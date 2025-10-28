@@ -540,15 +540,19 @@ const LEVELS = Array.from({ length: TOTAL_LEVELS }, (_, i) => ({
   }
 }));
 
-// Zet jouw bestaande 1–3 in de centrale tabel (behoud huidig gedrag)
+// Levels 1–3 blijven zoals ze zijn
 LEVELS[0].map = level1Map;
 LEVELS[1].map = level2Map;
 LEVELS[2].map = (typeof level3Map !== "undefined" ? level3Map : []);
-// Maak van level 4 een VS-level zonder blokken:
-LEVELS[4].map = [];                      // leeg
-LEVELS[4].params.vs = true;              // vlag aan
-LEVELS[4].params.paddleWidth = 100;      // optioneel: breedte fine-tunen
-LEVELS[4].params.ballSpeed = 6;          // startsnelheid in VS
+
+// --- LEVEL 4 wordt VS-modus (index 3) ---
+LEVELS[3].map = []; // leeg = geen blokken
+LEVELS[3].params = {
+  ...(LEVELS[3].params || {}),
+  vs: true,            // schakel VS
+  paddleWidth: 100,    // optioneel
+  ballSpeed: 6         // startsnelheid VS
+};
 
 // 🔧 Makkelijk bonusblokken plaatsen:
 function addBonus(levelNumber, col, row, type="normal") {
