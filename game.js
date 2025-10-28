@@ -1073,90 +1073,36 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
+// === MASTER image declarations (zet dit BOVEN registerImageOnloads()) ===
+window.blockImg = new Image();           blockImg.src = "block_logo.png";
+window.ballImg = new Image();            ballImg.src = "ball_logo.png";
+window.powerBlockImg = new Image();      powerBlockImg.src = "power_block_logo.png";
+window.powerBlock2Img = new Image();     powerBlock2Img.src = "signalblock2.png";
+window.rocketImg = new Image();          rocketImg.src = "raket1.png";
+window.doubleBallImg = new Image();      doubleBallImg.src = "2 balls.png";
+window.doublePointsImg = new Image();    doublePointsImg.src = "2x.png";
+window.vlagImgLeft = new Image();        vlagImgLeft.src = "vlaggetje1.png";
+window.vlagImgRight = new Image();       vlagImgRight.src = "vlaggetje2.png";
+window.shootCoinImg = new Image();       shootCoinImg.src = "3.png";
+window.speedImg = new Image();           speedImg.src = "speed.png";
+window.pointpayPaddleImg = new Image();  pointpayPaddleImg.src = "balkje.png";
+window.stone1Img = new Image();          stone1Img.src = "stone1.png";
+window.stone2Img = new Image();          stone2Img.src = "stone2.png";
+window.pxpBagImg = new Image();          pxpBagImg.src = "pxp_bag.png";
+window.dollarPxpImg = new Image();       dollarPxpImg.src = "dollarpxp.png";
+window.machinegunBlockImg = new Image(); machinegunBlockImg.src = "machinegun_block.png";
+window.machinegunGunImg = new Image();   machinegunGunImg.src = "machinegun_gun.png";
+window.coinImg = new Image();            coinImg.src = "coin.png";           // << zorg dat bestandsnaam klopt
+window.heartImg = new Image();           heartImg.src = "heart.png";
+window.heartBoardImg = new Image();      heartBoardImg.src = "heart_board.png";
+window.silver1Img = new Image();         silver1Img.src = "silver1.png";
+window.silver2Img = new Image();         silver2Img.src = "silver2.png";
+window.paddleLongBlockImg = new Image(); paddleLongBlockImg.src = "paddlelong.png";
+window.paddleSmallBlockImg = new Image();paddleSmallBlockImg.src = "paddlesmall.png";
+window.magnetImg = new Image();          magnetImg.src = "magnet.png";
+window.stoneBlockImg = new Image();      stoneBlockImg.src = "stone_block.png";
+window.stoneLargeImg = new Image();      stoneLargeImg.src = "stone_large.png";
 
-window.silver1Img = new Image();
-silver1Img.src = "silver1.png";
-
-window.silver2Img = new Image();
-silver2Img.src = "silver2.png";
-
-window.heartBoardImg = new Image();
-heartBoardImg.src = "heart_board.png";
-
-window.heartImg = new Image();
-heartImg.src = "heart.png";
-
-window.machinegunBlockImg = new Image();
-machinegunBlockImg.src = "machinegun_block.png";
-
-window.machinegunGunImg = new Image();
-machinegunGunImg.src = "machinegun_gun.png";
-
-window.lifeImg = new Image();
-lifeImg.src = "level.png";
-
-window.dollarPxpImg = new Image();
-dollarPxpImg.src = "dollarpxp.png";
-
-window.doubleBallImg = new Image();
-doubleBallImg.src = "2 balls.png";
-
-window.blockImg = new Image();
-blockImg.src = "block_logo.png";
-
-window.ballImg = new Image();
-ballImg.src = "ball_logo.png";
-
-window.vlagImgLeft = new Image();
-vlagImgLeft.src = "vlaggetje1.png";
-
-window.vlagImgRight = new Image();
-vlagImgRight.src = "vlaggetje2.png";
-
-window.shootCoinImg = new Image();
-shootCoinImg.src = "3.png";
-
-window.powerBlockImg = new Image();
-powerBlockImg.src = "power_block_logo.png";
-
-window.powerBlock2Img = new Image();
-powerBlock2Img.src = "signalblock2.png";
-
-window.rocketImg = new Image();
-rocketImg.src = "raket1.png";
-
-window.doublePointsImg = new Image();
-doublePointsImg.src = "2x.png";
-
-window.speedImg = new Image();
-speedImg.src = "speed.png";
-
-window.pointpayPaddleImg = new Image();
-pointpayPaddleImg.src = "balkje.png";
-
-window.stone1Img = new Image();
-stone1Img.src = "stone1.png";
-
-window.stone2Img = new Image();
-stone2Img.src = "stone2.png";
-
-window.pxpBagImg = new Image();
-pxpBagImg.src = "pxp_bag.png";
-
-window.stoneBlockImg = new Image();
-stoneBlockImg.src = "stone_block.png";
-
-window.stoneLargeImg = new Image();
-stoneLargeImg.src = "stone_large.png";
-
-window.paddleLongBlockImg = new Image();
-paddleLongBlockImg.src = "paddlelong.png";
-
-window.paddleSmallBlockImg = new Image();
-paddleSmallBlockImg.src = "paddlesmall.png";
-
-window.magnetImg = new Image();
-magnetImg.src = "magnet.png";
 
 
 // ✅ Registratie pas na aanmaken en src-koppeling
