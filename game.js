@@ -2092,9 +2092,6 @@ function saveHighscore() {
   }
 }
 
-const coinImg = new Image();
-coinImg.src = "pxp coin perfect_clipped_rev_1.png";
-let coins = [];
 
 function spawnCoin(x, y) {
   coins.push({ x: x + brickWidth / 2 - 12, y: y, radius: 12, active: true });
