@@ -2309,29 +2309,59 @@ function updateTNTs() {
 
 
 function explodeTNT(col, row) {
-  // ⛔ Beep hard stoppen, zodat er niets doorloopt
+  // 1) Hard: beep stoppen en explode-sound resetten
   try { tntBeepSound.pause(); tntBeepSound.currentTime = 0; } catch {}
-
-  const center = bricks[col][row];
-  if (!center || center.status !== 1) return;
   try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
-  // ...
-}
 
+  // 2) Guard: center ophalen en valideren
+  const center = bricks?.[col]?.[row];
+  if (!center || center.status !== 1) return;
 
-  dirs.forEach(([dx, dy]) => {
+  // voorkom dubbele triggers
+  if (center.tntArmed) center.tntArmed = false;
+
+  // 3) Buren matrix (8 richtingen)
+  const dirs = [
+    [ 0,-1],[ 1,-1],[ 1, 0],[ 1, 1],
+    [ 0, 1],[-1, 1],[-1, 0],[-1,-1]
+  ];
+
+  // 4) Center & buren “wegblazen”
+  //    (status = 0; raak niet buiten het grid)
+  for (let i = 0; i < dirs.length; i++) {
+    const dx = dirs[i][0], dy = dirs[i][1];
     const c = col + dx, r = row + dy;
-    if (c<0||r<0||c>=brickColumnCount||r>=brickRowCount) return;
+    if (c < 0 || r < 0 || c >= brickColumnCount || r >= brickRowCount) continue;
     const n = bricks[c][r];
-    if (n && n.status === 1) n.status = 0;
-  });
-
+    if (n && n.status === 1) {
+      n.status = 0;
+      if (n.tntArmed) n.tntArmed = false; // schakel evt. ketting-beep uit
+    }
+  }
   center.status = 0;
+
+  // 5) Explosiepositie robuust bepalen:
+  //    Gebruik center.x/center.y als ze bestaan, anders reken ze uit
+  //    met standaard breakout-variabelen.
+  //    PAS AAN als jouw variabelen anders heten.
+  const bx = (typeof center.x === "number")
+    ? center.x
+    : (brickOffsetLeft + col * (brickWidth + brickPadding));
+  const by = (typeof center.y === "number")
+    ? center.y
+    : (brickOffsetTop  + row * (brickHeight + brickPadding));
+
+  // 6) Explosie-effect pushen (zorg dat explosions bestaat)
+  if (!Array.isArray(explosions)) window.explosions = [];
   explosions.push({
-    x: center.x + brickWidth/2,
-    y: center.y + brickHeight/2,
-    radius: 22, alpha: 1, color: "orange"
+    x: bx + brickWidth / 2,
+    y: by + brickHeight / 2,
+    radius: 22,
+    alpha: 1,
+    color: "orange"
   });
+}
+ });
 }
 
 
