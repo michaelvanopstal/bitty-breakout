@@ -147,50 +147,54 @@ const PADDLE_SMALL_DURATION = 30000;
 // ==========================================================
 // 🎙️ VOICE-OVER: single-channel + cooldown
 // ==========================================================
-
 const VO_COOLDOWN_MS = 3000;    // minimaal 3s tussen voices
 let voIsPlaying = false;        // speelt er nu een voice?
 let voLockedUntil = 0;          // tot wanneer blokkeren (ms sinds pageload)
-let voAudio = null;             // huidige actieve audio
+
 
 function playVoiceOver(audio, opts = {}) {
-  const {
-    cooldown = VO_COOLDOWN_MS,
-    interrupt = false,
-    shortCooldownMs = 500,
-  } = opts;
-
+  const { cooldown = VO_COOLDOWN_MS } = opts;
   const now = performance.now();
 
-  // lock actief? => skip
-  if (now < voLockedUntil) return false;
+  // Gate dicht? → overslaan
+  if (voIsPlaying || now < voLockedUntil) return false;
 
-  // al spelend?
-  if (voIsPlaying) {
-    if (!interrupt) return false;           // geen interrupt toegestaan
-    try {                                   // hard interrupt
-      if (voAudio) { voAudio.pause(); voAudio.currentTime = 0; }
-    } catch {}
-    voIsPlaying = false;
-  }
-
-  // start nieuwe VO
-  voIsPlaying = true;
-  voAudio = audio;
+  voIsPlaying = true; // ⛓️ meteen locken, zodat dezelfde tik geen tweede VO kan starten
   try {
     audio.currentTime = 0;
     audio.onended = () => {
       voIsPlaying = false;
-      voAudio = null;
-      voLockedUntil = performance.now() + cooldown; // cooldown na afloop
+      voLockedUntil = performance.now() + cooldown; // cooldown NA afloop
     };
     audio.play().catch(() => {
+      // Als play faalt, meteen unlock + korte cooldown om spam te voorkomen
       voIsPlaying = false;
-      voLockedUntil = performance.now() + shortCooldownMs; // anti-spam bij fail
+      voLockedUntil = performance.now() + 500;
     });
   } catch (e) {
     voIsPlaying = false;
-    voLockedUntil = performance.now() + shortCooldownMs;
+    voLockedUntil = performance.now() + 500;
+  }
+  return true;
+}
+
+function playVoiceOver(audio, opts = {}) {
+  const { cooldown = VO_COOLDOWN_MS, skipIfLocked = true } = opts;
+  const now = performance.now();
+  if (skipIfLocked && now < voLockedUntil) return false;
+
+  voCurrent = audio || null;
+  if (audio) {
+    try {
+      audio.currentTime = 0;
+      audio.onended = () => {
+        if (voCurrent === audio) voCurrent = null;
+        voLockedUntil = performance.now() + cooldown; // lock NA afloop
+      };
+      audio.play().catch(()=>{});
+    } catch (e) {}
+  } else {
+    voLockedUntil = performance.now() + cooldown;
   }
   return true;
 }
@@ -410,7 +414,7 @@ const bonusBricks = [
   { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" },
 
 
-  { col: 4, row: 4, type: "magnet" },{ col: 4, row: 10, type: "tnt" },{ col: 1, row: 1, type: "tnt" },{ col: 8, row: 1, type: "tnt" },
+  { col: 4, row: 4, type: "magnet" },{ col: 6, row: 13, type: "tnt" },
 
 
 
@@ -435,9 +439,9 @@ const bonusBricks = [
 ];
 // 📦 PXP layout voor level 2 (alleen steen-blokken)
 const pxpMap = [
-  { col: 0, row: 4, type: "silver" }, { col: 0, row: 5 },   { col: 0, row: 8 },      { col: 0, row: 14 },     { col: 5, row: 3, type: "rocket" },{ col: 4, row: 10, type: "stonefall" },{ col: 0, row: 0, type: "tnt" },
-  { col: 1, row: 4, type: "silver" }, { col: 1, row: 5 },   { col: 1, row: 8 },      { col: 1, row: 14 },     { col: 8, row: 5, type: "power" },   { col: 5, row: 11, type: "stonefall" }, { col: 0, row: 8, type: "tnt" },    
-  { col: 2, row: 4, type: "silver" }, { col: 2, row: 5 },   { col: 2, row: 8 },      { col: 2, row: 14 },     { col: 3, row: 3, type: "speed" },      { col: 6, row: 12, type: "stonefall" }, { col: 4, row: 10, type: "tnt" },  
+  { col: 0, row: 4, type: "silver" }, { col: 0, row: 5 },   { col: 0, row: 8 },      { col: 0, row: 14 },     { col: 5, row: 3, type: "rocket" },{ col: 4, row: 10, type: "stonefall" },
+  { col: 1, row: 4, type: "silver" }, { col: 1, row: 5 },   { col: 1, row: 8 },      { col: 1, row: 14 },     { col: 8, row: 5, type: "power" },   { col: 5, row: 11, type: "stonefall" },     
+  { col: 2, row: 4, type: "silver" }, { col: 2, row: 5 },   { col: 2, row: 8 },      { col: 2, row: 14 },     { col: 3, row: 3, type: "speed" },      { col: 6, row: 12, type: "stonefall" },   
   { col: 3, row: 4, type: "silver" }, { col: 3, row: 5 },   { col: 3, row: 8 },      { col: 3, row: 14 },     { col: 4, row: 7, type: "2x" },       { col: 7, row: 13, type: "stonefall" },
   { col: 4, row: 4, type: "silver" }, { col: 4, row: 5 },   { col: 4, row: 8 },      { col: 4, row: 14 },     { col: 1, row: 7, type: "doubleball" },  { col: 8, row: 14, type: "stonefall" },       
   { col: 5, row: 4, type: "silver" }, { col: 5, row: 5 },   { col: 5, row: 8 },      { col: 5, row: 14 },      { col: 0, row: 14, type: "stonefall" },     { col: 2, row: 8, type: "stone" },   
@@ -489,7 +493,6 @@ const level3Map = [
   { col: 5, row: 10, type: "paddle_long" },
   { col: 0, row: 10, type: "paddle_small" },
   { col: 7, row: 4, type: "magnet" },
-  { col: 4, row: 13, type: "tnt" },{ col: 8, row: 6, type: "tnt" },{ col: 0, row: 6, type: "tnt" },
 
   // Stonefall “valstrikken” (3 hits + laat stenen vallen)
   { col: 3, row: 8, type: "stonefall" },
@@ -551,7 +554,7 @@ addBonuses(4, [
   // bonussen op accenten
   { col: 4, row: 3, type: "machinegun" }, { col: 4, row: 6, type: "rocket" }, { col: 1, row: 6, type: "doubleball" },  { col: 8, row: 4, type: "magnet" },
   { col: 7, row: 6, type: "speed" }, { col: 4, row: 8, type: "2x" }, { col: 8, row: 5, type: "power" },{ col: 3, row: 13, type: "paddle_long" },
-  { col: 1, row: 5, type: "paddle_small" },{ col: 4, row: 10, type: "tnt" },{ col: 5, row: 10, type: "tnt" },{ col: 6, row: 10, type: "tnt" }
+  { col: 1, row: 5, type: "paddle_small" }
 
 ]);
 
@@ -2293,62 +2296,28 @@ function drawFallingStones() {
   }
 }
 
-// 🔧 Beveiliging: stop beepen als TNT is verwijderd
-function stopAllTNTSounds() {
-  try { tntBeepSound.pause(); tntBeepSound.currentTime = 0; } catch {}
-  try { tntExplodeSound.pause(); tntExplodeSound.currentTime = 0; } catch {}
-}
-
 
 function updateTNTs() {
   const now = performance.now();
-
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
-
-      // 🚫 Sla over als dit geen actief TNT-blok is
       if (!b || b.status !== 1 || b.type !== "tnt" || !b.tntArmed) continue;
 
       const elapsed = now - b.tntStart;
       const timeToExplode = 10000; // 10 sec
 
-      // 🔊 Beep alleen zolang TNT nog actief is
       if (now >= b.tntBeepNext) {
-        try {
-          tntBeepSound.pause();
-          tntBeepSound.currentTime = 0;
-          tntBeepSound.play();
-        } catch {}
-
+        try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
         const remain = Math.max(0, timeToExplode - elapsed);
         const interval = Math.max(120, remain / 10);
         b.tntBeepNext = now + interval;
       }
 
-      // 💥 Explosie na 10 seconden (eenmalig)
-      if (elapsed >= timeToExplode) {
-        // ✅ voorkom dubbel afspelen
-        if (!b._explodedOnce) {
-          b._explodedOnce = true;
-          explodeTNT(c, r);
-
-          // 🔇 Stop het beepgeluid direct na explosie
-          try {
-            tntBeepSound.pause();
-            tntBeepSound.currentTime = 0;
-          } catch {}
-        }
-
-        // 🧹 Ruim TNT-status op zodat het niet meer wordt geüpdatet
-        b.tntArmed = false;
-        delete b.tntStart;
-        delete b.tntBeepNext;
-      }
+      if (elapsed >= timeToExplode) explodeTNT(c, r);
     }
   }
 }
-
 
 function explodeTNT(col, row) {
   const center = bricks[col][row];
@@ -2376,6 +2345,31 @@ function explodeTNT(col, row) {
 }
 
 
+
+function explodeTNT(col, row) {
+  const center = bricks[col][row];
+  if (!center || center.status !== 1) return;
+  try { tntExplodeSound.play(); } catch {}
+
+  const dirs = [
+    [ 0,-1],[ 1,-1],[ 1, 0],[ 1, 1],
+    [ 0, 1],[-1, 1],[-1, 0],[-1,-1]
+  ];
+
+  dirs.forEach(([dx, dy]) => {
+    const c = col + dx, r = row + dy;
+    if (c<0||r<0||c>=brickColumnCount||r>=brickRowCount) return;
+    const n = bricks[c][r];
+    if (n && n.status === 1) n.status = 0;
+  });
+
+  center.status = 0;
+  explosions.push({
+    x: center.x + brickWidth/2,
+    y: center.y + brickHeight/2,
+    radius: 22, alpha: 1, color: "orange"
+  });
+}
 
 
 function drawFlyingCoins() {
