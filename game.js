@@ -2293,27 +2293,47 @@ function drawFallingStones() {
   }
 }
 
- function updateTNTs() {
+
+function updateTNTs() {
   const now = performance.now();
+
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
       if (!b || b.status !== 1 || b.type !== "tnt" || !b.tntArmed) continue;
 
       const elapsed = now - b.tntStart;
-      const timeToExplode = 10000; // 10 sec
+      const timeToExplode = 10000; // 10 seconden (duur van audio)
 
-      if (now >= b.tntBeepNext) {
-        try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
-        const remain = Math.max(0, timeToExplode - elapsed);
-        const interval = Math.max(120, remain / 10);
-        b.tntBeepNext = now + interval;
+      // 🎧 Start het aftelgeluid precies één keer
+      if (!b.tntSoundStarted) {
+        try {
+          tntBeepSound.currentTime = 0;
+          tntBeepSound.play();
+          b.tntSoundStarted = true;
+        } catch (e) {
+          console.warn("TNT audio kon niet starten:", e);
+        }
       }
 
-      if (elapsed >= timeToExplode) explodeTNT(c, r);
+      // 💥 Wanneer 10s verstreken zijn → explodeer
+      if (elapsed >= timeToExplode) {
+        explodeTNT(c, r);
+
+        // 🔇 Stop het geluid na de explosie (veiligheid)
+        try {
+          tntBeepSound.pause();
+          tntBeepSound.currentTime = 0;
+        } catch (e) {}
+
+        // Reset flags (voor het geval er meerdere TNT’s in één level zijn)
+        b.tntArmed = false;
+        b.tntSoundStarted = false;
+      }
     }
   }
 }
+
 
 function explodeTNT(col, row) {
   const center = bricks[col][row];
