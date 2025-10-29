@@ -2339,14 +2339,17 @@ function stopAllTNTSounds() {
 
 function deactivateTNT(brick) {
   if (!brick) return;
-  // Stop globaal piepen (we hebben één Audio-channel)
-  stopAllTNTSounds();
-  // Ruim alle TNT-state op dit blokje op
+
+  // 🔇 Stop enkel het piepgeluid (laat explosie doorgaan)
+  if (typeof stopTNTBeep === "function") stopTNTBeep();
+
+  // 🧹 Ruim alle TNT-state netjes op
   brick.tntArmed = false;
   delete brick.tntStart;
   delete brick.tntBeepNext;
   delete brick._explodedOnce;
 }
+
 
 function updateTNTs() {
   const now = performance.now();
