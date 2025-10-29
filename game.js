@@ -2362,6 +2362,26 @@ function explodeTNT(col, row) {
   });
 }
 
+// 🔇 TNT: stop alle geluiden en ontkoppel timers
+function stopAndDisarmAllTNT() {
+  try { tntBeepSound.pause(); tntBeepSound.currentTime = 0; } catch {}
+  try { tntExplodeSound.pause?.(); tntExplodeSound.currentTime = 0; } catch {}
+
+  // alle TNT blokken doorlopen en disarmen
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const b = bricks?.[c]?.[r];
+      if (!b) continue;
+      if (b.type === "tnt") {
+        b.tntArmed   = false;
+        b.tntStart   = 0;
+        b.tntBeepNext = 0;
+      }
+    }
+  }
+}
+
+
 
 function drawFlyingCoins() {
   flyingCoins.forEach((coin) => {
