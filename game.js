@@ -178,26 +178,6 @@ function playVoiceOver(audio, opts = {}) {
   return true;
 }
 
-function playVoiceOver(audio, opts = {}) {
-  const { cooldown = VO_COOLDOWN_MS, skipIfLocked = true } = opts;
-  const now = performance.now();
-  if (skipIfLocked && now < voLockedUntil) return false;
-
-  voCurrent = audio || null;
-  if (audio) {
-    try {
-      audio.currentTime = 0;
-      audio.onended = () => {
-        if (voCurrent === audio) voCurrent = null;
-        voLockedUntil = performance.now() + cooldown; // lock NA afloop
-      };
-      audio.play().catch(()=>{});
-    } catch (e) {}
-  } else {
-    voLockedUntil = performance.now() + cooldown;
-  }
-  return true;
-}
 
 
 
