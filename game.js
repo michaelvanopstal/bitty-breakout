@@ -2574,7 +2574,6 @@ function checkCoinCollision() {
   });
 }
 
-
 function collisionDetection() {
   // 🎙️ Lazy init van voice line + state (1× per game)
   if (typeof window.rockWarnState === "undefined") {
@@ -2714,11 +2713,13 @@ function collisionDetection() {
 
             case "stonefall": {
               // ✨ Direct bij hit: laat stenen vallen
-              triggerStonefall(b.x + brickWidth / 2, b.y + brickHeight / 2);
+              const midX = b.x + brickWidth / 2;
+              const midY = b.y + brickHeight / 2;
+              triggerStonefall(midX, midY);
 
               // ✅ Simpele 1–3 hits voice (oneindig, level-onafhankelijk)
               if (!window.rockWarnState) {
-                window.rockWarnState = { hits: 0, triggerIndex: Math.floor(Math.random() * 5) + 1 };
+                window.rockWarnState = { hits: 0, triggerIndex: Math.floor(Math.random() * 3) + 1 };
               }
               window.rockWarnState.hits++;
               if (window.rockWarnState.hits >= window.rockWarnState.triggerIndex) {
@@ -2728,16 +2729,17 @@ function collisionDetection() {
                   a.play().catch(() => {});
                 } catch (e) {}
                 window.rockWarnState.hits = 0;
-                window.rockWarnState.triggerIndex = Math.floor(Math.random() * 5) + 1;
+                window.rockWarnState.triggerIndex = Math.floor(Math.random() * 3) + 1;
               }
 
+              // 🔒 Eigen cleanup + punten en daarna STOPPEN (geen gedeelde cleanup!)
               b.status = 0;                                // blok meteen weg
-              const earned = doublePointsActive ? 20 : 10; // zelfde puntentelling als voorheen
+              const earned = doublePointsActive ? 20 : 10; // punten
               score += earned;
               updateScoreDisplay();
-
-              spawnCoin(b.x, b.y);                         // beloning consistent houden
-              b.type = "normal";
+              spawnCoin(b.x, b.y);                         // beloning
+              // b.type laten voor wat het is; maakt niet meer uit, we stoppen hier
+              return; // <<< voorkomt dat andere cases/cleanup nog lopen
             }
 
             case "power":
@@ -2796,7 +2798,7 @@ function collisionDetection() {
               break;
           } // <-- einde switch
 
-          // 🔽 Gedeelde cleanup (voor alle reguliere bonussen)
+          // 🔽 Gedeelde cleanup (voor alle reguliere bonussen, NIET stonefall/tnt/silver/stone)
           b.status = 0;
 
           let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
@@ -2810,6 +2812,7 @@ function collisionDetection() {
     } // <-- einde for c
   }); // <-- einde balls.forEach
 } // <-- einde function
+
 
 
 
