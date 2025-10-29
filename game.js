@@ -1015,8 +1015,7 @@ const blockSound = new Audio("tock.mp3");
 
 const tntBeepSound = new Audio("tnt_beep.mp3");
 tntBeepSound.volume = 0.7;
-const tntExplodeSound = new Audio("tnt_explode.mp3");
-tntExplodeSound.volume = 0.9;
+
 
 
 const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
