@@ -2346,31 +2346,6 @@ function explodeTNT(col, row) {
 
 
 
-function explodeTNT(col, row) {
-  const center = bricks[col][row];
-  if (!center || center.status !== 1) return;
-  try { tntExplodeSound.play(); } catch {}
-
-  const dirs = [
-    [ 0,-1],[ 1,-1],[ 1, 0],[ 1, 1],
-    [ 0, 1],[-1, 1],[-1, 0],[-1,-1]
-  ];
-
-  dirs.forEach(([dx, dy]) => {
-    const c = col + dx, r = row + dy;
-    if (c<0||r<0||c>=brickColumnCount||r>=brickRowCount) return;
-    const n = bricks[c][r];
-    if (n && n.status === 1) n.status = 0;
-  });
-
-  center.status = 0;
-  explosions.push({
-    x: center.x + brickWidth/2,
-    y: center.y + brickHeight/2,
-    radius: 22, alpha: 1, color: "orange"
-  });
-}
-
 
 function drawFlyingCoins() {
   flyingCoins.forEach((coin) => {
