@@ -2576,17 +2576,15 @@ function checkCoinCollision() {
 
 
 function collisionDetection() {
-  // 🎙️ Lazy init van voice line + state
+  // 🎙️ Lazy init van voice line + state (1× per game)
   if (typeof window.rockWarnState === "undefined") {
     window.rockWarnState = {
-      // 'played' houden we niet meer bij; we willen oneindig herhalen
-      hits: 0,                                   // aantal geraakte stonefall-blokken sinds laatste VO
-      triggerIndex: Math.floor(Math.random() * 3) + 1, // 1 t/m 3
-      lastPlay: 0,                               // anti-spam timestamp
-      minIntervalMs: 800,                        // mini-cooldown
+      played: false,                          // al afgespeeld in deze game?
+      hits: 0,                                // aantal *geraakte* stonefall-blokken
+      triggerIndex: Math.random() < 0.5 ? 1 : 3,  // 1e of 3e keer
       audio: (() => {
         try {
-          const a = new Audio("bitty_watch_out.mp3"); // pas evt. pad/naam aan
+          const a = new Audio("bitty_watch_out.mp3"); // zet jouw mp3-bestandsnaam/pad
           a.volume = 0.85;
           return a;
         } catch (e) { return null; }
@@ -2610,7 +2608,6 @@ function collisionDetection() {
           blockSound.currentTime = 0;
           blockSound.play();
 
-          // bounce/correctie
           ball.dy = -ball.dy;
           if (ball.dy < 0) {
             ball.y = b.y - ball.radius - 1;
@@ -2704,45 +2701,41 @@ function collisionDetection() {
           // 🎁 Bonusacties
           switch (b.type) {
 
-            // 🧨 TNT — arm bij 1e hit
+            // 🧨 TNT — arm bij 1e hit, laat staan (knipper/beep via updateTNTs), geen cleanup hieronder
             case "tnt": {
               if (!b.tntArmed) {
-                b.tntArmed    = true;
-                b.tntStart    = performance.now();
+                b.tntArmed   = true;
+                b.tntStart   = performance.now();
                 b.tntBeepNext = b.tntStart; // als je beeps gebruikt
-                try {
-                  tntBeepSound.currentTime = 0;
-                  tntBeepSound.play();
-                } catch (e) {}
+                try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
               }
-              return; // ➜ voorkom gedeelde cleanup
+              return; // ➜ heel belangrijk: voorkom gedeelde cleanup
             }
 
             case "stonefall": {
-              // ✨ Direct bij hit: laat stenen vallen en verwijder het blok
+              // ✨ Direct bij 1e hit: laat stenen vallen en verwijder het blok
               const midX = b.x + brickWidth / 2;
               const midY = b.y + brickHeight / 2;
               triggerStonefall(midX, midY);
 
-              // ✅ Oneindige 1–3 hits voice line, met mini-cooldown
-              const now = performance.now();
-              RWS.hits++;
-              if (RWS.hits >= RWS.triggerIndex && RWS.audio && (now - RWS.lastPlay) >= RWS.minIntervalMs) {
-                // Als je playVoiceOver() gebruikt:
-                try { playVoiceOver(RWS.audio); } catch (e) { try { RWS.audio.play(); } catch (e2) {} }
-                RWS.lastPlay = now;
-                RWS.hits = 0;
-                RWS.triggerIndex = Math.floor(Math.random() * 3) + 1; // opnieuw 1–3
+              if (!RWS.played) {
+                RWS.hits++;
+                if (RWS.hits === RWS.triggerIndex && RWS.audio) {
+                  const ok = playVoiceOver(RWS.audio, { cooldown: 3000, skipIfLocked: true });
+                  if (ok) RWS.played = true; // alleen markeren als het echt heeft gespeeld
+                }
               }
 
-              b.status = 0;                                // blok weg
-              const earned = doublePointsActive ? 20 : 10; // zelfde punten als voorheen
+              b.status = 0;                                // blok meteen weg
+              const earned = doublePointsActive ? 20 : 10; // zelfde puntentelling als voorheen
               score += earned;
               updateScoreDisplay();
 
-              spawnCoin(b.x, b.y);                         // beloning
+              spawnCoin(b.x, b.y);                         // beloning consistent houden
               b.type = "normal";
-              break; // ga door naar gedeelde cleanup
+              // geen return; → na de switch blijft de gedeelde cleanup lopen,
+              // net als voorheen, zodat gedrag/score consistent blijft
+              break;
             }
 
             case "power":
@@ -2799,7 +2792,7 @@ function collisionDetection() {
               speedBoostStart = Date.now();
               speedBoostSound.play();
               break;
-          } // einde switch
+          } // <-- einde switch
 
           // 🔽 Gedeelde cleanup (voor alle reguliere bonussen)
           b.status = 0;
@@ -2810,11 +2803,15 @@ function collisionDetection() {
 
           b.type = "normal";
           spawnCoin(b.x, b.y);
-        } // einde IF hit
-      } // einde for r
-    } // einde for c
-  }); // einde balls.forEach
-} // einde function
+        } // <-- einde IF hit
+      } // <-- einde for r
+    } // <-- einde for c
+  }); // <-- einde balls.forEach
+} // <-- einde function
+
+
+
+
 
 function spawnExtraBall(originBall) {
   // Huidige bal krijgt een lichte afwijking
