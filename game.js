@@ -2144,7 +2144,7 @@ function pickRandomRockSprite() {
 
 function triggerStonefall(originX, originY) {
   // Altijd 3 stenen laten vallen
-  const count = 3;
+  const count = 2;
 
   for (let i = 0; i < count; i++) {
     const rock = pickRandomRockSprite(); // levert nu altijd stoneLargeImg
