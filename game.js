@@ -2296,28 +2296,62 @@ function drawFallingStones() {
   }
 }
 
+// 🔧 Beveiliging: stop beepen als TNT is verwijderd
+function stopAllTNTSounds() {
+  try { tntBeepSound.pause(); tntBeepSound.currentTime = 0; } catch {}
+  try { tntExplodeSound.pause(); tntExplodeSound.currentTime = 0; } catch {}
+}
+
 
 function updateTNTs() {
   const now = performance.now();
+
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
+
+      // 🚫 Sla over als dit geen actief TNT-blok is
       if (!b || b.status !== 1 || b.type !== "tnt" || !b.tntArmed) continue;
 
       const elapsed = now - b.tntStart;
       const timeToExplode = 10000; // 10 sec
 
+      // 🔊 Beep alleen zolang TNT nog actief is
       if (now >= b.tntBeepNext) {
-        try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
+        try {
+          tntBeepSound.pause();
+          tntBeepSound.currentTime = 0;
+          tntBeepSound.play();
+        } catch {}
+
         const remain = Math.max(0, timeToExplode - elapsed);
         const interval = Math.max(120, remain / 10);
         b.tntBeepNext = now + interval;
       }
 
-      if (elapsed >= timeToExplode) explodeTNT(c, r);
+      // 💥 Explosie na 10 seconden (eenmalig)
+      if (elapsed >= timeToExplode) {
+        // ✅ voorkom dubbel afspelen
+        if (!b._explodedOnce) {
+          b._explodedOnce = true;
+          explodeTNT(c, r);
+
+          // 🔇 Stop het beepgeluid direct na explosie
+          try {
+            tntBeepSound.pause();
+            tntBeepSound.currentTime = 0;
+          } catch {}
+        }
+
+        // 🧹 Ruim TNT-status op zodat het niet meer wordt geüpdatet
+        b.tntArmed = false;
+        delete b.tntStart;
+        delete b.tntBeepNext;
+      }
     }
   }
 }
+
 
 function explodeTNT(col, row) {
   const center = bricks[col][row];
