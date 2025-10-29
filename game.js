@@ -1557,8 +1557,6 @@ function goToLevel(n, opts = {}) {
   try { pxpBags = []; } catch(e){}
   try { paddleExplosionParticles = []; } catch(e){}
 
-  // ⛔️ Stop eventueel actieve TNT-piepgeluiden voor de levelwissel
-  if (typeof stopAllTNTSounds === "function") stopAllTNTSounds();
 
   // Bricks + paddle + ball klaarzetten voor dit level
   resetBricks();
