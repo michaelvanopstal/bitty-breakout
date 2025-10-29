@@ -3690,7 +3690,6 @@ function spawnStoneDebris(x, y) {
 
 function triggerPaddleExplosion() {
   // ⛔️ Zorg dat eventuele TNT-beeps per direct stoppen bij paddle-explosie
-  if (typeof stopAllTNTSounds === 'function') stopAllTNTSounds();
 
   if (lives > 1) {
     if (!resetTriggered) {
