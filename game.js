@@ -2287,17 +2287,26 @@ function updateTNTs() {
       const elapsed = now - b.tntStart;
       const timeToExplode = 10000; // 10 sec
 
+      // 🚩 Eerst: meteen exploderen als de timer op is (géén beep meer)
+      if (elapsed >= timeToExplode) {
+        explodeTNT(c, r);
+        continue; // skip verdere beeps
+      }
+
+      // ⏱️ Dan pas: volgende beep plannen/afspelen
       if (now >= b.tntBeepNext) {
-        try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
+        try {
+          tntBeepSound.currentTime = 0;
+          tntBeepSound.play();
+        } catch {}
         const remain = Math.max(0, timeToExplode - elapsed);
         const interval = Math.max(120, remain / 10);
         b.tntBeepNext = now + interval;
       }
-
-      if (elapsed >= timeToExplode) explodeTNT(c, r);
     }
   }
 }
+
 
 function explodeTNT(col, row) {
   const center = bricks[col][row];
