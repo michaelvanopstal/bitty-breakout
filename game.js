@@ -2302,7 +2302,7 @@ function updateTNTs() {
       if (!b || b.status !== 1 || b.type !== "tnt" || !b.tntArmed) continue;
 
       const elapsed = now - b.tntStart;
-      const timeToExplode = 9200; // 10 seconden (duur van audio)
+      const timeToExplode = 10000; // 10 seconden (duur van audio)
 
       // 🎧 Start het aftelgeluid precies één keer
       if (!b.tntSoundStarted) {
