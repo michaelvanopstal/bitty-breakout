@@ -2309,14 +2309,15 @@ function updateTNTs() {
 
 
 function explodeTNT(col, row) {
+  // ⛔ Beep hard stoppen, zodat er niets doorloopt
+  try { tntBeepSound.pause(); tntBeepSound.currentTime = 0; } catch {}
+
   const center = bricks[col][row];
   if (!center || center.status !== 1) return;
-  try { tntExplodeSound.play(); } catch {}
+  try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+  // ...
+}
 
-  const dirs = [
-    [ 0,-1],[ 1,-1],[ 1, 0],[ 1, 1],
-    [ 0, 1],[-1, 1],[-1, 0],[-1,-1]
-  ];
 
   dirs.forEach(([dx, dy]) => {
     const c = col + dx, r = row + dy;
