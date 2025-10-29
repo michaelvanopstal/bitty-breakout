@@ -147,54 +147,50 @@ const PADDLE_SMALL_DURATION = 30000;
 // ==========================================================
 // 🎙️ VOICE-OVER: single-channel + cooldown
 // ==========================================================
+
 const VO_COOLDOWN_MS = 3000;    // minimaal 3s tussen voices
 let voIsPlaying = false;        // speelt er nu een voice?
 let voLockedUntil = 0;          // tot wanneer blokkeren (ms sinds pageload)
-
+let voAudio = null;             // huidige actieve audio
 
 function playVoiceOver(audio, opts = {}) {
-  const { cooldown = VO_COOLDOWN_MS } = opts;
+  const {
+    cooldown = VO_COOLDOWN_MS,
+    interrupt = false,
+    shortCooldownMs = 500,
+  } = opts;
+
   const now = performance.now();
 
-  // Gate dicht? → overslaan
-  if (voIsPlaying || now < voLockedUntil) return false;
+  // lock actief? => skip
+  if (now < voLockedUntil) return false;
 
-  voIsPlaying = true; // ⛓️ meteen locken, zodat dezelfde tik geen tweede VO kan starten
+  // al spelend?
+  if (voIsPlaying) {
+    if (!interrupt) return false;           // geen interrupt toegestaan
+    try {                                   // hard interrupt
+      if (voAudio) { voAudio.pause(); voAudio.currentTime = 0; }
+    } catch {}
+    voIsPlaying = false;
+  }
+
+  // start nieuwe VO
+  voIsPlaying = true;
+  voAudio = audio;
   try {
     audio.currentTime = 0;
     audio.onended = () => {
       voIsPlaying = false;
-      voLockedUntil = performance.now() + cooldown; // cooldown NA afloop
+      voAudio = null;
+      voLockedUntil = performance.now() + cooldown; // cooldown na afloop
     };
     audio.play().catch(() => {
-      // Als play faalt, meteen unlock + korte cooldown om spam te voorkomen
       voIsPlaying = false;
-      voLockedUntil = performance.now() + 500;
+      voLockedUntil = performance.now() + shortCooldownMs; // anti-spam bij fail
     });
   } catch (e) {
     voIsPlaying = false;
-    voLockedUntil = performance.now() + 500;
-  }
-  return true;
-}
-
-function playVoiceOver(audio, opts = {}) {
-  const { cooldown = VO_COOLDOWN_MS, skipIfLocked = true } = opts;
-  const now = performance.now();
-  if (skipIfLocked && now < voLockedUntil) return false;
-
-  voCurrent = audio || null;
-  if (audio) {
-    try {
-      audio.currentTime = 0;
-      audio.onended = () => {
-        if (voCurrent === audio) voCurrent = null;
-        voLockedUntil = performance.now() + cooldown; // lock NA afloop
-      };
-      audio.play().catch(()=>{});
-    } catch (e) {}
-  } else {
-    voLockedUntil = performance.now() + cooldown;
+    voLockedUntil = performance.now() + shortCooldownMs;
   }
   return true;
 }
