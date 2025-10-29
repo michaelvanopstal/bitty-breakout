@@ -464,10 +464,10 @@ const level3Map = [
   { col: 7, row: 3, type: "silver" },
 
   // Bonussen verspreid
-  { col: 4, row: 2, type: "machinegun" },
-  { col: 2, row: 2, type: "doubleball" },
-  { col: 6, row: 2, type: "speed" },
-  { col: 1, row: 8, type: "2x" },
+  { col: 4, row: 2, type: "machinegun" },{ col: 7, row: 1, type: "tnt" },
+  { col: 2, row: 2, type: "doubleball" },{ col: 8, row: 7, type: "tnt" },
+  { col: 6, row: 2, type: "speed" },     { col: 1, row: 1, type: "tnt" },
+  { col: 1, row: 8, type: "2x" },         { col: 1, row: 8, type: "tnt" },
   { col: 7, row: 8, type: "2x" },
   { col: 4, row: 9, type: "rocket" },
   { col: 5, row: 10, type: "paddle_long" },
@@ -534,7 +534,7 @@ addBonuses(4, [
   // bonussen op accenten
   { col: 4, row: 3, type: "machinegun" }, { col: 4, row: 6, type: "rocket" }, { col: 1, row: 6, type: "doubleball" },  { col: 8, row: 4, type: "magnet" },
   { col: 7, row: 6, type: "speed" }, { col: 4, row: 8, type: "2x" }, { col: 8, row: 5, type: "power" },{ col: 3, row: 13, type: "paddle_long" },
-  { col: 1, row: 5, type: "paddle_small" }
+  { col: 1, row: 5, type: "paddle_small" },{ col: 3, row: 14, type: "tnt" },{ col: 4, row: 14, type: "tnt" },{ col: 5, row: 14, type: "tnt" },
 
 ]);
 
@@ -552,7 +552,7 @@ addBonuses(5, [
   // bonussen
   {col:4,row:2,type:"machinegun"},{col:1,row:7,type:"doubleball"},{col:7,row:7,type:"speed"},  { col: 4, row: 12, type: "magnet" },
   {col:4,row:9,type:"rocket"},{col:4,row:6,type:"2x"},{col:8,row:4,type:"power"},{ col: 6, row: 6, type: "paddle_long" },
-  { col: 8, row: 1, type: "paddle_small" }
+  { col: 8, row: 1, type: "paddle_small" },{ col: 3, row: 10, type: "tnt" },{ col: 4, row: 10, type: "tnt" },{ col: 5, row: 10, type: "tnt" }
 
 ]);
 
@@ -569,7 +569,7 @@ addBonuses(6, [
   {col:3,row:7,type:"stonefall"},{col:6,row:2,type:"stonefall"},{col:7,row:1,type:"stonefall"},{col:8,row:0,type:"stonefall"},{col:5,row:7,type:"stonefall"},
   // bonussen
   {col:4,row:2,type:"machinegun"},{col:1,row:7,type:"doubleball"},{col:7,row:7,type:"rocket"},
-  {col:4,row:8,type:"speed"},{col:4,row:6,type:"2x"},{col:0,row:4,type:"power"}
+  {col:4,row:8,type:"speed"},{col:4,row:6,type:"2x"},{col:0,row:4,type:"power"},{ col: 1, row: 4, type: "tnt" },{ col: 1, row: 5, type: "tnt" },{ col: 1, row: 6, type: "tnt" },
 ]);
 
 // ---------- LEVEL 7: “Rand + diagonale silver + middenval”
