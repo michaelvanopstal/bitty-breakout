@@ -3600,23 +3600,7 @@ function triggerPaddleExplosion() {
 
     machineGunActive = false;
     machineGunCooldownActive = false;
-
-    // 🔇 TNT direct stilzetten bij levenverlies
-    try { if (typeof tntBeepSound !== "undefined" && tntBeepSound) { tntBeepSound.pause(); tntBeepSound.currentTime = 0; } } catch {}
-    try { if (typeof tntExplodeSound !== "undefined" && tntExplodeSound?.pause) { tntExplodeSound.pause(); tntExplodeSound.currentTime = 0; } } catch {}
-    if (typeof bricks !== "undefined" && typeof brickColumnCount !== "undefined" && typeof brickRowCount !== "undefined") {
-      for (let c = 0; c < brickColumnCount; c++) {
-        for (let r = 0; r < brickRowCount; r++) {
-          const b = bricks?.[c]?.[r];
-          if (b && b.type === "tnt") {
-            b.tntArmed = false;
-            b.tntStart = 0;
-            b.tntBeepNext = 0;
-            if ("tntCountdown" in b) b.tntCountdown = 0; // voor als je deze property gebruikt
-          }
-        }
-      }
-    }
+    
 
     for (let i = 0; i < 50; i++) {
       paddleExplosionParticles.push({
