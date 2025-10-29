@@ -1000,9 +1000,9 @@ tntExplodeSound.volume = 0.9;
 
 
 
-
-
+const stonefallVoiceEvery = 5;
 const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
+
 rockWarning.volume = 0.85;
 
 const customBrickWidth = 70;   // pas aan zoals jij wilt
@@ -2574,16 +2574,18 @@ function checkCoinCollision() {
   });
 }
 
+
 function collisionDetection() {
+  // 🔧 Instelling: hoe vaak moet hij "watch out..." zeggen (1x per X hits)
+  const stonefallVoiceEvery = 5; // ← verander dit getal naar wens
+
   // 🎙️ Lazy init van voice line + state (1× per game)
   if (typeof window.rockWarnState === "undefined") {
     window.rockWarnState = {
-      played: false,                          // al afgespeeld in deze game? (niet meer gebruikt)
-      hits: 0,                                // aantal *geraakte* stonefall-blokken
-      triggerIndex: Math.random() < 0.5 ? 1 : 3,  // 1e of 3e keer
+      hits: 0,
       audio: (() => {
         try {
-          const a = new Audio("bitty_watch_out.mp3"); // zet jouw mp3-bestandsnaam/pad
+          const a = new Audio("bitty_watch_out.mp3"); // zet juiste pad/bestandsnaam
           a.volume = 0.85;
           return a;
         } catch (e) { return null; }
@@ -2717,19 +2719,15 @@ function collisionDetection() {
               const midY = b.y + brickHeight / 2;
               triggerStonefall(midX, midY);
 
-              // ✅ Simpele 1–3 hits voice (oneindig, level-onafhankelijk)
-              if (!window.rockWarnState) {
-                window.rockWarnState = { hits: 0, triggerIndex: Math.floor(Math.random() * 3) + 1 };
-              }
-              window.rockWarnState.hits++;
-              if (window.rockWarnState.hits >= window.rockWarnState.triggerIndex) {
+              // ✅ Voice 1× per X stonefall-hits (instelbaar bovenaan)
+              RWS.hits++;
+              if (RWS.hits >= stonefallVoiceEvery) {
                 try {
-                  const a = new Audio("bitty_watch_out.mp3"); // check bestandsnaam/pad
+                  const a = new Audio("bitty_watch_out.mp3");
                   a.volume = 0.9;
                   a.play().catch(() => {});
                 } catch (e) {}
-                window.rockWarnState.hits = 0;
-                window.rockWarnState.triggerIndex = Math.floor(Math.random() * 3) + 1;
+                RWS.hits = 0; // reset teller
               }
 
               // 🔒 Eigen cleanup + punten en daarna STOPPEN (geen gedeelde cleanup!)
@@ -2738,7 +2736,6 @@ function collisionDetection() {
               score += earned;
               updateScoreDisplay();
               spawnCoin(b.x, b.y);                         // beloning
-              // b.type laten voor wat het is; maakt niet meer uit, we stoppen hier
               return; // <<< voorkomt dat andere cases/cleanup nog lopen
             }
 
@@ -2812,6 +2809,7 @@ function collisionDetection() {
     } // <-- einde for c
   }); // <-- einde balls.forEach
 } // <-- einde function
+
 
 
 
