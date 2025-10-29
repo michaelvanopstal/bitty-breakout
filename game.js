@@ -3832,8 +3832,6 @@ function triggerPaddleExplosion() {
 
 
 function startLevelTransition() {
-  // ⛔️ Zorg dat eventuele TNT-beeps direct stoppen bij leveltransitie
-  if (typeof stopAllTNTSounds === 'function') stopAllTNTSounds();
 
   // ✅ Wincheck vóór level++ (we zitten aan het einde van het laatste level)
   if (level >= TOTAL_LEVELS) {
