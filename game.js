@@ -2718,7 +2718,7 @@ function collisionDetection() {
 
               // ✅ Simpele 1–3 hits voice (oneindig, level-onafhankelijk)
               if (!window.rockWarnState) {
-                window.rockWarnState = { hits: 0, triggerIndex: Math.floor(Math.random() * 3) + 1 };
+                window.rockWarnState = { hits: 0, triggerIndex: Math.floor(Math.random() * 5) + 1 };
               }
               window.rockWarnState.hits++;
               if (window.rockWarnState.hits >= window.rockWarnState.triggerIndex) {
@@ -2728,7 +2728,7 @@ function collisionDetection() {
                   a.play().catch(() => {});
                 } catch (e) {}
                 window.rockWarnState.hits = 0;
-                window.rockWarnState.triggerIndex = Math.floor(Math.random() * 3) + 1;
+                window.rockWarnState.triggerIndex = Math.floor(Math.random() * 5) + 1;
               }
 
               b.status = 0;                                // blok meteen weg
@@ -2738,9 +2738,6 @@ function collisionDetection() {
 
               spawnCoin(b.x, b.y);                         // beloning consistent houden
               b.type = "normal";
-              // geen return; → na de switch blijft de gedeelde cleanup lopen,
-              // net als voorheen, zodat gedrag/score consistent blijft
-              break;
             }
 
             case "power":
