@@ -2712,19 +2712,20 @@ function collisionDetection() {
               return; // ➜ heel belangrijk: voorkom gedeelde cleanup
             }
 
-            case "stonefall": {
-              // ✨ Direct bij 1e hit: laat stenen vallen en verwijder het blok
-              const midX = b.x + brickWidth / 2;
-              const midY = b.y + brickHeight / 2;
-              triggerStonefall(midX, midY);
+            case "stonefall":
+  triggerStonefall(b.x + brickWidth / 2, b.y + brickHeight / 2);
 
-              if (!RWS.played) {
-                RWS.hits++;
-                if (RWS.hits === RWS.triggerIndex && RWS.audio) {
-                  const ok = playVoiceOver(RWS.audio, { cooldown: 3000, skipIfLocked: true });
-                  if (ok) RWS.played = true; // alleen markeren als het echt heeft gespeeld
-                }
-              }
+  if (!window.rockWarnState) {
+    window.rockWarnState = { hits: 0, triggerIndex: Math.floor(Math.random() * 3) + 1 };
+  }
+
+  window.rockWarnState.hits++;
+  if (window.rockWarnState.hits >= window.rockWarnState.triggerIndex) {
+    new Audio("bitty_watch_out.mp3").play();
+    window.rockWarnState.hits = 0;
+    window.rockWarnState.triggerIndex = Math.floor(Math.random() * 3) + 1;
+  }
+
 
               b.status = 0;                                // blok meteen weg
               const earned = doublePointsActive ? 20 : 10; // zelfde puntentelling als voorheen
