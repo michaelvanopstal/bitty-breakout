@@ -2377,17 +2377,21 @@ function updateTNTs() {
       const timeToExplode = 10000; // 10 sec
 
       // 🔊 Beep alleen zolang TNT nog actief is
-      if (now >= b.tntBeepNext) {
-        try {
-          tntBeepSound.pause();
-          tntBeepSound.currentTime = 0;
-          tntBeepSound.play();
-        } catch {}
+    // 🔊 Beep per blok via een clone, zodat meerdere TNT's elkaar niet afkappen
+if (now >= b.tntBeepNext) {
+  try {
+    const beep = tntBeepSound.cloneNode(true);
+    beep.volume = tntBeepSound.volume;
+    beep.currentTime = 0;
+    // geen pause/reset van het gedeelde object nodig
+    beep.play().catch(()=>{});
+  } catch {}
 
-        const remain = Math.max(0, timeToExplode - elapsed);
-        const interval = Math.max(120, remain / 10);
-        b.tntBeepNext = now + interval;
-      }
+  const remain = Math.max(0, timeToExplode - elapsed);
+  const interval = Math.max(120, remain / 10); // sneller naarmate het einde nadert
+  b.tntBeepNext = now + interval;
+}
+
 
       // 💥 Explosie na 10 seconden (eenmalig)
       if (elapsed >= timeToExplode) {
