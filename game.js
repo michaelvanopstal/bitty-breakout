@@ -2361,12 +2361,6 @@ function explodeTNT(col, row) {
     color: "orange"
   });
 }
- });
-}
-
-
-
-
 
 
 function drawFlyingCoins() {
