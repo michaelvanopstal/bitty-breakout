@@ -2422,7 +2422,13 @@ function explodeTNT(col, row) {
   const center = bricks[col][row];
   if (!center || center.status !== 1) return;
 
-  try { tntExplodeSound.play(); } catch {}
+try {
+  const boom = tntExplodeSound.cloneNode(true);
+  boom.volume = tntExplodeSound.volume;
+  boom.currentTime = 0;
+  boom.play().catch(()=>{});
+} catch {}
+
 
   const dirs = [
     [ 0,-1],[ 1,-1],[ 1, 0],[ 1, 1],
