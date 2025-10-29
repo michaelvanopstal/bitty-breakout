@@ -1434,17 +1434,13 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
+
 function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
   const p = def?.params || {};
   const targetPaddleWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
   paddleBaseWidth = targetPaddleWidth;
-
-  // ⛔️ Zorg dat eventuele TNT-beeps niet lekken naar dit (her)opbouwen
-  if (typeof stopAllTNTSounds === 'function') {
-    stopAllTNTSounds();
-  }
 
   // event. size-effect opruimen
   if (paddleSizeEffect) {
@@ -1476,18 +1472,15 @@ function resetBricks() {
         delete b.hasDroppedBag;
       }
 
-      // 🧨 TNT goed initialiseren (en volledig opruimen wanneer geen TNT)
+      // 🧨 TNT goed initialiseren (en opruimen wanneer geen TNT)
       if (brickType === "tnt") {
         b.tntArmed = false;
         b.tntStart = 0;
         b.tntBeepNext = 0;
-        // Failsafe: vorige explosie/kettingreactie state weghalen
-        delete b._explodedOnce;
       } else {
         delete b.tntArmed;
         delete b.tntStart;
         delete b.tntBeepNext;
-        delete b._explodedOnce; // belangrijk om spookbeeps te voorkomen
       }
 
       // hearts reset
@@ -1498,6 +1491,7 @@ function resetBricks() {
 
   assignHeartBlocks();
 }
+
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
 function assignHeartBlocks() {
@@ -1556,7 +1550,6 @@ function goToLevel(n, opts = {}) {
   try { coins = []; } catch(e){}
   try { pxpBags = []; } catch(e){}
   try { paddleExplosionParticles = []; } catch(e){}
-
 
   // Bricks + paddle + ball klaarzetten voor dit level
   resetBricks();
@@ -1861,36 +1854,6 @@ function checkFlyingCoinHits() {
           coin.y > b.y &&
           coin.y < b.y + brickHeight
         ) {
-          // 🧨 TNT: eerst geluid stoppen + state opruimen (voor stone/bonussen)
-          if (b.type === "tnt") {
-            const wasArmed = !!b.tntArmed;
-
-            // stop mogelijke piep direct
-            if (typeof stopAllTNTSounds === "function") stopAllTNTSounds();
-
-            // netjes deactiveren als helper bestaat, anders handmatig opruimen
-            if (typeof deactivateTNT === "function") {
-              deactivateTNT(b);
-            } else {
-              delete b.tntArmed;
-              delete b.tntStart;
-              delete b.tntBeepNext;
-              delete b._explodedOnce;
-            }
-
-            // blok verwijderen
-            b.status = 0;
-            b.type = "normal";
-
-            // optionele kettingreactie als TNT gewapend was
-            if (wasArmed && typeof explodeTNT === "function") {
-              try { explodeTNT(c, r); } catch (_) {}
-            }
-
-            coin.active = false;
-            return;
-          }
-
           // 🪨 Als het een stenen blok is
           if (b.type === "stone") {
             b.hits = (b.hits || 0) + 1;
@@ -1962,7 +1925,7 @@ function checkFlyingCoinHits() {
               speedBoostStart = Date.now();
               speedBoostSound.play();
               break;
-            case "magnet":
+              case "magnet":
               activateMagnet(20000);
               break;
 
@@ -1992,7 +1955,6 @@ function checkFlyingCoinHits() {
     }
   });
 }
-
 
 function saveHighscore() {
   const playerName = window.currentPlayer || "Unknown";
@@ -2337,19 +2299,6 @@ function stopAllTNTSounds() {
   try { tntExplodeSound.pause(); tntExplodeSound.currentTime = 0; } catch {}
 }
 
-function deactivateTNT(brick) {
-  if (!brick) return;
-
-  // 🔇 Stop enkel het piepgeluid (laat explosie doorgaan)
-  if (typeof stopTNTBeep === "function") stopTNTBeep();
-
-  // 🧹 Ruim alle TNT-state netjes op
-  brick.tntArmed = false;
-  delete brick.tntStart;
-  delete brick.tntBeepNext;
-  delete brick._explodedOnce;
-}
-
 
 function updateTNTs() {
   const now = performance.now();
@@ -2358,43 +2307,24 @@ function updateTNTs() {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
 
-      // ✅ Failsafe: als blok niet (meer) actief is, maar mogelijk TNT-state had, ruim op
-      if (!b || b.status !== 1) {
-        if (b && b.type === "tnt") {
-          if (typeof deactivateTNT === "function") {
-            deactivateTNT(b);
-          } else {
-            delete b.tntArmed;
-            delete b.tntStart;
-            delete b.tntBeepNext;
-            delete b._explodedOnce;
-          }
-        }
-        continue;
-      }
-
       // 🚫 Sla over als dit geen actief TNT-blok is
-      if (b.type !== "tnt" || !b.tntArmed) continue;
+      if (!b || b.status !== 1 || b.type !== "tnt" || !b.tntArmed) continue;
 
       const elapsed = now - b.tntStart;
       const timeToExplode = 10000; // 10 sec
 
       // 🔊 Beep alleen zolang TNT nog actief is
-    // 🔊 Beep per blok via een clone, zodat meerdere TNT's elkaar niet afkappen
-if (now >= b.tntBeepNext) {
-  try {
-    const beep = tntBeepSound.cloneNode(true);
-    beep.volume = tntBeepSound.volume;
-    beep.currentTime = 0;
-    // geen pause/reset van het gedeelde object nodig
-    beep.play().catch(()=>{});
-  } catch {}
+      if (now >= b.tntBeepNext) {
+        try {
+          tntBeepSound.pause();
+          tntBeepSound.currentTime = 0;
+          tntBeepSound.play();
+        } catch {}
 
-  const remain = Math.max(0, timeToExplode - elapsed);
-  const interval = Math.max(120, remain / 10); // sneller naarmate het einde nadert
-  b.tntBeepNext = now + interval;
-}
-
+        const remain = Math.max(0, timeToExplode - elapsed);
+        const interval = Math.max(120, remain / 10);
+        b.tntBeepNext = now + interval;
+      }
 
       // 💥 Explosie na 10 seconden (eenmalig)
       if (elapsed >= timeToExplode) {
@@ -2420,18 +2350,10 @@ if (now >= b.tntBeepNext) {
 }
 
 
-
 function explodeTNT(col, row) {
   const center = bricks[col][row];
   if (!center || center.status !== 1) return;
-
-try {
-  const boom = tntExplodeSound.cloneNode(true);
-  boom.volume = tntExplodeSound.volume;
-  boom.currentTime = 0;
-  boom.play().catch(()=>{});
-} catch {}
-
+  try { tntExplodeSound.play(); } catch {}
 
   const dirs = [
     [ 0,-1],[ 1,-1],[ 1, 0],[ 1, 1],
@@ -2440,29 +2362,18 @@ try {
 
   dirs.forEach(([dx, dy]) => {
     const c = col + dx, r = row + dy;
-    if (c < 0 || r < 0 || c >= brickColumnCount || r >= brickRowCount) return;
+    if (c<0||r<0||c>=brickColumnCount||r>=brickRowCount) return;
     const n = bricks[c][r];
-
-    if (n && n.status === 1) {
-      // 💣 Als buur ook TNT was, zorg dat zijn beep niet blijft hangen
-      if (n.type === "tnt" && typeof deactivateTNT === "function") {
-        deactivateTNT(n);
-      }
-      n.status = 0;
-    }
+    if (n && n.status === 1) n.status = 0;
   });
 
   center.status = 0;
-
   explosions.push({
-    x: center.x + brickWidth / 2,
-    y: center.y + brickHeight / 2,
-    radius: 22,
-    alpha: 1,
-    color: "orange"
+    x: center.x + brickWidth/2,
+    y: center.y + brickHeight/2,
+    radius: 22, alpha: 1, color: "orange"
   });
 }
-
 
 
 
@@ -2506,36 +2417,6 @@ function checkRocketCollision() {
             bricks[col][row].status === 1
           ) {
             const target = bricks[col][row];
-
-            // 🧨 Speciaal: TNT-afhandeling vóór alle andere types
-            if (target.type === "tnt") {
-              // Stop elk actief TNT-geluid (failsafe)
-              if (typeof stopAllTNTSounds === 'function') stopAllTNTSounds();
-
-              // Ruim alle TNT-state op, zodat er niets kan lekken
-              delete target.tntArmed;
-              delete target.tntStart;
-              delete target.tntBeepNext;
-              delete target._explodedOnce;
-
-              // Verwijder het blok
-              target.status = 0;
-
-              // Als dit TNT gewapend was, triggert een kettingreactie op deze positie
-              if (typeof explodeTNT === 'function') {
-                try {
-                  explodeTNT(col, row);
-                } catch (e) {
-                  // stille fail: beter geen crash tijdens explosie
-                }
-              }
-
-              // (Optioneel) punten voor TNT – laat staan zoals je wilt
-              // score += doublePointsActive ? 20 : 10;
-
-              hitSomething = true;
-              return; // belangrijk: andere type-handlers overslaan
-            }
 
             // 🪨 Gedrag voor stenen blokken
             if (target.type === "stone") {
@@ -2609,7 +2490,6 @@ function checkRocketCollision() {
                 break;
             }
 
-            // Generieke removal voor niet-steen/geen-TNT blokken
             target.status = 0;
             target.type = "normal";
             score += doublePointsActive ? 20 : 10;
@@ -2621,7 +2501,7 @@ function checkRocketCollision() {
           rocketExplosionSound.currentTime = 0;
           rocketExplosionSound.play();
 
-          updateScoreDisplay(); // 👈 aangepaste regel blijft staan
+          updateScoreDisplay(); // 👈 aangepaste regel
           rocketFired = false;
 
           explosions.push({
@@ -2643,6 +2523,8 @@ function checkRocketCollision() {
     }
   }
 }
+
+
 
 
 function checkCoinCollision() {
@@ -3700,8 +3582,6 @@ function spawnStoneDebris(x, y) {
 
 
 function triggerPaddleExplosion() {
-  // ⛔️ Zorg dat eventuele TNT-beeps per direct stoppen bij paddle-explosie
-
   if (lives > 1) {
     if (!resetTriggered) {
       lives--;
@@ -3841,9 +3721,7 @@ function triggerPaddleExplosion() {
 }
 
 
-
 function startLevelTransition() {
-
   // ✅ Wincheck vóór level++ (we zitten aan het einde van het laatste level)
   if (level >= TOTAL_LEVELS) {
     // 🚩 WIN: zelfde reset-flow als game over, maar "You Win"
@@ -3918,7 +3796,6 @@ function startLevelTransition() {
   const rockets = Math.min(14, 6 + Math.floor(level / 2));
   triggerLevelCelebration(level, { rockets, confettiCount: 160 });
 }
-
 
 function updateLivesDisplay() {
   const display = document.getElementById("livesDisplay");
