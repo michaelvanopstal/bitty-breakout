@@ -54,6 +54,17 @@ let fallingStones = [];
 let stoneHitOverlayTimer = 0;
 let stoneHitLock = false;
 let stoneClearRequested = false;
+// 🎯 Stone–paddle collision tuning (strakker & later laten triggeren)
+const STONE_COLLISION = {
+  hitboxScaleLarge: 0.86,   // was ~0.90
+  hitboxScaleSmall: 0.78,   // was ~0.82
+  minPenLargeFrac: 0.50,    // 50% van r moet in de paddle zitten (was effectief 12 px)
+  minPenSmallFrac: 0.60,    // iets strenger voor kleine sprites
+  debounceLarge: 3,         // was 2
+  debounceSmall: 4,         // was 3
+  minHorizOverlapFrac: 0.55 // minimaal 55% van r overlappen in X-richting
+};
+
 
 // 🌟 Levelovergang
 let levelTransitionActive = false;
@@ -2166,8 +2177,6 @@ function triggerStonefall(originX, originY) {
   }
 }
 
-
-
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
@@ -2176,13 +2185,12 @@ function drawFallingStones() {
       continue;
     }
 
-   if (s.img && s.img.complete) {
-  ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-} else {
-  // Fallback ook de grote steen
-  ctx.drawImage(stoneLargeImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-}
-
+    if (s.img && s.img.complete) {
+      ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+    } else {
+      // Fallback ook de grote steen
+      ctx.drawImage(stoneLargeImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+    }
 
     // ===== beweging (bewaar vorige Y vóór we s.y updaten) =====
     if (s.prevY == null) s.prevY = s.y;
@@ -2195,16 +2203,14 @@ function drawFallingStones() {
     // Basisradius (ingeschreven cirkel)
     const baseRadius = s.size * 0.42;
 
-    // Categorieën: large houden zoals het nu fijn voelt
+    // Groot/klein categorisatie aan de hand van spritegrootte
     const isLarge = s.size >= 100;
 
-    // Tunables
-    const hitboxScale     = isLarge ? 0.90 : 0.82;                    // iets kleinere hitbox voor kleiner
-    const minPenetration  = isLarge ? Math.min(12, baseRadius * 0.40)
-                                    : Math.min(18, baseRadius * 0.55); // dieper in paddle voor kleiner
-    const debounceFrames  = isLarge ? 2 : 3;
-    const minHorizOverlap = isLarge ? (baseRadius * 0.30)
-                                    : (baseRadius * 0.40);
+    // 🔧 Tuning (strakker & later laten triggeren)
+    const hitboxScale            = isLarge ? 0.86 : 0.78; // kleiner dan voorheen (minder “aura”)
+    const minPenetrationFrac     = isLarge ? 0.50 : 0.60; // % van r dat echt in paddle moet zitten
+    const debounceFrames         = isLarge ? 3    : 4;    // iets hogere drempel
+    const minHorizOverlapFrac    = 0.55;                  // min. 55% van r overlappen in X
 
     const r = baseRadius * hitboxScale;
 
@@ -2217,20 +2223,24 @@ function drawFallingStones() {
     // 1) Cirkel vs rect overlap
     const intersects = circleIntersectsRect(s.x, s.y, r, paddleLeft, paddleTop, paddleW, paddleH);
 
-    // 2) Voldoende verticale diepte in de paddle
-    const penetrates = (s.y + r) >= (paddleTop + minPenetration);
+    // 2) Alleen hits die van bóven de paddle komen
+    const enteredFromAbove = (s.prevY + r) <= paddleTop;
 
-    // 3) Alleen neerwaartse hits
+    // 3) Genoeg verticale diepte (geen rand-tikje)
+    const minPenetrationPx = r * minPenetrationFrac;
+    const penetrates       = (s.y + r) >= (paddleTop + minPenetrationPx);
+
+    // 4) Alleen neerwaartse hits
     const falling = s.dy > 0;
 
-    // 4) Genoeg horizontale overlap – geen rand-tikjes
+    // 5) Genoeg horizontale overlap – geen rand-grazes
     const stoneLeft  = s.x - r;
     const stoneRight = s.x + r;
     const overlapX   = Math.max(0, Math.min(stoneRight, paddleLeft + paddleW) - Math.max(stoneLeft, paddleLeft));
-    const wideEnough = overlapX >= minHorizOverlap;
+    const wideEnough = overlapX >= (r * minHorizOverlapFrac);
 
-    // Echte hit als aan alle vier voldaan is
-    const realHitNow = intersects && penetrates && falling && wideEnough;
+    // ✅ Echte hit pas als alles waar is
+    const realHitNow = intersects && enteredFromAbove && falling && penetrates && wideEnough;
 
     if (realHitNow) {
       s.framesInside++;
