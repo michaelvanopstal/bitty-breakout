@@ -109,7 +109,8 @@ function applyStoneCollisionProfile(name = 'medium') {
 }
 
 // Zet standaard op 'medium' bij start
-applyStoneCollisionProfile('medium');
+applyStoneCollisionProfile('soft');
+
 
 
 // 🌟 Levelovergang
