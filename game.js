@@ -182,22 +182,6 @@ const VO_COOLDOWN_MS = 3000;    // minimaal 3s tussen voices
 let voIsPlaying = false;        // speelt er nu een voice?
 let voLockedUntil = 0;          // tot wanneer blokkeren (ms sinds pageload)
 
-// === COLLECTOR SYSTEM (stars/bombs/x) ===
-const GOAL_STARS = 10;
-const GOAL_BOMBS = 10;
-
-// vervangbare icoontjes (laad je eigen images als je wil)
-let hudStarIcon = typeof starImg !== "undefined" ? starImg : null;
-let hudBombIcon = typeof tntImg  !== "undefined" ? tntImg  : null;
-let hudXIcon    = null; // bv. redCrossImg; blijft null => teken we vectorisch
-
-const collector = {
-  stars: 0,
-  bombs: 0,
-  x: 0,           // we tellen X ook bij voor UI; effect = reset
-  invincibleUntil: 0
-};
-
 // paddle-invincibility helpers
 function activateInvinciblePaddle(ms = 20000) {
   collector.invincibleUntil = performance.now() + ms;
@@ -1333,6 +1317,26 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
+
+
+// === COLLECTOR SYSTEM (stars/bombs/x) ===
+const GOAL_STARS = 10;
+const GOAL_BOMBS = 10;
+
+// vervangbare icoontjes (laad je eigen images als je wil)
+let hudStarIcon = typeof starImg !== "undefined" ? starImg : null;
+let hudBombIcon = typeof tntImg  !== "undefined" ? tntImg  : null;
+let hudXIcon    = null; // bv. redCrossImg; blijft null => teken we vectorisch
+
+const collector = {
+  stars: 0,
+  bombs: 0,
+  x: 0,           // we tellen X ook bij voor UI; effect = reset
+  invincibleUntil: 0
+};
+
+
+
 
 // === DROPS SYSTEM: item type registry ===
 // Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
