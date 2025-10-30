@@ -182,6 +182,86 @@ const VO_COOLDOWN_MS = 3000;    // minimaal 3s tussen voices
 let voIsPlaying = false;        // speelt er nu een voice?
 let voLockedUntil = 0;          // tot wanneer blokkeren (ms sinds pageload)
 
+// === COLLECTOR SYSTEM (stars/bombs/x) ===
+const GOAL_STARS = 10;
+const GOAL_BOMBS = 10;
+
+// vervangbare icoontjes (laad je eigen images als je wil)
+let hudStarIcon = typeof starImg !== "undefined" ? starImg : null;
+let hudBombIcon = typeof tntImg  !== "undefined" ? tntImg  : null;
+let hudXIcon    = null; // bv. redCrossImg; blijft null => teken we vectorisch
+
+const collector = {
+  stars: 0,
+  bombs: 0,
+  x: 0,           // we tellen X ook bij voor UI; effect = reset
+  invincibleUntil: 0
+};
+
+// paddle-invincibility helpers
+function activateInvinciblePaddle(ms = 20000) {
+  collector.invincibleUntil = performance.now() + ms;
+  flashSetPopup?.("⭐ Invincible Paddle " + Math.round(ms/1000) + "s");
+}
+
+function isPaddleInvincible() {
+  return performance.now() < collector.invincibleUntil;
+}
+
+function addStar(n = 1) {
+  collector.stars = Math.min(GOAL_STARS, collector.stars + n);
+  if (collector.stars >= GOAL_STARS) {
+    activateInvinciblePaddle(20000); // 20s shield
+    collector.stars = 0;             // reset de sterrenteller
+  }
+}
+
+function explodeRandomBricks(n = 35) {
+  // 30–40 bricks (standaard 35). Pas aan als je wil.
+  const kill = Math.max(0, n|0);
+  const pool = [];
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const b = bricks[c][r];
+      if (!b) continue;
+      if (b.status !== 1) continue;            // alleen levende
+      if (b.type === "steel") continue;        // filter onbreekbaar (pas aan)
+      pool.push({c,r,b});
+    }
+  }
+  for (let i = 0; i < kill && pool.length; i++) {
+    const idx = Math.floor(Math.random() * pool.length);
+    const {c,r,b} = pool.splice(idx,1)[0];
+    b.status = 0;
+    score += 10;
+    pointPopups?.push?.({
+      x: (c+0.5)*brickWidth + brickOffsetLeft,
+      y: (r+0.5)*brickHeight + brickOffsetTop,
+      value: "+10", alpha: 1
+    });
+  }
+  updateScoreDisplay?.();
+}
+
+function addBomb(n = 1) {
+  collector.bombs = Math.min(GOAL_BOMBS, collector.bombs + n);
+  if (collector.bombs >= GOAL_BOMBS) {
+    // 30–40 bricks: kies random in deze range
+    const count = 30 + Math.floor(Math.random()*11);
+    flashSetPopup?.("💣 BOOM! -" + count + " bricks");
+    explodeRandomBricks(count);
+    collector.bombs = 0; // reset bommen-teller
+  }
+}
+
+function addX(n = 1) {
+  collector.x += n;
+  collector.stars = 0;
+  collector.bombs = 0;
+  flashSetPopup?.("❌ Progress reset");
+}
+
+
 
 function playVoiceOver(audio, opts = {}) {
   const { cooldown = VO_COOLDOWN_MS } = opts;
@@ -1242,10 +1322,10 @@ magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 // === DROPS SYSTEM: item type registry ===
 // Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
 const DROP_TYPES = {
+
+  // 💰 COIN
   coin: {
-    // gebruikt je bestaande coin-asset
     draw(drop, ctx) {
-      // 24x24 zoals je coins
       ctx.drawImage(coinImg, drop.x - 12, drop.y - 12, 24, 24);
     },
     onCatch(drop) {
@@ -1255,14 +1335,12 @@ const DROP_TYPES = {
       coinSound.currentTime = 0; coinSound.play();
       pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
     },
-    onMiss(drop) {
-      // niks; gewoon weg
-    },
+    onMiss(drop) {},
   },
 
+  // ❤️ HEART (voor test behouden)
   heart: {
     draw(drop, ctx) {
-      // iets groter hart (pulserend)
       const size = 24 + Math.sin(drop.t) * 2;
       ctx.globalAlpha = 0.95;
       ctx.drawImage(heartImg, drop.x - size/2, drop.y - size/2, size, size);
@@ -1273,7 +1351,6 @@ const DROP_TYPES = {
       heartsCollected++;
       document.getElementById("heartCount").textContent = heartsCollected;
       coinSound.currentTime = 0; coinSound.play();
-
       if (heartsCollected >= 10) {
         heartsCollected = 0;
         lives++;
@@ -1282,13 +1359,11 @@ const DROP_TYPES = {
         document.getElementById("heartCount").textContent = heartsCollected;
       }
     },
-    onMiss(drop) {
-      // gemist hart: geen straf
-    },
+    onMiss(drop) {},
   },
 
+  // 🎒 BAG (nog even behouden voor compatibiliteit)
   bag: {
-    // gebruikt je pxpBagImg (40x40 in je game)
     draw(drop, ctx) {
       ctx.drawImage(pxpBagImg, drop.x - 20, drop.y - 20, 40, 40);
     },
@@ -1299,11 +1374,11 @@ const DROP_TYPES = {
       pxpBagSound.currentTime = 0; pxpBagSound.play();
       pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
     },
-    onMiss(drop) { /* niks */ },
+    onMiss(drop) {},
   },
 
+  // 💣 NORMALE BOMB (oude systeem)
   bomb: {
-    // “ontwijken!” – lichte straf bij catch
     draw(drop, ctx) {
       const s = 26;
       const blink = (Math.floor(performance.now()/200) % 2 === 0);
@@ -1311,20 +1386,80 @@ const DROP_TYPES = {
       ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
     },
     onCatch(drop) {
-      // kleine straf of effect, bv. -1 leven (alleen als >1) of -punten
       if (lives > 1) {
         lives--;
         updateLivesDisplay?.();
         pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
       } else {
-        // laatste leven → trigger paddleExplode flow
         triggerPaddleExplosion?.();
       }
       try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
     },
-    onMiss(drop) { /* goed zo, niks */ },
+    onMiss(drop) {},
   },
 
+  // 🟡⭐ NIEUW: STAR TOKEN
+  star_token: {
+    draw(drop, ctx) {
+      const s = 26;
+      if (typeof starImg !== "undefined" && starImg) {
+        ctx.drawImage(starImg, drop.x - s/2, drop.y - s/2, s, s);
+      } else {
+        ctx.fillStyle = "#ffd700";
+        ctx.beginPath();
+        ctx.arc(drop.x, drop.y, 12, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
+    onCatch(drop) {
+      addStar?.(1);            // voegt ster toe
+      score += 5;              // kleine scorebonus
+      updateScoreDisplay?.();
+    },
+    onMiss(drop) {},
+  },
+
+  // 💣 NIEUW: BOMB TOKEN (voor brick-explosie bij 10x)
+  bomb_token: {
+    draw(drop, ctx) {
+      const s = 26;
+      const blink = (Math.floor(performance.now() / 200) % 2 === 0);
+      const img = blink && typeof tntBlinkImg !== "undefined" ? tntBlinkImg : tntImg;
+      if (img) ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
+      else {
+        ctx.fillStyle = "#111";
+        ctx.beginPath();
+        ctx.arc(drop.x, drop.y, 11, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
+    onCatch(drop) {
+      addBomb?.(1);
+      score += 5;
+      updateScoreDisplay?.();
+    },
+    onMiss(drop) {},
+  },
+
+  // ❌ NIEUW: RED X TOKEN (reset alle voortgang)
+  x_token: {
+    draw(drop, ctx) {
+      const s = 24;
+      ctx.save();
+      ctx.translate(drop.x, drop.y);
+      ctx.fillStyle = "#d00";
+      ctx.fillRect(-s/2, -5, s, 10);
+      ctx.fillRect(-5, -s/2, 10, s);
+      ctx.restore();
+    },
+    onCatch(drop) {
+      addX?.(1);               // reset alle tellerprogress
+      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+    },
+    onMiss(drop) {},
+  },
+
+  // 🧱 PADDLE POWERUPS
   paddle_long: {
     draw(drop, ctx) { ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) { startPaddleSizeEffect?.("long"); },
@@ -1337,12 +1472,19 @@ const DROP_TYPES = {
     onMiss(drop) {},
   },
 
+  // ⚡ SPEED BOOST
   speed: {
     draw(drop, ctx) { ctx.drawImage(speedImg, drop.x - 35, drop.y - 12, 70, 24); },
-    onCatch(drop) { speedBoostActive = true; speedBoostStart = Date.now(); speedBoostSound.currentTime=0; speedBoostSound.play(); },
+    onCatch(drop) {
+      speedBoostActive = true;
+      speedBoostStart = Date.now();
+      speedBoostSound.currentTime = 0;
+      speedBoostSound.play();
+    },
     onMiss(drop) {},
   },
 
+  // 🧲 MAGNET
   magnet: {
     draw(drop, ctx) { ctx.drawImage(magnetImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) { activateMagnet?.(20000); },
@@ -1611,6 +1753,84 @@ function drawBricks() {
       }
     }
   }
+}
+
+function drawRoundedRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+function drawCollectorPanel() {
+  // positie: onder je chatbox rechts. Pas aan naar jouw layout.
+  const panelW = 220, panelH = 120;
+  const x = canvas.width - panelW - 16; // 16px marge rechts
+  const y = 110;                        // onder je chatbox header (schat)
+  const pad = 10;
+
+  // achtergrond (chatbox-achtig)
+  drawRoundedRect(ctx, x, y, panelW, panelH, 14);
+  ctx.fillStyle = "rgba(255, 193, 7, 0.15)"; // warm geel/oranje tint
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "rgba(140, 90, 10, 0.6)";
+  ctx.stroke();
+
+  ctx.save();
+  ctx.translate(x + pad, y + pad);
+
+  // titel
+  ctx.fillStyle = "#3b2508";
+  ctx.font = "bold 14px Arial";
+  ctx.fillText("Collector", 0, 0);
+
+  // rij helper
+  const rowY = (i)=> 18 + i*32;
+
+  // ROW 1 - STARS (geel)
+  // icon
+  if (hudStarIcon) ctx.drawImage(hudStarIcon, 0, rowY(0)-2, 20, 20);
+  else { ctx.fillStyle="#ffd54f"; ctx.beginPath(); ctx.arc(10, rowY(0)+8, 8, 0, Math.PI*2); ctx.fill(); }
+  // label
+  ctx.fillStyle = "#654321";
+  ctx.font = "12px Arial";
+  ctx.fillText("Stars", 26, rowY(0));
+  // bar
+  const w = panelW - pad*2 - 26;
+  const h = 10;
+  const fillStars = w * (collector.stars / GOAL_STARS);
+  ctx.fillStyle = "#eee"; ctx.fillRect(26, rowY(0)+12, w, h);
+  ctx.fillStyle = "#ffca28"; ctx.fillRect(26, rowY(0)+12, fillStars, h);
+  ctx.strokeStyle = "#a67c00"; ctx.strokeRect(26, rowY(0)+12, w, h);
+  // text value
+  ctx.fillStyle = "#5b4600";
+  ctx.fillText(`${collector.stars}/${GOAL_STARS}`, 26 + w - 40, rowY(0));
+
+  // ROW 2 - BOMBS (zwart)
+  if (hudBombIcon) ctx.drawImage(hudBombIcon, 0, rowY(1)-2, 20, 20);
+  else { ctx.fillStyle="#222"; ctx.beginPath(); ctx.arc(10, rowY(1)+8, 8, 0, Math.PI*2); ctx.fill(); }
+  ctx.fillStyle = "#333"; ctx.fillText("Bombs", 26, rowY(1));
+  const fillBombs = w * (collector.bombs / GOAL_BOMBS);
+  ctx.fillStyle = "#eee"; ctx.fillRect(26, rowY(1)+12, w, h);
+  ctx.fillStyle = "#111"; ctx.fillRect(26, rowY(1)+12, fillBombs, h);
+  ctx.strokeStyle = "#555"; ctx.strokeRect(26, rowY(1)+12, w, h);
+  ctx.fillStyle = "#111";
+  ctx.fillText(`${collector.bombs}/${GOAL_BOMBS}`, 26 + w - 40, rowY(1));
+
+  // ROW 3 - X (rood)
+  if (hudXIcon) ctx.drawImage(hudXIcon, 0, rowY(2)-2, 20, 20);
+  else { ctx.fillStyle="#d12"; ctx.fillRect(0, rowY(2)-2, 20, 20); ctx.fillStyle="#fff"; ctx.fillRect(6, rowY(2)+2, 8, 12); }
+  ctx.fillStyle = "#6b1212"; ctx.fillText("X", 26, rowY(2));
+  const fillX = Math.min(w, collector.x * (w / GOAL_STARS)); // optioneel schaal; of maak eigen goal
+  ctx.fillStyle = "#eee"; ctx.fillRect(26, rowY(2)+12, w, h);
+  ctx.fillStyle = "#d32f2f"; ctx.fillRect(26, rowY(2)+12, fillX, h);
+  ctx.strokeStyle = "#8e1818"; ctx.strokeRect(26, rowY(2)+12, w, h);
+
+  ctx.restore();
 }
 
 
@@ -3461,6 +3681,7 @@ function isPaddleBlockedHorizontally(newX) {
   return false;
 }
 
+
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -3477,22 +3698,29 @@ function draw() {
   checkFlyingCoinHits();
   drawPointPopups();
 
+  // ⭐️⭐️⭐️ STEP 5 – Invincible Paddle overlay (lichte gloed boven achtergrond)
+  if (isPaddleInvincible()) {
+    ctx.save();
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = "#ffd54f";        // goudgele tint
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+  }
 
-// A) Time-out check heel vroeg in draw()
-if (magnetActive && performance.now() >= magnetEndTime) {
-  stopMagnet();
-}
+  // A) Time-out check heel vroeg in draw()
+  if (magnetActive && performance.now() >= magnetEndTime) {
+    stopMagnet();
+  }
 
-// B) Toepassen op arrays (na physics update van items, vóór render)
-applyMagnetToArray(fallingHearts);
-applyMagnetToArray(coins);     // muntjes worden al aangestuurd via 'coins'
-applyMagnetToArray(pxpBags);   // zakjes vallen in 'pxpBags'
-applyMagnetToArray(fallingDrops);
+  // B) Toepassen op arrays (na physics update van items, vóór render)
+  applyMagnetToArray(fallingHearts);
+  applyMagnetToArray(coins);
+  applyMagnetToArray(pxpBags);
+  applyMagnetToArray(fallingDrops);
 
-
-if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
-  stopPaddleSizeEffect();
-}
+  if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
+    stopPaddleSizeEffect();
+  }
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
     doublePointsActive = false;
@@ -3505,94 +3733,90 @@ if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
       ball.x += ball.dx * speedMultiplier;
       ball.y += ball.dy * speedMultiplier;
     } else {
-       ball.x = paddleX + paddleWidth / 2 - ballRadius;
-       ball.y = paddleY - ballRadius * 2;
-
+      ball.x = paddleX + paddleWidth / 2 - ballRadius;
+      ball.y = paddleY - ballRadius * 2;
     }
-    
+
     if (!ball.trail) ball.trail = [];
-
     let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
-    let steps = 3; // hoe meer hoe vloeiender
+    let steps = 3;
     for (let i = 1; i <= steps; i++) {
-    let px = last.x + (ball.x - last.x) * (i / steps);
-    let py = last.y + (ball.y - last.y) * (i / steps);
-    ball.trail.push({ x: px, y: py });
-  }
-
-    while (ball.trail.length > 20) {
-    ball.trail.shift();
- }
-
+      let px = last.x + (ball.x - last.x) * (i / steps);
+      let py = last.y + (ball.y - last.y) * (i / steps);
+      ball.trail.push({ x: px, y: py });
+    }
+    while (ball.trail.length > 20) ball.trail.shift();
 
     // Veiliger links/rechts
     if (ball.x <= ball.radius + 1 && ball.dx < 0) {
       ball.x = ball.radius + 1;
       ball.dx *= -1;
-      wallSound.currentTime = 0;
-      wallSound.play();
+      wallSound.currentTime = 0; wallSound.play();
     }
     if (ball.x >= canvas.width - ball.radius - 1 && ball.dx > 0) {
       ball.x = canvas.width - ball.radius - 1;
       ball.dx *= -1;
-      wallSound.currentTime = 0;
-      wallSound.play();
+      wallSound.currentTime = 0; wallSound.play();
     }
 
     // Veiliger bovenkant
     if (ball.y <= ball.radius + 1 && ball.dy < 0) {
       ball.y = ball.radius + 1;
       ball.dy *= -1;
-      wallSound.currentTime = 0;
-      wallSound.play();
+      wallSound.currentTime = 0; wallSound.play();
     }
-// 1) Eerst broad-phase met bal-middelpunt
-const { cx, cy } = getBallCenter(ball);
 
-if (
-  cy + ball.radius > paddleY &&
-  cy - ball.radius < paddleY + paddleHeight &&
-  cx + ball.radius > paddleX &&
-  cx - ball.radius < paddleX + paddleWidth
-) {
-  // 2) Pixel-precies check op paddleCanvas alpha
-  //    We testen een klein verticaal kolommetje rond de raaklijn,
-  //    zodat de bal niet per ongeluk door mag als een gat nét naast het midden zit.
-  const localX = Math.round(cx - paddleX);                 // in paddleCanvas-coördinaten
-  const sampleHalf = Math.max(1, Math.floor(ball.radius)); // aantal pixels boven/onder om te testen
-  let opaqueHit = false;
+    // 1) Eerst broad-phase met bal-middelpunt
+    const { cx, cy } = getBallCenter(ball);
+    if (
+      cy + ball.radius > paddleY &&
+      cy - ball.radius < paddleY + paddleHeight &&
+      cx + ball.radius > paddleX &&
+      cx - ball.radius < paddleX + paddleWidth
+    ) {
+      // 2) Pixel-precies check op paddleCanvas alpha
+      const localX = Math.round(cx - paddleX);
+      const sampleHalf = Math.max(1, Math.floor(ball.radius));
+      let opaqueHit = false;
+      const px = Math.max(0, Math.min(paddleWidth - 1, localX));
+      for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
+        const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
+        const a = paddleCtx.getImageData(px, localY, 1, 1).data[3];
+        if (a > 10) { opaqueHit = true; break; }
+      }
 
-  // Clamp X binnen de paddle
-  const px = Math.max(0, Math.min(paddleWidth - 1, localX));
-
-  for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
-    const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
-    const a = paddleCtx.getImageData(px, localY, 1, 1).data[3]; // alpha kanaal
-    if (a > 10) { // >10 om randen/transparantie te ontzien
-      opaqueHit = true;
-      break;
+      if (opaqueHit) {
+        const hitPos = (cx - paddleX) / paddleWidth;
+        const angle  = (hitPos - 0.5) * Math.PI / 2;
+        const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+        ball.dx = speed * Math.sin(angle);
+        ball.dy = -Math.abs(speed * Math.cos(angle));
+        ball.y = paddleY - (ball.radius * 2) - 1;
+        wallSound.currentTime = 0; wallSound.play();
+      }
+      // anders: pure gat → bal valt door
     }
+  });
+
+  // ⭐️⭐️⭐️ STEP 5b – Paddle-aura tekenen vóór paddle zelf
+  if (isPaddleInvincible()) {
+    const auraR = (paddleWidth * 0.65);
+    const cx = paddleX + paddleWidth / 2;
+    const cy = paddleY + paddleHeight / 2;
+    const g = ctx.createRadialGradient(cx, cy, 6, cx, cy, auraR);
+    g.addColorStop(0, "rgba(255,213,79,0.55)");
+    g.addColorStop(1, "rgba(255,213,79,0.00)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, auraR, 0, Math.PI * 2);
+    ctx.fill();
   }
 
-  if (opaqueHit) {
-    // 3) Reflectie zoals je al had, maar gebruik middelpunt
-    const hitPos = (cx - paddleX) / paddleWidth; // 0..1
-    const angle  = (hitPos - 0.5) * Math.PI / 2;
-    const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+  drawPaddle();  // paddle tekenen na de aura
 
-    ball.dx = speed * Math.sin(angle);
-    ball.dy = -Math.abs(speed * Math.cos(angle));
-
-    // Zet de bal net boven de paddle met linkerboven-positie
-    ball.y = paddleY - (ball.radius * 2) - 1;
-
-    wallSound.currentTime = 0;
-    wallSound.play();
-  } else {
-    // 4) Pure "gat": géén reflectie → bal valt erdoorheen
-    // (niets doen hier; de standaard logica laat ‘m door)
-  }
+  // (je overige UI/HUD-calls hieronder laten staan)
 }
+
 
 
 
@@ -3690,7 +3914,6 @@ if (downPressed) {
 }
 
 
-  drawPaddle();
   drawMagnetAura(ctx);
   drawMagnetHUD(ctx);
   updateAndDrawDrops();
