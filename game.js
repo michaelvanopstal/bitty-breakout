@@ -213,13 +213,13 @@ function playVoiceOver(audio, opts = {}) {
 }
 
 
-// === DROPS X-SELECTION HELPERS ===
-const GOLDEN_RATIO_CONJUGATE = 0.61803398875;
+// Goed verspreide X-posities (zonder clusteren)
 let dropSeed = Math.random();
-let gridColIndex = 0;
+let dropIndex = 0;
+const GOLDEN_RATIO_CONJUGATE = 0.61803398875;
 const recentSpawnXs = [];
 
-function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
 
 function nextWellDistributedX(margin = 40, minSpacing = 70) {
   // quasi-random met golden ratio; voorkomt clustering
