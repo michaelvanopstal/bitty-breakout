@@ -56,18 +56,60 @@ let stoneHitLock = false;
 let stoneClearRequested = false;
 // 🎯 Stone–paddle collision tuning (strakker & later laten triggeren)
 // 🎯 Centrale instellingen voor stone–paddle botsingen
+// 🎯 Centrale instellingen voor stone–paddle botsingen (actieve set)
 const STONE_COLLISION = {
-  hitboxScaleLarge: 0.88,   // iets kleiner dan sprite, maar niet te klein
+  hitboxScaleLarge: 0.88,
   hitboxScaleSmall: 0.82,
-
-  minPenLargeFrac: 0.35,    // fractie van r die in paddle moet zitten
+  minPenLargeFrac: 0.35,
   minPenSmallFrac: 0.40,
-
-  debounceLarge: 2,         // frames binnen voor geldige hit
+  debounceLarge: 2,
   debounceSmall: 2,
-
-  minHorizOverlapFrac: 0.35 // min. horizontale overlap (fractie van r)
+  minHorizOverlapFrac: 0.35
 };
+
+// 🧪 Voorinstellingen: kies snel tussen 'soft', 'medium', 'hard'
+const STONE_COLLISION_PROFILES = {
+  soft: {
+    // Makkelijker raken (ruimer)
+    hitboxScaleLarge: 0.90,
+    hitboxScaleSmall: 0.84,
+    minPenLargeFrac: 0.30,
+    minPenSmallFrac: 0.35,
+    debounceLarge: 1,
+    debounceSmall: 2,
+    minHorizOverlapFrac: 0.30
+  },
+  medium: {
+    // Aanbevolen (de waarden die je nu gebruikt)
+    hitboxScaleLarge: 0.88,
+    hitboxScaleSmall: 0.82,
+    minPenLargeFrac: 0.35,
+    minPenSmallFrac: 0.40,
+    debounceLarge: 2,
+    debounceSmall: 2,
+    minHorizOverlapFrac: 0.35
+  },
+  hard: {
+    // Strenger (pas tellen bij dieper & breder contact)
+    hitboxScaleLarge: 0.86,
+    hitboxScaleSmall: 0.78,
+    minPenLargeFrac: 0.45,
+    minPenSmallFrac: 0.55,
+    debounceLarge: 3,
+    debounceSmall: 4,
+    minHorizOverlapFrac: 0.45
+  }
+};
+
+// 🔄 Activeer een profiel met één call
+function applyStoneCollisionProfile(name = 'medium') {
+  const p = STONE_COLLISION_PROFILES[name] || STONE_COLLISION_PROFILES.medium;
+  Object.assign(STONE_COLLISION, p);
+  // console.log('[STONE]', 'profile:', name, '->', STONE_COLLISION);
+}
+
+// Zet standaard op 'medium' bij start
+applyStoneCollisionProfile('medium');
 
 
 // 🌟 Levelovergang
