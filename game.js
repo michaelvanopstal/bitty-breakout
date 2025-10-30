@@ -326,36 +326,49 @@ function nextGridX(margin = 40, columns = 8, jitterPx = 18) {
   return x;
 }
 
-function chooseSpawnX(cfg) {
-  const margin = cfg.xMargin || 0;
+function chooseSpawnX(cfg = {}) {
+  const margin = Number(cfg.xMargin || 0);
+  const minX   = margin;
+  const maxX   = canvas.width - margin;
 
-  // 1) kies X volgens modus
-  let x = (cfg.mode === "grid")
-    ? nextGridX(margin, cfg.gridColumns, cfg.gridJitterPx)
-    : nextWellDistributedX(margin, cfg.minSpacing);
+  const mode   = cfg.mode || "well";
+  const cols   = Math.max(1, cfg.gridColumns || 8);
+  const jitter = Number(cfg.gridJitterPx || 0);
+  const minSpacing = Number(cfg.minSpacing || 0);
 
-  // 2) optioneel vermijden boven paddle
+  let x;
+
+  if (mode === "grid") {
+    // nette kolommen met klein jittertje
+    const cellW = (maxX - minX) / cols;
+    const col   = Math.floor(Math.random() * cols);
+    x = minX + col * cellW + cellW / 2 + (Math.random() * 2 - 1) * jitter;
+  } else {
+    // "well" = mooie spreiding met afstand tot recente drops
+    let tries = 20;
+    do {
+      x = minX + Math.random() * (maxX - minX);
+      tries--;
+    } while (
+      tries > 0 &&
+      minSpacing > 0 &&
+      Array.isArray(fallingDrops) &&
+      fallingDrops.some(d => Math.abs(d.x - x) < minSpacing)
+    );
+  }
+
+  // Niet direct boven de paddle droppen (eerlijker)
   if (cfg.avoidPaddle) {
-    const padL = paddleX;
-    const padR = paddleX + paddleWidth;
-    const extra = (cfg.avoidMarginPx != null) ? cfg.avoidMarginPx : (paddleWidth * 0.6 + 30);
-    const forbidL = padL - extra;
-    const forbidR = padR + extra;
-
-    if (x >= forbidL && x <= forbidR) {
-      // duw X naar de dichtstbijzijnde vrije kant
-      const leftRoom  = Math.max(margin, forbidL - 8);
-      const rightRoom = Math.min(canvas.width - margin, forbidR + 8);
-      if (Math.abs(x - leftRoom) < Math.abs(x - rightRoom)) {
-        x = leftRoom - Math.random() * 40;
-      } else {
-        x = rightRoom + Math.random() * 40;
-      }
-      x = clamp(x, margin, canvas.width - margin);
+    const avoid = Number(cfg.avoidMarginPx || 40);
+    const left  = paddleX - avoid;
+    const right = paddleX + paddleWidth + avoid;
+    if (x > left && x < right) {
+      // duw naar dichtstbijzijnde veilige kant
+      x = (x - left) < (right - x) ? left : right;
     }
   }
 
-  return x;
+  return clamp(x, minX, maxX);
 }
 
 
