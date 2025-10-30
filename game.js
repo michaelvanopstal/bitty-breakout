@@ -3836,65 +3836,65 @@ function draw() {
 
   // (je overige UI/HUD-calls hieronder laten staan)
 }
+// 💥 Als de bal onder het scherm komt
+if (ball.y + ball.dy > canvas.height) {
+  balls.splice(index, 1); // verwijder bal zonder actie
+}
 
-
-
-
-
-    if (ball.y + ball.dy > canvas.height) {
-      balls.splice(index, 1); // verwijder bal zonder actie
-    }
-// ✨ Gouden smalle energie-staart (taps en iets smaller dan bal)
-// ✨ Rechte gouden energie-staart — iets groter dan de bal en 2x zo lang
+// ✨ Gouden energie-staart (trail)
 if (ball.trail.length >= 2) {
-  const head = ball.trail[ball.trail.length - 1]; // meest recente positie
-  const tail = ball.trail[0]; // oudste positie (ver weg van bal)
+  const head = ball.trail[ball.trail.length - 1];
+  const tail = ball.trail[0];
 
   ctx.save();
-
   const gradient = ctx.createLinearGradient(
     head.x + ball.radius, head.y + ball.radius,
     tail.x + ball.radius, tail.y + ball.radius
   );
-
-  ctx.lineWidth = ball.radius * 2.0; // iets kleiner dan 2.2
   gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
   gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
 
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = ball.radius * 2.2;
+  ctx.lineCap = "round";
   ctx.beginPath();
   ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
   ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
-  ctx.strokeStyle = gradient;
-  ctx.lineWidth = ball.radius * 2.2; // net iets groter dan de bal
-  ctx.lineCap = "round";
   ctx.stroke();
-
   ctx.restore();
 }
 
-    ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
-  });
+// 🟡 Bal zelf tekenen
+ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
+}); // ⬅️ sluit balls.forEach
 
-
-  if (resetOverlayActive) {
-    if (Date.now() % 1000 < 500) {
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+// 🔴 Reset-overlay effect
+if (resetOverlayActive) {
+  if (Date.now() % 1000 < 500) {
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
+}
 
-  // 🔴 Korte hit-flash bij steen op paddle
+// 🔴 Korte hit-flash bij steen op paddle
 if (stoneHitOverlayTimer > 0) {
   ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   stoneHitOverlayTimer--;
 }
 
+// ✅ Na de loop: check of alle ballen weg zijn
+if (balls.length === 0 && !paddleExploding) {
 
-  // ✅ Na de loop: check of alle ballen weg zijn
-  if (balls.length === 0 && !paddleExploding) {
-    triggerPaddleExplosion(); // pas nu verlies van leven
+  // 🛡️ Invincible check – geen leven verliezen bij actief schild
+  if (typeof isPaddleInvincible === "function" && isPaddleInvincible()) {
+    centerBallOnPaddle?.(); // bal terug op paddle
+    return;                 // stop verdere leven-verlies logica
   }
+
+  triggerPaddleExplosion(); // pas nu verlies van leven
+}
+
 
 drawBricks();
 updateTNTs();
