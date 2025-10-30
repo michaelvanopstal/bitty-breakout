@@ -2195,108 +2195,110 @@ function drawFallingStones() {
     if (s.img && s.img.complete) {
       ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     } else {
-      // Fallback ook de grote steen
       ctx.drawImage(stoneLargeImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     }
 
-    // ===== beweging (bewaar vorige pos vóór update) =====
+    // ===== beweging =====
     if (s.prevY == null) s.prevY = s.y;
     if (s.prevX == null) s.prevX = s.x;
+    const prevX = s.prevX;
     const prevY = s.prevY;
-    s.prevY = s.y;
     s.prevX = s.x;
-    s.y += s.dy; // val
+    s.prevY = s.y;
+    s.y += s.dy;
 
-    // ---- Botsing met paddle (alleen bij écht contact) ----
+    // ---- Botsing met paddle ----
     if (s.framesInside == null) s.framesInside = 0;
 
-    // Basisradius (ingeschreven cirkel)
     const baseRadius = s.size * 0.42;
-
-    // Groot/klein categorisatie aan de hand van spritegrootte
     const isLarge = s.size >= 100;
 
-    // 🔧 Tuning (iets vergevingsgezinder dan vorige versie, maar nog steeds anti-zijkant)
-    const hitboxScale         = isLarge ? 0.88 : 0.80; // iets groter dan 0.86/0.78 om misses te voorkomen
-    const minPenetrationFrac  = isLarge ? 0.35 : 0.45; // minder diep nodig dan 0.50/0.60
-    const debounceFrames      = isLarge ? 2    : 3;    // iets sneller tellen
-    const minHorizOverlapFrac = 0.35;                  // i.p.v. 0.55
+    // ⛏️ Lees alle waarden uit de centrale settings
+    const hitboxScale         = isLarge ? STONE_COLLISION.hitboxScaleLarge : STONE_COLLISION.hitboxScaleSmall;
+    const minPenetrationFrac  = isLarge ? STONE_COLLISION.minPenLargeFrac  : STONE_COLLISION.minPenSmallFrac;
+    const debounceFrames      = isLarge ? STONE_COLLISION.debounceLarge    : STONE_COLLISION.debounceSmall;
+    const minHorizOverlapFrac = STONE_COLLISION.minHorizOverlapFrac;
 
     const r = baseRadius * hitboxScale;
 
     // Paddle-bounds
-    const paddleLeft = paddleX;
-    const paddleTop  = paddleY;
-    const paddleW    = paddleWidth;
-    const paddleH    = paddleHeight;
-    const paddleRight = paddleLeft + paddleW;
+    const paddleLeft   = paddleX;
+    const paddleTop    = paddleY;
+    const paddleW      = paddleWidth;
+    const paddleH      = paddleHeight;
+    const paddleRight  = paddleLeft + paddleW;
+    const paddleBottom = paddleTop + paddleH;
 
-    // 1) Cirkel vs rect overlap
+    // 1) Directe overlap
     const intersects = circleIntersectsRect(s.x, s.y, r, paddleLeft, paddleTop, paddleW, paddleH);
 
-    // 2) Alleen hits die van bóven de paddle komen (met tolerantie op basis van snelheid)
+    // 1b) Swept (anti-tunneling)
+    const extLeft   = paddleLeft   - r;
+    const extRight  = paddleRight  + r;
+    const extTop    = paddleTop    - r;
+    const extBottom = paddleBottom + r;
+    const dx = s.x - prevX, dy = s.y - prevY;
+    let t0 = 0, t1 = 1;
+    const clip = (p, q) => {
+      if (p === 0) return q >= 0;
+      const t = q / p;
+      if (p < 0) { if (t > t1) return false; if (t > t0) t0 = t; }
+      else { if (t < t0) return false; if (t < t1) t1 = t; }
+      return true;
+    };
+    let sweptHit = false;
+    if (
+      clip(-dx, prevX - extLeft) &&
+      clip( dx, extRight - prevX) &&
+      clip(-dy, prevY - extTop) &&
+      clip( dy, extBottom - prevY)
+    ) sweptHit = t0 <= t1;
+
+    // 2) Richting + diepte
     const prevBottom = prevY + r;
     const nowBottom  = s.y + r;
-    const enterTol   = Math.max(4, Math.min(14, s.dy * 1.2)); // laat kleine overshoot toe bij hoge snelheid
-    const enteredFromAbove = prevBottom <= (paddleTop + enterTol);
-
-    // 3) Genoeg verticale diepte (geen rand-tikje)
-    const minPenetrationPx = Math.max(6, Math.min(r * 0.60, r * minPenetrationFrac, paddleH * 0.8));
-    const penetrates       = nowBottom >= (paddleTop + minPenetrationPx);
-
-    // 4) Alleen neerwaartse hits
+    const enterTol   = Math.max(4, Math.min(16, Math.abs(dy) * 1.5));
+    const enteredFromAbove = prevBottom <= paddleTop + enterTol;
+    const minPenetrationPx = Math.max(4, Math.min(r * 0.5, r * minPenetrationFrac, paddleH * 0.8));
+    const penetrates = nowBottom >= (paddleTop + minPenetrationPx);
     const falling = s.dy > 0;
 
-    // 5) Genoeg horizontale overlap – geen rand-grazes
+    // 3) Horizontale overlap
     const stoneLeft  = s.x - r;
     const stoneRight = s.x + r;
     const overlapX   = Math.max(0, Math.min(stoneRight, paddleRight) - Math.max(stoneLeft, paddleLeft));
-    const minOverlap = Math.min(r * minHorizOverlapFrac, paddleW * 0.45); // cap tegen smalle paddles
+    const minOverlap = Math.max(6, Math.min(r * minHorizOverlapFrac, paddleW * 0.5));
     const wideEnough = overlapX >= minOverlap;
 
-    // 🛡️ Extra guard A: centrum moet ruwweg boven de paddle liggen (kleine randmarge)
-    const edgeGuard = Math.min(Math.max(6, paddleW * 0.08), 18);
+    // 4) Guards tegen zij- en hoek-hits
+    const edgeGuard    = Math.min(Math.max(4, paddleW * 0.06), 14);
     const centerInside = (s.x >= paddleLeft + edgeGuard) && (s.x <= paddleRight - edgeGuard);
+    const cornerReject = intersects && (overlapX < Math.min(r * 0.28, paddleW * 0.25))
+                       && (nowBottom < (paddleTop + minPenetrationPx * 1.1));
 
-    // 🛡️ Extra guard B: corner-reject — kleine hoek-graze negeren
-    const cornerReject = intersects && (overlapX < r * 0.30) && (nowBottom < (paddleTop + minPenetrationPx * 1.10));
-
-    // ✅ Echte hit pas als alles waar is (en geen corner-reject)
-    const realHitNow = intersects
+    // ✅ Echte hit
+    const contactNow = (intersects || sweptHit)
       && enteredFromAbove
       && falling
       && penetrates
-      && wideEnough
-      && centerInside
+      && (wideEnough || centerInside)
       && !cornerReject;
 
-    if (realHitNow) {
-      s.framesInside++;
-    } else {
-      s.framesInside = 0;
-    }
+    if (contactNow) s.framesInside++;
+    else s.framesInside = 0;
 
-    // Pas botsing laten tellen na drempel-frames
+    // Als voldoende frames binnen → botsing
     if (s.framesInside >= debounceFrames) {
       spawnStoneDebris(s.x, s.y);
       s.active = false;
       stoneHitOverlayTimer = 18;
 
-      // ❗ éénmalige logica per salvo
       if (!stoneHitLock) {
         stoneHitLock = true;
-
-        if (typeof triggerPaddleExplosion === "function") {
-          triggerPaddleExplosion();
-        }
-
-        // na de loop alle stenen wissen (veilig)
+        if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
         stoneClearRequested = true;
-
-        // kleine cooldown voordat volgende salvo weer leven kan kosten
         setTimeout(() => { stoneHitLock = false; }, 1200);
       }
-
       continue;
     }
 
@@ -2307,12 +2309,13 @@ function drawFallingStones() {
     }
   }
 
-  // ná de iteratie: in één keer alle stenen wissen (voorkomt loop issues)
+  // ná de iteratie: alle stenen wissen
   if (stoneClearRequested) {
     fallingStones.length = 0;
     stoneClearRequested = false;
   }
 }
+
 
 
 
