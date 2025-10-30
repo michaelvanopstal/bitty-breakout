@@ -129,7 +129,8 @@ let fireworksParticles = []; // vonken na exploderen
 let dropSeed = Math.random();
 let dropIndex = 0;
 const GOLDEN_RATIO_CONJUGATE = 0.61803398875;
-const recentSpawnXs = [];
+let gridColIndex = 0;
+
 
 
 // 🧮 Flags
