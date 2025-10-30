@@ -4384,6 +4384,26 @@ function spawnStoneDebris(x, y) {
 }
 
 function triggerPaddleExplosion() {
+  // 🛡️ Invincible: geen leven verliezen, geen explosie-flow
+  if (typeof isPaddleInvincible === "function" && isPaddleInvincible()) {
+    // bal direct terug op de paddle en doorgaan met spelen
+    balls = [{
+      x: paddleX + paddleWidth / 2 - ballRadius,
+      y: paddleY - ballRadius * 2,
+      dx: 0,
+      dy: -6,
+      radius: ballRadius,
+      isMain: true
+    }];
+    ballLaunched = false;
+    ballMoving = false;
+    paddleFreeMove = false;
+    resetTriggered = false;
+    // laat magnet/speed/score etc. gewoon lopen; niets afstraffen
+    if (typeof redrawPaddleCanvas === "function") redrawPaddleCanvas();
+    return; // ⬅️ heel belangrijk: hier stoppen zodat er geen leven afgaat
+  }
+
   if (lives > 1) {
     if (!resetTriggered) {
       lives--;
@@ -4398,7 +4418,6 @@ function triggerPaddleExplosion() {
 
     machineGunActive = false;
     machineGunCooldownActive = false;
-    
 
     for (let i = 0; i < 50; i++) {
       paddleExplosionParticles.push({
@@ -4437,6 +4456,7 @@ function triggerPaddleExplosion() {
       resetTriggered = false;
       resetPaddle();
     }, 1000);
+
 
   } else {
     // Laatste leven → GAME OVER
