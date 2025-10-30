@@ -54,52 +54,18 @@ let fallingStones = [];
 let stoneHitOverlayTimer = 0;
 let stoneHitLock = false;
 let stoneClearRequested = false;
-// 🎯 Stone–paddle collision tuning (strakker & later laten triggeren)
-// 🎯 Centrale instellingen voor stone–paddle botsingen
-// 🎯 Centrale instellingen voor stone–paddle botsingen (actieve set)
+// 🎯 Stone–paddle botsing (SOFT-stand, centrale waarden)
 const STONE_COLLISION = {
-  hitboxScaleLarge: 0.88,
-  hitboxScaleSmall: 0.82,
-  minPenLargeFrac: 0.35,
-  minPenSmallFrac: 0.40,
-  debounceLarge: 2,
+  hitboxScaleLarge: 0.90,
+  hitboxScaleSmall: 0.84,
+  minPenLargeFrac: 0.30,
+  minPenSmallFrac: 0.35,
+  debounceLarge: 1,
   debounceSmall: 2,
-  minHorizOverlapFrac: 0.35
+  minHorizOverlapFrac: 0.30
 };
+// (Let op: zorg dat je elders GEEN calls meer hebt naar applyStoneCollisionProfile(...) – die bestonden voorheen)
 
-// 🧪 Voorinstellingen: kies snel tussen 'soft', 'medium', 'hard'
-const STONE_COLLISION_PROFILES = {
-  soft: {
-    // Makkelijker raken (ruimer)
-    hitboxScaleLarge: 0.90,
-    hitboxScaleSmall: 0.84,
-    minPenLargeFrac: 0.30,
-    minPenSmallFrac: 0.35,
-    debounceLarge: 1,
-    debounceSmall: 2,
-    minHorizOverlapFrac: 0.30
-  },
-  medium: {
-    // Aanbevolen (de waarden die je nu gebruikt)
-    hitboxScaleLarge: 0.88,
-    hitboxScaleSmall: 0.82,
-    minPenLargeFrac: 0.35,
-    minPenSmallFrac: 0.40,
-    debounceLarge: 2,
-    debounceSmall: 2,
-    minHorizOverlapFrac: 0.35
-  },
-  hard: {
-    // Strenger (pas tellen bij dieper & breder contact)
-    hitboxScaleLarge: 0.86,
-    hitboxScaleSmall: 0.78,
-    minPenLargeFrac: 0.45,
-    minPenSmallFrac: 0.55,
-    debounceLarge: 3,
-    debounceSmall: 4,
-    minHorizOverlapFrac: 0.45
-  }
-};
 
 // 🔄 Activeer een profiel met één call
 function applyStoneCollisionProfile(name = 'medium') {
@@ -2225,6 +2191,7 @@ function triggerStonefall(originX, originY) {
 }
 
 
+
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
@@ -2233,6 +2200,7 @@ function drawFallingStones() {
       continue;
     }
 
+    // Tekenen
     if (s.img && s.img.complete) {
       ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     } else {
@@ -2254,7 +2222,7 @@ function drawFallingStones() {
     const baseRadius = s.size * 0.42;
     const isLarge = s.size >= 100;
 
-    // ⛏️ lees soft/medium/hard uit centrale settings
+    // ⛏️ lees SOFT uit centrale settings
     const hitboxScale         = isLarge ? STONE_COLLISION.hitboxScaleLarge : STONE_COLLISION.hitboxScaleSmall;
     const minPenetrationFrac  = isLarge ? STONE_COLLISION.minPenLargeFrac  : STONE_COLLISION.minPenSmallFrac;
     const debounceFrames      = isLarge ? STONE_COLLISION.debounceLarge    : STONE_COLLISION.debounceSmall;
@@ -2306,9 +2274,9 @@ function drawFallingStones() {
     const stoneLeft  = s.x - r;
     const stoneRight = s.x + r;
     const overlapX   = Math.max(0, Math.min(stoneRight, paddleRight) - Math.max(stoneLeft, paddleLeft));
-    const minOverlapSoft = Math.max(6, Math.min(r * minHorizOverlapFrac, paddleW * 0.5)); // bestaande drempel
+    const minOverlapSoft = Math.max(6, Math.min(r * minHorizOverlapFrac, paddleW * 0.5)); // drempel in SOFT
 
-    // ========= Verticale hit-pad (zoals je had, iets milder in soft) =========
+    // ========= Verticale hit-pad (SOFT) =========
     const minPenetrationPx = Math.max(4, Math.min(r * 0.50, r * minPenetrationFrac, paddleH * 0.8));
     const penetrates       = nowBottom >= (paddleTop + minPenetrationPx);
 
@@ -2327,7 +2295,7 @@ function drawFallingStones() {
       && centerInsideV
       && !cornerRejectV;
 
-    // ========= Nieuw: Side-hit pad (voor zijkant-contact) =========
+    // ========= Side-hit pad (SOFT) =========
     // voorwaarden:
     // - directe of swept overlap
     // - vallend
@@ -2337,7 +2305,7 @@ function drawFallingStones() {
     const centerInVerticalBand =
       (s.y >= paddleTop - sideBandTol) && (s.y <= paddleBottom + sideBandTol);
 
-    const minOverlapSide = Math.max(8, Math.min(r * 0.45, paddleW * 0.6)); // iets strenger dan soft vertical
+    const minOverlapSide = Math.max(8, Math.min(r * 0.45, paddleW * 0.6)); // iets strenger dan vertical
     const wideEnoughSide = overlapX >= minOverlapSide;
 
     // corner-reject voor side: alleen reject als overlap echt klein is
@@ -2383,7 +2351,6 @@ function drawFallingStones() {
     stoneClearRequested = false;
   }
 }
-
 
 
 
