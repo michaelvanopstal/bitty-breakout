@@ -55,21 +55,18 @@ let stoneHitOverlayTimer = 0;
 let stoneHitLock = false;
 let stoneClearRequested = false;
 // 🎯 Stone–paddle collision tuning (strakker & later laten triggeren)
+// 🎯 Centrale instellingen voor stone–paddle botsingen
 const STONE_COLLISION = {
-  // hitbox
-  hitboxScaleLarge: 0.88,   // was 0.86/0.90
-  hitboxScaleSmall: 0.82,   // was 0.78/0.82
+  hitboxScaleLarge: 0.88,   // iets kleiner dan sprite, maar niet te klein
+  hitboxScaleSmall: 0.82,
 
-  // minimale verticale penetratie als fractie van r
-  minPenLargeFrac: 0.35,    // was 0.50
-  minPenSmallFrac: 0.40,    // was 0.60
+  minPenLargeFrac: 0.35,    // fractie van r die in paddle moet zitten
+  minPenSmallFrac: 0.40,
 
-  // debounce (frames binnen voor geldige hit)
-  debounceLarge: 2,         // was 3/2
-  debounceSmall: 2,         // was 4/3
+  debounceLarge: 2,         // frames binnen voor geldige hit
+  debounceSmall: 2,
 
-  // horizontale overlap-vereiste (fractie van r)
-  minHorizOverlapFrac: 0.35 // was 0.55
+  minHorizOverlapFrac: 0.35 // min. horizontale overlap (fractie van r)
 };
 
 
