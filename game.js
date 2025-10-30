@@ -69,8 +69,6 @@ const STONE_COLLISION = {
 let levelTransitionActive = false;
 let transitionOffsetY = -300;
 
-// (NIET NOG EENS levelMessageAlpha/Timer/Visible hier – die komen in het confetti-blok)
-
 let resetOverlayActive = false;
 let ballTrail = [];
 const maxTrailLength = 10;
