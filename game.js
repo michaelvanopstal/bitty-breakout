@@ -2192,29 +2192,12 @@ function drawFallingStones() {
       ctx.drawImage(stoneLargeImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     }
 
-    // 5) Genoeg horizontale overlap – geen rand-grazes
-const stoneLeft  = s.x - r;
-const stoneRight = s.x + r;
-const overlapX   = Math.max(0, Math.min(stoneRight, paddleLeft + paddleW) - Math.max(stoneLeft, paddleLeft));
-const wideEnough = overlapX >= (r * minHorizOverlapFrac);
-
-// 🛡️ Extra guard A: midden van de steen moet “binnen” de paddle vallen
-// -> voorkomt dat alleen de zijkant van de radius de paddle-hoek triggert
-const edgeGuard   = Math.max(8, paddleW * 0.12); // kleine marge t.o.v. paddle-breedte
-const centerInside = (s.x >= paddleLeft + edgeGuard) && (s.x <= paddleLeft + paddleW - edgeGuard);
-
-// 🛡️ Extra guard B: corner-reject (kleine schuine aanrakingen negeren)
-// -> als de steen slechts een hoekje raakt en de verticale diepte nog laag is, dan niet tellen
-const cornerReject = intersects && (overlapX < r * 0.40) && ((s.y + r) < (paddleTop + minPenetrationPx * 1.15));
-
-// ✅ Echte hit pas als alles waar is (en geen corner-reject)
-const realHitNow = intersects
-  && enteredFromAbove
-  && falling
-  && penetrates
-  && wideEnough
-  && centerInside
-  && !cornerReject;
+    // ===== beweging (bewaar vorige pos vóór update) =====
+    if (s.prevY == null) s.prevY = s.y;
+    if (s.prevX == null) s.prevX = s.x;   // track vorige X voor 'enteredFromAbove' / side-guards
+    s.prevY = s.y;
+    s.prevX = s.x;
+    s.y += s.dy; // val (X blijft doorgaans gelijk; als je horizontale drift toevoegt, werk s.x hier bij)
 
     // ---- Botsing met paddle (alleen bij écht contact) ----
     if (s.framesInside == null) s.framesInside = 0;
@@ -2226,10 +2209,10 @@ const realHitNow = intersects
     const isLarge = s.size >= 100;
 
     // 🔧 Tuning (strakker & later laten triggeren)
-    const hitboxScale            = isLarge ? 0.86 : 0.78; // kleiner dan voorheen (minder “aura”)
-    const minPenetrationFrac     = isLarge ? 0.50 : 0.60; // % van r dat echt in paddle moet zitten
-    const debounceFrames         = isLarge ? 3    : 4;    // iets hogere drempel
-    const minHorizOverlapFrac    = 0.55;                  // min. 55% van r overlappen in X
+    const hitboxScale         = isLarge ? 0.86 : 0.78; // kleiner dan voorheen (minder “aura”)
+    const minPenetrationFrac  = isLarge ? 0.50 : 0.60; // % van r dat echt in paddle moet zitten
+    const debounceFrames      = isLarge ? 3    : 4;    // iets hogere drempel
+    const minHorizOverlapFrac = 0.55;                  // min. 55% van r overlappen in X
 
     const r = baseRadius * hitboxScale;
 
@@ -2258,8 +2241,23 @@ const realHitNow = intersects
     const overlapX   = Math.max(0, Math.min(stoneRight, paddleLeft + paddleW) - Math.max(stoneLeft, paddleLeft));
     const wideEnough = overlapX >= (r * minHorizOverlapFrac);
 
-    // ✅ Echte hit pas als alles waar is
-    const realHitNow = intersects && enteredFromAbove && falling && penetrates && wideEnough;
+    // 🛡️ Extra guard A: midden van de steen moet “binnen” de paddle vallen
+    // -> voorkomt dat alleen de zijkant van de radius de paddle-hoek triggert
+    const edgeGuard     = Math.max(8, paddleW * 0.12); // kleine marge t.o.v. paddle-breedte
+    const centerInside  = (s.x >= paddleLeft + edgeGuard) && (s.x <= paddleLeft + paddleW - edgeGuard);
+
+    // 🛡️ Extra guard B: corner-reject (kleine schuine aanrakingen negeren)
+    // -> als de steen slechts een hoekje raakt en de verticale diepte nog laag is, dan niet tellen
+    const cornerReject = intersects && (overlapX < r * 0.40) && ((s.y + r) < (paddleTop + minPenetrationPx * 1.15));
+
+    // ✅ Echte hit pas als alles waar is (en geen corner-reject)
+    const realHitNow = intersects
+      && enteredFromAbove
+      && falling
+      && penetrates
+      && wideEnough
+      && centerInside
+      && !cornerReject;
 
     if (realHitNow) {
       s.framesInside++;
@@ -2304,6 +2302,7 @@ const realHitNow = intersects
     stoneClearRequested = false;
   }
 }
+
 
 
 function updateTNTs() {
