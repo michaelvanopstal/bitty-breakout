@@ -394,6 +394,10 @@ function stopMagnet() {
   magnetActive = false;
 }
 
+// Zet dit bovenin bij je helpers
+function getBallCenter(ball) {
+  return { cx: ball.x + ball.radius, cy: ball.y + ball.radius };
+}
 
 
 
@@ -3047,45 +3051,54 @@ if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
       wallSound.currentTime = 0;
       wallSound.play();
     }
+// 1) Eerst broad-phase met bal-middelpunt
+const { cx, cy } = getBallCenter(ball);
+
 if (
-  ball.y + ball.radius > paddleY &&
-  ball.y - ball.radius < paddleY + paddleHeight &&
-  ball.x + ball.radius > paddleX &&
-  ball.x - ball.radius < paddleX + paddleWidth
+  cy + ball.radius > paddleY &&
+  cy - ball.radius < paddleY + paddleHeight &&
+  cx + ball.radius > paddleX &&
+  cx - ball.radius < paddleX + paddleWidth
 ) {
-  let reflect = true;
+  // 2) Pixel-precies check op paddleCanvas alpha
+  //    We testen een klein verticaal kolommetje rond de raaklijn,
+  //    zodat de bal niet per ongeluk door mag als een gat nét naast het midden zit.
+  const localX = Math.round(cx - paddleX);                 // in paddleCanvas-coördinaten
+  const sampleHalf = Math.max(1, Math.floor(ball.radius)); // aantal pixels boven/onder om te testen
+  let opaqueHit = false;
 
-  if (machineGunActive || machineGunCooldownActive) {
-    const segmentWidth = paddleWidth / 10;
-    for (let i = 0; i < 10; i++) {
-      const segX = paddleX + i * segmentWidth;
-      const isDamaged = paddleDamageZones.some(hitX =>
-        hitX >= segX && hitX <= segX + segmentWidth
-      );
+  // Clamp X binnen de paddle
+  const px = Math.max(0, Math.min(paddleWidth - 1, localX));
 
-      const ballCenterX = ball.x;
-      if (
-        ballCenterX >= segX &&
-        ballCenterX < segX + segmentWidth &&
-        isDamaged
-      ) {
-        reflect = false;
-        break;
-      }
+  for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
+    const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
+    const a = paddleCtx.getImageData(px, localY, 1, 1).data[3]; // alpha kanaal
+    if (a > 10) { // >10 om randen/transparantie te ontzien
+      opaqueHit = true;
+      break;
     }
   }
 
-  if (reflect) {
-    const hitPos = (ball.x - paddleX) / paddleWidth;
-    const angle = (hitPos - 0.5) * Math.PI / 2;
-    const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+  if (opaqueHit) {
+    // 3) Reflectie zoals je al had, maar gebruik middelpunt
+    const hitPos = (cx - paddleX) / paddleWidth; // 0..1
+    const angle  = (hitPos - 0.5) * Math.PI / 2;
+    const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+
     ball.dx = speed * Math.sin(angle);
     ball.dy = -Math.abs(speed * Math.cos(angle));
 
+    // Zet de bal net boven de paddle met linkerboven-positie
+    ball.y = paddleY - (ball.radius * 2) - 1;
+
     wallSound.currentTime = 0;
     wallSound.play();
+  } else {
+    // 4) Pure "gat": géén reflectie → bal valt erdoorheen
+    // (niets doen hier; de standaard logica laat ‘m door)
   }
 }
+
 
 
 
