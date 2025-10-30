@@ -2192,10 +2192,29 @@ function drawFallingStones() {
       ctx.drawImage(stoneLargeImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     }
 
-    // ===== beweging (bewaar vorige Y vóór we s.y updaten) =====
-    if (s.prevY == null) s.prevY = s.y;
-    s.prevY = s.y;          // vorige frame Y opslaan
-    s.y += s.dy;            // val
+    // 5) Genoeg horizontale overlap – geen rand-grazes
+const stoneLeft  = s.x - r;
+const stoneRight = s.x + r;
+const overlapX   = Math.max(0, Math.min(stoneRight, paddleLeft + paddleW) - Math.max(stoneLeft, paddleLeft));
+const wideEnough = overlapX >= (r * minHorizOverlapFrac);
+
+// 🛡️ Extra guard A: midden van de steen moet “binnen” de paddle vallen
+// -> voorkomt dat alleen de zijkant van de radius de paddle-hoek triggert
+const edgeGuard   = Math.max(8, paddleW * 0.12); // kleine marge t.o.v. paddle-breedte
+const centerInside = (s.x >= paddleLeft + edgeGuard) && (s.x <= paddleLeft + paddleW - edgeGuard);
+
+// 🛡️ Extra guard B: corner-reject (kleine schuine aanrakingen negeren)
+// -> als de steen slechts een hoekje raakt en de verticale diepte nog laag is, dan niet tellen
+const cornerReject = intersects && (overlapX < r * 0.40) && ((s.y + r) < (paddleTop + minPenetrationPx * 1.15));
+
+// ✅ Echte hit pas als alles waar is (en geen corner-reject)
+const realHitNow = intersects
+  && enteredFromAbove
+  && falling
+  && penetrates
+  && wideEnough
+  && centerInside
+  && !cornerReject;
 
     // ---- Botsing met paddle (alleen bij écht contact) ----
     if (s.framesInside == null) s.framesInside = 0;
