@@ -333,15 +333,15 @@ function nextGridX(margin = 40, columns = 8, jitterPx = 18) {
   if (recentSpawnXs.length > 5) recentSpawnXs.shift();
   return x;
 }
-
+// === SAFE chooseSpawnX zonder clamp ===
 function chooseSpawnX(cfg = {}) {
   const margin = Number(cfg.xMargin || 0);
   const minX   = margin;
   const maxX   = canvas.width - margin;
 
-  const mode   = cfg.mode || "well";
-  const cols   = Math.max(1, cfg.gridColumns || 8);
-  const jitter = Number(cfg.gridJitterPx || 0);
+  const mode       = cfg.mode || "well";
+  const cols       = Math.max(1, cfg.gridColumns || 8);
+  const jitter     = Number(cfg.gridJitterPx || 0);
   const minSpacing = Number(cfg.minSpacing || 0);
 
   let x;
@@ -365,19 +365,23 @@ function chooseSpawnX(cfg = {}) {
     );
   }
 
-  // Niet direct boven de paddle droppen (eerlijker)
+  // niet direct boven de paddle droppen (eerlijker)
   if (cfg.avoidPaddle) {
     const avoid = Number(cfg.avoidMarginPx || 40);
     const left  = paddleX - avoid;
     const right = paddleX + paddleWidth + avoid;
     if (x > left && x < right) {
-      // duw naar dichtstbijzijnde veilige kant
       x = (x - left) < (right - x) ? left : right;
     }
   }
 
-  return clamp(x, minX, maxX);
+  // hard cap binnen canvas (ipv clamp)
+  if (x < minX) x = minX;
+  if (x > maxX) x = maxX;
+
+  return x;
 }
+
 
 
 
