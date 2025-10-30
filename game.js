@@ -2222,7 +2222,6 @@ function triggerStonefall(originX, originY) {
     });
   }
 }
-
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
