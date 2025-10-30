@@ -107,6 +107,29 @@ let heartPopupTimer = 0;
 let heartBoardX = 20;
 let heartBoardY = 20;
 
+// === DROPS SYSTEM: globals ===
+let fallingDrops = []; // actieve losse drops (niet uit bricks)
+let dropConfig = null; // actieve scheduler-config
+let dropsSpawned = 0;
+let lastDropAt = 0;
+// Goed verspreide X-posities (zonder clusteren)
+let dropSeed = Math.random();
+let dropIndex = 0;
+const GOLDEN_RATIO_CONJUGATE = 0.61803398875;
+const recentSpawnXs = [];
+let gridColIndex = 0;
+
+// Handige helper: paddle-bounds per frame
+function getPaddleBounds() {
+  return {
+    left: paddleX,
+    right: paddleX + paddleWidth,
+    top: paddleY,
+    bottom: paddleY + paddleHeight,
+  };
+}
+
+
 let electricBursts = [];
 
 let speedBoostActive = false;
@@ -119,41 +142,15 @@ let thunder2 = new Audio("thunder2.mp3");
 let thunder3 = new Audio("thunder3.mp3");
 let thunderSounds = [thunder1, thunder2, thunder3];
 
-
-
 // 🎆 Firework rockets + particles
 let fireworksRockets = [];   // opstijgende pijlen
 let fireworksParticles = []; // vonken na exploderen
-
-// Goed verspreide X-posities (zonder clusteren)
-let dropSeed = Math.random();
-let dropIndex = 0;
-const GOLDEN_RATIO_CONJUGATE = 0.61803398875;
-let gridColIndex = 0;
-
 
 
 // 🧮 Flags
 let stonefallHitsThisGame = 0;
 let rockWarnPlayed = false;
 let rockWarnTriggerIndex = Math.random() < 0.5 ? 1 : 3; // 1e of 3e keer
-
-// === DROPS SYSTEM: globals ===
-let fallingDrops = []; // actieve losse drops (niet uit bricks)
-let dropConfig = null; // actieve scheduler-config
-let dropsSpawned = 0;
-let lastDropAt = 0;
-
-// Handige helper: paddle-bounds per frame
-function getPaddleBounds() {
-  return {
-    left: paddleX,
-    right: paddleX + paddleWidth,
-    top: paddleY,
-    bottom: paddleY + paddleHeight,
-  };
-}
-
 
 balls.push({
   x: canvas.width / 2,
