@@ -2223,6 +2223,8 @@ function triggerStonefall(originX, originY) {
     });
   }
 }
+
+
 function drawFallingStones() {
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
@@ -2244,7 +2246,7 @@ function drawFallingStones() {
     const prevY = s.prevY;
     s.prevX = s.x;
     s.prevY = s.y;
-    s.y += s.dy;
+    s.y += s.dy; // val
 
     // ---- Botsing met paddle ----
     if (s.framesInside == null) s.framesInside = 0;
@@ -2252,7 +2254,7 @@ function drawFallingStones() {
     const baseRadius = s.size * 0.42;
     const isLarge = s.size >= 100;
 
-    // ⛏️ Lees alle waarden uit de centrale settings
+    // ⛏️ lees soft/medium/hard uit centrale settings
     const hitboxScale         = isLarge ? STONE_COLLISION.hitboxScaleLarge : STONE_COLLISION.hitboxScaleSmall;
     const minPenetrationFrac  = isLarge ? STONE_COLLISION.minPenLargeFrac  : STONE_COLLISION.minPenSmallFrac;
     const debounceFrames      = isLarge ? STONE_COLLISION.debounceLarge    : STONE_COLLISION.debounceSmall;
@@ -2271,7 +2273,7 @@ function drawFallingStones() {
     // 1) Directe overlap
     const intersects = circleIntersectsRect(s.x, s.y, r, paddleLeft, paddleTop, paddleW, paddleH);
 
-    // 1b) Swept (anti-tunneling)
+    // 1b) Swept (anti-tunneling) – segment tegen vergrote rect
     const extLeft   = paddleLeft   - r;
     const extRight  = paddleRight  + r;
     const extTop    = paddleTop    - r;
@@ -2291,42 +2293,69 @@ function drawFallingStones() {
       clip( dx, extRight - prevX) &&
       clip(-dy, prevY - extTop) &&
       clip( dy, extBottom - prevY)
-    ) sweptHit = t0 <= t1;
+    ) sweptHit = (t0 <= t1);
 
-    // 2) Richting + diepte
+    // 2) Basisvoorwaarden
+    const falling = s.dy > 0;
     const prevBottom = prevY + r;
     const nowBottom  = s.y + r;
     const enterTol   = Math.max(4, Math.min(16, Math.abs(dy) * 1.5));
-    const enteredFromAbove = prevBottom <= paddleTop + enterTol;
-    const minPenetrationPx = Math.max(4, Math.min(r * 0.5, r * minPenetrationFrac, paddleH * 0.8));
-    const penetrates = nowBottom >= (paddleTop + minPenetrationPx);
-    const falling = s.dy > 0;
+    const enteredFromAbove = (prevBottom <= paddleTop + enterTol);
 
-    // 3) Horizontale overlap
+    // 3) Overlapmetrics
     const stoneLeft  = s.x - r;
     const stoneRight = s.x + r;
     const overlapX   = Math.max(0, Math.min(stoneRight, paddleRight) - Math.max(stoneLeft, paddleLeft));
-    const minOverlap = Math.max(6, Math.min(r * minHorizOverlapFrac, paddleW * 0.5));
-    const wideEnough = overlapX >= minOverlap;
+    const minOverlapSoft = Math.max(6, Math.min(r * minHorizOverlapFrac, paddleW * 0.5)); // bestaande drempel
 
-    // 4) Guards tegen zij- en hoek-hits
-    const edgeGuard    = Math.min(Math.max(4, paddleW * 0.06), 14);
-    const centerInside = (s.x >= paddleLeft + edgeGuard) && (s.x <= paddleRight - edgeGuard);
-    const cornerReject = intersects && (overlapX < Math.min(r * 0.28, paddleW * 0.25))
-                       && (nowBottom < (paddleTop + minPenetrationPx * 1.1));
+    // ========= Verticale hit-pad (zoals je had, iets milder in soft) =========
+    const minPenetrationPx = Math.max(4, Math.min(r * 0.50, r * minPenetrationFrac, paddleH * 0.8));
+    const penetrates       = nowBottom >= (paddleTop + minPenetrationPx);
 
-    // ✅ Echte hit
-    const contactNow = (intersects || sweptHit)
+    // kleine guard tegen rand-graze
+    const edgeGuardV    = Math.min(Math.max(4, paddleW * 0.06), 14);
+    const centerInsideV = (s.x >= paddleLeft + edgeGuardV) && (s.x <= paddleRight - edgeGuardV);
+
+    const cornerRejectV = intersects && (overlapX < Math.min(r * 0.28, paddleW * 0.25))
+                        && (nowBottom < (paddleTop + minPenetrationPx * 1.1));
+
+    const verticalHit = (intersects || sweptHit)
       && enteredFromAbove
       && falling
       && penetrates
-      && (wideEnough || centerInside)
-      && !cornerReject;
+      && (overlapX >= minOverlapSoft)
+      && centerInsideV
+      && !cornerRejectV;
+
+    // ========= Nieuw: Side-hit pad (voor zijkant-contact) =========
+    // voorwaarden:
+    // - directe of swept overlap
+    // - vallend
+    // - steen-centrum y ongeveer binnen verticale band van paddle (met marge)
+    // - wat strenger op overlap in X om echte “side contact” te waarborgen
+    const sideBandTol = Math.min(12, Math.max(6, r * 0.25)); // verticale marge boven/onder paddle
+    const centerInVerticalBand =
+      (s.y >= paddleTop - sideBandTol) && (s.y <= paddleBottom + sideBandTol);
+
+    const minOverlapSide = Math.max(8, Math.min(r * 0.45, paddleW * 0.6)); // iets strenger dan soft vertical
+    const wideEnoughSide = overlapX >= minOverlapSide;
+
+    // corner-reject voor side: alleen reject als overlap echt klein is
+    const cornerRejectS = (intersects || sweptHit) && (overlapX < Math.min(r * 0.22, paddleW * 0.20));
+
+    const sideHit = (intersects || sweptHit)
+      && falling
+      && centerInVerticalBand
+      && wideEnoughSide
+      && !cornerRejectS;
+
+    // ✅ Echte hit als één van beide paden waar is
+    const contactNow = verticalHit || sideHit;
 
     if (contactNow) s.framesInside++;
     else s.framesInside = 0;
 
-    // Als voldoende frames binnen → botsing
+    // Botsing telt na drempel-frames
     if (s.framesInside >= debounceFrames) {
       spawnStoneDebris(s.x, s.y);
       s.active = false;
@@ -2348,7 +2377,7 @@ function drawFallingStones() {
     }
   }
 
-  // ná de iteratie: alle stenen wissen
+  // ná de iteratie: alle stenen wissen (indien aangevinkt)
   if (stoneClearRequested) {
     fallingStones.length = 0;
     stoneClearRequested = false;
