@@ -1612,52 +1612,107 @@ function drawBricks() {
     }
   }
 }
-// === DROPS SYSTEM: core (robuste, continue spawner) ===
+
+
 function startDrops(config) {
-  // config: { continuous, total, minIntervalMs, maxIntervalMs, speed, types, xMargin, startDelayMs,
-  //           mode, gridColumns, gridJitterPx, avoidPaddle, avoidMarginPx, minSpacing }
   dropConfig = Object.assign({
-    continuous: true,         // blijf droppen door het hele level
-    total: 10,                // alleen gebruikt als continuous:false
-    minIntervalMs: 1200,
-    maxIntervalMs: 2600,
-    speed: 2.8,
-    types: ["coin", "heart", "bag"],
-    xMargin: 40,
+    // timing
+    continuous: true,          // blijf spawnen zolang timer/limieten het toestaan
+    durationMs: null,          // ⏱️ totale spawn-duur; null = onbeperkt
+    minIntervalMs: 900,        // minimale tijd tussen spawn-events
+    maxIntervalMs: 1800,       // maximale tijd tussen spawn-events
     startDelayMs: 800,
-    mode: "well",             // "well" of "grid"
-    gridColumns: 8,
-    gridJitterPx: 16,
-    avoidPaddle: false,
-    avoidMarginPx: null,
+
+    // hoeveelheid
+    perSpawnMin: 1,            // min items per event
+    perSpawnMax: 1,            // max items per event
+    maxItems: null,            // ⛔ hard cap op totaal aantal items (over alle events); null = geen cap
+
+    // val/plaatsing
+    speed: 3.0,
+    xMargin: 40,
+    mode: "well",              // "well" | "grid"
+    gridColumns: 8,            // mag ook [5,6]
+    gridJitterPx: 18,
+    avoidPaddle: true,
+    avoidMarginPx: 40,
     minSpacing: 70,
-    maxSilenceMs: 4000        // ⬅️ watchdog: na max dit aantal ms móet er iets spawnen
+    maxSilenceMs: 4000,        // watchdog
+
+    // item-keuze
+    types: ["coin","heart","bag"], // fallback set
+    typeQuota: null,           // { heart: 5, bomb: 2 } → exact zoveel keer in totaal
+    typeWeights: null          // { coin:5, heart:2, bomb:1 } → gewogen random
   }, config || {});
 
-  // sanity
-  if (!Array.isArray(dropConfig.types) || dropConfig.types.length === 0) {
-    dropConfig.types = ["coin", "heart", "bag"];
-  }
-  if (!Array.isArray(dropConfig.gridColumns)) {
-    dropConfig.gridColumns = [ dropConfig.gridColumns ];
-  }
+  // normaliseer
+  if (!Array.isArray(dropConfig.gridColumns)) dropConfig.gridColumns = [ dropConfig.gridColumns ];
+  if (!Array.isArray(dropConfig.types) || dropConfig.types.length === 0) dropConfig.types = ["coin","heart","bag"];
 
-  dropsSpawned = 0;
-
-  // initialise timers voor eerste spawn
+  // interne tellers
+  dropsSpawned = 0;                   // aantal items gespawnd (telt individuele items)
+  dropConfig._eventsSpawned = 0;      // aantal spawn-events
   const now = performance.now();
   lastDropAt = now;
-  // plan direct de 1e spawn met delay
-  updateAndDrawDrops._nextDueMs = (dropConfig.startDelayMs || 0);
-
-  // watchdog timer (om stilvallen te voorkomen)
+  updateAndDrawDrops._nextDueMs = dropConfig.startDelayMs || 0;
   updateAndDrawDrops._sinceLastSpawn = 0;
+  updateAndDrawDrops._spawnEndAt = (dropConfig.durationMs != null) ? (now + dropConfig.durationMs) : null;
+
+  // grid/well helpers
+  gridColumnsIndex = 0;
+
+  // === type picker opzetten ===
+  dropConfig._pickType = (function initTypePicker(cfg) {
+    // 1) QUOTA: exact aantal keren per type
+    if (cfg.typeQuota && typeof cfg.typeQuota === "object") {
+      const pool = [];
+      for (const [t, n] of Object.entries(cfg.typeQuota)) {
+        const count = Math.max(0, n|0);
+        for (let i = 0; i < count; i++) pool.push(t);
+      }
+      // zorg dat bekende types nog bestaan als quota op is
+      const fallback = cfg.types.slice();
+      return function pickWithQuota() {
+        if (pool.length > 0) {
+          const idx = Math.floor(Math.random() * pool.length);
+          return pool.splice(idx, 1)[0];
+        }
+        // quota op → fallback naar types
+        return fallback[Math.floor(Math.random() * fallback.length)];
+      };
+    }
+
+    // 2) WEIGHTS: gewogen random
+    if (cfg.typeWeights && typeof cfg.typeWeights === "object") {
+      const entries = Object.entries(cfg.typeWeights)
+        .map(([type, w]) => ({ type, weight: Math.max(0, Number(w) || 0) }))
+        .filter(e => e.weight > 0);
+      const base = (entries.length ? entries : cfg.types.map(t => ({ type:t, weight:1 })));
+      const total = base.reduce((s, e) => s + e.weight, 0);
+
+      return function pickWeighted() {
+        let r = Math.random() * total;
+        for (const e of base) {
+          if (r < e.weight) return e.type;
+          r -= e.weight;
+        }
+        return base[base.length - 1].type; // fallback
+      };
+    }
+
+    // 3) Eenvoudig uniform random uit types
+    const arr = cfg.types.slice();
+    return function pickUniform() {
+      return arr[Math.floor(Math.random() * arr.length)];
+    };
+  })(dropConfig);
 }
 
-function spawnRandomDrop() {
-  if (!dropConfig || !dropConfig.types?.length) return;
 
-  const type = dropConfig.types[Math.floor(Math.random() * dropConfig.types.length)];
+function spawnRandomDrop() {
+  if (!dropConfig) return;
+
+  const type = dropConfig._pickType ? dropConfig._pickType() : (dropConfig.types?.[0] || "coin");
   const x = chooseSpawnX(dropConfig);
 
   fallingDrops.push({
@@ -1673,40 +1728,54 @@ function spawnRandomDrop() {
   dropsSpawned++;
 }
 
-function updateAndDrawDrops() {
-  // --- SPAWNER TICK ---
-  if (dropConfig) {
-    const now = performance.now();
-    const dt = Math.max(0, now - (updateAndDrawDrops._lastTickAt || now));
-    updateAndDrawDrops._lastTickAt = now;
 
-    // hoeveel ms verstreken sinds laatste spawn (voor watchdog)
-    updateAndDrawDrops._sinceLastSpawn = (updateAndDrawDrops._sinceLastSpawn || 0) + dt;
+// --- SPAWNER TICK ---
+if (dropConfig) {
+  const now = performance.now();
+  const dt = Math.max(0, now - (updateAndDrawDrops._lastTickAt || now));
+  updateAndDrawDrops._lastTickAt = now;
+  updateAndDrawDrops._sinceLastSpawn = (updateAndDrawDrops._sinceLastSpawn || 0) + dt;
 
-    const allowByTotal = !dropConfig.continuous && (dropsSpawned < (dropConfig.total || 0));
-    const allowContinuous = !!dropConfig.continuous;
+  const withinTimer = (updateAndDrawDrops._spawnEndAt == null) || (now < updateAndDrawDrops._spawnEndAt);
+  const underItemCap = (dropConfig.maxItems == null) || (dropsSpawned < dropConfig.maxItems);
 
-    // initialiseer volgende interval als die ontbreekt
-    if (updateAndDrawDrops._nextDueMs == null) {
-      const span = Math.max(0, (dropConfig.maxIntervalMs - dropConfig.minIntervalMs));
-      updateAndDrawDrops._nextDueMs = dropConfig.minIntervalMs + Math.random() * span;
-      lastDropAt = now;
-    }
-
-    const elapsed = now - lastDropAt;
-    const due = (elapsed >= updateAndDrawDrops._nextDueMs);
-    const watchdogDue = (updateAndDrawDrops._sinceLastSpawn >= (dropConfig.maxSilenceMs || 5000));
-
-    if ((allowContinuous || allowByTotal) && (due || watchdogDue)) {
-      spawnRandomDrop();
-      lastDropAt = now;
-      updateAndDrawDrops._sinceLastSpawn = 0;
-
-      // bereken nieuw interval
-      const span = Math.max(0, (dropConfig.maxIntervalMs - dropConfig.minIntervalMs));
-      updateAndDrawDrops._nextDueMs = dropConfig.minIntervalMs + Math.random() * span;
-    }
+  // plan eerste interval als nodig
+  if (updateAndDrawDrops._nextDueMs == null) {
+    const span = Math.max(0, dropConfig.maxIntervalMs - dropConfig.minIntervalMs);
+    updateAndDrawDrops._nextDueMs = dropConfig.minIntervalMs + Math.random() * span;
+    lastDropAt = now;
   }
+
+  const elapsed = now - lastDropAt;
+  const due = (elapsed >= updateAndDrawDrops._nextDueMs);
+  const watchdogDue = (updateAndDrawDrops._sinceLastSpawn >= (dropConfig.maxSilenceMs || 5000));
+
+  if (withinTimer && underItemCap && (due || watchdogDue)) {
+    // Bepaal burstgrootte
+    const minN = Math.max(1, dropConfig.perSpawnMin || 1);
+    const maxN = Math.max(minN, dropConfig.perSpawnMax || minN);
+    let burst = (minN === maxN) ? minN : (Math.floor(Math.random() * (maxN - minN + 1)) + minN);
+
+    // Respecteer maxItems hard cap
+    if (dropConfig.maxItems != null) {
+      const remain = dropConfig.maxItems - dropsSpawned;
+      if (remain <= 0) burst = 0;
+      else burst = Math.min(burst, remain);
+    }
+
+    // Spawn de burst
+    for (let k = 0; k < burst; k++) spawnRandomDrop();
+
+    dropConfig._eventsSpawned++;
+    lastDropAt = now;
+    updateAndDrawDrops._sinceLastSpawn = 0;
+
+    // nieuw interval plannen
+    const span = Math.max(0, dropConfig.maxIntervalMs - dropConfig.minIntervalMs);
+    updateAndDrawDrops._nextDueMs = dropConfig.minIntervalMs + Math.random() * span;
+  }
+}
+
 
   // --- ALS ER GEEN ACTIEVE DROPS ZIJN, MAG RENDER-LOOP DOOR ---
   // (We stoppen hier NIET de spawner; die loopt hierboven elk frame.)
