@@ -200,19 +200,7 @@ function addStar(n = 1) {
   }
 }
 
-function addX(n = 1) {
-  if (!window.collector) return;
-  collector.x = (collector.x || 0) + n;
 
-  // Reset alleen de verzamel-tellers
-  collector.stars = 0;
-  collector.bombs = 0;
-
-  // GEEN aanpassing aan invincibleUntil, lives, etc.
-  flashSetPopup?.("❌ Progress reset");
-  // optioneel: klein geluidje
-  try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
-}
 
 
 function explodeRandomBricks(n = 35) {
@@ -253,12 +241,32 @@ function addBomb(n = 1) {
   }
 }
 
-function addX(n = 1) {
-  collector.x += n;
-  collector.stars = 0;
-  collector.bombs = 0;
-  flashSetPopup?.("❌ Progress reset");
+// ❌ Rode X: reset alleen progress, spel loopt door
+if (typeof addX !== "function") {
+  function addX(n = 1) {
+    // zorg dat collector bestaat
+    if (!window.collector) return;
+    collector.x = (collector.x || 0) + n;
+
+    // Reset alleen de verzamel-tellers
+    collector.stars = 0;
+    collector.bombs = 0;
+
+    // GEEN aanpassing aan invincibleUntil, lives, etc.
+    flashSetPopup?.("❌ Progress reset");
+
+    // optioneel: klein geluidje
+    try {
+      if (typeof tntExplodeSound !== "undefined") {
+        tntExplodeSound.currentTime = 0;
+        tntExplodeSound.play();
+      }
+    } catch (err) {
+      console.warn("addX sound error:", err);
+    }
+  }
 }
+
 
 
 
