@@ -3834,39 +3834,42 @@ function draw() {
 
   drawPaddle();  // paddle tekenen na de aura
 
-  // (je overige UI/HUD-calls hieronder laten staan)
-}
-// 💥 Als de bal onder het scherm komt
-if (ball.y + ball.dy > canvas.height) {
-  balls.splice(index, 1); // verwijder bal zonder actie
-}
+   balls.forEach((ball, index) => {
 
-// ✨ Gouden energie-staart (trail)
-if (ball.trail.length >= 2) {
-  const head = ball.trail[ball.trail.length - 1];
-  const tail = ball.trail[0];
+ 
 
-  ctx.save();
-  const gradient = ctx.createLinearGradient(
-    head.x + ball.radius, head.y + ball.radius,
-    tail.x + ball.radius, tail.y + ball.radius
-  );
-  gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
-  gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
+  // 💥 Als de bal onder het scherm komt: verwijder bal en ga door met volgend element
+  if (ball.y + ball.dy > canvas.height) {
+    balls.splice(index, 1);
+    return; // heel belangrijk: stop hier voor deze bal
+  }
 
-  ctx.strokeStyle = gradient;
-  ctx.lineWidth = ball.radius * 2.2;
-  ctx.lineCap = "round";
-  ctx.beginPath();
-  ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
-  ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
-  ctx.stroke();
-  ctx.restore();
-}
+  // ✨ Gouden energie-staart (alleen tekenen als er genoeg punten in de trail zitten)
+  if (ball.trail && ball.trail.length >= 2) {
+    const head = ball.trail[ball.trail.length - 1];
+    const tail = ball.trail[0];
 
-// 🟡 Bal zelf tekenen
-ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
-}); // ⬅️ sluit balls.forEach
+    ctx.save();
+    const gradient = ctx.createLinearGradient(
+      head.x + ball.radius, head.y + ball.radius,
+      tail.x + ball.radius, tail.y + ball.radius
+    );
+    gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
+    gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
+
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = ball.radius * 2.2;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
+    ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 🟡 Bal zelf tekenen (zorg dat ballImg bestaat)
+  ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
+}); // ⬅️ EINDE van balls.forEach
 
 // 🔴 Reset-overlay effect
 if (resetOverlayActive) {
