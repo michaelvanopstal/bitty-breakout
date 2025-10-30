@@ -3892,15 +3892,18 @@ if (stoneHitOverlayTimer > 0) {
 
 // ✅ Na de loop: check of alle ballen weg zijn
 if (balls.length === 0 && !paddleExploding) {
-
-  // 🛡️ Invincible check – geen leven verliezen bij actief schild
+  // 🛡️ Invincible: géén leven verliezen; bal gewoon terug op paddle zetten
   if (typeof isPaddleInvincible === "function" && isPaddleInvincible()) {
-    centerBallOnPaddle?.(); // bal terug op paddle
-    return;                 // stop verdere leven-verlies logica
+    centerBallOnPaddle?.();   // bal terug op paddle
+    ballLaunched = false;      // opnieuw afschieten
+    ballMoving  = false;
+    // LET OP: NIET returnen! We willen de rest van draw() laten doorlopen
+  } else {
+    // Normaal gedrag: leven verliezen
+    triggerPaddleExplosion();
   }
-
-  triggerPaddleExplosion(); // pas nu verlies van leven
 }
+
 
 
 drawBricks();
