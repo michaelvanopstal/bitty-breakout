@@ -119,15 +119,40 @@ let thunder2 = new Audio("thunder2.mp3");
 let thunder3 = new Audio("thunder3.mp3");
 let thunderSounds = [thunder1, thunder2, thunder3];
 
+
+
 // 🎆 Firework rockets + particles
 let fireworksRockets = [];   // opstijgende pijlen
 let fireworksParticles = []; // vonken na exploderen
+
+// Goed verspreide X-posities (zonder clusteren)
+let dropSeed = Math.random();
+let dropIndex = 0;
+const GOLDEN_RATIO_CONJUGATE = 0.61803398875;
+const recentSpawnXs = [];
 
 
 // 🧮 Flags
 let stonefallHitsThisGame = 0;
 let rockWarnPlayed = false;
 let rockWarnTriggerIndex = Math.random() < 0.5 ? 1 : 3; // 1e of 3e keer
+
+// === DROPS SYSTEM: globals ===
+let fallingDrops = []; // actieve losse drops (niet uit bricks)
+let dropConfig = null; // actieve scheduler-config
+let dropsSpawned = 0;
+let lastDropAt = 0;
+
+// Handige helper: paddle-bounds per frame
+function getPaddleBounds() {
+  return {
+    left: paddleX,
+    right: paddleX + paddleWidth,
+    top: paddleY,
+    bottom: paddleY + paddleHeight,
+  };
+}
+
 
 balls.push({
   x: canvas.width / 2,
@@ -184,6 +209,30 @@ function playVoiceOver(audio, opts = {}) {
     voLockedUntil = performance.now() + 500;
   }
   return true;
+}
+
+
+function nextWellDistributedX(margin = 40, minSpacing = 70) {
+  // Halton-achtig: golden-ratio scramble → gelijkmatige spreiding
+  let tries = 0;
+  let x;
+  const usable = canvas.width - margin * 2;
+
+  while (true) {
+    dropIndex++;
+    dropSeed = (dropSeed + GOLDEN_RATIO_CONJUGATE) % 1;
+    x = margin + dropSeed * usable;
+
+    // voorkom herhalingen/klontering: check afstand tot recente spawns
+    const tooClose = recentSpawnXs.some(px => Math.abs(px - x) < minSpacing);
+    if (!tooClose) break;
+
+    if (++tries > 6) break; // geef op na een paar pogingen, neem laatste x
+  }
+
+  recentSpawnXs.push(x);
+  if (recentSpawnXs.length > 5) recentSpawnXs.shift(); // korte geschiedenis
+  return x;
 }
 
 
@@ -1125,6 +1174,12 @@ pxpBagImg.src = "pxp_bag.png"; // of "bag.png"
 const stoneBlockImg  = new Image();
 stoneBlockImg.src  = "stone_block.png";
 
+// 🧨 TNT blok
+const tntImg = new Image();      
+tntImg.src = "tnt.png";
+
+const tntBlinkImg = new Image(); 
+tntBlinkImg.src = "tnt_blink.png";
 
 
 const stoneLargeImg  = new Image(); 
@@ -1139,13 +1194,117 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
+// === DROPS SYSTEM: item type registry ===
+// Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
+const DROP_TYPES = {
+  coin: {
+    // gebruikt je bestaande coin-asset
+    draw(drop, ctx) {
+      // 24x24 zoals je coins
+      ctx.drawImage(coinImg, drop.x - 12, drop.y - 12, 24, 24);
+    },
+    onCatch(drop) {
+      const earned = doublePointsActive ? 20 : 10;
+      score += earned;
+      updateScoreDisplay?.();
+      coinSound.currentTime = 0; coinSound.play();
+      pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
+    },
+    onMiss(drop) {
+      // niks; gewoon weg
+    },
+  },
 
-// 🧨 TNT blok
-const tntImg = new Image();      
-tntImg.src = "tnt.png";
+  heart: {
+    draw(drop, ctx) {
+      // iets groter hart (pulserend)
+      const size = 24 + Math.sin(drop.t) * 2;
+      ctx.globalAlpha = 0.95;
+      ctx.drawImage(heartImg, drop.x - size/2, drop.y - size/2, size, size);
+      ctx.globalAlpha = 1;
+    },
+    onTick(drop, dt) { drop.t += 0.2; },
+    onCatch(drop) {
+      heartsCollected++;
+      document.getElementById("heartCount").textContent = heartsCollected;
+      coinSound.currentTime = 0; coinSound.play();
 
-const tntBlinkImg = new Image(); 
-tntBlinkImg.src = "tnt_blink.png";
+      if (heartsCollected >= 10) {
+        heartsCollected = 0;
+        lives++;
+        updateLivesDisplay?.();
+        heartPopupTimer = 100;
+        document.getElementById("heartCount").textContent = heartsCollected;
+      }
+    },
+    onMiss(drop) {
+      // gemist hart: geen straf
+    },
+  },
+
+  bag: {
+    // gebruikt je pxpBagImg (40x40 in je game)
+    draw(drop, ctx) {
+      ctx.drawImage(pxpBagImg, drop.x - 20, drop.y - 20, 40, 40);
+    },
+    onCatch(drop) {
+      const earned = doublePointsActive ? 160 : 80;
+      score += earned;
+      updateScoreDisplay?.();
+      pxpBagSound.currentTime = 0; pxpBagSound.play();
+      pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
+    },
+    onMiss(drop) { /* niks */ },
+  },
+
+  bomb: {
+    // “ontwijken!” – lichte straf bij catch
+    draw(drop, ctx) {
+      const s = 26;
+      const blink = (Math.floor(performance.now()/200) % 2 === 0);
+      const img = blink ? tntBlinkImg : tntImg;
+      ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
+    },
+    onCatch(drop) {
+      // kleine straf of effect, bv. -1 leven (alleen als >1) of -punten
+      if (lives > 1) {
+        lives--;
+        updateLivesDisplay?.();
+        pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
+      } else {
+        // laatste leven → trigger paddleExplode flow
+        triggerPaddleExplosion?.();
+      }
+      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+    },
+    onMiss(drop) { /* goed zo, niks */ },
+  },
+
+  paddle_long: {
+    draw(drop, ctx) { ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
+    onCatch(drop) { startPaddleSizeEffect?.("long"); },
+    onMiss(drop) {},
+  },
+
+  paddle_small: {
+    draw(drop, ctx) { ctx.drawImage(paddleSmallBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
+    onCatch(drop) { startPaddleSizeEffect?.("small"); },
+    onMiss(drop) {},
+  },
+
+  speed: {
+    draw(drop, ctx) { ctx.drawImage(speedImg, drop.x - 35, drop.y - 12, 70, 24); },
+    onCatch(drop) { speedBoostActive = true; speedBoostStart = Date.now(); speedBoostSound.currentTime=0; speedBoostSound.play(); },
+    onMiss(drop) {},
+  },
+
+  magnet: {
+    draw(drop, ctx) { ctx.drawImage(magnetImg, drop.x - 35, drop.y - 12, 70, 24); },
+    onCatch(drop) { activateMagnet?.(20000); },
+    onMiss(drop) {},
+  },
+};
+
 
 
 
@@ -1408,6 +1567,105 @@ function drawBricks() {
     }
   }
 }
+// === DROPS SYSTEM: core ===
+function startDrops(config) {
+  // config: { total, minIntervalMs, maxIntervalMs, speed, types: ["coin","heart",...], xMargin }
+  dropConfig = Object.assign({
+    total: 10,
+    minIntervalMs: 1500,
+    maxIntervalMs: 3500,
+    speed: 2.5,       // val-snelheid (px/frame; wordt per draw gebruikt)
+    types: ["coin", "heart", "bag"],
+    xMargin: 40,      // veilige marges aan zijkant
+    startDelayMs: 800 // kleine delay na levelstart
+  }, config || {});
+  dropsSpawned = 0;
+  lastDropAt = performance.now() - dropConfig.minIntervalMs + (dropConfig.startDelayMs || 0);
+}
+
+function nextDropDue(now) {
+  const span = (dropConfig.maxIntervalMs - dropConfig.minIntervalMs);
+  const jitter = Math.random() * (span <= 0 ? 0 : span);
+  return (dropConfig.minIntervalMs + jitter);
+}
+
+function spawnRandomDrop() {
+  if (!dropConfig || !dropConfig.types?.length) return;
+  const type = dropConfig.types[Math.floor(Math.random() * dropConfig.types.length)];
+  const margin = dropConfig.xMargin || 0;
+  const x = nextWellDistributedX(margin, /* minSpacing */ 70);
+
+
+  fallingDrops.push({
+    type,
+    x,
+    y: -20,
+    dy: dropConfig.speed || 2.5,
+    vx: 0,  // compatibel met magnet
+    vy: 0,
+    t: 0,   // vrije parameter (bijv. puls)
+    active: true
+  });
+  dropsSpawned++;
+}
+
+function updateAndDrawDrops() {
+  if (!fallingDrops.length && (!dropConfig || dropsSpawned >= (dropConfig.total||0))) return;
+
+  // Spawner tick
+  if (dropConfig && dropsSpawned < dropConfig.total) {
+    const now = performance.now();
+    if (now - lastDropAt >= nextDropDue(now)) {
+      spawnRandomDrop();
+      lastDropAt = now;
+    }
+  }
+
+  // Update + render
+  for (let i = fallingDrops.length - 1; i >= 0; i--) {
+    const d = fallingDrops[i];
+    if (!d || !d.active) { fallingDrops.splice(i,1); continue; }
+
+    // tick hooks (bijv. heart pulseren)
+    const def = DROP_TYPES[d.type];
+    if (def?.onTick) def.onTick(d, 16); // approx dt
+
+    // magnet kan vx/vy injecteren — daarbovenop vaste val
+    d.y += d.dy;
+    if (typeof d.vx === "number") d.x += d.vx;
+    if (typeof d.vy === "number") d.y += d.vy;
+
+    // tekenen
+    if (def?.draw) def.draw(d, ctx);
+    else {
+      // fallback
+      ctx.fillStyle = "#ffd700";
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, 8, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // collision met paddle
+    const pb = getPaddleBounds();
+    const w = 26, h = 26; // ruwe bbox
+    const left = d.x - w/2, right = d.x + w/2, top = d.y - h/2, bottom = d.y + h/2;
+    const overlap = (right >= pb.left && left <= pb.right && bottom >= pb.top && top <= pb.bottom);
+
+    if (overlap) {
+      def?.onCatch?.(d);
+      d.active = false;
+      fallingDrops.splice(i, 1);
+      continue;
+    }
+
+    // onder uit beeld?
+    if (d.y - 30 > canvas.height) {
+      def?.onMiss?.(d);
+      d.active = false;
+      fallingDrops.splice(i, 1);
+    }
+  }
+}
 
 
 function drawPointPopups() {
@@ -1485,7 +1743,71 @@ function resetBricks() {
   }
 
   assignHeartBlocks();
+
+  // =========================
+  // DROPS SYSTEM: reset & start per level
+  // =========================
+  // opruimen van eerdere drops/scheduler state
+  if (typeof fallingDrops !== 'undefined') {
+    fallingDrops = [];
+  }
+  if (typeof dropsSpawned !== 'undefined') {
+    dropsSpawned = 0;
+  }
+  if (typeof lastDropAt !== 'undefined') {
+    lastDropAt = performance.now();
+  }
+  // (dropConfig wordt in startDrops gezet)
+
+  const lvl = level || 1;
+
+  // Voorbeeldconfiguraties per level-range.
+  // Pas gerust aan naar jouw pacing.
+  if (lvl <= 3) {
+    startDrops({
+      total: 8,
+      minIntervalMs: 1200,
+      maxIntervalMs: 2600,
+      speed: 2.5,
+      types: ["coin", "heart", "bag"], // veilige startersmix
+      xMargin: 40,
+      startDelayMs: 800,
+      mode: "well",          // goed gespreide x-waarden (geen grid)
+      avoidPaddle: false,
+      minSpacing: 70
+    });
+  } else if (lvl <= 10) {
+    startDrops({
+      total: 12,
+      minIntervalMs: 900,
+      maxIntervalMs: 2200,
+      speed: 3.0,
+      types: ["coin", "heart", "bag", "paddle_long", "speed", "magnet"],
+      xMargin: 40,
+      startDelayMs: 600,
+      mode: "well",
+      avoidPaddle: false,
+      minSpacing: 70
+    });
+  } else {
+    startDrops({
+      total: 14,
+      minIntervalMs: 800,
+      maxIntervalMs: 1800,
+      speed: 3.4,
+      types: ["coin", "heart", "bag", "paddle_long", "speed", "magnet", "bomb"], // bomb erbij voor extra spanning
+      xMargin: 40,
+      startDelayMs: 500,
+      mode: "grid",          // nette kolommen in hogere levels
+      gridColumns: 8,
+      gridJitterPx: 16,
+      avoidPaddle: true,     // eerlijker: niet direct boven de paddle spawnen
+      avoidMarginPx: 40,
+      minSpacing: 70
+    });
+  }
 }
+
 
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
@@ -2993,6 +3315,7 @@ if (magnetActive && performance.now() >= magnetEndTime) {
 applyMagnetToArray(fallingHearts);
 applyMagnetToArray(coins);     // muntjes worden al aangestuurd via 'coins'
 applyMagnetToArray(pxpBags);   // zakjes vallen in 'pxpBags'
+applyMagnetToArray(fallingDrops);
 
 
 if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
@@ -3198,6 +3521,7 @@ if (downPressed) {
   drawPaddle();
   drawMagnetAura(ctx);
   drawMagnetHUD(ctx);
+  updateAndDrawDrops();
 
   if (rocketActive && !rocketFired && rocketAmmo > 0) {
     rocketX = paddleX + paddleWidth / 2 - 12;
