@@ -64,20 +64,6 @@ const STONE_COLLISION = {
   debounceSmall: 2,
   minHorizOverlapFrac: 0.30
 };
-// (Let op: zorg dat je elders GEEN calls meer hebt naar applyStoneCollisionProfile(...) – die bestonden voorheen)
-
-
-// 🔄 Activeer een profiel met één call
-function applyStoneCollisionProfile(name = 'medium') {
-  const p = STONE_COLLISION_PROFILES[name] || STONE_COLLISION_PROFILES.medium;
-  Object.assign(STONE_COLLISION, p);
-  // console.log('[STONE]', 'profile:', name, '->', STONE_COLLISION);
-}
-
-// Zet standaard op 'medium' bij start
-applyStoneCollisionProfile('soft');
-
-
 
 // 🌟 Levelovergang
 let levelTransitionActive = false;
