@@ -2137,7 +2137,7 @@ function resetBricks() {
   assignHeartBlocks();
 
   // =========================
-  // DROPS SYSTEM: reset & start per level
+  // DROPS SYSTEM: reset & start per level (STAP 6)
   // =========================
   // opruimen van eerdere drops/scheduler state
   if (typeof fallingDrops !== 'undefined') {
@@ -2149,57 +2149,62 @@ function resetBricks() {
   if (typeof lastDropAt !== 'undefined') {
     lastDropAt = performance.now();
   }
-  // (dropConfig wordt in startDrops gezet)
+  // (dropConfig zelf wordt opnieuw gezet door startDrops)
 
   const lvl = level || 1;
 
-  // Voorbeeldconfiguraties per level-range.
-  // Pas gerust aan naar jouw pacing.
-  if (lvl <= 3) {
-    startDrops({
-     continuous: true,  
-      minIntervalMs: 1200,
-      maxIntervalMs: 2600,
-      speed: 2.5,
-      types: ["coin", "heart", "bag"], // veilige startersmix
-      xMargin: 40,
-      startDelayMs: 800,
-      mode: "well",          // goed gespreide x-waarden (geen grid)
-      avoidPaddle: false,
-      minSpacing: 70
-    });
-  } else if (lvl <= 10) {
-    startDrops({
-      continuous: true,  
-      minIntervalMs: 900,
-      maxIntervalMs: 2200,
-      speed: 3.0,
-      types: ["coin", "heart", "bag", "paddle_long", "speed", "magnet"],
-      xMargin: 40,
-      startDelayMs: 600,
-      mode: "well",
-      avoidPaddle: false,
-      minSpacing: 70
-    });
-  } else {
-    startDrops({
-    continuous: true,  
-      minIntervalMs: 800,
-      maxIntervalMs: 1800,
-      speed: 3.4,
-      types: ["coin", "heart", "bag", "paddle_long", "speed", "magnet", "bomb"], // bomb erbij voor extra spanning
-      xMargin: 40,
-      startDelayMs: 500,
-      mode: "grid",          // nette kolommen in hogere levels
-      gridColumns: 8,
-      gridJitterPx: 16,
-      avoidPaddle: true,     // eerlijker: niet direct boven de paddle spawnen
-      avoidMarginPx: 40,
-      minSpacing: 70
-    });
-  }
-}
+  // Basis set voor het nieuwe valsysteem
+  // - Altijd: de drie nieuwe tokens
+  // - In lage levels: ook coin + heart, zodat je makkelijk kunt verifiëren dat het systeem werkt
+  let typesMix = ["star_token", "bomb_token", "x_token"];
 
+  if (lvl <= 3) {
+    // test-vriendelijke start (oude items zichtbaar)
+    typesMix = ["star_token", "bomb_token", "x_token", "coin", "heart"];
+  } else if (lvl <= 10) {
+    // wat extra power-ups erbij
+    typesMix.push("speed", "magnet");
+  } else {
+    // hogere levels, extra variatie
+    typesMix.push("speed", "magnet", "paddle_long");
+  }
+
+  // Start het dropschema in well-modus met bursts
+  startDrops({
+    continuous: true,         // blijft droppen gedurende het hele level
+    // Je kunt durationMs/maxItems later instellen als je wil ‘timen’ of ‘cappen’
+    // durationMs: null,
+    // maxItems: null,
+
+    // Tussentijd tussen drop-events
+    minIntervalMs: 900,
+    maxIntervalMs: 1800,
+
+    // Hoeveel items per event
+    perSpawnMin: 1,
+    perSpawnMax: 3,
+
+    // Val-snelheid
+    speed: 3.0,
+
+    // Welke items (zie per-level mix hierboven)
+    types: typesMix,
+
+    // X-plaatsing & veiligheid
+    xMargin: 40,
+    mode: "well",             // goed gespreide x-waarden (geen grid)
+    avoidPaddle: true,        // eerlijker: niet direct boven de paddle
+    avoidMarginPx: 40,
+    minSpacing: 70,
+
+    // Kleine startvertraging is niet per se nodig; kan als je wilt:
+    // startDelayMs: 600
+  });
+
+  // 🎯 Belangrijk: we resetten de collectors NIET hier.
+  // Stars/bombs progress blijft bewust doorlopen tussen levels
+  // (zoals je vroeg). Alleen de rode X of game-over reset ze.
+}
 
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
