@@ -1709,10 +1709,16 @@ function startDrops(config) {
 }
 
 
+// VERVANG JE OUDE FUNCTIE door deze:
 function spawnRandomDrop() {
   if (!dropConfig) return;
 
-  const type = dropConfig._pickType ? dropConfig._pickType() : (dropConfig.types?.[0] || "coin");
+  // typekeuze via picker (quota/gewichten) of fallback
+  const type = dropConfig._pickType
+    ? dropConfig._pickType()
+    : (dropConfig.types?.[0] || "coin");
+
+  // X bepalen volgens gekozen modus (well/grid) + avoidPaddle
   const x = chooseSpawnX(dropConfig);
 
   fallingDrops.push({
@@ -1728,69 +1734,74 @@ function spawnRandomDrop() {
   dropsSpawned++;
 }
 
+// VERVANG JE OUDE FUNCTIE door deze:
+function updateAndDrawDrops() {
+  // --- SPAWNER TICK (binnen de functie!) ---
+  if (dropConfig) {
+    const now = performance.now();
+    const dt = Math.max(0, now - (updateAndDrawDrops._lastTickAt || now));
+    updateAndDrawDrops._lastTickAt = now;
+    updateAndDrawDrops._sinceLastSpawn = (updateAndDrawDrops._sinceLastSpawn || 0) + dt;
 
-// --- SPAWNER TICK ---
-if (dropConfig) {
-  const now = performance.now();
-  const dt = Math.max(0, now - (updateAndDrawDrops._lastTickAt || now));
-  updateAndDrawDrops._lastTickAt = now;
-  updateAndDrawDrops._sinceLastSpawn = (updateAndDrawDrops._sinceLastSpawn || 0) + dt;
+    const withinTimer = (updateAndDrawDrops._spawnEndAt == null) || (now < updateAndDrawDrops._spawnEndAt);
+    const underItemCap = (dropConfig.maxItems == null) || (dropsSpawned < dropConfig.maxItems);
 
-  const withinTimer = (updateAndDrawDrops._spawnEndAt == null) || (now < updateAndDrawDrops._spawnEndAt);
-  const underItemCap = (dropConfig.maxItems == null) || (dropsSpawned < dropConfig.maxItems);
-
-  // plan eerste interval als nodig
-  if (updateAndDrawDrops._nextDueMs == null) {
-    const span = Math.max(0, dropConfig.maxIntervalMs - dropConfig.minIntervalMs);
-    updateAndDrawDrops._nextDueMs = dropConfig.minIntervalMs + Math.random() * span;
-    lastDropAt = now;
-  }
-
-  const elapsed = now - lastDropAt;
-  const due = (elapsed >= updateAndDrawDrops._nextDueMs);
-  const watchdogDue = (updateAndDrawDrops._sinceLastSpawn >= (dropConfig.maxSilenceMs || 5000));
-
-  if (withinTimer && underItemCap && (due || watchdogDue)) {
-    // Bepaal burstgrootte
-    const minN = Math.max(1, dropConfig.perSpawnMin || 1);
-    const maxN = Math.max(minN, dropConfig.perSpawnMax || minN);
-    let burst = (minN === maxN) ? minN : (Math.floor(Math.random() * (maxN - minN + 1)) + minN);
-
-    // Respecteer maxItems hard cap
-    if (dropConfig.maxItems != null) {
-      const remain = dropConfig.maxItems - dropsSpawned;
-      if (remain <= 0) burst = 0;
-      else burst = Math.min(burst, remain);
+    // plan eerste interval indien nodig
+    if (updateAndDrawDrops._nextDueMs == null) {
+      const span0 = Math.max(0, dropConfig.maxIntervalMs - dropConfig.minIntervalMs);
+      updateAndDrawDrops._nextDueMs = dropConfig.minIntervalMs + Math.random() * span0;
+      lastDropAt = now;
     }
 
-    // Spawn de burst
-    for (let k = 0; k < burst; k++) spawnRandomDrop();
+    const elapsed = now - lastDropAt;
+    const due = (elapsed >= updateAndDrawDrops._nextDueMs);
+    const watchdogDue = (updateAndDrawDrops._sinceLastSpawn >= (dropConfig.maxSilenceMs || 5000));
 
-    dropConfig._eventsSpawned++;
-    lastDropAt = now;
-    updateAndDrawDrops._sinceLastSpawn = 0;
+    if (withinTimer && underItemCap && (due || watchdogDue)) {
+      // burst-grootte bepalen
+      const minN = Math.max(1, dropConfig.perSpawnMin || 1);
+      const maxN = Math.max(minN, dropConfig.perSpawnMax || minN);
+      let burst = (minN === maxN) ? minN : (Math.floor(Math.random() * (maxN - minN + 1)) + minN);
 
-    // nieuw interval plannen
-    const span = Math.max(0, dropConfig.maxIntervalMs - dropConfig.minIntervalMs);
-    updateAndDrawDrops._nextDueMs = dropConfig.minIntervalMs + Math.random() * span;
+      // respecteer maxItems (hard cap)
+      if (dropConfig.maxItems != null) {
+        const remain = dropConfig.maxItems - dropsSpawned;
+        if (remain <= 0) burst = 0;
+        else burst = Math.min(burst, remain);
+      }
+
+      for (let k = 0; k < burst; k++) spawnRandomDrop();
+
+      dropConfig._eventsSpawned = (dropConfig._eventsSpawned || 0) + 1;
+      lastDropAt = now;
+      updateAndDrawDrops._sinceLastSpawn = 0;
+
+      // nieuw interval plannen
+      const span1 = Math.max(0, dropConfig.maxIntervalMs - dropConfig.minIntervalMs);
+      updateAndDrawDrops._nextDueMs = dropConfig.minIntervalMs + Math.random() * span1;
+    }
   }
-}
 
-
-  // --- ALS ER GEEN ACTIEVE DROPS ZIJN, MAG RENDER-LOOP DOOR ---
-  // (We stoppen hier NIET de spawner; die loopt hierboven elk frame.)
-  if (!fallingDrops.length) return;
+  // Als er (nog) niets actief valt, stop na de spawner (die blijft wél lopen)
+  if (!fallingDrops || fallingDrops.length === 0) return;
 
   // --- UPDATE + RENDER ---
   for (let i = fallingDrops.length - 1; i >= 0; i--) {
     const d = fallingDrops[i];
     if (!d || !d.active) { fallingDrops.splice(i, 1); continue; }
 
-    // type-hooks (bijv. pulsen)
     const def = DROP_TYPES[d.type];
     if (def?.onTick) def.onTick(d, 16); // ~16ms/frame
 
-    // magnet/andere krachten
+    // instant magnet-catch (als magnet een __forceCatch vlag zet)
+    if (d.__forceCatch) {
+      def?.onCatch?.(d);
+      d.active = false;
+      fallingDrops.splice(i, 1);
+      continue;
+    }
+
+    // beweging
     d.y += d.dy;
     if (typeof d.vx === "number") d.x += d.vx;
     if (typeof d.vy === "number") d.y += d.vy;
@@ -1799,7 +1810,7 @@ if (dropConfig) {
     if (def?.draw) def.draw(d, ctx);
     else {
       ctx.beginPath();
-      ctx.arc(d.x, d.y, 8, 0, Math.PI*2);
+      ctx.arc(d.x, d.y, 8, 0, Math.PI * 2);
       ctx.fillStyle = "#ffd700";
       ctx.fill();
     }
@@ -1825,7 +1836,6 @@ if (dropConfig) {
     }
   }
 }
-
 
 
 
