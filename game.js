@@ -2194,10 +2194,11 @@ function drawFallingStones() {
 
     // ===== beweging (bewaar vorige pos vóór update) =====
     if (s.prevY == null) s.prevY = s.y;
-    if (s.prevX == null) s.prevX = s.x;   // track vorige X voor 'enteredFromAbove' / side-guards
+    if (s.prevX == null) s.prevX = s.x;
+    const prevY = s.prevY;
     s.prevY = s.y;
     s.prevX = s.x;
-    s.y += s.dy; // val (X blijft doorgaans gelijk; als je horizontale drift toevoegt, werk s.x hier bij)
+    s.y += s.dy; // val
 
     // ---- Botsing met paddle (alleen bij écht contact) ----
     if (s.framesInside == null) s.framesInside = 0;
@@ -2208,11 +2209,11 @@ function drawFallingStones() {
     // Groot/klein categorisatie aan de hand van spritegrootte
     const isLarge = s.size >= 100;
 
-    // 🔧 Tuning (strakker & later laten triggeren)
-    const hitboxScale         = isLarge ? 0.86 : 0.78; // kleiner dan voorheen (minder “aura”)
-    const minPenetrationFrac  = isLarge ? 0.50 : 0.60; // % van r dat echt in paddle moet zitten
-    const debounceFrames      = isLarge ? 3    : 4;    // iets hogere drempel
-    const minHorizOverlapFrac = 0.55;                  // min. 55% van r overlappen in X
+    // 🔧 Tuning (iets vergevingsgezinder dan vorige versie, maar nog steeds anti-zijkant)
+    const hitboxScale         = isLarge ? 0.88 : 0.80; // iets groter dan 0.86/0.78 om misses te voorkomen
+    const minPenetrationFrac  = isLarge ? 0.35 : 0.45; // minder diep nodig dan 0.50/0.60
+    const debounceFrames      = isLarge ? 2    : 3;    // iets sneller tellen
+    const minHorizOverlapFrac = 0.35;                  // i.p.v. 0.55
 
     const r = baseRadius * hitboxScale;
 
@@ -2221,16 +2222,20 @@ function drawFallingStones() {
     const paddleTop  = paddleY;
     const paddleW    = paddleWidth;
     const paddleH    = paddleHeight;
+    const paddleRight = paddleLeft + paddleW;
 
     // 1) Cirkel vs rect overlap
     const intersects = circleIntersectsRect(s.x, s.y, r, paddleLeft, paddleTop, paddleW, paddleH);
 
-    // 2) Alleen hits die van bóven de paddle komen
-    const enteredFromAbove = (s.prevY + r) <= paddleTop;
+    // 2) Alleen hits die van bóven de paddle komen (met tolerantie op basis van snelheid)
+    const prevBottom = prevY + r;
+    const nowBottom  = s.y + r;
+    const enterTol   = Math.max(4, Math.min(14, s.dy * 1.2)); // laat kleine overshoot toe bij hoge snelheid
+    const enteredFromAbove = prevBottom <= (paddleTop + enterTol);
 
     // 3) Genoeg verticale diepte (geen rand-tikje)
-    const minPenetrationPx = r * minPenetrationFrac;
-    const penetrates       = (s.y + r) >= (paddleTop + minPenetrationPx);
+    const minPenetrationPx = Math.max(6, Math.min(r * 0.60, r * minPenetrationFrac, paddleH * 0.8));
+    const penetrates       = nowBottom >= (paddleTop + minPenetrationPx);
 
     // 4) Alleen neerwaartse hits
     const falling = s.dy > 0;
@@ -2238,17 +2243,16 @@ function drawFallingStones() {
     // 5) Genoeg horizontale overlap – geen rand-grazes
     const stoneLeft  = s.x - r;
     const stoneRight = s.x + r;
-    const overlapX   = Math.max(0, Math.min(stoneRight, paddleLeft + paddleW) - Math.max(stoneLeft, paddleLeft));
-    const wideEnough = overlapX >= (r * minHorizOverlapFrac);
+    const overlapX   = Math.max(0, Math.min(stoneRight, paddleRight) - Math.max(stoneLeft, paddleLeft));
+    const minOverlap = Math.min(r * minHorizOverlapFrac, paddleW * 0.45); // cap tegen smalle paddles
+    const wideEnough = overlapX >= minOverlap;
 
-    // 🛡️ Extra guard A: midden van de steen moet “binnen” de paddle vallen
-    // -> voorkomt dat alleen de zijkant van de radius de paddle-hoek triggert
-    const edgeGuard     = Math.max(8, paddleW * 0.12); // kleine marge t.o.v. paddle-breedte
-    const centerInside  = (s.x >= paddleLeft + edgeGuard) && (s.x <= paddleLeft + paddleW - edgeGuard);
+    // 🛡️ Extra guard A: centrum moet ruwweg boven de paddle liggen (kleine randmarge)
+    const edgeGuard = Math.min(Math.max(6, paddleW * 0.08), 18);
+    const centerInside = (s.x >= paddleLeft + edgeGuard) && (s.x <= paddleRight - edgeGuard);
 
-    // 🛡️ Extra guard B: corner-reject (kleine schuine aanrakingen negeren)
-    // -> als de steen slechts een hoekje raakt en de verticale diepte nog laag is, dan niet tellen
-    const cornerReject = intersects && (overlapX < r * 0.40) && ((s.y + r) < (paddleTop + minPenetrationPx * 1.15));
+    // 🛡️ Extra guard B: corner-reject — kleine hoek-graze negeren
+    const cornerReject = intersects && (overlapX < r * 0.30) && (nowBottom < (paddleTop + minPenetrationPx * 1.10));
 
     // ✅ Echte hit pas als alles waar is (en geen corner-reject)
     const realHitNow = intersects
@@ -2302,6 +2306,7 @@ function drawFallingStones() {
     stoneClearRequested = false;
   }
 }
+
 
 
 
