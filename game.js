@@ -1612,10 +1612,13 @@ function drawBricks() {
     }
   }
 }
+
 function startDrops(config) {
   // config: { total, minIntervalMs, maxIntervalMs, speed, types, xMargin, ... }
   dropConfig = Object.assign({
-    total: 10,
+    // Als je continuous:true gebruikt, wordt 'total' genegeerd.
+    continuous: true,        // ⬅️ NIEUW: blijf het hele level droppen
+    total: 10,               // fallback (als continuous:false)
     minIntervalMs: 1500,
     maxIntervalMs: 3500,
     speed: 2.5,
@@ -1623,14 +1626,25 @@ function startDrops(config) {
     xMargin: 40,
     startDelayMs: 800,
 
-    // 🔧 NIEUWE OPTIES (Stap 3)
-    mode: "well",        // "well" (gelijkmatig) | "grid" (kolommen)
-    gridColumns: 8,      // alleen voor mode="grid"
-    gridJitterPx: 18,    // kleine variatie binnen kolom
-    avoidPaddle: false,  // true = niet boven paddle spawnen
-    avoidMarginPx: null, // extra buffer naast paddle (null = auto)
-    minSpacing: 70       // min. afstand tussen opeenvolgende X-spawns
+    // spawn-modus en veiligheid
+    mode: "well",            // "well" | "grid"
+    gridColumns: 8,
+    gridJitterPx: 18,
+    avoidPaddle: false,
+    avoidMarginPx: null,
+    minSpacing: 70
   }, config || {});
+
+  // sanity
+  if (!Array.isArray(dropConfig.types) || dropConfig.types.length === 0) {
+    dropConfig.types = ["coin", "heart", "bag"];
+  }
+
+  // normaliseer gridColumns (mag getal of array zijn)
+  if (!Array.isArray(dropConfig.gridColumns)) {
+    dropConfig.gridColumns = [ dropConfig.gridColumns ];
+  }
+
   dropsSpawned = 0;
   lastDropAt = performance.now() - dropConfig.minIntervalMs + (dropConfig.startDelayMs || 0);
 }
@@ -1644,35 +1658,99 @@ function nextDropDue(now) {
 
 function spawnRandomDrop() {
   if (!dropConfig || !dropConfig.types?.length) return;
-  const type = dropConfig.types[Math.floor(Math.random() * dropConfig.types.length)];
-  const margin = dropConfig.xMargin || 0;
-  const x = nextWellDistributedX(margin, /* minSpacing */ 70);
 
+  // random type
+  const type = dropConfig.types[Math.floor(Math.random() * dropConfig.types.length)];
+
+  // X volgens mode ("well" | "grid") + optioneel avoidPaddle
+  const x = chooseSpawnX(dropConfig);
 
   fallingDrops.push({
     type,
     x,
-    y: -20,
+    y: -20 - Math.random() * 30,
     dy: dropConfig.speed || 2.5,
-    vx: 0,  // compatibel met magnet
+    vx: 0,
     vy: 0,
-    t: 0,   // vrije parameter (bijv. puls)
+    t: 0,
     active: true
   });
   dropsSpawned++;
 }
 
-function updateAndDrawDrops() {
-  if (!fallingDrops.length && (!dropConfig || dropsSpawned >= (dropConfig.total||0))) return;
 
-  // Spawner tick
-  if (dropConfig && dropsSpawned < dropConfig.total) {
+function updateAndDrawDrops() {
+  // Spawner tick (continuous of beperkt met 'total')
+  if (dropConfig) {
     const now = performance.now();
-    if (now - lastDropAt >= nextDropDue(now)) {
-      spawnRandomDrop();
-      lastDropAt = now;
+    const allowByTotal = !dropConfig.continuous && (dropsSpawned < (dropConfig.total || 0));
+    const allowContinuous = !!dropConfig.continuous;
+
+    if (allowContinuous || allowByTotal) {
+      if (now - lastDropAt >= (updateAndDrawDrops._nextDueMs || 0)) {
+        spawnRandomDrop();
+        lastDropAt = now;
+        // bereken nieuwe jitter voor volgende spawn
+        updateAndDrawDrops._nextDueMs = dropConfig.minIntervalMs +
+          Math.random() * Math.max(0, (dropConfig.maxIntervalMs - dropConfig.minIntervalMs));
+      }
     }
   }
+
+  if (!fallingDrops.length) return;
+
+  // Update + render
+  for (let i = fallingDrops.length - 1; i >= 0; i--) {
+    const d = fallingDrops[i];
+    if (!d || !d.active) { fallingDrops.splice(i,1); continue; }
+
+    const def = DROP_TYPES[d.type];
+    if (def?.onTick) def.onTick(d, 16); // approx dt
+
+    // ⬇️ Instant magnet-catch als magnet een forcecatch vlag heeft gezet
+    if (d.__forceCatch) {
+      def?.onCatch?.(d);
+      d.active = false;
+      fallingDrops.splice(i, 1);
+      continue;
+    }
+
+    // magnet kan vx/vy injecteren — daarbovenop vaste val
+    d.y += d.dy;
+    if (typeof d.vx === "number") d.x += d.vx;
+    if (typeof d.vy === "number") d.y += d.vy;
+
+    // tekenen
+    if (def?.draw) def.draw(d, ctx);
+    else {
+      // fallback
+      ctx.fillStyle = "#ffd700";
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, 8, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // collision met paddle (ruwe bbox)
+    const pb = getPaddleBounds();
+    const w = 26, h = 26;
+    const left = d.x - w/2, right = d.x + w/2, top = d.y - h/2, bottom = d.y + h/2;
+    const overlap = (right >= pb.left && left <= pb.right && bottom >= pb.top && top <= pb.bottom);
+
+    if (overlap) {
+      def?.onCatch?.(d);
+      d.active = false;
+      fallingDrops.splice(i, 1);
+      continue;
+    }
+
+    // onder uit beeld?
+    if (d.y - 30 > canvas.height) {
+      def?.onMiss?.(d);
+      d.active = false;
+      fallingDrops.splice(i, 1);
+    }
+  }
+}
 
   // Update + render
   for (let i = fallingDrops.length - 1; i >= 0; i--) {
@@ -1719,6 +1797,8 @@ function updateAndDrawDrops() {
     }
   }
 }
+
+
 
 
 function drawPointPopups() {
@@ -1818,7 +1898,7 @@ function resetBricks() {
   // Pas gerust aan naar jouw pacing.
   if (lvl <= 3) {
     startDrops({
-      total: 8,
+     continuous: true,  
       minIntervalMs: 1200,
       maxIntervalMs: 2600,
       speed: 2.5,
@@ -1831,7 +1911,7 @@ function resetBricks() {
     });
   } else if (lvl <= 10) {
     startDrops({
-      total: 12,
+      continuous: true,  
       minIntervalMs: 900,
       maxIntervalMs: 2200,
       speed: 3.0,
@@ -1844,7 +1924,7 @@ function resetBricks() {
     });
   } else {
     startDrops({
-      total: 14,
+    continuous: true,  
       minIntervalMs: 800,
       maxIntervalMs: 1800,
       speed: 3.4,
