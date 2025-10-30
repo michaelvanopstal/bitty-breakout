@@ -212,28 +212,80 @@ function playVoiceOver(audio, opts = {}) {
 }
 
 
+// === DROPS X-SELECTION HELPERS ===
+const GOLDEN_RATIO_CONJUGATE = 0.61803398875;
+let dropSeed = Math.random();
+let gridColIndex = 0;
+const recentSpawnXs = [];
+
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
 function nextWellDistributedX(margin = 40, minSpacing = 70) {
-  // Halton-achtig: golden-ratio scramble → gelijkmatige spreiding
+  // quasi-random met golden ratio; voorkomt clustering
   let tries = 0;
   let x;
   const usable = canvas.width - margin * 2;
-
   while (true) {
-    dropIndex++;
     dropSeed = (dropSeed + GOLDEN_RATIO_CONJUGATE) % 1;
     x = margin + dropSeed * usable;
-
-    // voorkom herhalingen/klontering: check afstand tot recente spawns
     const tooClose = recentSpawnXs.some(px => Math.abs(px - x) < minSpacing);
-    if (!tooClose) break;
-
-    if (++tries > 6) break; // geef op na een paar pogingen, neem laatste x
+    if (!tooClose || tries++ > 6) break;
   }
-
   recentSpawnXs.push(x);
-  if (recentSpawnXs.length > 5) recentSpawnXs.shift(); // korte geschiedenis
+  if (recentSpawnXs.length > 5) recentSpawnXs.shift();
   return x;
 }
+
+function nextGridX(margin = 40, columns = 8, jitterPx = 18) {
+  const usable = canvas.width - margin * 2;
+  const colW = usable / Math.max(1, columns);
+  const col = (gridColIndex++ % Math.max(1, columns));
+  const base = margin + col * colW + colW / 2;
+  const jitter = (Math.random() * 2 - 1) * jitterPx;
+  let x = base + jitter;
+
+  // kleine anti-cluster
+  const tooClose = recentSpawnXs.some(px => Math.abs(px - x) < Math.min(70, colW * 0.75));
+  if (tooClose) x += (colW * 0.5 * (Math.random() < 0.5 ? -1 : 1));
+
+  x = clamp(x, margin, canvas.width - margin);
+  recentSpawnXs.push(x);
+  if (recentSpawnXs.length > 5) recentSpawnXs.shift();
+  return x;
+}
+
+function chooseSpawnX(cfg) {
+  const margin = cfg.xMargin || 0;
+
+  // 1) kies X volgens modus
+  let x = (cfg.mode === "grid")
+    ? nextGridX(margin, cfg.gridColumns, cfg.gridJitterPx)
+    : nextWellDistributedX(margin, cfg.minSpacing);
+
+  // 2) optioneel vermijden boven paddle
+  if (cfg.avoidPaddle) {
+    const padL = paddleX;
+    const padR = paddleX + paddleWidth;
+    const extra = (cfg.avoidMarginPx != null) ? cfg.avoidMarginPx : (paddleWidth * 0.6 + 30);
+    const forbidL = padL - extra;
+    const forbidR = padR + extra;
+
+    if (x >= forbidL && x <= forbidR) {
+      // duw X naar de dichtstbijzijnde vrije kant
+      const leftRoom  = Math.max(margin, forbidL - 8);
+      const rightRoom = Math.min(canvas.width - margin, forbidR + 8);
+      if (Math.abs(x - leftRoom) < Math.abs(x - rightRoom)) {
+        x = leftRoom - Math.random() * 40;
+      } else {
+        x = rightRoom + Math.random() * 40;
+      }
+      x = clamp(x, margin, canvas.width - margin);
+    }
+  }
+
+  return x;
+}
+
 
 
 
@@ -1567,21 +1619,29 @@ function drawBricks() {
     }
   }
 }
-// === DROPS SYSTEM: core ===
 function startDrops(config) {
-  // config: { total, minIntervalMs, maxIntervalMs, speed, types: ["coin","heart",...], xMargin }
+  // config: { total, minIntervalMs, maxIntervalMs, speed, types, xMargin, ... }
   dropConfig = Object.assign({
     total: 10,
     minIntervalMs: 1500,
     maxIntervalMs: 3500,
-    speed: 2.5,       // val-snelheid (px/frame; wordt per draw gebruikt)
+    speed: 2.5,
     types: ["coin", "heart", "bag"],
-    xMargin: 40,      // veilige marges aan zijkant
-    startDelayMs: 800 // kleine delay na levelstart
+    xMargin: 40,
+    startDelayMs: 800,
+
+    // 🔧 NIEUWE OPTIES (Stap 3)
+    mode: "well",        // "well" (gelijkmatig) | "grid" (kolommen)
+    gridColumns: 8,      // alleen voor mode="grid"
+    gridJitterPx: 18,    // kleine variatie binnen kolom
+    avoidPaddle: false,  // true = niet boven paddle spawnen
+    avoidMarginPx: null, // extra buffer naast paddle (null = auto)
+    minSpacing: 70       // min. afstand tussen opeenvolgende X-spawns
   }, config || {});
   dropsSpawned = 0;
   lastDropAt = performance.now() - dropConfig.minIntervalMs + (dropConfig.startDelayMs || 0);
 }
+
 
 function nextDropDue(now) {
   const span = (dropConfig.maxIntervalMs - dropConfig.minIntervalMs);
