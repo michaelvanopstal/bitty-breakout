@@ -216,6 +216,21 @@ function addStar(n = 1) {
   }
 }
 
+function addX(n = 1) {
+  if (!window.collector) return;
+  collector.x = (collector.x || 0) + n;
+
+  // Reset alleen de verzamel-tellers
+  collector.stars = 0;
+  collector.bombs = 0;
+
+  // GEEN aanpassing aan invincibleUntil, lives, etc.
+  flashSetPopup?.("❌ Progress reset");
+  // optioneel: klein geluidje
+  try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+}
+
+
 function explodeRandomBricks(n = 35) {
   // 30–40 bricks (standaard 35). Pas aan als je wil.
   const kill = Math.max(0, n|0);
