@@ -1678,7 +1678,7 @@ function startDrops(config) {
     maxSilenceMs: 4000,        // watchdog
 
     // item-keuze
-    types: ["coin","heart","bag"], // fallback set
+    types: ["coin","heart","star"], // fallback set
     typeQuota: null,           // { heart: 5, bomb: 2 } → exact zoveel keer in totaal
     typeWeights: null          // { coin:5, heart:2, bomb:1 } → gewogen random
   }, config || {});
@@ -1979,7 +1979,7 @@ function resetBricks() {
       minIntervalMs: 1200,
       maxIntervalMs: 2600,
       speed: 2.5,
-      types: ["coin", "heart", "bag"], // veilige startersmix
+      types: ["coin","heart","star"], // veilige startersmix
       xMargin: 40,
       startDelayMs: 800,
       mode: "well",          // goed gespreide x-waarden (geen grid)
@@ -1992,7 +1992,7 @@ function resetBricks() {
       minIntervalMs: 900,
       maxIntervalMs: 2200,
       speed: 3.0,
-      types: ["coin", "heart", "bag", "paddle_long", "speed", "magnet"],
+      types: ["coin","heart","star"],
       xMargin: 40,
       startDelayMs: 600,
       mode: "well",
@@ -2005,7 +2005,7 @@ function resetBricks() {
       minIntervalMs: 800,
       maxIntervalMs: 1800,
       speed: 3.4,
-      types: ["coin", "heart", "bag", "paddle_long", "speed", "magnet", "bomb"], // bomb erbij voor extra spanning
+      types:["coin","heart","star"],
       xMargin: 40,
       startDelayMs: 500,
       mode: "grid",          // nette kolommen in hogere levels
