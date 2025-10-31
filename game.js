@@ -2283,15 +2283,17 @@ function resetAllBonuses() {
 
 
 function resetBall() {
+  // bal opnieuw op de paddle parkeren
   balls = [{
     x: paddleX + paddleWidth / 2 - ballRadius,
     y: paddleY - ballRadius * 2,
     dx: 0,
     dy: -(LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))]?.params?.ballSpeed ?? 6),
-
     radius: ballRadius,
     isMain: true
   }];
+
+  // standaard reset-stand
   ballLaunched = false;
   ballMoving = false;
 
@@ -2302,6 +2304,33 @@ function resetBall() {
   if (level === 1) {
     levelTransitionActive = false;
     transitionOffsetY = 0;
+  }
+
+  // 🛡️ Tijdens STAR-bonus: bal meteen weer de lucht in (spel loopt door)
+  if (invincibleActive) {
+    // kleine delay zodat de bal eerst netjes op de paddle "klikt"
+    setTimeout(() => {
+      // alleen autolancen als de bonus nog actief is en de bal nog geparkeerd staat
+      if (!invincibleActive || balls.length === 0) return;
+
+      const b = balls[0];
+
+      // positioneer voor de zekerheid opnieuw exact boven de paddle
+      b.x = paddleX + paddleWidth / 2 - ballRadius;
+      b.y = paddleY - ballRadius * 2;
+
+      // geef een lichte horizontale start (voelt natuurlijker)
+      if (Math.abs(b.dx) < 0.5) {
+        b.dx = (Math.random() < 0.5 ? -1 : 1) * 2; // klein tikje links/rechts
+      }
+      b.dy = -Math.abs(b.dy); // altijd omhoog
+
+      ballLaunched = true;
+      ballMoving   = true;
+
+      // paddle mag weer vrij nadat de bal weg is
+      paddleFreeMove = true;
+    }, 200); // 0.2s voelt vloeiend; pas aan naar smaak
   }
 }
 
@@ -4325,9 +4354,11 @@ function spawnStoneDebris(x, y) {
   }
 }
 
+
 function triggerPaddleExplosion() {
-  // 🛡️ Sterren-bonus actief: NIETS resetten of pauzeren, spel loopt door
+  // 🛡️ STAR-bonus actief: geen life loss, geen pauze, alleen bal terug op paddle
   if (invincibleActive) {
+    resetBall?.();   // centreer/park de bal op de paddle (jouw bestaande functie)
     return;
   }
 
