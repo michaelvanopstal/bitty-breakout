@@ -1998,7 +1998,7 @@ function resetBricks() {
       minIntervalMs: 1200,
       maxIntervalMs: 2600,
       speed: 2.5,
-      types: types: ["coin","heart","bag","star"],
+      types: ["coin","heart","bag","star"],
       xMargin: 40,
       startDelayMs: 800,
       mode: "well",          // goed gespreide x-waarden (geen grid)
@@ -2011,7 +2011,7 @@ function resetBricks() {
       minIntervalMs: 900,
       maxIntervalMs: 2200,
       speed: 3.0,
-      types: types: ["coin","heart","bag","star"],
+      types: ["coin","heart","bag","star"],
       xMargin: 40,
       startDelayMs: 600,
       mode: "well",
@@ -2024,7 +2024,7 @@ function resetBricks() {
       minIntervalMs: 800,
       maxIntervalMs: 1800,
       speed: 3.4,
-      types: types: ["coin","heart","bag","star"],
+      types: ["coin","heart","bag","star"],
       xMargin: 40,
       startDelayMs: 500,
       mode: "grid",          // nette kolommen in hogere levels
