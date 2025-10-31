@@ -4117,7 +4117,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 30) {
+  if (imagesLoaded === 31) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -4181,6 +4181,7 @@ stoneBlockImg.onload  = onImageLoad;
 stoneLargeImg.onload  = onImageLoad;
 tntImg.onload = onImageLoad;
 tntBlinkImg.onload = onImageLoad;
+starImg.onload = onImageLoad;
 
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
