@@ -182,126 +182,6 @@ const VO_COOLDOWN_MS = 3000;    // minimaal 3s tussen voices
 let voIsPlaying = false;        // speelt er nu een voice?
 let voLockedUntil = 0;          // tot wanneer blokkeren (ms sinds pageload)
 
-// paddle-invincibility helpers
-function activateInvinciblePaddle(ms = 20000) {
-  collector.invincibleUntil = performance.now() + ms;
-  flashSetPopup?.("⭐ Invincible Paddle " + Math.round(ms/1000) + "s");
-}
-
-function isPaddleInvincible() {
-  return performance.now() < (collector?.invincibleUntil || 0);
-}
-
-let lastStarTrigger = 0; // voorkomt dubbel activeren binnen 0.5s
-
-function addStar(n = 1) {
-  // Zorg dat collector bestaat
-  if (!window.collector) return;
-
-  // Basiswaarden
-  collector.stars = Math.min(GOAL_STARS, (collector.stars || 0) + n);
-
-  // Debug: laat even zien in console
-  console.log(`⭐ Stars: ${collector.stars}/${GOAL_STARS}`);
-
-  // Check of doel bereikt is
-  if (collector.stars >= GOAL_STARS) {
-    const now = performance.now();
-
-    // Cooldown van 500ms om dubbele triggers te vermijden
-    if (now - lastStarTrigger > 500) {
-      lastStarTrigger = now;
-
-      // Activeer het schild (20 seconden)
-      activateInvinciblePaddle(20000);
-
-      // Kleine visuele/audio feedback
-      flashSetPopup?.("⭐ Invincible Paddle 20s!");
-      try {
-        if (typeof coinSound !== "undefined") {
-          coinSound.currentTime = 0;
-          coinSound.play();
-        }
-      } catch (err) {
-        console.warn("addStar sound error:", err);
-      }
-    }
-
-    // Reset teller
-    collector.stars = 0;
-  }
-}
-
-
-
-
-
-function explodeRandomBricks(n = 35) {
-  // 30–40 bricks (standaard 35). Pas aan als je wil.
-  const kill = Math.max(0, n|0);
-  const pool = [];
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      const b = bricks[c][r];
-      if (!b) continue;
-      if (b.status !== 1) continue;            // alleen levende
-      if (b.type === "steel") continue;        // filter onbreekbaar (pas aan)
-      pool.push({c,r,b});
-    }
-  }
-  for (let i = 0; i < kill && pool.length; i++) {
-    const idx = Math.floor(Math.random() * pool.length);
-    const {c,r,b} = pool.splice(idx,1)[0];
-    b.status = 0;
-    score += 10;
-    pointPopups?.push?.({
-      x: (c+0.5)*brickWidth + brickOffsetLeft,
-      y: (r+0.5)*brickHeight + brickOffsetTop,
-      value: "+10", alpha: 1
-    });
-  }
-  updateScoreDisplay?.();
-}
-
-function addBomb(n = 1) {
-  collector.bombs = Math.min(GOAL_BOMBS, collector.bombs + n);
-  if (collector.bombs >= GOAL_BOMBS) {
-    // 30–40 bricks: kies random in deze range
-    const count = 30 + Math.floor(Math.random()*11);
-    flashSetPopup?.("💣 BOOM! -" + count + " bricks");
-    explodeRandomBricks(count);
-    collector.bombs = 0; // reset bommen-teller
-  }
-}
-
-// ❌ Rode X: reset alleen progress, spel loopt door
-if (typeof addX !== "function") {
-  function addX(n = 1) {
-    // zorg dat collector bestaat
-    if (!window.collector) return;
-    collector.x = (collector.x || 0) + n;
-
-    // Reset alleen de verzamel-tellers
-    collector.stars = 0;
-    collector.bombs = 0;
-
-    // GEEN aanpassing aan invincibleUntil, lives, etc.
-    flashSetPopup?.("❌ Progress reset");
-
-    // optioneel: klein geluidje
-    try {
-      if (typeof tntExplodeSound !== "undefined") {
-        tntExplodeSound.currentTime = 0;
-        tntExplodeSound.play();
-      }
-    } catch (err) {
-      console.warn("addX sound error:", err);
-    }
-  }
-}
-
-
-
 
 function playVoiceOver(audio, opts = {}) {
   const { cooldown = VO_COOLDOWN_MS } = opts;
@@ -366,55 +246,38 @@ function nextGridX(margin = 40, columns = 8, jitterPx = 18) {
   if (recentSpawnXs.length > 5) recentSpawnXs.shift();
   return x;
 }
-// === SAFE chooseSpawnX zonder clamp ===
-function chooseSpawnX(cfg = {}) {
-  const margin = Number(cfg.xMargin || 0);
-  const minX   = margin;
-  const maxX   = canvas.width - margin;
 
-  const mode       = cfg.mode || "well";
-  const cols       = Math.max(1, cfg.gridColumns || 8);
-  const jitter     = Number(cfg.gridJitterPx || 0);
-  const minSpacing = Number(cfg.minSpacing || 0);
+function chooseSpawnX(cfg) {
+  const margin = cfg.xMargin || 0;
 
-  let x;
+  // 1) kies X volgens modus
+  let x = (cfg.mode === "grid")
+    ? nextGridX(margin, cfg.gridColumns, cfg.gridJitterPx)
+    : nextWellDistributedX(margin, cfg.minSpacing);
 
-  if (mode === "grid") {
-    // nette kolommen met klein jittertje
-    const cellW = (maxX - minX) / cols;
-    const col   = Math.floor(Math.random() * cols);
-    x = minX + col * cellW + cellW / 2 + (Math.random() * 2 - 1) * jitter;
-  } else {
-    // "well" = mooie spreiding met afstand tot recente drops
-    let tries = 20;
-    do {
-      x = minX + Math.random() * (maxX - minX);
-      tries--;
-    } while (
-      tries > 0 &&
-      minSpacing > 0 &&
-      Array.isArray(fallingDrops) &&
-      fallingDrops.some(d => Math.abs(d.x - x) < minSpacing)
-    );
-  }
-
-  // niet direct boven de paddle droppen (eerlijker)
+  // 2) optioneel vermijden boven paddle
   if (cfg.avoidPaddle) {
-    const avoid = Number(cfg.avoidMarginPx || 40);
-    const left  = paddleX - avoid;
-    const right = paddleX + paddleWidth + avoid;
-    if (x > left && x < right) {
-      x = (x - left) < (right - x) ? left : right;
+    const padL = paddleX;
+    const padR = paddleX + paddleWidth;
+    const extra = (cfg.avoidMarginPx != null) ? cfg.avoidMarginPx : (paddleWidth * 0.6 + 30);
+    const forbidL = padL - extra;
+    const forbidR = padR + extra;
+
+    if (x >= forbidL && x <= forbidR) {
+      // duw X naar de dichtstbijzijnde vrije kant
+      const leftRoom  = Math.max(margin, forbidL - 8);
+      const rightRoom = Math.min(canvas.width - margin, forbidR + 8);
+      if (Math.abs(x - leftRoom) < Math.abs(x - rightRoom)) {
+        x = leftRoom - Math.random() * 40;
+      } else {
+        x = rightRoom + Math.random() * 40;
+      }
+      x = clamp(x, margin, canvas.width - margin);
     }
   }
 
-  // hard cap binnen canvas (ipv clamp)
-  if (x < minX) x = minX;
-  if (x > maxX) x = maxX;
-
   return x;
 }
-
 
 
 
@@ -1376,202 +1239,112 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
-// === COLLECTOR SYSTEM (stars/bombs/x) ===
-const GOAL_STARS = 10;
-const GOAL_BOMBS = 10;
-
-// vervangbare icoontjes (laad je eigen images als je wil)
-let hudStarIcon = (typeof starImg !== "undefined" ? starImg : null);
-let hudBombIcon = (typeof tntImg  !== "undefined" ? tntImg  : null);
-let hudXIcon    = null; // bv. redCrossImg; blijft null => vectorisch tekenen
-
-const collector = {
-  stars: 0,
-  bombs: 0,
-  x: 0,           // voor UI; effect = reset
-  invincibleUntil: 0
-};
-
 // === DROPS SYSTEM: item type registry ===
+// Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
 const DROP_TYPES = {
-
-  // 💰 COIN → telt nu ook als ⭐ ster
   coin: {
+    // gebruikt je bestaande coin-asset
     draw(drop, ctx) {
-      if (typeof coinImg !== "undefined" && coinImg) {
-        ctx.drawImage(coinImg, drop.x - 12, drop.y - 12, 24, 24);
-      } else {
-        ctx.fillStyle = "#ffd700";
-        ctx.beginPath(); ctx.arc(drop.x, drop.y, 12, 0, Math.PI * 2); ctx.fill();
-      }
+      // 24x24 zoals je coins
+      ctx.drawImage(coinImg, drop.x - 12, drop.y - 12, 24, 24);
     },
     onCatch(drop) {
       const earned = doublePointsActive ? 20 : 10;
       score += earned;
       updateScoreDisplay?.();
-      try { coinSound.currentTime = 0; coinSound.play(); } catch {}
+      coinSound.currentTime = 0; coinSound.play();
       pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
-
-      // ⭐️ laat coins ook meetellen voor de invincible-bonus
-      if (typeof addStar === "function") addStar(1);
     },
-    onMiss(drop) {},
+    onMiss(drop) {
+      // niks; gewoon weg
+    },
   },
 
-  // ❤️ HEART (voor test behouden)
   heart: {
     draw(drop, ctx) {
+      // iets groter hart (pulserend)
       const size = 24 + Math.sin(drop.t) * 2;
       ctx.globalAlpha = 0.95;
-      if (typeof heartImg !== "undefined" && heartImg) {
-        ctx.drawImage(heartImg, drop.x - size/2, drop.y - size/2, size, size);
-      } else {
-        ctx.fillStyle = "#f44";
-        ctx.beginPath(); ctx.arc(drop.x, drop.y, size/2, 0, Math.PI * 2); ctx.fill();
-      }
+      ctx.drawImage(heartImg, drop.x - size/2, drop.y - size/2, size, size);
       ctx.globalAlpha = 1;
     },
     onTick(drop, dt) { drop.t += 0.2; },
     onCatch(drop) {
       heartsCollected++;
-      const el = document.getElementById("heartCount");
-      if (el) el.textContent = heartsCollected;
-      try { coinSound.currentTime = 0; coinSound.play(); } catch {}
+      document.getElementById("heartCount").textContent = heartsCollected;
+      coinSound.currentTime = 0; coinSound.play();
 
       if (heartsCollected >= 10) {
         heartsCollected = 0;
         lives++;
         updateLivesDisplay?.();
         heartPopupTimer = 100;
-        if (el) el.textContent = heartsCollected;
+        document.getElementById("heartCount").textContent = heartsCollected;
       }
     },
-    onMiss(drop) {},
+    onMiss(drop) {
+      // gemist hart: geen straf
+    },
   },
 
-  // 🎒 BAG (compat)
   bag: {
+    // gebruikt je pxpBagImg (40x40 in je game)
     draw(drop, ctx) {
-      if (typeof pxpBagImg !== "undefined" && pxpBagImg) {
-        ctx.drawImage(pxpBagImg, drop.x - 20, drop.y - 20, 40, 40);
-      } else {
-        ctx.fillStyle = "#c90";
-        ctx.fillRect(drop.x - 20, drop.y - 20, 40, 40);
-      }
+      ctx.drawImage(pxpBagImg, drop.x - 20, drop.y - 20, 40, 40);
     },
     onCatch(drop) {
       const earned = doublePointsActive ? 160 : 80;
       score += earned;
       updateScoreDisplay?.();
-      try { pxpBagSound.currentTime = 0; pxpBagSound.play(); } catch {}
+      pxpBagSound.currentTime = 0; pxpBagSound.play();
       pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
     },
-    onMiss(drop) {},
+    onMiss(drop) { /* niks */ },
   },
 
-  // 💣 NORMALE BOMB (oude systeem)
   bomb: {
+    // “ontwijken!” – lichte straf bij catch
     draw(drop, ctx) {
       const s = 26;
       const blink = (Math.floor(performance.now()/200) % 2 === 0);
-      const img = (blink ? (typeof tntBlinkImg !== "undefined" && tntBlinkImg) : (typeof tntImg !== "undefined" && tntImg));
-      if (img) ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
-      else { ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(drop.x, drop.y, 11, 0, Math.PI*2); ctx.fill(); }
+      const img = blink ? tntBlinkImg : tntImg;
+      ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
     },
     onCatch(drop) {
+      // kleine straf of effect, bv. -1 leven (alleen als >1) of -punten
       if (lives > 1) {
         lives--;
         updateLivesDisplay?.();
         pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
       } else {
+        // laatste leven → trigger paddleExplode flow
         triggerPaddleExplosion?.();
       }
       try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
     },
-    onMiss(drop) {},
+    onMiss(drop) { /* goed zo, niks */ },
   },
 
-  // 🟡⭐ NIEUW: STAR TOKEN
-  star_token: {
-    draw(drop, ctx) {
-      const s = 26;
-      if (typeof starImg !== "undefined" && starImg) {
-        ctx.drawImage(starImg, drop.x - s/2, drop.y - s/2, s, s);
-      } else {
-        ctx.fillStyle = "#ffd700";
-        ctx.beginPath(); ctx.arc(drop.x, drop.y, 12, 0, Math.PI * 2); ctx.fill();
-      }
-    },
-    onCatch(drop) {
-      addStar?.(1);
-      score += 5;
-      updateScoreDisplay?.();
-    },
-    onMiss(drop) {},
-  },
-
-  // 💣 NIEUW: BOMB TOKEN (triggert brick-explosie bij 10x)
-  bomb_token: {
-    draw(drop, ctx) {
-      const s = 26;
-      const blink = (Math.floor(performance.now() / 200) % 2 === 0);
-      const img = blink && typeof tntBlinkImg !== "undefined" && tntBlinkImg ? tntBlinkImg : (typeof tntImg !== "undefined" && tntImg ? tntImg : null);
-      if (img) ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
-      else { ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(drop.x, drop.y, 11, 0, Math.PI * 2); ctx.fill(); }
-    },
-    onCatch(drop) {
-      addBomb?.(1);
-      score += 5;
-      updateScoreDisplay?.();
-    },
-    onMiss(drop) {},
-  },
-
-  // ❌ NIEUW: RED X TOKEN (reset alle voortgang)
-  x_token: {
-    draw(drop, ctx) {
-      const s = 24;
-      ctx.save();
-      ctx.translate(drop.x, drop.y);
-      ctx.fillStyle = "#d00";
-      ctx.fillRect(-s/2, -5, s, 10);
-      ctx.fillRect(-5, -s/2, 10, s);
-      ctx.restore();
-    },
-    onCatch(drop) {
-      addX?.(1);
-      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
-    },
-    onMiss(drop) {},
-  },
-
-  // 🧱 PADDLE POWERUPS
   paddle_long: {
-    draw(drop, ctx) { if (typeof paddleLongBlockImg !== "undefined" && paddleLongBlockImg) ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
+    draw(drop, ctx) { ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) { startPaddleSizeEffect?.("long"); },
     onMiss(drop) {},
   },
 
   paddle_small: {
-    draw(drop, ctx) { if (typeof paddleSmallBlockImg !== "undefined" && paddleSmallBlockImg) ctx.drawImage(paddleSmallBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
+    draw(drop, ctx) { ctx.drawImage(paddleSmallBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) { startPaddleSizeEffect?.("small"); },
     onMiss(drop) {},
   },
 
-  // ⚡ SPEED BOOST
   speed: {
-    draw(drop, ctx) { if (typeof speedImg !== "undefined" && speedImg) ctx.drawImage(speedImg, drop.x - 35, drop.y - 12, 70, 24); },
-    onCatch(drop) {
-      speedBoostActive = true;
-      speedBoostStart = Date.now();
-      try { speedBoostSound.currentTime = 0; speedBoostSound.play(); } catch {}
-    },
+    draw(drop, ctx) { ctx.drawImage(speedImg, drop.x - 35, drop.y - 12, 70, 24); },
+    onCatch(drop) { speedBoostActive = true; speedBoostStart = Date.now(); speedBoostSound.currentTime=0; speedBoostSound.play(); },
     onMiss(drop) {},
   },
 
-  // 🧲 MAGNET
   magnet: {
-    draw(drop, ctx) { if (typeof magnetImg !== "undefined" && magnetImg) ctx.drawImage(magnetImg, drop.x - 35, drop.y - 12, 70, 24); },
+    draw(drop, ctx) { ctx.drawImage(magnetImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) { activateMagnet?.(20000); },
     onMiss(drop) {},
   },
@@ -1838,84 +1611,6 @@ function drawBricks() {
       }
     }
   }
-}
-
-function drawRoundedRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.arcTo(x+w, y, x+w, y+h, r);
-  ctx.arcTo(x+w, y+h, x, y+h, r);
-  ctx.arcTo(x, y+h, x, y, r);
-  ctx.arcTo(x, y, x+w, y, r);
-  ctx.closePath();
-}
-
-function drawCollectorPanel() {
-  // positie: onder je chatbox rechts. Pas aan naar jouw layout.
-  const panelW = 220, panelH = 120;
-  const x = canvas.width - panelW - 16; // 16px marge rechts
-  const y = 110;                        // onder je chatbox header (schat)
-  const pad = 10;
-
-  // achtergrond (chatbox-achtig)
-  drawRoundedRect(ctx, x, y, panelW, panelH, 14);
-  ctx.fillStyle = "rgba(255, 193, 7, 0.15)"; // warm geel/oranje tint
-  ctx.fill();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "rgba(140, 90, 10, 0.6)";
-  ctx.stroke();
-
-  ctx.save();
-  ctx.translate(x + pad, y + pad);
-
-  // titel
-  ctx.fillStyle = "#3b2508";
-  ctx.font = "bold 14px Arial";
-  ctx.fillText("Collector", 0, 0);
-
-  // rij helper
-  const rowY = (i)=> 18 + i*32;
-
-  // ROW 1 - STARS (geel)
-  // icon
-  if (hudStarIcon) ctx.drawImage(hudStarIcon, 0, rowY(0)-2, 20, 20);
-  else { ctx.fillStyle="#ffd54f"; ctx.beginPath(); ctx.arc(10, rowY(0)+8, 8, 0, Math.PI*2); ctx.fill(); }
-  // label
-  ctx.fillStyle = "#654321";
-  ctx.font = "12px Arial";
-  ctx.fillText("Stars", 26, rowY(0));
-  // bar
-  const w = panelW - pad*2 - 26;
-  const h = 10;
-  const fillStars = w * (collector.stars / GOAL_STARS);
-  ctx.fillStyle = "#eee"; ctx.fillRect(26, rowY(0)+12, w, h);
-  ctx.fillStyle = "#ffca28"; ctx.fillRect(26, rowY(0)+12, fillStars, h);
-  ctx.strokeStyle = "#a67c00"; ctx.strokeRect(26, rowY(0)+12, w, h);
-  // text value
-  ctx.fillStyle = "#5b4600";
-  ctx.fillText(`${collector.stars}/${GOAL_STARS}`, 26 + w - 40, rowY(0));
-
-  // ROW 2 - BOMBS (zwart)
-  if (hudBombIcon) ctx.drawImage(hudBombIcon, 0, rowY(1)-2, 20, 20);
-  else { ctx.fillStyle="#222"; ctx.beginPath(); ctx.arc(10, rowY(1)+8, 8, 0, Math.PI*2); ctx.fill(); }
-  ctx.fillStyle = "#333"; ctx.fillText("Bombs", 26, rowY(1));
-  const fillBombs = w * (collector.bombs / GOAL_BOMBS);
-  ctx.fillStyle = "#eee"; ctx.fillRect(26, rowY(1)+12, w, h);
-  ctx.fillStyle = "#111"; ctx.fillRect(26, rowY(1)+12, fillBombs, h);
-  ctx.strokeStyle = "#555"; ctx.strokeRect(26, rowY(1)+12, w, h);
-  ctx.fillStyle = "#111";
-  ctx.fillText(`${collector.bombs}/${GOAL_BOMBS}`, 26 + w - 40, rowY(1));
-
-  // ROW 3 - X (rood)
-  if (hudXIcon) ctx.drawImage(hudXIcon, 0, rowY(2)-2, 20, 20);
-  else { ctx.fillStyle="#d12"; ctx.fillRect(0, rowY(2)-2, 20, 20); ctx.fillStyle="#fff"; ctx.fillRect(6, rowY(2)+2, 8, 12); }
-  ctx.fillStyle = "#6b1212"; ctx.fillText("X", 26, rowY(2));
-  const fillX = Math.min(w, collector.x * (w / GOAL_STARS)); // optioneel schaal; of maak eigen goal
-  ctx.fillStyle = "#eee"; ctx.fillRect(26, rowY(2)+12, w, h);
-  ctx.fillStyle = "#d32f2f"; ctx.fillRect(26, rowY(2)+12, fillX, h);
-  ctx.strokeStyle = "#8e1818"; ctx.strokeRect(26, rowY(2)+12, w, h);
-
-  ctx.restore();
 }
 
 
@@ -2222,7 +1917,7 @@ function resetBricks() {
   assignHeartBlocks();
 
   // =========================
-  // DROPS SYSTEM: reset & start per level (STAP 6)
+  // DROPS SYSTEM: reset & start per level
   // =========================
   // opruimen van eerdere drops/scheduler state
   if (typeof fallingDrops !== 'undefined') {
@@ -2234,62 +1929,57 @@ function resetBricks() {
   if (typeof lastDropAt !== 'undefined') {
     lastDropAt = performance.now();
   }
-  // (dropConfig zelf wordt opnieuw gezet door startDrops)
+  // (dropConfig wordt in startDrops gezet)
 
   const lvl = level || 1;
 
-  // Basis set voor het nieuwe valsysteem
-  // - Altijd: de drie nieuwe tokens
-  // - In lage levels: ook coin + heart, zodat je makkelijk kunt verifiëren dat het systeem werkt
-  let typesMix = ["star_token", "bomb_token", "x_token"];
-
+  // Voorbeeldconfiguraties per level-range.
+  // Pas gerust aan naar jouw pacing.
   if (lvl <= 3) {
-    // test-vriendelijke start (oude items zichtbaar)
-    typesMix = ["star_token", "bomb_token", "x_token", "coin", "heart"];
+    startDrops({
+     continuous: true,  
+      minIntervalMs: 1200,
+      maxIntervalMs: 2600,
+      speed: 2.5,
+      types: ["coin", "heart", "bag"], // veilige startersmix
+      xMargin: 40,
+      startDelayMs: 800,
+      mode: "well",          // goed gespreide x-waarden (geen grid)
+      avoidPaddle: false,
+      minSpacing: 70
+    });
   } else if (lvl <= 10) {
-    // wat extra power-ups erbij
-    typesMix.push("speed", "magnet");
+    startDrops({
+      continuous: true,  
+      minIntervalMs: 900,
+      maxIntervalMs: 2200,
+      speed: 3.0,
+      types: ["coin", "heart", "bag", "paddle_long", "speed", "magnet"],
+      xMargin: 40,
+      startDelayMs: 600,
+      mode: "well",
+      avoidPaddle: false,
+      minSpacing: 70
+    });
   } else {
-    // hogere levels, extra variatie
-    typesMix.push("speed", "magnet", "paddle_long");
+    startDrops({
+    continuous: true,  
+      minIntervalMs: 800,
+      maxIntervalMs: 1800,
+      speed: 3.4,
+      types: ["coin", "heart", "bag", "paddle_long", "speed", "magnet", "bomb"], // bomb erbij voor extra spanning
+      xMargin: 40,
+      startDelayMs: 500,
+      mode: "grid",          // nette kolommen in hogere levels
+      gridColumns: 8,
+      gridJitterPx: 16,
+      avoidPaddle: true,     // eerlijker: niet direct boven de paddle spawnen
+      avoidMarginPx: 40,
+      minSpacing: 70
+    });
   }
-
-  // Start het dropschema in well-modus met bursts
-  startDrops({
-    continuous: true,         // blijft droppen gedurende het hele level
-    // Je kunt durationMs/maxItems later instellen als je wil ‘timen’ of ‘cappen’
-    // durationMs: null,
-    // maxItems: null,
-
-    // Tussentijd tussen drop-events
-    minIntervalMs: 900,
-    maxIntervalMs: 1800,
-
-    // Hoeveel items per event
-    perSpawnMin: 1,
-    perSpawnMax: 3,
-
-    // Val-snelheid
-    speed: 3.0,
-
-    // Welke items (zie per-level mix hierboven)
-    types: typesMix,
-
-    // X-plaatsing & veiligheid
-    xMargin: 40,
-    mode: "well",             // goed gespreide x-waarden (geen grid)
-    avoidPaddle: true,        // eerlijker: niet direct boven de paddle
-    avoidMarginPx: 40,
-    minSpacing: 70,
-
-    // Kleine startvertraging is niet per se nodig; kan als je wilt:
-    // startDelayMs: 600
-  });
-
-  // 🎯 Belangrijk: we resetten de collectors NIET hier.
-  // Stars/bombs progress blijft bewust doorlopen tussen levels
-  // (zoals je vroeg). Alleen de rode X of game-over reset ze.
 }
+
 
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
@@ -3771,7 +3461,6 @@ function isPaddleBlockedHorizontally(newX) {
   return false;
 }
 
-
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -3788,29 +3477,22 @@ function draw() {
   checkFlyingCoinHits();
   drawPointPopups();
 
-  // ⭐️⭐️⭐️ STEP 5 – Invincible Paddle overlay (lichte gloed boven achtergrond)
-  if (isPaddleInvincible()) {
-    ctx.save();
-    ctx.globalAlpha = 0.18;
-    ctx.fillStyle = "#ffd54f";        // goudgele tint
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.restore();
-  }
 
-  // A) Time-out check heel vroeg in draw()
-  if (magnetActive && performance.now() >= magnetEndTime) {
-    stopMagnet();
-  }
+// A) Time-out check heel vroeg in draw()
+if (magnetActive && performance.now() >= magnetEndTime) {
+  stopMagnet();
+}
 
-  // B) Toepassen op arrays (na physics update van items, vóór render)
-  applyMagnetToArray(fallingHearts);
-  applyMagnetToArray(coins);
-  applyMagnetToArray(pxpBags);
-  applyMagnetToArray(fallingDrops);
+// B) Toepassen op arrays (na physics update van items, vóór render)
+applyMagnetToArray(fallingHearts);
+applyMagnetToArray(coins);     // muntjes worden al aangestuurd via 'coins'
+applyMagnetToArray(pxpBags);   // zakjes vallen in 'pxpBags'
+applyMagnetToArray(fallingDrops);
 
-  if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
-    stopPaddleSizeEffect();
-  }
+
+if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
+  stopPaddleSizeEffect();
+}
 
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
     doublePointsActive = false;
@@ -3823,154 +3505,152 @@ function draw() {
       ball.x += ball.dx * speedMultiplier;
       ball.y += ball.dy * speedMultiplier;
     } else {
-      ball.x = paddleX + paddleWidth / 2 - ballRadius;
-      ball.y = paddleY - ballRadius * 2;
-    }
+       ball.x = paddleX + paddleWidth / 2 - ballRadius;
+       ball.y = paddleY - ballRadius * 2;
 
-    if (!ball.trail) ball.trail = [];
-    let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
-    let steps = 3;
-    for (let i = 1; i <= steps; i++) {
-      let px = last.x + (ball.x - last.x) * (i / steps);
-      let py = last.y + (ball.y - last.y) * (i / steps);
-      ball.trail.push({ x: px, y: py });
     }
-    while (ball.trail.length > 20) ball.trail.shift();
+    
+    if (!ball.trail) ball.trail = [];
+
+    let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
+    let steps = 3; // hoe meer hoe vloeiender
+    for (let i = 1; i <= steps; i++) {
+    let px = last.x + (ball.x - last.x) * (i / steps);
+    let py = last.y + (ball.y - last.y) * (i / steps);
+    ball.trail.push({ x: px, y: py });
+  }
+
+    while (ball.trail.length > 20) {
+    ball.trail.shift();
+ }
+
 
     // Veiliger links/rechts
     if (ball.x <= ball.radius + 1 && ball.dx < 0) {
       ball.x = ball.radius + 1;
       ball.dx *= -1;
-      wallSound.currentTime = 0; wallSound.play();
+      wallSound.currentTime = 0;
+      wallSound.play();
     }
     if (ball.x >= canvas.width - ball.radius - 1 && ball.dx > 0) {
       ball.x = canvas.width - ball.radius - 1;
       ball.dx *= -1;
-      wallSound.currentTime = 0; wallSound.play();
+      wallSound.currentTime = 0;
+      wallSound.play();
     }
 
     // Veiliger bovenkant
     if (ball.y <= ball.radius + 1 && ball.dy < 0) {
       ball.y = ball.radius + 1;
       ball.dy *= -1;
-      wallSound.currentTime = 0; wallSound.play();
+      wallSound.currentTime = 0;
+      wallSound.play();
     }
+// 1) Eerst broad-phase met bal-middelpunt
+const { cx, cy } = getBallCenter(ball);
 
-    // 1) Eerst broad-phase met bal-middelpunt
-    const { cx, cy } = getBallCenter(ball);
-    if (
-      cy + ball.radius > paddleY &&
-      cy - ball.radius < paddleY + paddleHeight &&
-      cx + ball.radius > paddleX &&
-      cx - ball.radius < paddleX + paddleWidth
-    ) {
-      // 2) Pixel-precies check op paddleCanvas alpha
-      const localX = Math.round(cx - paddleX);
-      const sampleHalf = Math.max(1, Math.floor(ball.radius));
-      let opaqueHit = false;
-      const px = Math.max(0, Math.min(paddleWidth - 1, localX));
-      for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
-        const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
-        const a = paddleCtx.getImageData(px, localY, 1, 1).data[3];
-        if (a > 10) { opaqueHit = true; break; }
-      }
+if (
+  cy + ball.radius > paddleY &&
+  cy - ball.radius < paddleY + paddleHeight &&
+  cx + ball.radius > paddleX &&
+  cx - ball.radius < paddleX + paddleWidth
+) {
+  // 2) Pixel-precies check op paddleCanvas alpha
+  //    We testen een klein verticaal kolommetje rond de raaklijn,
+  //    zodat de bal niet per ongeluk door mag als een gat nét naast het midden zit.
+  const localX = Math.round(cx - paddleX);                 // in paddleCanvas-coördinaten
+  const sampleHalf = Math.max(1, Math.floor(ball.radius)); // aantal pixels boven/onder om te testen
+  let opaqueHit = false;
 
-      if (opaqueHit) {
-        const hitPos = (cx - paddleX) / paddleWidth;
-        const angle  = (hitPos - 0.5) * Math.PI / 2;
-        const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-        ball.dx = speed * Math.sin(angle);
-        ball.dy = -Math.abs(speed * Math.cos(angle));
-        ball.y = paddleY - (ball.radius * 2) - 1;
-        wallSound.currentTime = 0; wallSound.play();
-      }
-      // anders: pure gat → bal valt door
+  // Clamp X binnen de paddle
+  const px = Math.max(0, Math.min(paddleWidth - 1, localX));
+
+  for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
+    const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
+    const a = paddleCtx.getImageData(px, localY, 1, 1).data[3]; // alpha kanaal
+    if (a > 10) { // >10 om randen/transparantie te ontzien
+      opaqueHit = true;
+      break;
     }
-  });
-
-  // ⭐️⭐️⭐️ STEP 5b – Paddle-aura tekenen vóór paddle zelf
-  if (isPaddleInvincible()) {
-    const auraR = (paddleWidth * 0.65);
-    const cx = paddleX + paddleWidth / 2;
-    const cy = paddleY + paddleHeight / 2;
-    const g = ctx.createRadialGradient(cx, cy, 6, cx, cy, auraR);
-    g.addColorStop(0, "rgba(255,213,79,0.55)");
-    g.addColorStop(1, "rgba(255,213,79,0.00)");
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(cx, cy, auraR, 0, Math.PI * 2);
-    ctx.fill();
   }
 
-  drawPaddle();  // paddle tekenen na de aura
+  if (opaqueHit) {
+    // 3) Reflectie zoals je al had, maar gebruik middelpunt
+    const hitPos = (cx - paddleX) / paddleWidth; // 0..1
+    const angle  = (hitPos - 0.5) * Math.PI / 2;
+    const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
 
-   balls.forEach((ball, index) => {
+    ball.dx = speed * Math.sin(angle);
+    ball.dy = -Math.abs(speed * Math.cos(angle));
 
- 
+    // Zet de bal net boven de paddle met linkerboven-positie
+    ball.y = paddleY - (ball.radius * 2) - 1;
 
-  // 💥 Als de bal onder het scherm komt: verwijder bal en ga door met volgend element
-  if (ball.y + ball.dy > canvas.height) {
-    balls.splice(index, 1);
-    return; // heel belangrijk: stop hier voor deze bal
-  }
-
-  // ✨ Gouden energie-staart (alleen tekenen als er genoeg punten in de trail zitten)
-  if (ball.trail && ball.trail.length >= 2) {
-    const head = ball.trail[ball.trail.length - 1];
-    const tail = ball.trail[0];
-
-    ctx.save();
-    const gradient = ctx.createLinearGradient(
-      head.x + ball.radius, head.y + ball.radius,
-      tail.x + ball.radius, tail.y + ball.radius
-    );
-    gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
-    gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
-
-    ctx.strokeStyle = gradient;
-    ctx.lineWidth = ball.radius * 2.2;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
-    ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // 🟡 Bal zelf tekenen (zorg dat ballImg bestaat)
-  ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
-}); // ⬅️ EINDE van balls.forEach
-
-// 🔴 Reset-overlay effect
-if (resetOverlayActive) {
-  if (Date.now() % 1000 < 500) {
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    wallSound.currentTime = 0;
+    wallSound.play();
+  } else {
+    // 4) Pure "gat": géén reflectie → bal valt erdoorheen
+    // (niets doen hier; de standaard logica laat ‘m door)
   }
 }
 
-// 🔴 Korte hit-flash bij steen op paddle
+
+
+
+    if (ball.y + ball.dy > canvas.height) {
+      balls.splice(index, 1); // verwijder bal zonder actie
+    }
+// ✨ Gouden smalle energie-staart (taps en iets smaller dan bal)
+// ✨ Rechte gouden energie-staart — iets groter dan de bal en 2x zo lang
+if (ball.trail.length >= 2) {
+  const head = ball.trail[ball.trail.length - 1]; // meest recente positie
+  const tail = ball.trail[0]; // oudste positie (ver weg van bal)
+
+  ctx.save();
+
+  const gradient = ctx.createLinearGradient(
+    head.x + ball.radius, head.y + ball.radius,
+    tail.x + ball.radius, tail.y + ball.radius
+  );
+
+  ctx.lineWidth = ball.radius * 2.0; // iets kleiner dan 2.2
+  gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
+  gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
+
+  ctx.beginPath();
+  ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
+  ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = ball.radius * 2.2; // net iets groter dan de bal
+  ctx.lineCap = "round";
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+    ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
+  });
+
+
+  if (resetOverlayActive) {
+    if (Date.now() % 1000 < 500) {
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  // 🔴 Korte hit-flash bij steen op paddle
 if (stoneHitOverlayTimer > 0) {
   ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   stoneHitOverlayTimer--;
 }
 
-// ✅ Na de loop: check of alle ballen weg zijn
-if (balls.length === 0 && !paddleExploding) {
-  // 🛡️ Invincible: géén leven verliezen; bal gewoon terug op paddle zetten
-  if (typeof isPaddleInvincible === "function" && isPaddleInvincible()) {
-    centerBallOnPaddle?.();   // bal terug op paddle
-    ballLaunched = false;      // opnieuw afschieten
-    ballMoving  = false;
-    // LET OP: NIET returnen! We willen de rest van draw() laten doorlopen
-  } else {
-    // Normaal gedrag: leven verliezen
-    triggerPaddleExplosion();
+
+  // ✅ Na de loop: check of alle ballen weg zijn
+  if (balls.length === 0 && !paddleExploding) {
+    triggerPaddleExplosion(); // pas nu verlies van leven
   }
-}
-
-
 
 drawBricks();
 updateTNTs();
@@ -4010,6 +3690,7 @@ if (downPressed) {
 }
 
 
+  drawPaddle();
   drawMagnetAura(ctx);
   drawMagnetHUD(ctx);
   updateAndDrawDrops();
@@ -4480,26 +4161,6 @@ function spawnStoneDebris(x, y) {
 }
 
 function triggerPaddleExplosion() {
-  // 🛡️ Invincible: geen leven verliezen, geen explosie-flow
-  if (typeof isPaddleInvincible === "function" && isPaddleInvincible()) {
-    // bal direct terug op de paddle en doorgaan met spelen
-    balls = [{
-      x: paddleX + paddleWidth / 2 - ballRadius,
-      y: paddleY - ballRadius * 2,
-      dx: 0,
-      dy: -6,
-      radius: ballRadius,
-      isMain: true
-    }];
-    ballLaunched = false;
-    ballMoving = false;
-    paddleFreeMove = false;
-    resetTriggered = false;
-    // laat magnet/speed/score etc. gewoon lopen; niets afstraffen
-    if (typeof redrawPaddleCanvas === "function") redrawPaddleCanvas();
-    return; // ⬅️ heel belangrijk: hier stoppen zodat er geen leven afgaat
-  }
-
   if (lives > 1) {
     if (!resetTriggered) {
       lives--;
@@ -4514,6 +4175,7 @@ function triggerPaddleExplosion() {
 
     machineGunActive = false;
     machineGunCooldownActive = false;
+    
 
     for (let i = 0; i < 50; i++) {
       paddleExplosionParticles.push({
@@ -4552,7 +4214,6 @@ function triggerPaddleExplosion() {
       resetTriggered = false;
       resetPaddle();
     }, 1000);
-
 
   } else {
     // Laatste leven → GAME OVER
