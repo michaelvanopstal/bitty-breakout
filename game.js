@@ -144,6 +144,12 @@ function getPaddleBounds() {
   };
 }
 
+// ⭐ SFX: ster gepakt
+const starCatchSfx = new Audio("starbutton.mp3");
+starCatchSfx.preload = "auto";
+starCatchSfx.loop = false;
+starCatchSfx.volume = 0.85; // pas aan naar smaak
+
 
 let electricBursts = [];
 
@@ -1615,33 +1621,45 @@ const DROP_TYPES = {
   },
 
   star: {
-    // Pulserend gouden sterretje
-    draw(drop, ctx) {
-      drop.t = (drop.t || 0) + 0.016;                 // ~60fps fase
-      const base = 28;
-      const pulse = 1 + 0.12 * Math.sin(drop.t * 8);  // zachte puls
-      const size = base * pulse;
+  // Pulserend gouden sterretje
+  draw(drop, ctx) {
+    drop.t = (drop.t || 0) + 0.016;                 // ~60fps fase
+    const base = 28;
+    const pulse = 1 + 0.12 * Math.sin(drop.t * 8);  // zachte puls
+    const size = base * pulse;
 
-      ctx.save();
-      ctx.globalAlpha = 0.9 + 0.1 * Math.sin(drop.t * 8);
-      ctx.drawImage(starImg, drop.x - size / 2, drop.y - size / 2, size, size);
-      ctx.restore();
-    },
-    onCatch(drop) {
-      starsCollected++;
-      pointPopups.push({ x: drop.x, y: drop.y, value: "⭐+" + 1, alpha: 1 });
-
-     if (starsCollected >= 10) {
-  starsCollected = 0;
-  startStarPowerCelebration();      // 🌟 full-screen neon celebration
-  activateInvincibleShield(30000);  // 🛡️ shield 30s
-}
- },
-    onMiss(drop) {
-      // geen straf
-    },
+    ctx.save();
+    ctx.globalAlpha = 0.9 + 0.1 * Math.sin(drop.t * 8);
+    ctx.drawImage(starImg, drop.x - size / 2, drop.y - size / 2, size, size);
+    ctx.restore();
   },
-};
+
+  onCatch(drop) {
+    // 🔊 SFX bij het oppakken van de ster
+    try {
+      if (typeof playOnceSafe === "function") {
+        playOnceSafe(starCatchSfx);
+      } else {
+        starCatchSfx.pause();
+        starCatchSfx.currentTime = 0;
+        starCatchSfx.play();
+      }
+    } catch (e) {}
+
+    starsCollected++;
+    pointPopups.push({ x: drop.x, y: drop.y, value: "⭐+" + 1, alpha: 1 });
+
+    if (starsCollected >= 10) {
+      starsCollected = 0;
+      startStarPowerCelebration();     // 🎉 overlay
+      activateInvincibleShield(30000); // 🛡️ 30 s shield
+    }
+  },
+
+  onMiss(drop) {
+    // geen straf
+  },
+}, // ← **deze komma MOET blijven** (scheidt dit item van het volgende in DROP_TYPES)
 
 
 
