@@ -1306,9 +1306,6 @@ tntBeepSound.volume = 0.7;
 const tntExplodeSound = new Audio("tnt_explode.mp3");
 tntExplodeSound.volume = 0.9;
 
-const starPowerSfx = new Audio("starpoweractivation.mp3");
-const starAuraSound = new Audio("starsound.mp3");
-
 
 const stonefallVoiceEvery = 5;
 const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
@@ -1325,7 +1322,7 @@ const brickColumnCount = 9;
 const brickWidth = customBrickWidth;
 const brickHeight = customBrickHeight;
 
-// ⭐ Audio – STAR aura (loop) + STAR power activation (one-shot)
+
 const starAuraSound = new Audio("starsound.mp3");
 starAuraSound.preload = "auto";
 starAuraSound.loop = true;
