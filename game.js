@@ -1248,7 +1248,7 @@ magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 const starImg = new Image();
 starImg.src = "stars.png";  // jouw ster-afbeelding
 
-}
+
 
 const DROP_TYPES = {
   coin: {
