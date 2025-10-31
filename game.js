@@ -1658,9 +1658,9 @@ star: {
 
   onMiss(drop) {
     // geen straf
-  },
-}, // ← **deze komma MOET blijven** (scheidt dit item van het volgende in DROP_TYPES)
-
+   },
+  }, // ← **deze komma MOET blijven** (scheidt dit item van het volgende in DROP_TYPES)
+ };
 
 
 let rocketActive = false; // Voor nu altijd zichtbaar om te testen
