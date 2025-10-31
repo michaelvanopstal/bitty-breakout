@@ -1620,7 +1620,7 @@ const DROP_TYPES = {
     onMiss(drop) {},
   },
 
-  star: {
+star: {
   // Pulserend gouden sterretje
   draw(drop, ctx) {
     drop.t = (drop.t || 0) + 0.016;                 // ~60fps fase
@@ -1660,15 +1660,6 @@ const DROP_TYPES = {
     // geen straf
   },
 }, // ← **deze komma MOET blijven** (scheidt dit item van het volgende in DROP_TYPES)
-
-
-
-
-
-
-// Vergeet niet je 'expected' imagesLoaded maximale aantal met +4 te verhogen.
-
-
 
 
 
