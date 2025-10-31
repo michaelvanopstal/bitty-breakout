@@ -316,6 +316,17 @@ function ensureFxCanvas() {
 function startStarPowerCelebration() {
   ensureFxCanvas();
 
+  // 🔊 One-shot SFX bij start van de celebration (letters + sterren)
+  try {
+    if (typeof playOnceSafe === "function") {
+      playOnceSafe(starPowerSfx);
+    } else {
+      starPowerSfx?.pause?.();
+      if (starPowerSfx) starPowerSfx.currentTime = 0;
+      starPowerSfx?.play?.();
+    }
+  } catch (e) {}
+
   starPowerFX.active = true;
   starPowerFX.t0 = performance.now();
   starPowerFX.stars = [];
@@ -341,6 +352,7 @@ function startStarPowerCelebration() {
     });
   }
 }
+
 
 function renderStarPowerFX() {
   if (!starPowerFX.active || !fxCtx) return;
@@ -672,8 +684,16 @@ function getBallCenter(ball) {
 function activateInvincibleShield(ms = 30000) {
   invincibleActive = true;
   invincibleEndTime = performance.now() + ms;
-  // (optioneel geluid) try { shieldSound.currentTime = 0; shieldSound.play(); } catch {}
+
+  // 🔊 start de aura-loop (alleen als hij niet al speelt)
+  try {
+    if (starAuraSound.paused) {
+      starAuraSound.currentTime = 0;
+      starAuraSound.play();
+    }
+  } catch (e) {}
 }
+
 
 
 
@@ -1286,10 +1306,15 @@ tntBeepSound.volume = 0.7;
 const tntExplodeSound = new Audio("tnt_explode.mp3");
 tntExplodeSound.volume = 0.9;
 
+const starPowerSfx = new Audio("starpoweractivation.mp3");
+const starAuraSound = new Audio("starsound.mp3");
 
 
 const stonefallVoiceEvery = 5;
 const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
+
+
+
 
 rockWarning.volume = 0.85;
 
@@ -1299,6 +1324,36 @@ const brickRowCount = 15;
 const brickColumnCount = 9;
 const brickWidth = customBrickWidth;
 const brickHeight = customBrickHeight;
+
+// ⭐ Audio – STAR aura (loop) + STAR power activation (one-shot)
+const starAuraSound = new Audio("starsound.mp3");
+starAuraSound.preload = "auto";
+starAuraSound.loop = true;
+starAuraSound.volume = 0.45; // pas aan naar smaak
+
+const starPowerSfx = new Audio("starpoweractivation.mp3");
+starPowerSfx.preload = "auto";
+starPowerSfx.loop = false;
+starPowerSfx.volume = 0.85;   // pas aan naar smaak
+
+// kleine helpers
+function playOnceSafe(audio) {
+  try { audio.currentTime = 0; audio.play(); } catch (e) {}
+}
+function fadeOutAndStop(audio, ms = 350) {
+  const startVol = audio.volume;
+  const steps = 12;
+  let i = 0;
+  const iv = setInterval(() => {
+    i++;
+    audio.volume = Math.max(0, startVol * (1 - i/steps));
+    if (i >= steps) {
+      clearInterval(iv);
+      try { audio.pause(); } catch (e) {}
+      audio.volume = startVol; // reset voor volgende keer
+    }
+  }, Math.max(10, ms/steps));
+}
 
 
 const bricks = [];
@@ -4316,14 +4371,20 @@ if (levelTransitionActive) {
   }
 }
 
+// 🛡️ Check of STAR-bonus afgelopen is
+if (invincibleActive && performance.now() >= invincibleEndTime) {
+  invincibleActive = false;
+
+  // 🔇 zacht uitfaden en stoppen van de aura-sound
+  try { fadeOutAndStop(starAuraSound, 350); } catch (e) {}
+}
 
 // 🎆 Fireworks (raketten + vonken)
 drawFireworks();
 
 // 🎊 Confetti bovenop de scene tekenen
 drawConfetti();
-renderStarPowerFX();  // 🌟 full-screen star celebration overlay
-
+renderStarPowerFX(); // 🌟 full-screen star celebration overlay
 
 if (showGameOver) {
   ctx.save();
@@ -4345,7 +4406,11 @@ if (showGameOver) {
   if (gameOverTimer >= 120) {
     showGameOver = false;
   }
+
+  // 🛑 Extra safety: stop aura-geluid bij game over of hard reset
+  try { fadeOutAndStop(starAuraSound, 200); } catch (e) {}
 }
+
 
 
   // 🎇 Paddle-explosie tekenen
