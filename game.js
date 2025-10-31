@@ -4037,7 +4037,6 @@ for (let i = machineGunBullets.length - 1; i >= 0; i--) {
   }
 }
 
-  });
 
   // ⏳ Start cooldown als alle 30 kogels zijn afgevuurd
   if (machineGunShotsFired >= 30 && machineGunBullets.length === 0 && !machineGunCooldownActive) {
