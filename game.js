@@ -189,16 +189,49 @@ function activateInvinciblePaddle(ms = 20000) {
 }
 
 function isPaddleInvincible() {
-  return performance.now() < collector.invincibleUntil;
+  return performance.now() < (collector?.invincibleUntil || 0);
 }
 
+let lastStarTrigger = 0; // voorkomt dubbel activeren binnen 0.5s
+
 function addStar(n = 1) {
-  collector.stars = Math.min(GOAL_STARS, collector.stars + n);
+  // Zorg dat collector bestaat
+  if (!window.collector) return;
+
+  // Basiswaarden
+  collector.stars = Math.min(GOAL_STARS, (collector.stars || 0) + n);
+
+  // Debug: laat even zien in console
+  console.log(`⭐ Stars: ${collector.stars}/${GOAL_STARS}`);
+
+  // Check of doel bereikt is
   if (collector.stars >= GOAL_STARS) {
-    activateInvinciblePaddle(20000); // 20s shield
-    collector.stars = 0;             // reset de sterrenteller
+    const now = performance.now();
+
+    // Cooldown van 500ms om dubbele triggers te vermijden
+    if (now - lastStarTrigger > 500) {
+      lastStarTrigger = now;
+
+      // Activeer het schild (20 seconden)
+      activateInvinciblePaddle(20000);
+
+      // Kleine visuele/audio feedback
+      flashSetPopup?.("⭐ Invincible Paddle 20s!");
+      try {
+        if (typeof coinSound !== "undefined") {
+          coinSound.currentTime = 0;
+          coinSound.play();
+        }
+      } catch (err) {
+        console.warn("addStar sound error:", err);
+      }
+    }
+
+    // Reset teller
+    collector.stars = 0;
   }
 }
+
 
 
 
@@ -1343,41 +1376,44 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
-
 // === COLLECTOR SYSTEM (stars/bombs/x) ===
 const GOAL_STARS = 10;
 const GOAL_BOMBS = 10;
 
 // vervangbare icoontjes (laad je eigen images als je wil)
-let hudStarIcon = typeof starImg !== "undefined" ? starImg : null;
-let hudBombIcon = typeof tntImg  !== "undefined" ? tntImg  : null;
-let hudXIcon    = null; // bv. redCrossImg; blijft null => teken we vectorisch
+let hudStarIcon = (typeof starImg !== "undefined" ? starImg : null);
+let hudBombIcon = (typeof tntImg  !== "undefined" ? tntImg  : null);
+let hudXIcon    = null; // bv. redCrossImg; blijft null => vectorisch tekenen
 
 const collector = {
   stars: 0,
   bombs: 0,
-  x: 0,           // we tellen X ook bij voor UI; effect = reset
+  x: 0,           // voor UI; effect = reset
   invincibleUntil: 0
 };
 
-
-
-
 // === DROPS SYSTEM: item type registry ===
-// Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
 const DROP_TYPES = {
 
-  // 💰 COIN
+  // 💰 COIN → telt nu ook als ⭐ ster
   coin: {
     draw(drop, ctx) {
-      ctx.drawImage(coinImg, drop.x - 12, drop.y - 12, 24, 24);
+      if (typeof coinImg !== "undefined" && coinImg) {
+        ctx.drawImage(coinImg, drop.x - 12, drop.y - 12, 24, 24);
+      } else {
+        ctx.fillStyle = "#ffd700";
+        ctx.beginPath(); ctx.arc(drop.x, drop.y, 12, 0, Math.PI * 2); ctx.fill();
+      }
     },
     onCatch(drop) {
       const earned = doublePointsActive ? 20 : 10;
       score += earned;
       updateScoreDisplay?.();
-      coinSound.currentTime = 0; coinSound.play();
+      try { coinSound.currentTime = 0; coinSound.play(); } catch {}
       pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
+
+      // ⭐️ laat coins ook meetellen voor de invincible-bonus
+      if (typeof addStar === "function") addStar(1);
     },
     onMiss(drop) {},
   },
@@ -1387,35 +1423,47 @@ const DROP_TYPES = {
     draw(drop, ctx) {
       const size = 24 + Math.sin(drop.t) * 2;
       ctx.globalAlpha = 0.95;
-      ctx.drawImage(heartImg, drop.x - size/2, drop.y - size/2, size, size);
+      if (typeof heartImg !== "undefined" && heartImg) {
+        ctx.drawImage(heartImg, drop.x - size/2, drop.y - size/2, size, size);
+      } else {
+        ctx.fillStyle = "#f44";
+        ctx.beginPath(); ctx.arc(drop.x, drop.y, size/2, 0, Math.PI * 2); ctx.fill();
+      }
       ctx.globalAlpha = 1;
     },
     onTick(drop, dt) { drop.t += 0.2; },
     onCatch(drop) {
       heartsCollected++;
-      document.getElementById("heartCount").textContent = heartsCollected;
-      coinSound.currentTime = 0; coinSound.play();
+      const el = document.getElementById("heartCount");
+      if (el) el.textContent = heartsCollected;
+      try { coinSound.currentTime = 0; coinSound.play(); } catch {}
+
       if (heartsCollected >= 10) {
         heartsCollected = 0;
         lives++;
         updateLivesDisplay?.();
         heartPopupTimer = 100;
-        document.getElementById("heartCount").textContent = heartsCollected;
+        if (el) el.textContent = heartsCollected;
       }
     },
     onMiss(drop) {},
   },
 
-  // 🎒 BAG (nog even behouden voor compatibiliteit)
+  // 🎒 BAG (compat)
   bag: {
     draw(drop, ctx) {
-      ctx.drawImage(pxpBagImg, drop.x - 20, drop.y - 20, 40, 40);
+      if (typeof pxpBagImg !== "undefined" && pxpBagImg) {
+        ctx.drawImage(pxpBagImg, drop.x - 20, drop.y - 20, 40, 40);
+      } else {
+        ctx.fillStyle = "#c90";
+        ctx.fillRect(drop.x - 20, drop.y - 20, 40, 40);
+      }
     },
     onCatch(drop) {
       const earned = doublePointsActive ? 160 : 80;
       score += earned;
       updateScoreDisplay?.();
-      pxpBagSound.currentTime = 0; pxpBagSound.play();
+      try { pxpBagSound.currentTime = 0; pxpBagSound.play(); } catch {}
       pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
     },
     onMiss(drop) {},
@@ -1426,8 +1474,9 @@ const DROP_TYPES = {
     draw(drop, ctx) {
       const s = 26;
       const blink = (Math.floor(performance.now()/200) % 2 === 0);
-      const img = blink ? tntBlinkImg : tntImg;
-      ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
+      const img = (blink ? (typeof tntBlinkImg !== "undefined" && tntBlinkImg) : (typeof tntImg !== "undefined" && tntImg));
+      if (img) ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
+      else { ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(drop.x, drop.y, 11, 0, Math.PI*2); ctx.fill(); }
     },
     onCatch(drop) {
       if (lives > 1) {
@@ -1450,32 +1499,25 @@ const DROP_TYPES = {
         ctx.drawImage(starImg, drop.x - s/2, drop.y - s/2, s, s);
       } else {
         ctx.fillStyle = "#ffd700";
-        ctx.beginPath();
-        ctx.arc(drop.x, drop.y, 12, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(drop.x, drop.y, 12, 0, Math.PI * 2); ctx.fill();
       }
     },
     onCatch(drop) {
-      addStar?.(1);            // voegt ster toe
-      score += 5;              // kleine scorebonus
+      addStar?.(1);
+      score += 5;
       updateScoreDisplay?.();
     },
     onMiss(drop) {},
   },
 
-  // 💣 NIEUW: BOMB TOKEN (voor brick-explosie bij 10x)
+  // 💣 NIEUW: BOMB TOKEN (triggert brick-explosie bij 10x)
   bomb_token: {
     draw(drop, ctx) {
       const s = 26;
       const blink = (Math.floor(performance.now() / 200) % 2 === 0);
-      const img = blink && typeof tntBlinkImg !== "undefined" ? tntBlinkImg : tntImg;
+      const img = blink && typeof tntBlinkImg !== "undefined" && tntBlinkImg ? tntBlinkImg : (typeof tntImg !== "undefined" && tntImg ? tntImg : null);
       if (img) ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
-      else {
-        ctx.fillStyle = "#111";
-        ctx.beginPath();
-        ctx.arc(drop.x, drop.y, 11, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      else { ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(drop.x, drop.y, 11, 0, Math.PI * 2); ctx.fill(); }
     },
     onCatch(drop) {
       addBomb?.(1);
@@ -1497,7 +1539,7 @@ const DROP_TYPES = {
       ctx.restore();
     },
     onCatch(drop) {
-      addX?.(1);               // reset alle tellerprogress
+      addX?.(1);
       try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
     },
     onMiss(drop) {},
@@ -1505,32 +1547,31 @@ const DROP_TYPES = {
 
   // 🧱 PADDLE POWERUPS
   paddle_long: {
-    draw(drop, ctx) { ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
+    draw(drop, ctx) { if (typeof paddleLongBlockImg !== "undefined" && paddleLongBlockImg) ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) { startPaddleSizeEffect?.("long"); },
     onMiss(drop) {},
   },
 
   paddle_small: {
-    draw(drop, ctx) { ctx.drawImage(paddleSmallBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
+    draw(drop, ctx) { if (typeof paddleSmallBlockImg !== "undefined" && paddleSmallBlockImg) ctx.drawImage(paddleSmallBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) { startPaddleSizeEffect?.("small"); },
     onMiss(drop) {},
   },
 
   // ⚡ SPEED BOOST
   speed: {
-    draw(drop, ctx) { ctx.drawImage(speedImg, drop.x - 35, drop.y - 12, 70, 24); },
+    draw(drop, ctx) { if (typeof speedImg !== "undefined" && speedImg) ctx.drawImage(speedImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) {
       speedBoostActive = true;
       speedBoostStart = Date.now();
-      speedBoostSound.currentTime = 0;
-      speedBoostSound.play();
+      try { speedBoostSound.currentTime = 0; speedBoostSound.play(); } catch {}
     },
     onMiss(drop) {},
   },
 
   // 🧲 MAGNET
   magnet: {
-    draw(drop, ctx) { ctx.drawImage(magnetImg, drop.x - 35, drop.y - 12, 70, 24); },
+    draw(drop, ctx) { if (typeof magnetImg !== "undefined" && magnetImg) ctx.drawImage(magnetImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) { activateMagnet?.(20000); },
     onMiss(drop) {},
   },
