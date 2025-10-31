@@ -225,6 +225,22 @@ function playVoiceOver(audio, opts = {}) {
 }
 
 
+function stopStarAura(immediate = false) {
+  try {
+    if (immediate) {
+      starAuraSound.pause();
+      starAuraSound.currentTime = 0;
+      return;
+    }
+    // zachte fade-out
+    if (typeof fadeOutAndStop === "function") {
+      fadeOutAndStop(starAuraSound, 300);
+    } else {
+      starAuraSound.pause();
+      starAuraSound.currentTime = 0;
+    }
+  } catch (e) {}
+}
 
 
 
@@ -684,8 +700,6 @@ function getBallCenter(ball) {
 function activateInvincibleShield(ms = 30000) {
   invincibleActive = true;
   invincibleEndTime = performance.now() + ms;
-
-  // 🔊 start de aura-loop (alleen als hij niet al speelt)
   try {
     if (starAuraSound.paused) {
       starAuraSound.currentTime = 0;
@@ -693,6 +707,7 @@ function activateInvincibleShield(ms = 30000) {
     }
   } catch (e) {}
 }
+
 
 
 
@@ -4371,10 +4386,14 @@ if (levelTransitionActive) {
 // 🛡️ Check of STAR-bonus afgelopen is
 if (invincibleActive && performance.now() >= invincibleEndTime) {
   invincibleActive = false;
-
-  // 🔇 zacht uitfaden en stoppen van de aura-sound
-  try { fadeOutAndStop(starAuraSound, 350); } catch (e) {}
+  stopStarAura(false);   // fade-out
 }
+
+// 🔒 Fail-safe: als er om welke reden dan ook géén shield is, mag de aura-sound niet spelen
+if (!invincibleActive && !starAuraSound.paused) {
+  stopStarAura(false);   // fade-out (of true voor instant)
+}
+
 
 // 🎆 Fireworks (raketten + vonken)
 drawFireworks();
