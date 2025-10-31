@@ -1247,12 +1247,10 @@ magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
 const starImg = new Image();
 starImg.src = "stars.png";  // jouw ster-afbeelding
-
 // === DROPS SYSTEM: item type registry ===
-// Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
+// Alleen de actieve types: coin, heart, star
 const DROP_TYPES = {
   coin: {
-    // gebruikt je bestaande coin-asset
     draw(drop, ctx) {
       // 24x24 zoals je coins
       ctx.drawImage(coinImg, drop.x - 12, drop.y - 12, 24, 24);
@@ -1261,38 +1259,41 @@ const DROP_TYPES = {
       const earned = doublePointsActive ? 20 : 10;
       score += earned;
       updateScoreDisplay?.();
-      coinSound.currentTime = 0; coinSound.play();
+      try { coinSound.currentTime = 0; coinSound.play(); } catch (e) {}
       pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
     },
     onMiss(drop) {
-      // niks; gewoon weg
+      // niks
     },
   },
 
   heart: {
     draw(drop, ctx) {
-      // iets groter hart (pulserend)
-      const size = 24 + Math.sin(drop.t) * 2;
+      // pulserend hart
+      const size = 24 + Math.sin(drop.t || 0) * 2;
       ctx.globalAlpha = 0.95;
       ctx.drawImage(heartImg, drop.x - size / 2, drop.y - size / 2, size, size);
       ctx.globalAlpha = 1;
     },
-    onTick(drop, dt) { drop.t += 0.2; },
+    onTick(drop, dt) {
+      drop.t = (drop.t || 0) + 0.2;
+    },
     onCatch(drop) {
       heartsCollected++;
-      document.getElementById("heartCount").textContent = heartsCollected;
-      coinSound.currentTime = 0; coinSound.play();
+      const el = document.getElementById("heartCount");
+      if (el) el.textContent = heartsCollected;
+      try { coinSound.currentTime = 0; coinSound.play(); } catch (e) {}
 
       if (heartsCollected >= 10) {
         heartsCollected = 0;
         lives++;
         updateLivesDisplay?.();
         heartPopupTimer = 100;
-        document.getElementById("heartCount").textContent = heartsCollected;
+        if (el) el.textContent = heartsCollected;
       }
     },
     onMiss(drop) {
-      // gemist hart: geen straf
+      // geen straf
     },
   },
 
@@ -1301,7 +1302,7 @@ const DROP_TYPES = {
     draw(drop, ctx) {
       const t = performance.now() * 0.006 + (drop.t || 0);
       const scale = 1 + 0.12 * Math.sin(t); // zachte puls
-      const w = 34 * scale;                 // basismaat ≈ 34px
+      const w = 34 * scale;
       const h = 34 * scale;
       const img = (starImg && starImg.complete) ? starImg : coinImg; // fallback
       ctx.save();
@@ -1310,87 +1311,29 @@ const DROP_TYPES = {
       ctx.restore();
     },
     onTick(drop) {
-      // houd interne tijd voor de puls bij
-      drop.t = (drop.t || 0) + 0.016;
+      drop.t = (drop.t || 0) + 0.016; // voor de puls
     },
     onCatch(drop) {
       starsCollected++;
-      // kleine puntenbeloning (optioneel consistent met coin/bag)
       const earned = doublePointsActive ? 40 : 20;
       score += earned;
       updateScoreDisplay?.();
       pointPopups.push({ x: drop.x, y: drop.y, value: "+⭐ " + earned, alpha: 1 });
 
-      // Elke 10 sterren: activeer Invincible Paddle (eenmalige burst)
+      // Elke 10 sterren → Invincible Paddle 30s
       if (starsCollected >= 10 && !invincibleActive) {
-        starsCollected = 0; // reset teller voor de volgende reeks
+        starsCollected = 0;
         invincibleActive = true;
         invincibleEndTime = performance.now() + INVINCIBLE_DURATION;
-        // (optioneel) sound/callout
         try { new Audio("shield_on.mp3").play().catch(() => {}); } catch (e) {}
       }
     },
     onMiss(drop) {
-      // gemiste ster: geen straf
+      // geen straf
     },
   },
+}; // ⬅️ DROP_TYPES netjes afgesloten
 
-  bomb: {
-    // “ontwijken!” – lichte straf bij catch
-    draw(drop, ctx) {
-      const s = 26;
-      const blink = (Math.floor(performance.now() / 200) % 2 === 0);
-      const img = blink ? tntBlinkImg : tntImg;
-      ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
-    },
-    onCatch(drop) {
-      if (invincibleActive) {
-        // ⭐ geen schade; desnoods reflectie-animatie
-        pointPopups.push({ x: drop.x, y: drop.y, value: "Shield!", alpha: 1 });
-        try { new Audio("plink.mp3").play().catch(() => {}); } catch (e) {}
-        return;
-      }
-      if (lives > 1) {
-        lives--;
-        updateLivesDisplay?.();
-        pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
-      } else {
-        triggerPaddleExplosion?.();
-      }
-      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch (e) {}
-    },
-    onMiss(drop) { /* goed zo, niks */ },
-  },
-
-  paddle_long: {
-    draw(drop, ctx) { ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
-    onCatch(drop) { startPaddleSizeEffect?.("long"); },
-    onMiss(drop) {},
-  },
-
-  paddle_small: {
-    draw(drop, ctx) { ctx.drawImage(paddleSmallBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
-    onCatch(drop) { startPaddleSizeEffect?.("small"); },
-    onMiss(drop) {},
-  },
-
-  speed: {
-    draw(drop, ctx) { ctx.drawImage(speedImg, drop.x - 35, drop.y - 12, 70, 24); },
-    onCatch(drop) {
-      speedBoostActive = true;
-      speedBoostStart = Date.now();
-      speedBoostSound.currentTime = 0;
-      speedBoostSound.play();
-    },
-    onMiss(drop) {},
-  },
-
-  magnet: {
-    draw(drop, ctx) { ctx.drawImage(magnetImg, drop.x - 35, drop.y - 12, 70, 24); },
-    onCatch(drop) { activateMagnet?.(20000); },
-    onMiss(drop) {},
-  } // ⬅️ geen komma hier (laatste item)
-}; // ⬅️ sluit het hele DROP_TYPES-object af
 
 
 
