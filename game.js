@@ -2135,39 +2135,70 @@ function drawPaddle() {
   // basis
   ctx.drawImage(paddleCanvas, paddleX, paddleY);
 
-  // 🛡️ Gouden aura als schild actief is
+  // 🛡️ Ronde, pulserende gouden energie-aura
   if (invincibleActive) {
-    ctx.save();
-
-    // gouden rand
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "#ffd700";
-    ctx.strokeRect(paddleX - 2, paddleY - 2, paddleWidth + 4, paddleHeight + 4);
-
-    // zachte, pulserende gloed
-    const t = performance.now() * 0.006;
-    const glow = 18 + 3 * Math.sin(t);
     const cx = paddleX + paddleWidth / 2;
     const cy = paddleY + paddleHeight / 2;
 
-    const grad = ctx.createRadialGradient(cx, cy, 6, cx, cy, Math.max(paddleWidth, paddleHeight) * 0.8);
-    grad.addColorStop(0, "rgba(255,215,0,0.20)");
-    grad.addColorStop(1, "rgba(255,215,0,0.00)");
+    // kies een cirkelradius die de paddle ruim omvat
+    const rBase = Math.hypot(paddleWidth, paddleHeight) * 0.65;
+    const t = performance.now() * 0.002;
 
+    ctx.save();
+
+    // 1) zachte radiale gloed
+    const rPulse = rBase * (1 + 0.06 * Math.sin(t * 6));
+    const g1 = ctx.createRadialGradient(cx, cy, rPulse * 0.2, cx, cy, rPulse);
+    g1.addColorStop(0.00, "rgba(255,215,0,0.35)");
+    g1.addColorStop(0.50, "rgba(255,215,0,0.15)");
+    g1.addColorStop(1.00, "rgba(255,215,0,0.00)");
     ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = grad;
-    // met roundRect als beschikbaar
-    if (ctx.roundRect) {
+    ctx.fillStyle = g1;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rPulse, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2) buitenrand met lichte flikkering
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = "rgba(255,215,0,0.9)";
+    ctx.shadowColor = "rgba(255,215,0,0.7)";
+    ctx.shadowBlur = 18;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rPulse * (0.92 + 0.02 * Math.sin(t * 10)), 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 3) twee roterende energie-bogen (geeft “plasma” gevoel)
+    const arcR = rPulse * 0.92;
+    const arcLen = Math.PI * 0.6; // 108°
+    ctx.shadowBlur = 22;
+    for (let k = 0; k < 2; k++) {
+      const phase = t * (k ? 1.2 : -1.3) + k * Math.PI * 0.5;
       ctx.beginPath();
-      ctx.roundRect(paddleX - glow, paddleY - glow, paddleWidth + glow*2, paddleHeight + glow*2, 10);
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = 0.75;
+      ctx.strokeStyle = "rgba(255,223,0,0.95)";
+      ctx.arc(cx, cy, arcR, phase, phase + arcLen);
+      ctx.stroke();
+    }
+
+    // 4) subtiele vonkjes
+    const sparks = 10;
+    ctx.globalAlpha = 0.8;
+    for (let i = 0; i < sparks; i++) {
+      const ang = t * 7 + (i * (Math.PI * 2 / sparks));
+      const r = rPulse * (0.85 + 0.1 * Math.sin(t * 5 + i));
+      const sx = cx + Math.cos(ang) * r;
+      const sy = cy + Math.sin(ang) * r;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,240,150,0.95)";
       ctx.fill();
-    } else {
-      ctx.fillRect(paddleX - glow, paddleY - glow, paddleWidth + glow*2, paddleHeight + glow*2);
     }
 
     ctx.restore();
   }
 }
+
 
 
 function drawMagnetAura(ctx) {
@@ -2898,19 +2929,39 @@ function drawFallingStones() {
     else s.framesInside = 0;
 
     // Botsing telt na drempel-frames
-    if (s.framesInside >= debounceFrames) {
-      spawnStoneDebris(s.x, s.y);
-      s.active = false;
-      stoneHitOverlayTimer = 18;
+   if (s.framesInside >= debounceFrames) {
+  if (invincibleActive) {
+    // 🛡️ Tijdens sterren-bonus: NIET exploderen — gewoon reflecteren en doorgaan
+    // eenvoudige bounce omhoog + lichte zij-afwijking obv contactpunt
+    const paddleLeft  = paddleX;
+    const paddleRight = paddleX + paddleWidth;
+    const rel = ((s.x - paddleLeft) / (paddleRight - paddleLeft)) - 0.5; // -0.5..+0.5
 
-      if (!stoneHitLock) {
-        stoneHitLock = true;
-        if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
-        stoneClearRequested = true;
-        setTimeout(() => { stoneHitLock = false; }, 1200);
-      }
-      continue;
+    s.vy = -Math.max(6, Math.abs(s.vy || 6));
+    s.vx = (s.vx || 0) + rel * 2;
+
+    // zet steen net boven de paddle om “plakken” te voorkomen
+    const r = s.size / 2;
+    s.y = paddleY - r - 1;
+
+    // klein visueel tikje
+    stoneHitOverlayTimer = 10;
+  } else {
+    // normaal gedrag (zoals je had)
+    spawnStoneDebris(s.x, s.y);
+    s.active = false;
+    stoneHitOverlayTimer = 18;
+
+    if (!stoneHitLock) {
+      stoneHitLock = true;
+      if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
+      stoneClearRequested = true;
+      setTimeout(() => { stoneHitLock = false; }, 1200);
     }
+  }
+  continue;
+}
+
 
     // onder uit beeld → vergruizen
     if (s.y - s.size / 2 > canvas.height) {
@@ -3942,29 +3993,37 @@ if (machineGunActive && !machineGunCooldownActive) {
     ctx.fill();
 
     // 🎯 Check botsing met paddle
-    if (
-      bullet.y >= paddleY &&
-      bullet.x >= paddleX &&
-      bullet.x <= paddleX + paddleWidth
-    ) {
-      const hitX = bullet.x - paddleX;
-      const radius = 6;
+    // 🎯 Check botsing met paddle
+if (
+  bullet.y >= paddleY &&
+  bullet.x >= paddleX &&
+  bullet.x <= paddleX + paddleWidth
+) {
+  if (invincibleActive) {
+    // 🛡️ Tijdens sterren-bonus: geen schade — kogel weg (of reflecteren)
+    // reflect-optie: bullet.vy = -Math.abs(bullet.vy || 6);
+    machineGunBullets.splice(i, 1);
+    continue;
+  }
 
-      if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
-        paddleDamageZones.push(bullet.x);
+  const hitX = bullet.x - paddleX;
+  const radius = 6;
 
-        // ❗ GAT MAKEN
-        paddleCtx.globalCompositeOperation = 'destination-out';
-        paddleCtx.beginPath();
-        paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
-        paddleCtx.fill();
-        paddleCtx.globalCompositeOperation = 'source-over';
-      }
+  if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
+    paddleDamageZones.push(bullet.x);
 
-      machineGunBullets.splice(i, 1);
-    } else if (bullet.y > canvas.height) {
-      machineGunBullets.splice(i, 1);
-    }
+    // ❗ GAT MAKEN
+    paddleCtx.globalCompositeOperation = 'destination-out';
+    paddleCtx.beginPath();
+    paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
+    paddleCtx.fill();
+    paddleCtx.globalCompositeOperation = 'source-over';
+  }
+
+  machineGunBullets.splice(i, 1);
+} else if (bullet.y > canvas.height) {
+  machineGunBullets.splice(i, 1);
+}
   });
 
   // ⏳ Start cooldown als alle 30 kogels zijn afgevuurd
@@ -4255,10 +4314,8 @@ function spawnStoneDebris(x, y) {
 }
 
 function triggerPaddleExplosion() {
-  // 🛡️ Invincible: géén levensverlies of explosie; bal gewoon terug op de paddle
+  // 🛡️ Sterren-bonus actief: NIETS resetten of pauzeren, spel loopt door
   if (invincibleActive) {
-    pauseTimer?.();
-    resetBall?.();              // jouw bestaande reset (bal centreren op paddle)
     return;
   }
 
