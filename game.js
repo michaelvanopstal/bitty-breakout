@@ -4673,3 +4673,6 @@ function triggerBallReset() {
 // 🟢 BELANGRIJK: knop koppelen aan functie
 document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
 
+  console.log("EOF OK");
+
+
