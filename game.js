@@ -97,6 +97,11 @@ let magnetCatchRadius = 22;      // auto-catch radius rond paddle
 
 let fallingCoins = [];
 let fallingBags = [];
+// ⭐ Invincible Paddle (gouden schild na 10 sterren)
+let invincibleActive = false;
+let invincibleEndTime = 0;      // ms timestamp
+let starsCollected = 0;         // telt gevangen sterren (triggert bij 10)
+const INVINCIBLE_DURATION = 30000; // 30s
 
 
 // ❤️ Hartjes-systeem
@@ -1239,6 +1244,11 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
+
+const starImg = new Image();
+starImg.src = "stars.png";  // jouw ster-afbeelding
+
+
 // === DROPS SYSTEM: item type registry ===
 // Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
 const DROP_TYPES = {
@@ -1287,20 +1297,43 @@ const DROP_TYPES = {
     },
   },
 
-  bag: {
-    // gebruikt je pxpBagImg (40x40 in je game)
+   star: {
+    // Pulsende ster terwijl hij valt
     draw(drop, ctx) {
-      ctx.drawImage(pxpBagImg, drop.x - 20, drop.y - 20, 40, 40);
+      const t = performance.now() * 0.006 + (drop.t || 0);
+      const scale = 1 + 0.12 * Math.sin(t); // zachte puls
+      const w = 34 * scale;                // basismaat ≈ 34px
+      const h = 34 * scale;
+      const img = starImg && starImg.complete ? starImg : coinImg; // fallback
+      ctx.save();
+      ctx.translate(drop.x, drop.y);
+      ctx.drawImage(img, -w/2, -h/2, w, h);
+      ctx.restore();
+    },
+    onTick(drop) {
+      // houd interne tijd voor de puls bij
+      drop.t = (drop.t || 0) + 0.016;
     },
     onCatch(drop) {
-      const earned = doublePointsActive ? 160 : 80;
+      starsCollected++;
+      // kleine puntenbeloning (optioneel consistent met coin/bag)
+      const earned = doublePointsActive ? 40 : 20;
       score += earned;
       updateScoreDisplay?.();
-      pxpBagSound.currentTime = 0; pxpBagSound.play();
-      pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
+      pointPopups.push({ x: drop.x, y: drop.y, value: "+⭐ " + earned, alpha: 1 });
+
+      // Elke 10 sterren: activeer Invincible Paddle (eenmalige burst)
+      if (starsCollected >= 10 && !invincibleActive) {
+        starsCollected = 0; // reset teller voor de volgende reeks
+        invincibleActive = true;
+        invincibleEndTime = performance.now() + INVINCIBLE_DURATION;
+        // (optioneel) sound/callout
+        try { new Audio("shield_on.mp3").play().catch(()=>{}); } catch(e){}
+      }
     },
-    onMiss(drop) { /* niks */ },
-  },
+    onMiss(drop) {
+      // gemiste ster: geen straf
+    },
 
   bomb: {
     // “ontwijken!” – lichte straf bij catch
@@ -1310,18 +1343,23 @@ const DROP_TYPES = {
       const img = blink ? tntBlinkImg : tntImg;
       ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
     },
-    onCatch(drop) {
-      // kleine straf of effect, bv. -1 leven (alleen als >1) of -punten
-      if (lives > 1) {
-        lives--;
-        updateLivesDisplay?.();
-        pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
-      } else {
-        // laatste leven → trigger paddleExplode flow
-        triggerPaddleExplosion?.();
-      }
-      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
-    },
+   onCatch(drop) {
+  if (invincibleActive) {
+    // ⭐ geen schade; desnoods reflectie-animatie
+    pointPopups.push({ x: drop.x, y: drop.y, value: "Shield!", alpha: 1 });
+    try { new Audio("plink.mp3").play().catch(()=>{}); } catch(e){}
+    return;
+  }
+  if (lives > 1) {
+    lives--;
+    updateLivesDisplay?.();
+    pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
+  } else {
+    triggerPaddleExplosion?.();
+  }
+  try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+}
+
     onMiss(drop) { /* goed zo, niks */ },
   },
 
@@ -2075,8 +2113,43 @@ function drawHeartPopup() {
 function drawPaddle() {
   if (paddleExploding) return;
 
+  // Paddle zelf
   ctx.drawImage(paddleCanvas, paddleX, paddleY);
+
+  // ⭐ Gouden aura wanneer invincible
+  if (invincibleActive) {
+    const cx = paddleX + paddleWidth / 2;
+    const cy = paddleY + paddleHeight / 2;
+    const t = performance.now() * 0.004;
+    const baseR = Math.max(paddleWidth, 80) * 0.65;
+    const puls = 6 * Math.sin(t * 2);
+    const radius = baseR + puls;
+
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    const grd = ctx.createRadialGradient(cx, cy, Math.max(10, baseR*0.35), cx, cy, radius);
+    grd.addColorStop(0, "rgba(255,215,0,0.9)");  // goud
+    grd.addColorStop(1, "rgba(255,215,0,0.0)");
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // dunne gouden rand
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,215,0,0.9)";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(paddleX - 2, paddleY - 2, paddleWidth + 4, paddleHeight + 4);
+    ctx.restore();
+  }
 }
+// ⭐ Invincible timer
+if (invincibleActive && performance.now() >= invincibleEndTime) {
+  invincibleActive = false;
+  try { new Audio("shield_off.mp3").play().catch(()=>{}); } catch(e){}
+}
+
 
 function drawMagnetAura(ctx) {
   if (!magnetActive) return; // alleen tekenen als hij aanstaat
@@ -2123,6 +2196,9 @@ function resetAllBonuses() {
 
   flagsOnPaddle = false;
   flagTimer = 0;
+
+  invincibleActive = false;
+  invincibleEndTime = 0;
 
   rocketActive = false;
   rocketAmmo = 0;
@@ -2802,30 +2878,41 @@ function drawFallingStones() {
     // ✅ Echte hit als één van beide paden waar is
     const contactNow = verticalHit || sideHit;
 
-    if (contactNow) s.framesInside++;
-    else s.framesInside = 0;
+  if (contactNow) s.framesInside++;
+else s.framesInside = 0;
 
-    // Botsing telt na drempel-frames
-    if (s.framesInside >= debounceFrames) {
-      spawnStoneDebris(s.x, s.y);
-      s.active = false;
-      stoneHitOverlayTimer = 18;
+// Botsing telt na drempel-frames
+if (s.framesInside >= debounceFrames) {
+  spawnStoneDebris(s.x, s.y);
 
-      if (!stoneHitLock) {
-        stoneHitLock = true;
-        if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
-        stoneClearRequested = true;
-        setTimeout(() => { stoneHitLock = false; }, 1200);
-      }
-      continue;
-    }
+  if (invincibleActive) {
+    // ⭐ Invincible Paddle reflecteert de steen omhoog
+    s.y = paddleTop - s.size / 2 - 2;
+    s.dy = -Math.abs(s.dy) * 1.2;  // stuiter terug omhoog
+    s.framesInside = 0;
+    // optioneel: visuele feedback
+    pointPopups.push({ x: s.x, y: s.y, value: "CLANG!", alpha: 1 });
+  } else {
+    // normaal gedrag: steen vernietigt paddle
+    s.active = false;
+    stoneHitOverlayTimer = 18;
 
-    // onder uit beeld → vergruizen
-    if (s.y - s.size / 2 > canvas.height) {
-      spawnStoneDebris(s.x, canvas.height - 10);
-      s.active = false;
+    if (!stoneHitLock) {
+      stoneHitLock = true;
+      if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
+      stoneClearRequested = true;
+      setTimeout(() => { stoneHitLock = false; }, 1200);
     }
   }
+  continue;
+}
+
+// onder uit beeld → vergruizen
+if (s.y - s.size / 2 > canvas.height) {
+  spawnStoneDebris(s.x, canvas.height - 10);
+  s.active = false;
+}
+
 
   // ná de iteratie: alle stenen wissen (indien aangevinkt)
   if (stoneClearRequested) {
@@ -3849,31 +3936,39 @@ if (machineGunActive && !machineGunCooldownActive) {
     ctx.fillStyle = "red";
     ctx.fill();
 
-    // 🎯 Check botsing met paddle
     if (
-      bullet.y >= paddleY &&
-      bullet.x >= paddleX &&
-      bullet.x <= paddleX + paddleWidth
-    ) {
-      const hitX = bullet.x - paddleX;
-      const radius = 6;
+  bullet.y >= paddleY &&
+  bullet.x >= paddleX &&
+  bullet.x <= paddleX + paddleWidth
+) {
+  if (invincibleActive) {
+    // ⭐ Invincible Paddle reflecteert kogel omhoog
+    bullet.y = paddleY - 6;
+    bullet.dy = -Math.abs(bullet.dy) * 1.15; // iets sneller omhoog
+    // optioneel: visuele vonk
+    pointPopups.push({ x: bullet.x, y: bullet.y, value: "↰", alpha: 1 });
+  } else {
+    const hitX = bullet.x - paddleX;
+    const radius = 6;
 
-      if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
-        paddleDamageZones.push(bullet.x);
+    if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
+      paddleDamageZones.push(bullet.x);
 
-        // ❗ GAT MAKEN
-        paddleCtx.globalCompositeOperation = 'destination-out';
-        paddleCtx.beginPath();
-        paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
-        paddleCtx.fill();
-        paddleCtx.globalCompositeOperation = 'source-over';
-      }
-
-      machineGunBullets.splice(i, 1);
-    } else if (bullet.y > canvas.height) {
-      machineGunBullets.splice(i, 1);
+      // ❗ GAT MAKEN in paddle
+      paddleCtx.globalCompositeOperation = 'destination-out';
+      paddleCtx.beginPath();
+      paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
+      paddleCtx.fill();
+      paddleCtx.globalCompositeOperation = 'source-over';
     }
-  });
+
+    // verwijder kogel na schade
+     machineGunBullets.splice(i, 1);
+    }
+  } else if (bullet.y > canvas.height) {
+    machineGunBullets.splice(i, 1);
+  }
+});
 
   // ⏳ Start cooldown als alle 30 kogels zijn afgevuurd
   if (machineGunShotsFired >= 30 && machineGunBullets.length === 0 && !machineGunCooldownActive) {
