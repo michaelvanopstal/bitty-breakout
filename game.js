@@ -1497,21 +1497,19 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
-
 // === DROPS SYSTEM: item type registry ===
 // Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
 const DROP_TYPES = {
   coin: {
-    // gebruikt je bestaande coin-asset
     draw(drop, ctx) {
-      // 24x24 zoals je coins
       ctx.drawImage(coinImg, drop.x - 12, drop.y - 12, 24, 24);
     },
     onCatch(drop) {
       const earned = doublePointsActive ? 20 : 10;
       score += earned;
       updateScoreDisplay?.();
-      coinSound.currentTime = 0; coinSound.play();
+      coinSound.currentTime = 0;
+      coinSound.play();
       pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
     },
     onMiss(drop) {
@@ -1521,17 +1519,17 @@ const DROP_TYPES = {
 
   heart: {
     draw(drop, ctx) {
-      // iets groter hart (pulserend)
       const size = 24 + Math.sin(drop.t) * 2;
       ctx.globalAlpha = 0.95;
-      ctx.drawImage(heartImg, drop.x - size/2, drop.y - size/2, size, size);
+      ctx.drawImage(heartImg, drop.x - size / 2, drop.y - size / 2, size, size);
       ctx.globalAlpha = 1;
     },
     onTick(drop, dt) { drop.t += 0.2; },
     onCatch(drop) {
       heartsCollected++;
       document.getElementById("heartCount").textContent = heartsCollected;
-      coinSound.currentTime = 0; coinSound.play();
+      coinSound.currentTime = 0;
+      coinSound.play();
 
       if (heartsCollected >= 10) {
         heartsCollected = 0;
@@ -1547,7 +1545,6 @@ const DROP_TYPES = {
   },
 
   bag: {
-    // gebruikt je pxpBagImg (40x40 in je game)
     draw(drop, ctx) {
       ctx.drawImage(pxpBagImg, drop.x - 20, drop.y - 20, 40, 40);
     },
@@ -1555,14 +1552,14 @@ const DROP_TYPES = {
       const earned = doublePointsActive ? 160 : 80;
       score += earned;
       updateScoreDisplay?.();
-      pxpBagSound.currentTime = 0; pxpBagSound.play();
+      pxpBagSound.currentTime = 0;
+      pxpBagSound.play();
       pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
     },
     onMiss(drop) { /* niks */ },
   },
 
   bomb: {
-    // “ontwijken!” – lichte straf bij catch
     draw(drop, ctx) {
       const s = 26;
       const blink = (Math.floor(performance.now() / 200) % 2 === 0);
@@ -1570,20 +1567,17 @@ const DROP_TYPES = {
       ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
     },
     onCatch(drop) {
-      // 🛡️ Invincible shield actief → reflect en geen schade
       if (invincibleActive) {
         pointPopups.push({ x: drop.x, y: drop.y, value: "🛡️ reflect", alpha: 1 });
         try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
         return;
       }
 
-      // anders: normale straf
       if (lives > 1) {
         lives--;
         updateLivesDisplay?.();
         pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
       } else {
-        // laatste leven → trigger paddleExplode flow
         triggerPaddleExplosion?.();
       }
       try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
@@ -1620,47 +1614,48 @@ const DROP_TYPES = {
     onMiss(drop) {},
   },
 
-star: {
-  // Pulserend gouden sterretje
-  draw(drop, ctx) {
-    drop.t = (drop.t || 0) + 0.016;                 // ~60fps fase
-    const base = 28;
-    const pulse = 1 + 0.12 * Math.sin(drop.t * 8);  // zachte puls
-    const size = base * pulse;
+  star: {
+    // Pulserend gouden sterretje
+    draw(drop, ctx) {
+      drop.t = (drop.t || 0) + 0.016;
+      const base = 28;
+      const pulse = 1 + 0.12 * Math.sin(drop.t * 8);
+      const size = base * pulse;
 
-    ctx.save();
-    ctx.globalAlpha = 0.9 + 0.1 * Math.sin(drop.t * 8);
-    ctx.drawImage(starImg, drop.x - size / 2, drop.y - size / 2, size, size);
-    ctx.restore();
-  },
+      ctx.save();
+      ctx.globalAlpha = 0.9 + 0.1 * Math.sin(drop.t * 8);
+      ctx.drawImage(starImg, drop.x - size / 2, drop.y - size / 2, size, size);
+      ctx.restore();
+    },
 
-  onCatch(drop) {
-    // 🔊 SFX bij het oppakken van de ster
-    try {
-      if (typeof playOnceSafe === "function") {
-        playOnceSafe(starCatchSfx);
-      } else {
-        starCatchSfx.pause();
-        starCatchSfx.currentTime = 0;
-        starCatchSfx.play();
+    onCatch(drop) {
+      // 🔊 SFX bij het oppakken van de ster
+      try {
+        if (typeof playOnceSafe === "function") {
+          playOnceSafe(starCatchSfx);
+        } else {
+          starCatchSfx.pause();
+          starCatchSfx.currentTime = 0;
+          starCatchSfx.play();
+        }
+      } catch (e) {}
+
+      starsCollected++;
+      pointPopups.push({ x: drop.x, y: drop.y, value: "⭐+" + 1, alpha: 1 });
+
+      if (starsCollected >= 10) {
+        starsCollected = 0;
+        startStarPowerCelebration();     // 🎉 overlay
+        activateInvincibleShield(30000); // 🛡️ 30 s shield
       }
-    } catch (e) {}
+    },
 
-    starsCollected++;
-    pointPopups.push({ x: drop.x, y: drop.y, value: "⭐+" + 1, alpha: 1 });
+    onMiss(drop) {
+      // geen straf
+    },
+  }, // ✅ komma behouden, want er kunnen in de toekomst meer types bij
+}; // ✅ sluit het hele const DROP_TYPES object af
 
-    if (starsCollected >= 10) {
-      starsCollected = 0;
-      startStarPowerCelebration();     // 🎉 overlay
-      activateInvincibleShield(30000); // 🛡️ 30 s shield
-    }
-  },
-
-  onMiss(drop) {
-    // geen straf
-   },
-  }, // ← **deze komma MOET blijven** (scheidt dit item van het volgende in DROP_TYPES)
- };
 
 
 let rocketActive = false; // Voor nu altijd zichtbaar om te testen
