@@ -3811,26 +3811,28 @@ for (let i = pxpBags.length - 1; i >= 0; i--) {
     bagBottom >= paddleTop &&
     bagTop <= paddleBottom;
 
-  if (isOverlap) {
-    pxpBagSound.currentTime = 0;
-    pxpBagSound.play();
+ if (isOverlap) {
+  // sound veilig afspelen
+  try { pxpBagSound.currentTime = 0; pxpBagSound.play(); } catch (e) {}
 
-    const earned = doublePointsActive ? 160 : 80;
-    score += earned;
-    updateScoreDisplay(); // 👈 aangepaste regel
+  const earned = doublePointsActive ? 160 : 80;
+  score += earned;
+  updateScoreDisplay?.(); // 👈 aangepaste regel (safe call)
 
-    pointPopups.push({
-      x: bag.x,
-      y: bag.y,
-      value: "+" + earned,
-      alpha: 1
-    });
+  pointPopups.push({
+    x: bag.x,
+    y: bag.y,
+    value: "+" + earned,
+    alpha: 1
+  });
 
-    pxpBags.splice(i, 1);
-  } else if (bag.y > canvas.height) {
-    pxpBags.splice(i, 1); // uit beeld
-  }
+  pxpBags.splice(i, 1);
+  // (optioneel) continue; // als je binnen een for-loop zit en hierna nog code volgt
+} else if (bag.y > canvas.height) {
+  // uit beeld
+  pxpBags.splice(i, 1);
 }
+
 
 if (machineGunActive && !machineGunCooldownActive) {
   // 📍 Instelbare offset tussen paddle en gun
