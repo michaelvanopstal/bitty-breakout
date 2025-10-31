@@ -1329,10 +1329,10 @@ const DROP_TYPES = {
       }
     },
     onMiss(drop) {
-      // geen straf
+  
     },
   },
-}; // ⬅️ DROP_TYPES netjes afgesloten
+}; 
 
 
 
