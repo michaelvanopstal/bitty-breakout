@@ -1247,8 +1247,7 @@ magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
 const starImg = new Image();
 starImg.src = "stars.png";  // jouw ster-afbeelding
-// === DROPS SYSTEM: item type registry ===
-// Alleen de actieve types: coin, heart, star
+
 const DROP_TYPES = {
   coin: {
     draw(drop, ctx) {
@@ -4672,7 +4671,5 @@ function triggerBallReset() {
 
 // 🟢 BELANGRIJK: knop koppelen aan functie
 document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
-
-  console.log("EOF OK");
 
 
