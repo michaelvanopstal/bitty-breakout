@@ -104,6 +104,16 @@ let invincibleActive = false; // schild aan/uit
 let invincibleEndTime = 0;    // ms timestamp einde
 
 
+const AURA_HEX       = "#FFD700";           // jouw paddle aura hoofdkleur
+const AURA_RGB       = "255,215,0";         // zelfde in RGB
+const AURA_EDGE_HEX  = "rgba(255,140,0,0.9)"; // warme rand voor tekststroke
+const AURA_SOFT_GLOW = "rgba(255,215,0,0.20)";
+const AURA_SPARK_RGB = "255,240,150";       // lichtere vonkjes (warm wit/goud)
+
+let starPowerFX = { active: false, t0: 0, duration: 3000, stars: [], particles: [] };
+let fxCanvas = null, fxCtx = null;
+
+
 // ❤️ Hartjes-systeem
 let heartsCollected = 0;
 let heartBlocks = [];
@@ -284,6 +294,168 @@ function chooseSpawnX(cfg) {
   return x;
 }
 
+
+function ensureFxCanvas() {
+  if (fxCanvas) return;
+  fxCanvas = document.createElement('canvas');
+  fxCanvas.style.position = 'fixed';
+  fxCanvas.style.top = '0';
+  fxCanvas.style.left = '0';
+  fxCanvas.style.width = '100vw';
+  fxCanvas.style.height = '100vh';
+  fxCanvas.style.pointerEvents = 'none';
+  fxCanvas.style.zIndex = '9999';
+  document.body.appendChild(fxCanvas);
+  fxCtx = fxCanvas.getContext('2d');
+
+  const resizeFx = () => { fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; };
+  addEventListener('resize', resizeFx);
+  resizeFx();
+}
+
+function startStarPowerCelebration() {
+  ensureFxCanvas();
+
+  starPowerFX.active = true;
+  starPowerFX.t0 = performance.now();
+  starPowerFX.stars = [];
+  starPowerFX.particles = [];
+
+  const W = fxCanvas.width, H = fxCanvas.height;
+  const N = 10;
+
+  for (let i = 0; i < N; i++) {
+    const dir = (i % 2 === 0) ? 1 : -1;
+    const y = (H * 0.15) + (i / (N - 1)) * (H * 0.7);
+    const speed = (W / 2.2) + Math.random() * (W / 1.8);
+    const amp   = 18 + Math.random() * 24;
+    const freq  = 1.5 + Math.random() * 1.5;
+    const startX = dir === 1 ? -80 : W + 80;
+    const vx = dir * speed;
+
+    starPowerFX.stars.push({
+      x: startX, y, vx, vy: 0,
+      r: 0, vr: (Math.random() * 2 - 1) * 0.015,
+      scale: 0.7 + Math.random() * 0.6,
+      amp, freq, t: Math.random() * 1000, dir
+    });
+  }
+}
+
+function renderStarPowerFX() {
+  if (!starPowerFX.active || !fxCtx) return;
+
+  const now = performance.now();
+  const dt = Math.min(33, now - (renderStarPowerFX._prev || now));
+  renderStarPowerFX._prev = now;
+
+  const tElapsed = now - starPowerFX.t0;
+  const W = fxCanvas.width, H = fxCanvas.height;
+
+  // Clear + subtiele donkerte zodat neon beter "pop"t (heel licht!)
+  fxCtx.clearRect(0, 0, W, H);
+  fxCtx.fillStyle = "rgba(0,0,0,0.12)";
+  fxCtx.fillRect(0, 0, W, H);
+
+  // Sterren + stardust
+  for (const s of starPowerFX.stars) {
+    s.t += dt * 0.001;
+    const yOffset = Math.sin(s.t * s.freq * 2 * Math.PI) * s.amp;
+    s.x += s.vx * (dt / 1000);
+    s.y += yOffset * 0.02;
+    s.r += s.vr * dt;
+
+    // Ster tekenen met neon-glow (zelfde aura-kleur)
+    fxCtx.save();
+    fxCtx.translate(s.x, s.y);
+    fxCtx.rotate(s.r);
+    const size = 56 * s.scale;
+
+    // zachte glow ring onder de ster
+    const grd = fxCtx.createRadialGradient(0, 0, size * 0.15, 0, 0, size * 0.9);
+    grd.addColorStop(0.00, `rgba(${AURA_RGB},0.30)`);
+    grd.addColorStop(0.50, `rgba(${AURA_RGB},0.12)`);
+    grd.addColorStop(1.00, `rgba(${AURA_RGB},0.00)`);
+    fxCtx.globalCompositeOperation = 'lighter';
+    fxCtx.fillStyle = grd;
+    fxCtx.beginPath();
+    fxCtx.arc(0, 0, size * 0.9, 0, Math.PI * 2);
+    fxCtx.fill();
+
+    // ster zelf
+    fxCtx.globalAlpha = 0.96;
+    fxCtx.drawImage(starImg, -size/2, -size/2, size, size);
+    fxCtx.restore();
+
+    // Stardust (zelfde neon goud, iets lichter voor sparkle)
+    for (let k = 0; k < 3; k++) {
+      starPowerFX.particles.push({
+        x: s.x,
+        y: s.y,
+        vx: (Math.random() - 0.5) * 80,
+        vy: (Math.random() - 0.5) * 80 + 20,
+        life: 600,
+        age: 0,
+        r: 1.5 + Math.random() * 2.5
+      });
+    }
+  }
+
+  for (let i = starPowerFX.particles.length - 1; i >= 0; i--) {
+    const p = starPowerFX.particles[i];
+    p.age += dt;
+    if (p.age >= p.life) { starPowerFX.particles.splice(i, 1); continue; }
+    const a = 1 - (p.age / p.life);
+    p.x += p.vx * (dt / 1000);
+    p.y += p.vy * (dt / 1000);
+
+    fxCtx.save();
+    fxCtx.globalCompositeOperation = 'lighter';
+    fxCtx.globalAlpha = a * 0.95;
+
+    const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2);
+    grd.addColorStop(0, `rgba(${AURA_SPARK_RGB},1)`);       // kern (licht)
+    grd.addColorStop(1, `rgba(${AURA_RGB},0)`);             // uitwaaien
+    fxCtx.fillStyle = grd;
+    fxCtx.beginPath();
+    fxCtx.arc(p.x, p.y, p.r * 3.2, 0, Math.PI * 2);
+    fxCtx.fill();
+    fxCtx.restore();
+  }
+
+  // Titel “Bitty STAR POWER!” met identieke neon-styling
+  const fadeIn = Math.min(1, tElapsed / 300);
+  const fadeOut = Math.min(1, Math.max(0, (starPowerFX.duration - tElapsed) / 300));
+  const alpha = Math.min(fadeIn, fadeOut);
+
+  fxCtx.save();
+  fxCtx.globalAlpha = alpha;
+  const title = "Bitty STAR POWER!";
+  fxCtx.font = `bold ${Math.round(Math.min(W, H) * 0.08)}px Arial`;
+  fxCtx.textAlign = "center";
+  fxCtx.textBaseline = "middle";
+
+  // multi-pass glow in AURA-kleur
+  fxCtx.fillStyle = `rgba(${AURA_RGB},0.22)`;
+  for (let g = 0; g < 5; g++) {
+    fxCtx.fillText(title, W / 2, H * 0.25);
+  }
+
+  // kern + warme rand (zoals je aura-edge)
+  fxCtx.fillStyle = AURA_HEX;
+  fxCtx.strokeStyle = AURA_EDGE_HEX;
+  fxCtx.lineWidth = 4;
+  fxCtx.strokeText(title, W / 2, H * 0.25);
+  fxCtx.fillText(title, W / 2, H * 0.25);
+
+  fxCtx.restore();
+
+  // einde
+  if (tElapsed >= starPowerFX.duration) {
+    starPowerFX.active = false;
+    fxCtx.clearRect(0, 0, W, H);
+  }
+}
 
 
 
@@ -1392,11 +1564,12 @@ const DROP_TYPES = {
       starsCollected++;
       pointPopups.push({ x: drop.x, y: drop.y, value: "⭐+" + 1, alpha: 1 });
 
-      if (starsCollected >= 10) {
-        starsCollected = 0;
-        activateInvincibleShield(30000); // 🛡️ 30 seconden bescherming
-      }
-    },
+     if (starsCollected >= 10) {
+  starsCollected = 0;
+  startStarPowerCelebration();      // 🌟 full-screen neon celebration
+  activateInvincibleShield(30000);  // 🛡️ shield 30s
+}
+ },
     onMiss(drop) {
       // geen straf
     },
@@ -4149,6 +4322,7 @@ drawFireworks();
 
 // 🎊 Confetti bovenop de scene tekenen
 drawConfetti();
+renderStarPowerFX();  // 🌟 full-screen star celebration overlay
 
 
 if (showGameOver) {
