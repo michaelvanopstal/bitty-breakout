@@ -1381,12 +1381,13 @@ onMiss(drop) { /* goed zo, niks */ },
     onMiss(drop) {},
   },
 
-  magnet: {
+   magnet: {
     draw(drop, ctx) { ctx.drawImage(magnetImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) { activateMagnet?.(20000); },
     onMiss(drop) {},
-  },
-};
+  } // ⬅️ geen komma hier!
+
+}; // ⬅️ sluit het hele DROP_TYPES-object af
 
 
 
