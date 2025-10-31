@@ -1350,18 +1350,18 @@ const DROP_TYPES = {
     try { new Audio("plink.mp3").play().catch(()=>{}); } catch(e){}
     return;
   }
-  if (lives > 1) {
-    lives--;
-    updateLivesDisplay?.();
-    pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
-  } else {
-    triggerPaddleExplosion?.();
-  }
-  try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+if (lives > 1) {
+  lives--;
+  updateLivesDisplay?.();
+  pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
+} else {
+  triggerPaddleExplosion?.();
 }
+try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch (e) {}
+}, // ⬅️ BELANGRIJK: komma om de onCatch-methode af te sluiten
 
-    onMiss(drop) { /* goed zo, niks */ },
-  },
+onMiss(drop) { /* goed zo, niks */ },
+
 
   paddle_long: {
     draw(drop, ctx) { ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
