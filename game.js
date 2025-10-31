@@ -3984,46 +3984,59 @@ if (machineGunActive && !machineGunCooldownActive) {
     shootSound.play();
   }
 
-  // 💥 Verwerk kogels
-  machineGunBullets.forEach((bullet, i) => {
-    bullet.y += bullet.dy;
-    ctx.beginPath();
-    ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = "red";
-    ctx.fill();
+// 💥 Verwerk kogels
+for (let i = machineGunBullets.length - 1; i >= 0; i--) {
+  const bullet = machineGunBullets[i];
 
-    // 🎯 Check botsing met paddle
-    // 🎯 Check botsing met paddle
-if (
-  bullet.y >= paddleY &&
-  bullet.x >= paddleX &&
-  bullet.x <= paddleX + paddleWidth
-) {
-  if (invincibleActive) {
-    // 🛡️ Tijdens sterren-bonus: geen schade — kogel weg (of reflecteren)
-    // reflect-optie: bullet.vy = -Math.abs(bullet.vy || 6);
+  // pos update (val terug op vy als dy niet bestaat)
+  const dy = (typeof bullet.dy === "number") ? bullet.dy : (bullet.vy ?? 0);
+  bullet.y += dy;
+
+  // teken kogel
+  ctx.beginPath();
+  ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2);
+  ctx.fillStyle = "red";
+  ctx.fill();
+
+  // 🎯 Check botsing met paddle
+  if (
+    bullet.y >= paddleY &&
+    bullet.x >= paddleX &&
+    bullet.x <= paddleX + paddleWidth
+  ) {
+    if (invincibleActive) {
+      // 🛡️ tijdens sterren-bonus: geen schade — kogel weg (of reflecteer)
+      // Reflect-optie (i.p.v. verwijderen):
+      // bullet.vy = -Math.abs(dy || 6); continue;
+      machineGunBullets.splice(i, 1);
+      continue;
+    }
+
+    const hitX = bullet.x - paddleX;
+    const radius = 6;
+
+    if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
+      paddleDamageZones.push(bullet.x);
+
+      // ❗ GAT MAKEN
+      paddleCtx.globalCompositeOperation = 'destination-out';
+      paddleCtx.beginPath();
+      paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
+      paddleCtx.fill();
+      paddleCtx.globalCompositeOperation = 'source-over';
+    }
+
     machineGunBullets.splice(i, 1);
     continue;
   }
 
-  const hitX = bullet.x - paddleX;
-  const radius = 6;
-
-  if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
-    paddleDamageZones.push(bullet.x);
-
-    // ❗ GAT MAKEN
-    paddleCtx.globalCompositeOperation = 'destination-out';
-    paddleCtx.beginPath();
-    paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
-    paddleCtx.fill();
-    paddleCtx.globalCompositeOperation = 'source-over';
+  // buiten beeld? weg ermee
+  if (bullet.y > canvas.height) {
+    machineGunBullets.splice(i, 1);
+    continue;
   }
-
-  machineGunBullets.splice(i, 1);
-} else if (bullet.y > canvas.height) {
-  machineGunBullets.splice(i, 1);
 }
+
   });
 
   // ⏳ Start cooldown als alle 30 kogels zijn afgevuurd
