@@ -98,6 +98,11 @@ let magnetCatchRadius = 22;      // auto-catch radius rond paddle
 let fallingCoins = [];
 let fallingBags = [];
 
+// ⭐ Sterren & Invincible-schild
+let starsCollected = 0;       // 0..10
+let invincibleActive = false; // schild aan/uit
+let invincibleEndTime = 0;    // ms timestamp einde
+
 
 // ❤️ Hartjes-systeem
 let heartsCollected = 0;
@@ -491,6 +496,11 @@ function stopMagnet() {
 // Zet dit bovenin bij je helpers
 function getBallCenter(ball) {
   return { cx: ball.x + ball.radius, cy: ball.y + ball.radius };
+}
+function activateInvincibleShield(ms = 30000) {
+  invincibleActive = true;
+  invincibleEndTime = performance.now() + ms;
+  // (optioneel geluid) try { shieldSound.currentTime = 0; shieldSound.play(); } catch {}
 }
 
 
@@ -1226,6 +1236,9 @@ tntImg.src = "tnt.png";
 const tntBlinkImg = new Image(); 
 tntBlinkImg.src = "tnt_blink.png";
 
+// ⭐ Star (vallende ster)
+const starImg = new Image();
+starImg.src = "stars.png"; // zet stars.png naast je game-bestanden
 
 const stoneLargeImg  = new Image(); 
 stoneLargeImg.src  = "stone_large.png";
@@ -1238,6 +1251,7 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
+
 
 // === DROPS SYSTEM: item type registry ===
 // Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
@@ -1306,12 +1320,19 @@ const DROP_TYPES = {
     // “ontwijken!” – lichte straf bij catch
     draw(drop, ctx) {
       const s = 26;
-      const blink = (Math.floor(performance.now()/200) % 2 === 0);
+      const blink = (Math.floor(performance.now() / 200) % 2 === 0);
       const img = blink ? tntBlinkImg : tntImg;
-      ctx.drawImage(img, drop.x - s/2, drop.y - s/2, s, s);
+      ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
     },
     onCatch(drop) {
-      // kleine straf of effect, bv. -1 leven (alleen als >1) of -punten
+      // 🛡️ Invincible shield actief → reflect en geen schade
+      if (invincibleActive) {
+        pointPopups.push({ x: drop.x, y: drop.y, value: "🛡️ reflect", alpha: 1 });
+        try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+        return;
+      }
+
+      // anders: normale straf
       if (lives > 1) {
         lives--;
         updateLivesDisplay?.();
@@ -1339,7 +1360,12 @@ const DROP_TYPES = {
 
   speed: {
     draw(drop, ctx) { ctx.drawImage(speedImg, drop.x - 35, drop.y - 12, 70, 24); },
-    onCatch(drop) { speedBoostActive = true; speedBoostStart = Date.now(); speedBoostSound.currentTime=0; speedBoostSound.play(); },
+    onCatch(drop) {
+      speedBoostActive = true;
+      speedBoostStart = Date.now();
+      speedBoostSound.currentTime = 0;
+      speedBoostSound.play();
+    },
     onMiss(drop) {},
   },
 
@@ -1348,7 +1374,36 @@ const DROP_TYPES = {
     onCatch(drop) { activateMagnet?.(20000); },
     onMiss(drop) {},
   },
+
+  star: {
+    // Pulserend gouden sterretje
+    draw(drop, ctx) {
+      drop.t = (drop.t || 0) + 0.016;                 // ~60fps fase
+      const base = 28;
+      const pulse = 1 + 0.12 * Math.sin(drop.t * 8);  // zachte puls
+      const size = base * pulse;
+
+      ctx.save();
+      ctx.globalAlpha = 0.9 + 0.1 * Math.sin(drop.t * 8);
+      ctx.drawImage(starImg, drop.x - size / 2, drop.y - size / 2, size, size);
+      ctx.restore();
+    },
+    onCatch(drop) {
+      starsCollected++;
+      pointPopups.push({ x: drop.x, y: drop.y, value: "⭐+" + 1, alpha: 1 });
+
+      if (starsCollected >= 10) {
+        starsCollected = 0;
+        activateInvincibleShield(30000); // 🛡️ 30 seconden bescherming
+      }
+    },
+    onMiss(drop) {
+      // geen straf
+    },
+  },
 };
+
+
 
 
 
@@ -1736,6 +1791,8 @@ function spawnRandomDrop() {
 
 // VERVANG JE OUDE FUNCTIE door deze:
 function updateAndDrawDrops() {
+  if (invincibleActive && performance.now() >= invincibleEndTime) invincibleActive = false;
+
   // --- SPAWNER TICK (binnen de functie!) ---
   if (dropConfig) {
     const now = performance.now();
@@ -1941,7 +1998,7 @@ function resetBricks() {
       minIntervalMs: 1200,
       maxIntervalMs: 2600,
       speed: 2.5,
-      types: ["coin", "heart", "bag"], // veilige startersmix
+      types: types: ["coin","heart","bag","star"],
       xMargin: 40,
       startDelayMs: 800,
       mode: "well",          // goed gespreide x-waarden (geen grid)
@@ -1954,7 +2011,7 @@ function resetBricks() {
       minIntervalMs: 900,
       maxIntervalMs: 2200,
       speed: 3.0,
-      types: ["coin", "heart", "bag", "paddle_long", "speed", "magnet"],
+      types: types: ["coin","heart","bag","star"],
       xMargin: 40,
       startDelayMs: 600,
       mode: "well",
@@ -1967,7 +2024,7 @@ function resetBricks() {
       minIntervalMs: 800,
       maxIntervalMs: 1800,
       speed: 3.4,
-      types: ["coin", "heart", "bag", "paddle_long", "speed", "magnet", "bomb"], // bomb erbij voor extra spanning
+      types: types: ["coin","heart","bag","star"],
       xMargin: 40,
       startDelayMs: 500,
       mode: "grid",          // nette kolommen in hogere levels
@@ -2075,8 +2132,43 @@ function drawHeartPopup() {
 function drawPaddle() {
   if (paddleExploding) return;
 
+  // basis
   ctx.drawImage(paddleCanvas, paddleX, paddleY);
+
+  // 🛡️ Gouden aura als schild actief is
+  if (invincibleActive) {
+    ctx.save();
+
+    // gouden rand
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#ffd700";
+    ctx.strokeRect(paddleX - 2, paddleY - 2, paddleWidth + 4, paddleHeight + 4);
+
+    // zachte, pulserende gloed
+    const t = performance.now() * 0.006;
+    const glow = 18 + 3 * Math.sin(t);
+    const cx = paddleX + paddleWidth / 2;
+    const cy = paddleY + paddleHeight / 2;
+
+    const grad = ctx.createRadialGradient(cx, cy, 6, cx, cy, Math.max(paddleWidth, paddleHeight) * 0.8);
+    grad.addColorStop(0, "rgba(255,215,0,0.20)");
+    grad.addColorStop(1, "rgba(255,215,0,0.00)");
+
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = grad;
+    // met roundRect als beschikbaar
+    if (ctx.roundRect) {
+      ctx.beginPath();
+      ctx.roundRect(paddleX - glow, paddleY - glow, paddleWidth + glow*2, paddleHeight + glow*2, 10);
+      ctx.fill();
+    } else {
+      ctx.fillRect(paddleX - glow, paddleY - glow, paddleWidth + glow*2, paddleHeight + glow*2);
+    }
+
+    ctx.restore();
+  }
 }
+
 
 function drawMagnetAura(ctx) {
   if (!magnetActive) return; // alleen tekenen als hij aanstaat
@@ -4022,7 +4114,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 30) {
+  if (imagesLoaded === 31) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -4086,6 +4178,8 @@ stoneBlockImg.onload  = onImageLoad;
 stoneLargeImg.onload  = onImageLoad;
 tntImg.onload = onImageLoad;
 tntBlinkImg.onload = onImageLoad;
+starImg.onload = onImageLoad;
+
 
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
@@ -4161,10 +4255,17 @@ function spawnStoneDebris(x, y) {
 }
 
 function triggerPaddleExplosion() {
+  // 🛡️ Invincible: géén levensverlies of explosie; bal gewoon terug op de paddle
+  if (invincibleActive) {
+    pauseTimer?.();
+    resetBall?.();              // jouw bestaande reset (bal centreren op paddle)
+    return;
+  }
+
   if (lives > 1) {
     if (!resetTriggered) {
       lives--;
-      updateLivesDisplay();
+      updateLivesDisplay?.();
       // 💖 Hartjes blijven behouden – reset alleen bij game over
     }
 
