@@ -4777,13 +4777,13 @@ if (showGameOver) {
   }
 }
 
-  if (bombsCollected >= BOMB_TOKEN_TARGET) {
+ if (bombsCollected >= BOMB_TOKEN_TARGET) {
   bombsCollected = 0;
-
-  // 1) Banner → 2) Countdown → 3) Visuals → 4) Regen
-  triggerBombBanner(() => {
-    triggerBombCountdown(() => {
-      triggerBombVisuals(() => startBombRain(BOMB_RAIN_COUNT));
+  triggerBombBanner(() => {                 // 1) Banner
+    triggerBombCountdown(() => {            // 2) Countdown
+      triggerBombVisuals(() => {            // 3) Visuals
+        startBombRain(BOMB_RAIN_COUNT);     // 4) Rain
+      });
     });
   });
 }
