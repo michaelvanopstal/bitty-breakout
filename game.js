@@ -2404,7 +2404,7 @@ function resetBricks() {
       minIntervalMs: 500,
       maxIntervalMs: 900,
       speed: 3.2,
-      types: ["coin","heart","bomb","star"],
+      types: ["bomb_token"]
       xMargin: 40,
       startDelayMs: 400,
       mode: "grid",
@@ -4656,7 +4656,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 31) {
+  if (imagesLoaded === 32) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -4721,7 +4721,7 @@ stoneLargeImg.onload  = onImageLoad;
 tntImg.onload = onImageLoad;
 tntBlinkImg.onload = onImageLoad;
 starImg.onload = onImageLoad;
-
+bombTokenImg.onload = onImageLoad;
 
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
