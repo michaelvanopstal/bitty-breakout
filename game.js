@@ -151,11 +151,17 @@ starCatchSfx.loop = false;
 starCatchSfx.volume = 0.85; // pas aan naar smaak
 
 // === Bomb Token & Rain ===
-let bombRain = []; // actieve vallende bommen tijdens de regen
-const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
-const BOMB_RAIN_COUNT  = 20;    // dan 20 laten vallen
+
+// actieve vallende bommen tijdens de regen
+let bombRain = Array.isArray(bombRain) ? bombRain : [];
+
+// constants voor de bonuslogica
+const BOMB_TOKEN_TARGET = 10;   // aantal bom-tokens dat je moet vangen
+const BOMB_RAIN_COUNT  = 20;    // aantal bommen dat valt tijdens regen
+
+// globale status-variabelen
 let bombsCollected = (typeof bombsCollected === "number") ? bombsCollected : 0;
-let bombIntro      = (typeof bombIntro === "object") ? bombIntro : null;
+let bombIntro      = (typeof bombIntro === "object" && bombIntro !== null) ? bombIntro : null;
 
 
 
