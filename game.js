@@ -151,7 +151,6 @@ starCatchSfx.loop = false;
 starCatchSfx.volume = 0.85; // pas aan naar smaak
 
 // === Bomb Token & Rain ===
-let bombIntro = null;
 let bombsCollected = 0;
 let bombRain = []; // actieve vallende bommen tijdens de regen
 const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
@@ -211,86 +210,6 @@ const PADDLE_SMALL_DURATION = 30000;
 const VO_COOLDOWN_MS = 3000;    // minimaal 3s tussen voices
 let voIsPlaying = false;        // speelt er nu een voice?
 let voLockedUntil = 0;          // tot wanneer blokkeren (ms sinds pageload)
-
-// ===== Drop Type Sequencer (voor afwisselend ritme) =====
-let dropSeq = {
-  lastType: null,
-  burstType: null,
-  burstLeft: 0,
-  types: ["heart","star","bomb_token"],
-  weights: { heart: 1, star: 1, bomb_token: 1 }, // basisbalans
-  // instellingen om het ritme te sturen:
-  minBurst: 1,   // 1 of 2 achter elkaar
-  maxBurst: 2,
-  maxStreak: 2,  // nooit langer dan 2 dezelfde types op rij
-  repeatChance: 0.25 // kans om tóch nog een keer dezelfde burstType te kiezen (voor "soms 2x achter elkaar")
-};
-
-function initDropSequencer(types, opts = {}) {
-  dropSeq.types   = types.slice();
-  dropSeq.weights = Object.assign({ heart:1, star:1, bomb_token:1 }, opts.weights || {});
-  dropSeq.minBurst = opts.minBurst ?? 1;
-  dropSeq.maxBurst = opts.maxBurst ?? 2;
-  dropSeq.maxStreak = opts.maxStreak ?? 2;
-  dropSeq.repeatChance = opts.repeatChance ?? 0.25;
-  dropSeq.lastType = null;
-  dropSeq.burstType = null;
-  dropSeq.burstLeft = 0;
-}
-
-function pickWeighted(types, weights) {
-  let total = 0;
-  for (const t of types) total += (weights[t] ?? 1);
-  let r = Math.random() * total;
-  for (const t of types) {
-    r -= (weights[t] ?? 1);
-    if (r <= 0) return t;
-  }
-  return types[0];
-}
-
-/** Geeft het volgende type terug met bursts en afwisseling. */
-function nextDropType(allowedTypes) {
-  // 1) Als we midden in een burst zitten, ga door met deze burstType
-  if (dropSeq.burstLeft > 0 && dropSeq.burstType && allowedTypes.includes(dropSeq.burstType)) {
-    dropSeq.burstLeft--;
-    dropSeq.lastType = dropSeq.burstType;
-    return dropSeq.burstType;
-  }
-
-  // 2) Nieuwe burst kiezen:
-  //    - meestal een ander type dan de vorige
-  //    - maar met kleine kans (repeatChance) nogmaals dezelfde
-  const others = allowedTypes.filter(t => t !== dropSeq.lastType);
-  const canRepeat = dropSeq.lastType && allowedTypes.includes(dropSeq.lastType);
-
-  let candidatePool;
-  if (canRepeat && Math.random() < dropSeq.repeatChance) {
-    // soms bewust herhalen
-    candidatePool = [dropSeq.lastType, ...others];
-  } else {
-    candidatePool = others.length ? others : allowedTypes.slice();
-  }
-
-  // pick met gewicht — maar respecteer maxStreak
-  let chosen = pickWeighted(candidatePool, dropSeq.weights);
-
-  // safety: forceer afwisseling als we al aan streak-limiet zitten
-  if (dropSeq.lastType && chosen === dropSeq.lastType) {
-    // tel streak (we weten alleen lastType; streaklimiter via burst)
-    // We voorkomen langere reeksen door burst = 1 in dit geval
-    dropSeq.burstLeft = 0;
-  } else {
-    // kies burstlengte 1..2
-    const len = dropSeq.minBurst + Math.floor(Math.random() * (dropSeq.maxBurst - dropSeq.minBurst + 1));
-    // voorkom dat burst langer wordt dan maxStreak
-    dropSeq.burstLeft = Math.max(0, Math.min(len, dropSeq.maxStreak) - 1);
-  }
-
-  dropSeq.burstType = chosen;
-  dropSeq.lastType = chosen;
-  return chosen;
-}
 
 
 function playVoiceOver(audio, opts = {}) {
@@ -465,21 +384,6 @@ function startStarPowerCelebration() {
       amp, freq, t: Math.random() * 1000, dir
     });
   }
-}
-
-// ============== BOMB INTRO STATE ==============
-
-function triggerBombIntro(afterCb) {
-  // start éénmalige animatie; afterCb = () => startBombRain(20)
-  bombIntro = {
-    t0: performance.now(),
-    phase: "glow",
-    particles: [],
-    bolts: [],
-    flashed: false,
-    afterCb,
-    done: false
-  };
 }
 
 
@@ -688,166 +592,6 @@ function spawnFireworkRockets(count = 8) {
       exploded: false
     });
   }
-}
-function updateAndDrawBombIntro(ctx) {
-  if (!bombIntro || bombIntro.done) return;
-
-  const now = performance.now();
-  const t = (now - bombIntro.t0);      // ms sinds start
-  const cx = canvas.width  / 2;
-  const cy = canvas.height / 2;
-
-  // ---- Timings (in ms) ----
-  const T_GLOW_END   = 300;   // brick glow duur
-  const T_TEXT_START = 300;   // start “BITTY BOMB ACTIVATED”
-  const T_FLASH_START= 500;   // start center flash
-  const T_FLASH_END  = 800;
-  const T_FIRE_START = 700;   // start vlam particles
-  const T_FIRE_END   = 1600;
-  const T_BOLT_START = 900;   // start bliksem
-  const T_BOLT_END   = 1600;
-  const T_OUTRO      = 1650;  // klaar -> start rain
-
-  // ---- 1) full-canvas energy tint / lichte puls ----
-  if (t >= 0 && t <= T_FIRE_END) {
-    const a = Math.min(0.25, 0.25 * (1 - Math.abs(((t % 300)/300)*2 - 1))); // ademende puls
-    ctx.save();
-    ctx.fillStyle = `rgba(255,130,30,${a})`; // warm energy tint
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.restore();
-  }
-
-  // ---- 2) Center flash (nucleair) ----
-  if (t >= T_FLASH_START && t <= T_FLASH_END) {
-    const k = (t - T_FLASH_START) / (T_FLASH_END - T_FLASH_START); // 0..1
-    const r = (0.1 + 0.9*k) * Math.hypot(canvas.width, canvas.height)*0.6;
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    g.addColorStop(0, "rgba(255,255,255,0.95)");
-    g.addColorStop(0.6, "rgba(255,250,200,0.35)");
-    g.addColorStop(1, "rgba(255,180,80,0.0)");
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  // ---- 3) Tekst: BITTY BOMB ACTIVATED (flits wit ↔ grijs) ----
-  if (t >= T_TEXT_START && t <= T_FIRE_END) {
-    const blink = (Math.floor(t/120) % 2) === 0;
-    ctx.save();
-    ctx.font = "bold 42px Arial";
-    ctx.textAlign = "center";
-    ctx.shadowColor = "rgba(255,200,120,0.8)";
-    ctx.shadowBlur = 12;
-    ctx.fillStyle = blink ? "#FFFFFF" : "#9AA0A6"; // wit ↔ grijs
-    ctx.fillText("BITTY BOMB  ACTIVATED", cx, cy - 80);
-    ctx.restore();
-  }
-
-  // ---- 4) Vlam-particles (vanuit midden naar buiten) ----
-  if (t >= T_FIRE_START && t <= T_FIRE_END) {
-    // spawn per frame wat deeltjes
-    for (let i = 0; i < 24; i++) {
-      const ang = Math.random()*Math.PI*2;
-      const spd = 2.0 + Math.random()*4.0;
-      bombIntro.particles.push({
-        x: cx, y: cy,
-        vx: Math.cos(ang)*spd,
-        vy: Math.sin(ang)*spd,
-        life: 600 + Math.random()*500, // ms
-        t0: now,
-        r: 2 + Math.random()*3
-      });
-    }
-  }
-  // update+draw particles
-  for (let i = bombIntro.particles.length-1; i >= 0; i--) {
-    const p = bombIntro.particles[i];
-    const age = now - p.t0;
-    const lifeK = Math.max(0, 1 - age/p.life);
-    p.x += p.vx;
-    p.y += p.vy;
-    // lichte zwaartekracht & wrijving
-    p.vx *= 0.99; p.vy = p.vy*0.99 + 0.02;
-
-    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*5);
-    grad.addColorStop(0.0, `rgba(255,220,160,${0.85*lifeK})`);
-    grad.addColorStop(0.4, `rgba(255,140,60,${0.55*lifeK})`);
-    grad.addColorStop(1.0, `rgba(255,80,0,0)`);
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r*4, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-
-    if (age >= p.life) bombIntro.particles.splice(i,1);
-  }
-
-  // ---- 5) Bliksemstralen (dun wit/blauw, energiestijl) ----
-  if (t >= T_BOLT_START && t <= T_BOLT_END) {
-    // teken 6–10 bolts per frame met random targets aan randen
-    const count = 6 + Math.floor(Math.random()*5);
-    for (let i = 0; i < count; i++) {
-      const edge = Math.floor(Math.random()*4);
-      let tx, ty;
-      if (edge === 0) { tx = Math.random()*canvas.width; ty = -20; }             // top
-      else if (edge === 1) { tx = canvas.width+20; ty = Math.random()*canvas.height; } // right
-      else if (edge === 2) { tx = Math.random()*canvas.width; ty = canvas.height+20; } // bottom
-      else { tx = -20; ty = Math.random()*canvas.height; }                       // left
-      drawBolt(ctx, cx, cy, tx, ty);
-    }
-  }
-
-  // ---- 6) Klaar? -> start de regen ----
-  if (t >= T_OUTRO && !bombIntro.done) {
-    bombIntro.done = true;
-    const cb = bombIntro.afterCb;
-    bombIntro.afterCb = null;
-    // kleine safeguard timeout zodat laatste frame aftekent
-    setTimeout(() => {
-      if (typeof cb === "function") cb();
-      bombIntro = null;
-    }, 0);
-  }
-}
-
-// Dunne, fraaie lightning bolt tussen (x1,y1) en (x2,y2)
-function drawBolt(ctx, x1, y1, x2, y2) {
-  const segs = 14;              // segmenten
-  const jitter = 14;            // zijwaartse variatie
-  let pts = [{x:x1,y:y1}];
-  for (let i = 1; i < segs; i++) {
-    const k = i/segs;
-    const x = x1 + (x2-x1)*k;
-    const y = y1 + (y2-y1)*k;
-    // sinusoidale zij-jitter zodat het natuurlijk oogt
-    const off = (Math.random()*2-1) * jitter * Math.sin(k*Math.PI);
-    pts.push({ x: x + off*(y2-y1)/Math.hypot(x2-x1,y2-y1), y: y - off*(x2-x1)/Math.hypot(x2-x1,y2-y1) });
-  }
-  pts.push({x:x2,y:y2});
-
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-  // blauwe gloed
-  ctx.strokeStyle = "rgba(120,180,255,0.55)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.stroke();
-  // witte kern
-  ctx.strokeStyle = "rgba(255,255,255,0.9)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.stroke();
-  ctx.restore();
 }
 
 function explodeFirework(x, y, baseColor) {
@@ -1841,9 +1585,9 @@ const DROP_TYPES = {
   pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/10`, alpha: 1 });
   try { coinSound.currentTime = 0; coinSound.play(); } catch {}
   if (bombsCollected >= 10) {
-  bombsCollected = 0;
-  triggerBombIntro(() => startBombRain(20));
-}
+    bombsCollected = 0;
+    startBombRain(20);
+  }
 
       if (lives > 1) {
         lives--;
@@ -2306,49 +2050,17 @@ function startDrops(config) {
   })(dropConfig);
 }
 
-// VERVANG je oude functie hiermee — gebruikt jouw pickWeighted() en nextDropType()
+
+// VERVANG JE OUDE FUNCTIE door deze:
 function spawnRandomDrop() {
   if (!dropConfig) return;
 
-  // --- Quota administratie (per actieve dropConfig) ---
-  if (!dropConfig._quotaUsed) dropConfig._quotaUsed = {}; // { type: count }
-  const quota = dropConfig.typeQuota || null;
+  // typekeuze via picker (quota/gewichten) of fallback
+  const type = dropConfig._pickType
+    ? dropConfig._pickType()
+    : (dropConfig.types?.[0] || "coin");
 
-  // 1) Allowed types bepalen (rekening houdend met quota)
-  let allowed = Array.isArray(dropConfig.types) && dropConfig.types.length
-    ? dropConfig.types.slice()
-    : ["heart","star","bomb_token"]; // veilige fallback set
-
-  if (quota && typeof quota === "object") {
-    const stillAllowed = allowed.filter(t => {
-      const used = dropConfig._quotaUsed[t] || 0;
-      const max  = quota[t];
-      return (typeof max !== "number") || (used < max);
-    });
-    // Als alle quota op zijn, laat alles weer toe zodat de spawner nooit "vastloopt"
-    if (stillAllowed.length > 0) allowed = stillAllowed;
-  }
-
-  // 2) Typekeuze: custom sequencer -> gewichten -> random
-  let type;
-  if (typeof dropConfig.customPicker === "function") {
-    type = dropConfig.customPicker(allowed);          // jouw nextDropType(allowed)
-    if (!allowed.includes(type)) {
-      // veiligheidsnet als customPicker iets buiten allowed geeft
-      type = allowed.includes("heart") ? "heart" : allowed[0];
-    }
-  } else if (dropConfig.typeWeights) {
-    type = pickWeighted(allowed, dropConfig.typeWeights); // ⬅️ jouw bestaande helper
-  } else {
-    type = allowed[Math.floor(Math.random() * allowed.length)];
-  }
-
-  // 3) Quota bijwerken (indien ingesteld)
-  if (quota && typeof quota === "object") {
-    dropConfig._quotaUsed[type] = (dropConfig._quotaUsed[type] || 0) + 1;
-  }
-
-  // 4) Spawnpositie en object toevoegen
+  // X bepalen volgens gekozen modus (well/grid) + avoidPaddle
   const x = chooseSpawnX(dropConfig);
 
   fallingDrops.push({
@@ -2361,11 +2073,8 @@ function spawnRandomDrop() {
     t: 0,
     active: true
   });
-
   dropsSpawned++;
 }
-
-
 
 
 // VERVANG JE OUDE FUNCTIE door deze:
@@ -2533,7 +2242,6 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
-
 function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
@@ -2548,7 +2256,7 @@ function resetBricks() {
     const centerX = paddleX + paddleWidth / 2;
     paddleWidth = paddleBaseWidth;
     paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
-    if (typeof redrawPaddleCanvas === "function") redrawPaddleCanvas();
+    if (typeof redrawPaddleCanvas === 'function') redrawPaddleCanvas();
   }
 
   // alle bricks resetten
@@ -2557,7 +2265,7 @@ function resetBricks() {
       const b = bricks[c][r];
       b.status = 1;
 
-      const defined = currentMap.find((p) => p.col === c && p.row === r);
+      const defined = currentMap.find(p => p.col === c && p.row === r);
       const brickType = defined ? defined.type : "normal";
       b.type = brickType;
 
@@ -2589,46 +2297,37 @@ function resetBricks() {
   assignHeartBlocks();
 
   // bommenregen opruimen bij levelstart (voortgang teller behouden)
-  if (typeof bombRain !== "undefined") bombRain = [];
+  if (typeof bombRain !== 'undefined') bombRain = [];
 
   // drops resetten
-  if (typeof fallingDrops !== "undefined") fallingDrops = [];
-  if (typeof dropsSpawned !== "undefined") dropsSpawned = 0;
-  if (typeof lastDropAt !== "undefined") lastDropAt = performance.now();
+  if (typeof fallingDrops !== 'undefined') fallingDrops = [];
+  if (typeof dropsSpawned !== 'undefined') dropsSpawned = 0;
+  if (typeof lastDropAt !== 'undefined') lastDropAt = performance.now();
 
   const lvl = level || 1;
 
-  // ===== Sequencer instellen voor natuurlijke afwisseling =====
-  if (typeof initDropSequencer === "function") {
-    initDropSequencer(["heart", "star", "bomb_token"], {
-      weights: { heart: 1, star: 1, bomb_token: 1 },
-      minBurst: 1,
-      maxBurst: 2,
-      maxStreak: 2,
-      repeatChance: 0.25 // soms 2x hetzelfde voor variatie
-    });
-  }
-
-  // ===== ÉÉN enkele startDrops per level =====
+  // ======= ÉÉN enkele startDrops per level =======
   startDrops({
     continuous: true,
-    minIntervalMs: lvl <= 3 ? 1200 : lvl <= 10 ? 900 : 800,
-    maxIntervalMs: lvl <= 3 ? 2600 : lvl <= 10 ? 2200 : 1800,
-    speed: lvl <= 3 ? 2.5 : lvl <= 10 ? 3.0 : 3.4,
+    minIntervalMs: (lvl <= 3) ? 1200 : (lvl <= 10) ? 900 : 800,
+    maxIntervalMs: (lvl <= 3) ? 2600 : (lvl <= 10) ? 2200 : 1800,
+    speed:        (lvl <= 3) ? 2.5  : (lvl <= 10) ? 3.0  : 3.4,
 
-    // Alleen heart, star en bomb_token in het valsysteem
+    // Alleen heart, star en bomb_token in het val­systeem
     types: ["heart", "star", "bomb_token"],
 
-    // Gebruik de sequencer voor afwisselende keuze
-    customPicker: typeof nextDropType === "function" ? nextDropType : null,
+    // Zorgt dat bommen zeldzamer vallen dan hearts/stars
+    typeWeights: { heart: 4, star: 4, bomb_token: 1 },
 
-    // geen typeQuota → vrij ritme, gereguleerd door de sequencer
+    // Maximaal aantal bommen dat kan vallen in totaal
+    typeQuota: { bomb_token: 10 },
+
     xMargin: 40,
-    startDelayMs: lvl <= 3 ? 800 : lvl <= 10 ? 600 : 500,
-    mode: lvl > 10 ? "grid" : "well",
+    startDelayMs: (lvl <= 3) ? 800 : (lvl <= 10) ? 600 : 500,
+    mode: (lvl > 10) ? "grid" : "well",
     gridColumns: 8,
     gridJitterPx: 16,
-    avoidPaddle: lvl > 10,
+    avoidPaddle: (lvl > 10),
     avoidMarginPx: 40,
     minSpacing: 70
   });
@@ -4872,8 +4571,6 @@ if (showGameOver) {
 
   animationFrameId = requestAnimationFrame(draw);
 } // ✅ Sluit function draw() correct af
-
-
 
 function onImageLoad() {
   imagesLoaded++;
