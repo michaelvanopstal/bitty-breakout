@@ -212,6 +212,69 @@ let voIsPlaying = false;        // speelt er nu een voice?
 let voLockedUntil = 0;          // tot wanneer blokkeren (ms sinds pageload)
 
 
+// === BITTY BOMB INTRO FX ===
+let bittyBomb = {
+  active: false,
+  phase: "idle",          // "idle" | "countdown" | "flash" | "done"
+  start: 0,               // ms (performance.now)
+  queuedRain: 0,          // hoeveel bommen vallen er straks
+  countdownFrom: 3,       // 3..2..1
+  lastTick: 0,            // voor knipper-ritme
+  flashAlpha: 0,          // voor nucleaire flash
+  rays: [],               // bliksemstraal data
+  flames: [],             // vlam-partikels
+};
+
+// helper: maak bliksemstralen vanuit het midden
+function makeLightningRays(n = 16) {
+  const rays = [];
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const len = 80 + Math.random() * 220;
+    rays.push({
+      a,
+      len,
+      life: 250 + Math.random()*200,  // ms
+      width: 1 + Math.random()*1.5,
+      t0: performance.now(),
+      jitter: 3 + Math.random()*6
+    });
+  }
+  return rays;
+}
+
+// helper: maak vlam-partikels (energie-stijl)
+function makeFlames(n = 80, cx = canvas.width/2, cy = canvas.height/2) {
+  const arr = [];
+  for (let i = 0; i < n; i++) {
+    const a = Math.random()*Math.PI*2;
+    const sp = 2 + Math.random()*4;
+    arr.push({
+      x: cx, y: cy,
+      vx: Math.cos(a)*sp,
+      vy: Math.sin(a)*sp,
+      size: 2 + Math.random()*3,
+      alpha: 1,
+      decay: 0.015 + Math.random()*0.02
+    });
+  }
+  return arr;
+}
+function triggerBittyBombIntro(n = BOMB_RAIN_COUNT) {
+  bittyBomb.active = true;
+  bittyBomb.phase = "countdown";
+  bittyBomb.start = performance.now();
+  bittyBomb.queuedRain = n;
+  bittyBomb.lastTick = 0;
+  bittyBomb.flashAlpha = 0;
+  bittyBomb.rays = [];
+  bittyBomb.flames = [];
+
+  // Klein “ready” geluidje hergebruiken
+  try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
+}
+
+
 function playVoiceOver(audio, opts = {}) {
   const { cooldown = VO_COOLDOWN_MS } = opts;
   const now = performance.now();
@@ -294,6 +357,162 @@ function nextGridX(margin = 40, columns = 8, jitterPx = 18) {
   if (recentSpawnXs.length > 5) recentSpawnXs.shift();
   return x;
 }
+
+function renderBittyBombIntro() {
+  if (!bittyBomb.active) return;
+
+  const now = performance.now();
+  const dt = now - (bittyBomb.lastTick || now);
+  bittyBomb.lastTick = now;
+
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+
+  // Fase 1: Countdown 3..2..1 met knipperende overlay en titel
+  if (bittyBomb.phase === "countdown") {
+    const elapsed = now - bittyBomb.start;    // ms
+    const secs = Math.floor(elapsed / 1000);  // 0,1,2,...
+    const remain = Math.max(0, bittyBomb.countdownFrom - secs); // 3→2→1→0
+
+    // Lichtgrijze, zachte scherm-overlay die “ademt”
+    const pulse = 0.12 + 0.08 * Math.sin(elapsed/120);
+    ctx.save();
+    ctx.fillStyle = `rgba(255,255,255,${pulse})`;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+
+    // Tekst: "BITTY BOMB  ACTIVATED !" + cijfer met cirkel
+    const blinkOn = (Math.floor(elapsed/500) % 2) === 0;
+
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Titel knippert mee met de seconde (grijs)
+    ctx.font = "bold 40px Arial";
+    ctx.fillStyle = blinkOn ? "rgba(180,180,180,1)" : "rgba(120,120,120,1)";
+    ctx.strokeStyle = "rgba(50,50,50,0.7)";
+    ctx.lineWidth = 3;
+    const title = "BITTY BOMB  ACTIVATED !";
+    ctx.strokeText(title, cx, cy - 60);
+    ctx.fillText(title,  cx, cy - 60);
+
+    // Cijfer in cirkel
+    ctx.beginPath();
+    ctx.arc(cx, cy + 10, 28, 0, Math.PI*2);
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = blinkOn ? "rgba(200,200,200,0.9)" : "rgba(160,160,160,0.9)";
+    ctx.stroke();
+
+    ctx.font = "bold 34px Arial";
+    ctx.fillStyle = "rgba(220,220,220,1)";
+    ctx.fillText(String(Math.max(1, remain)), cx, cy + 10);
+
+    // Tussentitels per seconde (optioneel): "BITTY BOMB ACTIVATED ! 3./2./1."
+    ctx.font = "bold 22px Arial";
+    ctx.fillStyle = "rgba(170,170,170,1)";
+    ctx.fillText(`${title} ${Math.max(1, remain)}.`, cx, cy + 60);
+
+    ctx.restore();
+
+    if (remain <= 0) {
+      // Start flash-fase
+      bittyBomb.phase = "flash";
+      bittyBomb.start = now;
+      bittyBomb.flashAlpha = 1.0;
+      bittyBomb.rays = makeLightningRays(18);
+      bittyBomb.flames = makeFlames(120, cx, cy);
+
+      // donder-geluid → random keuze uit bestaande
+      try { (thunderSounds[Math.floor(Math.random()*thunderSounds.length)] || thunder1).play(); } catch {}
+    }
+    return;
+  }
+
+  // Fase 2: Nucleaire flash + bliksem + energie/vlam-partikels
+  if (bittyBomb.phase === "flash") {
+    const elapsed = now - bittyBomb.start;
+
+    // Radiale white flash vanuit midden
+    const r = Math.min(W, H) * (0.15 + elapsed / 220);
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, `rgba(255,255,255,${bittyBomb.flashAlpha})`);
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.save();
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+
+    // Flits alpha snel afbouwen
+    bittyBomb.flashAlpha = Math.max(0, bittyBomb.flashAlpha - 0.08);
+
+    // Bliksems (dunne witte/blauw-witte stralen)
+    ctx.save();
+    ctx.lineCap = "round";
+    for (let i = bittyBomb.rays.length - 1; i >= 0; i--) {
+      const r = bittyBomb.rays[i];
+      const lt = now - r.t0;
+      if (lt > r.life) { bittyBomb.rays.splice(i,1); continue; }
+
+      const jitter = (Math.random() - 0.5) * r.jitter;
+      const x2 = cx + Math.cos(r.a)*(r.len + jitter);
+      const y2 = cy + Math.sin(r.a)*(r.len + jitter);
+
+      // outer stroke (licht blauw)
+      ctx.strokeStyle = "rgba(150,200,255,0.65)";
+      ctx.lineWidth = r.width + 1.2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      // inner core (wit)
+      ctx.strokeStyle = "rgba(255,255,255,0.95)";
+      ctx.lineWidth = r.width;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Vlam/energie-partikels
+    for (let i = bittyBomb.flames.length - 1; i >= 0; i--) {
+      const p = bittyBomb.flames[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha -= p.decay;
+      if (p.alpha <= 0) { bittyBomb.flames.splice(i,1); continue; }
+
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = "rgba(255,180,80,1)"; // warm oranje
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // blauwe randgloed (energie look)
+      ctx.save();
+      ctx.globalAlpha = p.alpha * 0.45;
+      ctx.strokeStyle = "rgba(120,180,255,0.9)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size+1.5, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Na ~600–800ms starten we de bommenregen
+    if (elapsed >= 700) {
+      bittyBomb.phase = "done";
+      bittyBomb.active = false;
+      // Start nu de regen
+      startBombRain(bittyBomb.queuedRain);
+    }
+  }
+}
+
 
 function chooseSpawnX(cfg) {
   const margin = cfg.xMargin || 0;
@@ -1585,8 +1804,9 @@ const DROP_TYPES = {
   pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/10`, alpha: 1 });
   try { coinSound.currentTime = 0; coinSound.play(); } catch {}
   if (bombsCollected >= 10) {
-    bombsCollected = 0;
-    startBombRain(20);
+  bombsCollected = 0;
+  triggerBittyBombIntro(20);
+
   }
 
       if (lives > 1) {
@@ -1649,9 +1869,10 @@ const DROP_TYPES = {
       // leuk geluidje hergebruiken
       try { coinSound.currentTime = 0; coinSound.play(); } catch {}
       if (bombsCollected >= BOMB_TOKEN_TARGET) {
-        bombsCollected = 0;
-        startBombRain(BOMB_RAIN_COUNT);
-      }
+      bombsCollected = 0;
+      triggerBittyBombIntro(BOMB_RAIN_COUNT);
+    }
+
     },
     onMiss(drop) { /* geen straf */ },
   },
@@ -4568,6 +4789,9 @@ if (showGameOver) {
   });
 
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
+
+   renderBittyBombIntro();
+
 
   animationFrameId = requestAnimationFrame(draw);
 } // ✅ Sluit function draw() correct af
