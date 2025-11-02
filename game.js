@@ -2130,16 +2130,15 @@ function startDrops(config) {
   })(dropConfig);
 }
 
-
-// VERVANG JE OUDE FUNCTIE door deze:
+// VERVANG je oude functie hiermee — gebruikt jouw pickWeighted() en nextDropType()
 function spawnRandomDrop() {
   if (!dropConfig) return;
 
-  // --- Quota administratie (per running config) ---
+  // --- Quota administratie (per actieve dropConfig) ---
   if (!dropConfig._quotaUsed) dropConfig._quotaUsed = {}; // { type: count }
   const quota = dropConfig.typeQuota || null;
 
-  // Bepaal welke types nog "mogen" volgens quota
+  // 1) Allowed types bepalen (rekening houdend met quota)
   let allowed = Array.isArray(dropConfig.types) && dropConfig.types.length
     ? dropConfig.types.slice()
     : ["heart","star","bomb_token"]; // veilige fallback set
@@ -2150,47 +2149,32 @@ function spawnRandomDrop() {
       const max  = quota[t];
       return (typeof max !== "number") || (used < max);
     });
-
-    // Als ALLE types hun quota bereikt hebben, laat dan toch alles toe
-    // (zodat de spawner niet "doodvalt"); anders gebruik de gefilterde set.
+    // Als alle quota op zijn, laat alles weer toe zodat de spawner nooit "vastloopt"
     if (stillAllowed.length > 0) allowed = stillAllowed;
   }
 
-  // --- Typekeuze: custom picker -> gewichten -> random ---
-  function pickWeightedLocal(types, weights) {
-    let total = 0;
-    for (const t of types) total += (weights?.[t] ?? 1);
-    let r = Math.random() * total;
-    for (const t of types) {
-      r -= (weights?.[t] ?? 1);
-      if (r <= 0) return t;
-    }
-    return types[0];
-  }
-
+  // 2) Typekeuze: custom sequencer -> gewichten -> random
   let type;
   if (typeof dropConfig.customPicker === "function") {
-    // Sequencer/afwissel-ritme: geef allowed types door
-    type = dropConfig.customPicker(allowed);
-    // Als picker iets buiten allowed geeft, clamp 'm alsnog
+    type = dropConfig.customPicker(allowed);          // jouw nextDropType(allowed)
     if (!allowed.includes(type)) {
+      // veiligheidsnet als customPicker iets buiten allowed geeft
       type = allowed.includes("heart") ? "heart" : allowed[0];
     }
   } else if (dropConfig.typeWeights) {
-    type = pickWeightedLocal(allowed, dropConfig.typeWeights);
+    type = pickWeighted(allowed, dropConfig.typeWeights); // ⬅️ jouw bestaande helper
   } else {
     type = allowed[Math.floor(Math.random() * allowed.length)];
   }
 
-  // Quota bijwerken
+  // 3) Quota bijwerken (indien ingesteld)
   if (quota && typeof quota === "object") {
     dropConfig._quotaUsed[type] = (dropConfig._quotaUsed[type] || 0) + 1;
   }
 
-  // --- Spawnpositie ---
+  // 4) Spawnpositie en object toevoegen
   const x = chooseSpawnX(dropConfig);
 
-  // --- Drop object toevoegen ---
   fallingDrops.push({
     type,
     x,
@@ -2201,8 +2185,10 @@ function spawnRandomDrop() {
     t: 0,
     active: true
   });
+
   dropsSpawned++;
 }
+
 
 
 
