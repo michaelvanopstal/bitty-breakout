@@ -1778,36 +1778,27 @@ const DROP_TYPES = {
       const img = blink ? tntBlinkImg : tntImg;
       ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
     },
-  
-  onCatch(drop) {
-  bombsCollected++;
-  pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/10`, alpha: 1 });
-  try { coinSound.currentTime = 0; coinSound.play(); } catch {}
-
-  if (bombsCollected >= 10) {
-    bombsCollected = 0;
-    startBombRain(20);
-  }
-}, // 👈 sluit deze onCatch netjes af
-
-onCatch(drop) {
-  if (lives > 1) {
-    lives--;
-    updateLivesDisplay?.();
-    pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
-  } else {
-    triggerPaddleExplosion?.();
-  }
-  try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
-}, // 👈 sluit ook deze netjes af
-
-paddle_long: {
-  draw(drop, ctx) {
-    ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24);
+    onCatch(drop) {
+      // ⚠️ Gevaarlijke bom: -1 life (telt niet mee voor token-teller)
+      if (lives > 1) {
+        lives--;
+        updateLivesDisplay?.();
+        pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
+      } else {
+        triggerPaddleExplosion?.();
+      }
+      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+    },
+    onMiss(drop) { /* goed zo, niks */ },
   },
-  onCatch(drop) { startPaddleSizeEffect?.("long"); },
-  onMiss(drop) {},
-},
+
+  paddle_long: {
+    draw(drop, ctx) {
+      ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24);
+    },
+    onCatch(drop) { startPaddleSizeEffect?.("long"); },
+    onMiss(drop) {},
+  },
 
   paddle_small: {
     draw(drop, ctx) { ctx.drawImage(paddleSmallBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
@@ -1845,18 +1836,18 @@ paddle_long: {
       ctx.drawImage(img, drop.x - size/2, drop.y - size/2, size, size);
       ctx.restore();
     },
-   onCatch(drop) {
-  bombsCollected++;
-  pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`, alpha: 1 });
-  try { coinSound.currentTime = 0; coinSound.play(); } catch {}
-
-  if (bombsCollected >= BOMB_TOKEN_TARGET) {
-    bombsCollected = 0;
-    // Eerst de intro, daarna pas de bommenregen:
-    triggerBombIntro(() => startBombRain(BOMB_RAIN_COUNT));
-  }
-},
-
+    onCatch(drop) {
+      bombsCollected++;
+      pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`, alpha: 1 });
+      try { coinSound.currentTime = 0; coinSound.play(); } catch {}
+      if (bombsCollected >= BOMB_TOKEN_TARGET) {
+        bombsCollected = 0;
+        // Eerst de intro, daarna pas de bommenregen:
+        triggerBombIntro(() => startBombRain(BOMB_RAIN_COUNT));
+      }
+    },
+    onMiss(drop) { /* geen straf */ },
+  },
 
   star: {
     // Pulserend gouden sterretje
@@ -1899,7 +1890,6 @@ paddle_long: {
     },
   }, // ✅ komma behouden, want er kunnen in de toekomst meer types bij
 }; // ✅ sluit het hele const DROP_TYPES object af
-
 
 
 let rocketActive = false; // Voor nu altijd zichtbaar om te testen
