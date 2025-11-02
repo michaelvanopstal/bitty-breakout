@@ -2235,7 +2235,6 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
-
 function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
@@ -2339,7 +2338,7 @@ function resetBricks() {
       minIntervalMs: 500,
       maxIntervalMs: 900,
       speed: 3.2,
-      types: ["coin","heart","bomb","star"],
+      types: ["bomb_token"],
       xMargin: 40,
       startDelayMs: 400,
       mode: "well",
@@ -2366,7 +2365,7 @@ function resetBricks() {
     // --- 💣 bomb_token drops ---
     startDrops({
       continuous: true,
-      typeQuota: ["coin","heart","bomb","star"],
+      typeQuota: { bomb_token: 10 },   // <-- FIX: object i.p.v. array
       minIntervalMs: 500,
       maxIntervalMs: 900,
       speed: 3.2,
@@ -2404,7 +2403,7 @@ function resetBricks() {
       minIntervalMs: 500,
       maxIntervalMs: 900,
       speed: 3.2,
-      types: ["bomb_token"]
+      types: ["bomb_token"],
       xMargin: 40,
       startDelayMs: 400,
       mode: "grid",
@@ -2416,6 +2415,7 @@ function resetBricks() {
     });
   }
 }
+
 
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
