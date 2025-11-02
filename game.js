@@ -211,32 +211,6 @@ const VO_COOLDOWN_MS = 3000;    // minimaal 3s tussen voices
 let voIsPlaying = false;        // speelt er nu een voice?
 let voLockedUntil = 0;          // tot wanneer blokkeren (ms sinds pageload)
 
-// === BITTY BOMB: Intro + Nieuwe Explosie VFX ===
-let bittyBomb = {
-  active: false,
-  phase: "idle",       // "idle" | "countdown" | "done"
-  start: 0,
-  lastTick: 0,
-  countdownFrom: 3,
-  queuedRain: 0
-};
-
-let bombVisuals = null;
-
-const BOMB_VFX = {
-  FLASH_START: 500,  // ms
-  FLASH_END:   800,
-  FLAME_START: 700,
-  FLAME_END:   1600,
-  BOLT_START:  900,
-  BOLT_END:    1600,
-  SMOKE_START: 900,
-  END:         1800  // einde sequence → start regen
-};
-
-function randRange(a, b) { return a + Math.random() * (b - a); }
-function lerp(a, b, t) { return a + (b - a) * t; }
-
 
 function playVoiceOver(audio, opts = {}) {
   const { cooldown = VO_COOLDOWN_MS } = opts;
@@ -527,85 +501,8 @@ function renderStarPowerFX() {
     fxCtx.clearRect(0, 0, W, H);
   }
 }
-function renderBittyBombIntro() {
-  if (!bittyBomb.active) return;
-
-  const now = performance.now();
-  const W = canvas.width, H = canvas.height;
-  const cx = W/2, cy = H/2;
-
-  if (bittyBomb.phase === "countdown") {
-    const elapsed = now - bittyBomb.start;
-    const secs = Math.floor(elapsed / 1000);
-    const remain = Math.max(0, bittyBomb.countdownFrom - secs);
-    const blinkOn = (Math.floor(elapsed/500) % 2) === 0;
-
-    // zachte pulserende overlay
-    const pulse = 0.12 + 0.08 * Math.sin(elapsed/120);
-    ctx.save();
-    ctx.fillStyle = `rgba(255,255,255,${pulse})`;
-    ctx.fillRect(0, 0, W, H);
-    ctx.restore();
-
-    // tekst + nummer in cirkel
-    const title = "BITTY BOMB  ACTIVATED !";
-
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    ctx.font = "bold 40px Arial";
-    ctx.fillStyle = blinkOn ? "rgba(180,180,180,1)" : "rgba(120,120,120,1)";
-    ctx.strokeStyle = "rgba(50,50,50,0.7)";
-    ctx.lineWidth = 3;
-    ctx.strokeText(title, cx, cy - 60);
-    ctx.fillText(title,  cx, cy - 60);
-
-    ctx.beginPath();
-    ctx.arc(cx, cy + 10, 28, 0, Math.PI*2);
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = blinkOn ? "rgba(200,200,200,0.9)" : "rgba(160,160,160,0.9)";
-    ctx.stroke();
-
-    ctx.font = "bold 34px Arial";
-    ctx.fillStyle = "rgba(220,220,220,1)";
-    ctx.fillText(String(Math.max(1, remain)), cx, cy + 10);
-
-    ctx.font = "bold 22px Arial";
-    ctx.fillStyle = "rgba(170,170,170,1)";
-    ctx.fillText(`${title} ${Math.max(1, remain)}.`, cx, cy + 60);
-    ctx.restore();
-
-    if (remain <= 0) {
-      // klaar met countdown → start explosie-FX en daarna regen
-      bittyBomb.phase = "done";
-      bittyBomb.active = false;
-
-      startBombVisuals(() => startBombRain(bittyBomb.queuedRain));
-      try {
-        (thunderSounds?.[Math.floor(Math.random()*thunderSounds.length)] || thunder1).play();
-      } catch {}
-    }
-  }
-}
 
 
-
-
-
-function startBombVisuals(afterCb) {
-  const now = performance.now();
-  bombVisuals = {
-    t0: now,
-    done: false,
-    afterCb,
-    ringR: 0,
-    ringAlpha: 0.55,
-    flames: [],
-    sparks: [],
-    smoke: []
-  };
-}
 
 
 function showLevelBanner(text) {
@@ -1687,11 +1584,10 @@ const DROP_TYPES = {
   bombsCollected++;
   pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/10`, alpha: 1 });
   try { coinSound.currentTime = 0; coinSound.play(); } catch {}
- if (bombsCollected >= 10) {
-  bombsCollected = 0;
-  triggerBittyBombIntro(20); // of triggerBittyBombIntro(BOMB_RAIN_COUNT)
-}
-
+  if (bombsCollected >= 10) {
+    bombsCollected = 0;
+    startBombRain(20);
+  }
 
       if (lives > 1) {
         lives--;
@@ -2285,18 +2181,6 @@ function updateAndDrawDrops() {
     }
   }
 }
-
-function triggerBittyBombIntro(n) {
-  bittyBomb.active = true;
-  bittyBomb.phase = "countdown";
-  bittyBomb.start = performance.now();
-  bittyBomb.lastTick = 0;
-  bittyBomb.queuedRain = n || 20; // fallback
-
-  // klein piepje mag, optioneel
-  try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
-}
-
 
 function startBombRain(n = 20) {
   // verzamel alle actieve bricks
@@ -4684,11 +4568,6 @@ if (showGameOver) {
   });
 
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
-
-  // altijd bovenop tekenen
-renderBittyBombIntro();
-updateAndDrawBombVisuals(ctx);
-
 
   animationFrameId = requestAnimationFrame(draw);
 } // ✅ Sluit function draw() correct af
