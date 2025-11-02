@@ -211,6 +211,86 @@ const VO_COOLDOWN_MS = 3000;    // minimaal 3s tussen voices
 let voIsPlaying = false;        // speelt er nu een voice?
 let voLockedUntil = 0;          // tot wanneer blokkeren (ms sinds pageload)
 
+// ===== Drop Type Sequencer (voor afwisselend ritme) =====
+let dropSeq = {
+  lastType: null,
+  burstType: null,
+  burstLeft: 0,
+  types: ["heart","star","bomb_token"],
+  weights: { heart: 1, star: 1, bomb_token: 1 }, // basisbalans
+  // instellingen om het ritme te sturen:
+  minBurst: 1,   // 1 of 2 achter elkaar
+  maxBurst: 2,
+  maxStreak: 2,  // nooit langer dan 2 dezelfde types op rij
+  repeatChance: 0.25 // kans om tóch nog een keer dezelfde burstType te kiezen (voor "soms 2x achter elkaar")
+};
+
+function initDropSequencer(types, opts = {}) {
+  dropSeq.types   = types.slice();
+  dropSeq.weights = Object.assign({ heart:1, star:1, bomb_token:1 }, opts.weights || {});
+  dropSeq.minBurst = opts.minBurst ?? 1;
+  dropSeq.maxBurst = opts.maxBurst ?? 2;
+  dropSeq.maxStreak = opts.maxStreak ?? 2;
+  dropSeq.repeatChance = opts.repeatChance ?? 0.25;
+  dropSeq.lastType = null;
+  dropSeq.burstType = null;
+  dropSeq.burstLeft = 0;
+}
+
+function pickWeighted(types, weights) {
+  let total = 0;
+  for (const t of types) total += (weights[t] ?? 1);
+  let r = Math.random() * total;
+  for (const t of types) {
+    r -= (weights[t] ?? 1);
+    if (r <= 0) return t;
+  }
+  return types[0];
+}
+
+/** Geeft het volgende type terug met bursts en afwisseling. */
+function nextDropType(allowedTypes) {
+  // 1) Als we midden in een burst zitten, ga door met deze burstType
+  if (dropSeq.burstLeft > 0 && dropSeq.burstType && allowedTypes.includes(dropSeq.burstType)) {
+    dropSeq.burstLeft--;
+    dropSeq.lastType = dropSeq.burstType;
+    return dropSeq.burstType;
+  }
+
+  // 2) Nieuwe burst kiezen:
+  //    - meestal een ander type dan de vorige
+  //    - maar met kleine kans (repeatChance) nogmaals dezelfde
+  const others = allowedTypes.filter(t => t !== dropSeq.lastType);
+  const canRepeat = dropSeq.lastType && allowedTypes.includes(dropSeq.lastType);
+
+  let candidatePool;
+  if (canRepeat && Math.random() < dropSeq.repeatChance) {
+    // soms bewust herhalen
+    candidatePool = [dropSeq.lastType, ...others];
+  } else {
+    candidatePool = others.length ? others : allowedTypes.slice();
+  }
+
+  // pick met gewicht — maar respecteer maxStreak
+  let chosen = pickWeighted(candidatePool, dropSeq.weights);
+
+  // safety: forceer afwisseling als we al aan streak-limiet zitten
+  if (dropSeq.lastType && chosen === dropSeq.lastType) {
+    // tel streak (we weten alleen lastType; streaklimiter via burst)
+    // We voorkomen langere reeksen door burst = 1 in dit geval
+    dropSeq.burstLeft = 0;
+  } else {
+    // kies burstlengte 1..2
+    const len = dropSeq.minBurst + Math.floor(Math.random() * (dropSeq.maxBurst - dropSeq.minBurst + 1));
+    // voorkom dat burst langer wordt dan maxStreak
+    dropSeq.burstLeft = Math.max(0, Math.min(len, dropSeq.maxStreak) - 1);
+  }
+
+  dropSeq.burstType = chosen;
+  dropSeq.lastType = chosen;
+  return chosen;
+}
+
 
 function playVoiceOver(audio, opts = {}) {
   const { cooldown = VO_COOLDOWN_MS } = opts;
@@ -2055,14 +2135,62 @@ function startDrops(config) {
 function spawnRandomDrop() {
   if (!dropConfig) return;
 
-  // typekeuze via picker (quota/gewichten) of fallback
-  const type = dropConfig._pickType
-    ? dropConfig._pickType()
-    : (dropConfig.types?.[0] || "coin");
+  // --- Quota administratie (per running config) ---
+  if (!dropConfig._quotaUsed) dropConfig._quotaUsed = {}; // { type: count }
+  const quota = dropConfig.typeQuota || null;
 
-  // X bepalen volgens gekozen modus (well/grid) + avoidPaddle
+  // Bepaal welke types nog "mogen" volgens quota
+  let allowed = Array.isArray(dropConfig.types) && dropConfig.types.length
+    ? dropConfig.types.slice()
+    : ["heart","star","bomb_token"]; // veilige fallback set
+
+  if (quota && typeof quota === "object") {
+    const stillAllowed = allowed.filter(t => {
+      const used = dropConfig._quotaUsed[t] || 0;
+      const max  = quota[t];
+      return (typeof max !== "number") || (used < max);
+    });
+
+    // Als ALLE types hun quota bereikt hebben, laat dan toch alles toe
+    // (zodat de spawner niet "doodvalt"); anders gebruik de gefilterde set.
+    if (stillAllowed.length > 0) allowed = stillAllowed;
+  }
+
+  // --- Typekeuze: custom picker -> gewichten -> random ---
+  function pickWeightedLocal(types, weights) {
+    let total = 0;
+    for (const t of types) total += (weights?.[t] ?? 1);
+    let r = Math.random() * total;
+    for (const t of types) {
+      r -= (weights?.[t] ?? 1);
+      if (r <= 0) return t;
+    }
+    return types[0];
+  }
+
+  let type;
+  if (typeof dropConfig.customPicker === "function") {
+    // Sequencer/afwissel-ritme: geef allowed types door
+    type = dropConfig.customPicker(allowed);
+    // Als picker iets buiten allowed geeft, clamp 'm alsnog
+    if (!allowed.includes(type)) {
+      type = allowed.includes("heart") ? "heart" : allowed[0];
+    }
+  } else if (dropConfig.typeWeights) {
+    type = pickWeightedLocal(allowed, dropConfig.typeWeights);
+  } else {
+    type = allowed[Math.floor(Math.random() * allowed.length)];
+  }
+
+  // Quota bijwerken
+  if (quota && typeof quota === "object") {
+    dropConfig._quotaUsed[type] = (dropConfig._quotaUsed[type] || 0) + 1;
+  }
+
+  // --- Spawnpositie ---
   const x = chooseSpawnX(dropConfig);
 
+  // --- Drop object toevoegen ---
   fallingDrops.push({
     type,
     x,
@@ -2075,6 +2203,7 @@ function spawnRandomDrop() {
   });
   dropsSpawned++;
 }
+
 
 
 // VERVANG JE OUDE FUNCTIE door deze:
@@ -2242,6 +2371,7 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
+
 function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
@@ -2256,7 +2386,7 @@ function resetBricks() {
     const centerX = paddleX + paddleWidth / 2;
     paddleWidth = paddleBaseWidth;
     paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
-    if (typeof redrawPaddleCanvas === 'function') redrawPaddleCanvas();
+    if (typeof redrawPaddleCanvas === "function") redrawPaddleCanvas();
   }
 
   // alle bricks resetten
@@ -2265,7 +2395,7 @@ function resetBricks() {
       const b = bricks[c][r];
       b.status = 1;
 
-      const defined = currentMap.find(p => p.col === c && p.row === r);
+      const defined = currentMap.find((p) => p.col === c && p.row === r);
       const brickType = defined ? defined.type : "normal";
       b.type = brickType;
 
@@ -2297,37 +2427,46 @@ function resetBricks() {
   assignHeartBlocks();
 
   // bommenregen opruimen bij levelstart (voortgang teller behouden)
-  if (typeof bombRain !== 'undefined') bombRain = [];
+  if (typeof bombRain !== "undefined") bombRain = [];
 
   // drops resetten
-  if (typeof fallingDrops !== 'undefined') fallingDrops = [];
-  if (typeof dropsSpawned !== 'undefined') dropsSpawned = 0;
-  if (typeof lastDropAt !== 'undefined') lastDropAt = performance.now();
+  if (typeof fallingDrops !== "undefined") fallingDrops = [];
+  if (typeof dropsSpawned !== "undefined") dropsSpawned = 0;
+  if (typeof lastDropAt !== "undefined") lastDropAt = performance.now();
 
   const lvl = level || 1;
 
-  // ======= ÉÉN enkele startDrops per level =======
+  // ===== Sequencer instellen voor natuurlijke afwisseling =====
+  if (typeof initDropSequencer === "function") {
+    initDropSequencer(["heart", "star", "bomb_token"], {
+      weights: { heart: 1, star: 1, bomb_token: 1 },
+      minBurst: 1,
+      maxBurst: 2,
+      maxStreak: 2,
+      repeatChance: 0.25 // soms 2x hetzelfde voor variatie
+    });
+  }
+
+  // ===== ÉÉN enkele startDrops per level =====
   startDrops({
     continuous: true,
-    minIntervalMs: (lvl <= 3) ? 1200 : (lvl <= 10) ? 900 : 800,
-    maxIntervalMs: (lvl <= 3) ? 2600 : (lvl <= 10) ? 2200 : 1800,
-    speed:        (lvl <= 3) ? 2.5  : (lvl <= 10) ? 3.0  : 3.4,
+    minIntervalMs: lvl <= 3 ? 1200 : lvl <= 10 ? 900 : 800,
+    maxIntervalMs: lvl <= 3 ? 2600 : lvl <= 10 ? 2200 : 1800,
+    speed: lvl <= 3 ? 2.5 : lvl <= 10 ? 3.0 : 3.4,
 
-    // Alleen heart, star en bomb_token in het val­systeem
+    // Alleen heart, star en bomb_token in het valsysteem
     types: ["heart", "star", "bomb_token"],
 
-    // Zorgt dat bommen zeldzamer vallen dan hearts/stars
-    typeWeights: { heart: 4, star: 4, bomb_token: 1 },
+    // Gebruik de sequencer voor afwisselende keuze
+    customPicker: typeof nextDropType === "function" ? nextDropType : null,
 
-    // Maximaal aantal bommen dat kan vallen in totaal
-    typeQuota: { bomb_token: 10 },
-
+    // geen typeQuota → vrij ritme, gereguleerd door de sequencer
     xMargin: 40,
-    startDelayMs: (lvl <= 3) ? 800 : (lvl <= 10) ? 600 : 500,
-    mode: (lvl > 10) ? "grid" : "well",
+    startDelayMs: lvl <= 3 ? 800 : lvl <= 10 ? 600 : 500,
+    mode: lvl > 10 ? "grid" : "well",
     gridColumns: 8,
     gridJitterPx: 16,
-    avoidPaddle: (lvl > 10),
+    avoidPaddle: lvl > 10,
     avoidMarginPx: 40,
     minSpacing: 70
   });
