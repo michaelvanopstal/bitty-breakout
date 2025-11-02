@@ -150,6 +150,14 @@ starCatchSfx.preload = "auto";
 starCatchSfx.loop = false;
 starCatchSfx.volume = 0.85; // pas aan naar smaak
 
+// === Bomb Token & Rain ===
+let bombsCollected = 0;
+let bombRain = []; // actieve vallende bommen tijdens de regen
+const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
+const BOMB_RAIN_COUNT  = 20;    // dan 20 laten vallen
+
+
+
 
 let electricBursts = [];
 
@@ -1424,6 +1432,9 @@ lifeImg.src = "level.png";
 const dollarPxpImg = new Image();
 dollarPxpImg.src = "dollarpxp.png";
 
+const bombTokenImg = new Image();
+bombTokenImg.src = "bom.png"; 
+
 
 const doubleBallImg = new Image();
 doubleBallImg.src = "2 balls.png";  // upload dit naar dezelfde map
@@ -1612,6 +1623,32 @@ const DROP_TYPES = {
     draw(drop, ctx) { ctx.drawImage(magnetImg, drop.x - 35, drop.y - 12, 70, 24); },
     onCatch(drop) { activateMagnet?.(20000); },
     onMiss(drop) {},
+  },
+ 
+  bomb_token: {
+    draw(drop, ctx) {
+      const s = 28;
+      const img = (bombTokenImg && bombTokenImg.complete) ? bombTokenImg : tntImg;
+      // kleine pulse om 'm speciaal te maken
+      drop.t = (drop.t || 0) + 0.16;
+      const k = 1 + 0.08 * Math.sin(drop.t * 6);
+      const size = s * k;
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      ctx.drawImage(img, drop.x - size/2, drop.y - size/2, size, size);
+      ctx.restore();
+    },
+    onCatch(drop) {
+      bombsCollected++;
+      pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`, alpha: 1 });
+      // leuk geluidje hergebruiken
+      try { coinSound.currentTime = 0; coinSound.play(); } catch {}
+      if (bombsCollected >= BOMB_TOKEN_TARGET) {
+        bombsCollected = 0;
+        startBombRain(BOMB_RAIN_COUNT);
+      }
+    },
+    onMiss(drop) { /* geen straf */ },
   },
 
   star: {
@@ -2138,6 +2175,44 @@ function updateAndDrawDrops() {
   }
 }
 
+function startBombRain(n = 20) {
+  // verzamel alle actieve bricks
+  const pool = [];
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const b = bricks[c][r];
+      if (b?.status === 1) pool.push({ c, r, x: b.x, y: b.y });
+    }
+  }
+  if (!pool.length) return;
+
+  // shuffle compact
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  const count = Math.min(n, pool.length);
+  for (let i = 0; i < count; i++) {
+    const t = pool[i];
+    const delay = 150 + Math.random() * 1400;     // door elkaar
+    const startX = t.x + brickWidth/2 + (Math.random()*80 - 40);
+    const startY = -40 - Math.random() * 200;     // verschillende hoogtes
+    const targetY = t.y - 14;                     // nét voor de steen
+    const speed   = 3.2 + Math.random() * 1.8;
+
+    bombRain.push({
+      x: startX, y: startY, vx: 0, vy: speed,
+      targetY, col: t.c, row: t.r,
+      startAt: performance.now() + delay,
+      exploded: false
+    });
+  }
+
+  // leuk: voice of sfx kan hier
+  try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
+}
+
 
 
 
@@ -2217,6 +2292,12 @@ function resetBricks() {
 
   assignHeartBlocks();
 
+  // ===== Veiligheid: bommenregen opruimen bij levelstart =====
+  if (typeof bombRain !== 'undefined') {
+    bombRain = [];
+  }
+  // (bewust GEEN reset van bombsCollected zodat voortgang kan blijven)
+
   // =========================
   // DROPS SYSTEM: reset & start per level
   // =========================
@@ -2237,38 +2318,75 @@ function resetBricks() {
   // Voorbeeldconfiguraties per level-range.
   // Pas gerust aan naar jouw pacing.
   if (lvl <= 3) {
+    // --- jouw bestaande mix ---
     startDrops({
-     continuous: true,  
+      continuous: true,
       minIntervalMs: 1200,
       maxIntervalMs: 2600,
       speed: 2.5,
-      types: ["coin","heart","bag","star"],
+      types: ["coin","heart","bomb","star"],
       xMargin: 40,
       startDelayMs: 800,
       mode: "well",          // goed gespreide x-waarden (geen grid)
       avoidPaddle: false,
       minSpacing: 70
     });
-  } else if (lvl <= 10) {
+
+    // --- 💣 bomb_token drops (10 stuks te vangen) ---
     startDrops({
-      continuous: true,  
+      continuous: true,
+      typeQuota: { bomb_token: 10 },   // precies 10 tokens “in omloop” in deze fase
+      minIntervalMs: 500,
+      maxIntervalMs: 900,
+      speed: 3.2,
+      types: ["coin","heart","bomb","star"],
+      xMargin: 40,
+      startDelayMs: 400,
+      mode: "well",
+      avoidPaddle: true,               // iets eerlijker: niet recht boven de paddle
+      avoidMarginPx: 40,
+      minSpacing: 70
+    });
+
+  } else if (lvl <= 10) {
+    // --- jouw bestaande mix ---
+    startDrops({
+      continuous: true,
       minIntervalMs: 900,
       maxIntervalMs: 2200,
       speed: 3.0,
-      types: ["coin","heart","bag","star"],
+      types: ["coin","heart","bomb","star"],
       xMargin: 40,
       startDelayMs: 600,
       mode: "well",
       avoidPaddle: false,
       minSpacing: 70
     });
-  } else {
+
+    // --- 💣 bomb_token drops ---
     startDrops({
-    continuous: true,  
+      continuous: true,
+      typeQuota: ["coin","heart","bomb","star"],
+      minIntervalMs: 500,
+      maxIntervalMs: 900,
+      speed: 3.2,
+      types: ["bomb_token"],
+      xMargin: 40,
+      startDelayMs: 400,
+      mode: "well",
+      avoidPaddle: true,
+      avoidMarginPx: 40,
+      minSpacing: 70
+    });
+
+  } else {
+    // --- jouw bestaande mix ---
+    startDrops({
+      continuous: true,
       minIntervalMs: 800,
       maxIntervalMs: 1800,
       speed: 3.4,
-      types: ["coin","heart","bag","star"],
+      types: ["coin","heart","bomb","star"],
       xMargin: 40,
       startDelayMs: 500,
       mode: "grid",          // nette kolommen in hogere levels
@@ -2278,9 +2396,26 @@ function resetBricks() {
       avoidMarginPx: 40,
       minSpacing: 70
     });
+
+    // --- 💣 bomb_token drops ---
+    startDrops({
+      continuous: true,
+      typeQuota: { bomb_token: 10 },
+      minIntervalMs: 500,
+      maxIntervalMs: 900,
+      speed: 3.2,
+      types: ["coin","heart","bomb","star"],
+      xMargin: 40,
+      startDelayMs: 400,
+      mode: "grid",
+      gridColumns: 8,
+      gridJitterPx: 16,
+      avoidPaddle: true,
+      avoidMarginPx: 40,
+      minSpacing: 70
+    });
   }
 }
-
 
 
 // 🔧 Hulp-functie om 4 hartjes te verdelen
@@ -3357,6 +3492,53 @@ function stopAndDisarmAllTNT() {
   }
 }
 
+function updateAndDrawBombRain() {
+  const now = performance.now();
+  for (let i = bombRain.length - 1; i >= 0; i--) {
+    const b = bombRain[i];
+    if (now < b.startAt) continue;
+
+    // vallen
+    b.y += b.vy;
+
+    // tekenen
+    const img = (bombTokenImg && bombTokenImg.complete) ? bombTokenImg : tntImg;
+    ctx.drawImage(img, b.x - 14, b.y - 14, 28, 28);
+
+    // geland?
+    if (!b.exploded && b.y >= b.targetY) {
+      b.exploded = true;
+
+      // veilige guard: bestaat target nog?
+      if (bricks?.[b.col]?.[b.row]?.status === 1) {
+        explodeTNT(b.col, b.row);  // wist center + buren
+      } else {
+        // fallback: zoek dichtstbijzijnde nog-actieve brick in buurt
+        let best = null, bestD = Infinity;
+        for (let c = 0; c < brickColumnCount; c++) {
+          for (let r = 0; r < brickRowCount; r++) {
+            const bx = bricks[c][r];
+            if (bx?.status !== 1) continue;
+            const dx = (bx.x + brickWidth/2) - b.x;
+            const dy = (bx.y + brickHeight/2) - b.y;
+            const d2 = dx*dx + dy*dy;
+            if (d2 < bestD) { bestD = d2; best = { c, r }; }
+          }
+        }
+        if (best) explodeTNT(best.c, best.r);
+      }
+
+      // leuke rook + knal die je al tekent
+      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+      // laat sprite verdwijnen na knal
+      bombRain.splice(i, 1);
+    }
+
+    // buiten beeld/fail-safe
+    if (b.y > canvas.height + 40) bombRain.splice(i, 1);
+  }
+}
+
 
 
 function drawFlyingCoins() {
@@ -4110,6 +4292,7 @@ if (downPressed) {
   drawMagnetAura(ctx);
   drawMagnetHUD(ctx);
   updateAndDrawDrops();
+  updateAndDrawBombRain();
 
   if (rocketActive && !rocketFired && rocketAmmo > 0) {
     rocketX = paddleX + paddleWidth / 2 - 12;
