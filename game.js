@@ -256,6 +256,9 @@ function stopStarAura(immediate = false) {
   } catch (e) {}
 }
 
+function clamp(x, min, max) {
+  return Math.max(min, Math.min(max, x));
+}
 
 
 function nextWellDistributedX(margin = 40, minSpacing = 70) {
@@ -2070,6 +2073,7 @@ function spawnRandomDrop() {
   dropsSpawned++;
 }
 
+
 // VERVANG JE OUDE FUNCTIE door deze:
 function updateAndDrawDrops() {
   if (invincibleActive && performance.now() >= invincibleEndTime) invincibleActive = false;
@@ -2235,6 +2239,7 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
+
 function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
