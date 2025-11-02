@@ -589,39 +589,6 @@ function renderBittyBombIntro() {
   }
 }
 
-function drawBolt(ctx, x1, y1, x2, y2, opts = {}) {
-  const {
-    depth = 4,
-    roughness = 18,
-    forks = 2,
-    forkChance = 0.45,
-    forkAngle = Math.PI / 6,
-    shrink = 0.65
-  } = opts;
-
-  // ✅ jaggedLine hoort HIERBINNEN te staan:
-  function jaggedLine(x1, y1, x2, y2, d, r) {
-    const pts = [{x:x1, y:y1}, {x:x2, y:y2}];
-    for (let i = 0; i < d; i++) {
-      const arr = [pts[0]];
-      for (let j = 0; j < pts.length - 1; j++) {
-        const a = pts[j], b = pts[j+1];
-        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-        const dx = b.x - a.x, dy = b.y - a.y;
-        const nx = -dy, ny = dx;
-        const off = (Math.random() - 0.5) * r;
-        const mag = Math.hypot(nx, ny) || 1;
-        arr.push({x: mx + nx * off / mag, y: my + ny * off / mag});
-        arr.push(b);
-      }
-      pts.splice(0, pts.length, ...arr);
-      r *= 0.55;
-    }
-    return pts;
-  }
-
-  // daarna de rest van drawBolt...
-}
 
 
 
