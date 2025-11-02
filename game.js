@@ -155,6 +155,7 @@ starCatchSfx.volume = 0.85; // pas aan naar smaak
 let bombsCollected = 0;
 let bombIntro = null;
 let bombRain = [];
+let bombCountdown = null;
 
 
 // constants voor de bonuslogica
@@ -439,6 +440,72 @@ function startBombRain(count = 20) {
       active: true
     });
   }
+}
+
+function triggerBombCountdown(afterCb) {
+  if (bombCountdown && !bombCountdown.done) return;
+  bombCountdown = { t0: performance.now(), done: false, afterCb };
+}
+
+function updateAndDrawBombCountdown(ctx) {
+  if (!bombCountdown || bombCountdown.done) return;
+
+  const now = performance.now();
+  const t = now - bombCountdown.t0;  // ms
+  const D = 3000;                    // totale duur: 3 → 2 → 1
+  const perStep = 1000;
+
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  if (t >= D) {
+    bombCountdown.done = true;
+    // ⤵️ eerst jouw bestaande intro (die je al hebt),
+    // daarna de bommenregen via afterCb
+    triggerBombIntro(() => {
+      if (typeof bombCountdown.afterCb === "function") bombCountdown.afterCb();
+      bombCountdown = null;
+    });
+    return;
+  }
+
+  // huidige tel (3,2,1) + fase binnen de tel
+  const step = 3 - Math.floor(t / perStep);
+  const stepT = (t % perStep) / perStep;
+
+  // zwart pulserende ring
+  ctx.save();
+  const baseR = Math.min(canvas.width, canvas.height) * 0.18;
+  const pulse = 1 + 0.08 * Math.sin(stepT * Math.PI * 2);
+  const r = baseR * pulse;
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = (Math.floor(stepT * 6) % 2 === 0) ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.55)";
+  ctx.stroke();
+
+  // korte witte flits bij start van elke tel
+  const flash = (stepT < 0.08) ? (1 - stepT / 0.08) : 0;
+  if (flash > 0) {
+    ctx.fillStyle = `rgba(255,255,255,${0.25 * flash})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // de grote cijfers 3/2/1
+  ctx.font = "bold 120px Arial";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#FFFFFF";
+  ctx.strokeStyle = "#000000";
+  ctx.lineWidth = 8;
+  ctx.strokeText(String(step), cx, cy + 40);
+  ctx.fillText(String(step), cx, cy + 40);
+
+  // labeltje erboven
+  ctx.font = "bold 22px Arial";
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.fillText("BITTY BOMB INCOMING…", cx, cy - r - 20);
+  ctx.restore();
 }
 
 function stopStarAura(immediate = false) {
@@ -4752,11 +4819,13 @@ if (showGameOver) {
   }
 }
 
-  // in DROP_TYPES.bomb_token.onCatch
+ // in DROP_TYPES.bomb_token.onCatch:
 if (bombsCollected >= BOMB_TOKEN_TARGET) {
   bombsCollected = 0;
-  triggerBombIntro(() => startBombRain(BOMB_RAIN_COUNT));
+  // in plaats van: triggerBombIntro(() => startBombRain(BOMB_RAIN_COUNT));
+  triggerBombCountdown(() => startBombRain(BOMB_RAIN_COUNT));
 }
+
 
   // 🧱 Steenpuin tekenen
   stoneDebris.forEach(p => {
@@ -4772,7 +4841,8 @@ if (bombsCollected >= BOMB_TOKEN_TARGET) {
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
 
   updateAndDrawBombIntro(ctx);
-
+  updateAndDrawBombCountdown(ctx);
+  
   animationFrameId = requestAnimationFrame(draw);
 } // ✅ Sluit function draw() correct af
 
