@@ -155,7 +155,7 @@ let bombsCollected = 0;
 let bombRain = []; // actieve vallende bommen tijdens de regen
 const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
 const BOMB_RAIN_COUNT  = 20;    // dan 20 laten vallen
-
+let bombCountdown = null;
 
 
 
@@ -236,6 +236,88 @@ function playVoiceOver(audio, opts = {}) {
     voLockedUntil = performance.now() + 500;
   }
   return true;
+}
+// Start de 3→2→1 countdown; na afloop roepen we afterCb()
+function triggerBombCountdown(afterCb) {
+  bombCountdown = {
+    t0: performance.now(),
+    done: false,
+    afterCb: (typeof afterCb === "function") ? afterCb : null
+  };
+}
+
+// Tekent "BITTY BOMB ACTIVATED!" + 3 → 2 → 1 met pulserende ringen.
+// Roept na ~2400ms automatisch de afterCb() en sluit zichzelf af.
+function updateAndDrawBombCountdown(ctx) {
+  if (!bombCountdown || bombCountdown.done) return;
+
+  const now = performance.now();
+  const t = now - bombCountdown.t0; // ms
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  // Totale duur van de countdown (3× 800ms = 2400ms)
+  const STEP = 800;
+  const TOTAL = 3 * STEP; // 2400ms
+
+  // 0) Titeltekst "BITTY BOMB ACTIVATED!" knipperend
+  const blink = ((Math.floor(t / 120) % 2) === 0);
+  ctx.save();
+  ctx.font = "bold 42px Arial";
+  ctx.textAlign = "center";
+  ctx.shadowColor = "rgba(255,200,120,0.8)";
+  ctx.shadowBlur = 12;
+  ctx.fillStyle = blink ? "#FFFFFF" : "#9AA0A6";
+  ctx.fillText("BITTY BOMB ACTIVATED!", cx, cy - 80);
+  ctx.restore();
+
+  // 1) Bepaal welk cijfer we tonen (3, 2 of 1)
+  let number = null;
+  if (t < STEP) number = "3";
+  else if (t < 2 * STEP) number = "2";
+  else if (t < 3 * STEP) number = "1";
+
+  if (number) {
+    // Puls / ring
+    const local = t % STEP;               // 0..800 ms binnen stap
+    const pulse = 1 + 0.08 * Math.sin((local / STEP) * Math.PI * 2);
+
+    // Zwart rondje met zachte rand
+    const R = 80 * pulse;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0,0,0,0.65)";
+    ctx.fill();
+
+    // Witte flits-rand (lichtjes knipperend)
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = `rgba(255,255,255,${0.35 + 0.35 * Math.sin(local / 60)})`;
+    ctx.stroke();
+    ctx.restore();
+
+    // Grote teller in het midden
+    ctx.save();
+    ctx.font = "bold 72px Arial";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#FFFFFF";
+    ctx.strokeStyle = "rgba(0,0,0,0.4)";
+    ctx.lineWidth = 6;
+    ctx.strokeText(number, cx, cy + 24);
+    ctx.fillText(number, cx, cy + 24);
+    ctx.restore();
+  }
+
+  // Klaar? Dan door naar jouw bestaande intro (flash/vuur/bliksem) en daarna de regen
+  if (t >= TOTAL && !bombCountdown.done) {
+    bombCountdown.done = true;
+    const cb = bombCountdown.afterCb;
+    bombCountdown.afterCb = null;
+    setTimeout(() => {
+      if (typeof cb === "function") cb();
+      bombCountdown = null;
+    }, 0);
+  }
 }
 
 
@@ -1650,7 +1732,8 @@ const DROP_TYPES = {
       try { coinSound.currentTime = 0; coinSound.play(); } catch {}
       if (bombsCollected >= BOMB_TOKEN_TARGET) {
         bombsCollected = 0;
-        startBombRain(BOMB_RAIN_COUNT);
+        triggerBombCountdown(() => {
+        triggerBombIntro(() => startBombRain(BOMB_RAIN_COUNT));;
       }
     },
     onMiss(drop) { /* geen straf */ },
@@ -4568,6 +4651,9 @@ if (showGameOver) {
   });
 
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
+
+  updateAndDrawBombCountdown(ctx); // 3 → 2 → 1
+  updateAndDrawBombIntro(ctx);
 
   animationFrameId = requestAnimationFrame(draw);
 } // ✅ Sluit function draw() correct af
