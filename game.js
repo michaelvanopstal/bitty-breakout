@@ -156,10 +156,6 @@ let bombRain = []; // actieve vallende bommen tijdens de regen
 const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
 const BOMB_RAIN_COUNT  = 20;    // dan 20 laten vallen
 
-// === Bomb Banner / Countdown / Visuals chain ===
-let bombBanner   = null;  // { t0, done, afterCb }
-let bombCountdown= null;  // { t0, done, afterCb }
-let bombVisuals  = null;  // { t0, done, afterCb }
 
 
 
@@ -240,223 +236,6 @@ function playVoiceOver(audio, opts = {}) {
     voLockedUntil = performance.now() + 500;
   }
   return true;
-}
-
-
-// Positie van 3/2/1 (links, midden, rechts). Altijd exact gecentreerd.
-function getCountdownPos(step) {
-  const y = canvas.height * 0.46; // iets boven midden
-  if (step === 3) return { x: canvas.width * 0.25, y };
-  if (step === 2) return { x: canvas.width * 0.50, y };
-  return { x: canvas.width * 0.75, y }; // step === 1
-}
-
-function triggerBombCountdown(afterCb) {
-  if (bombCountdown && !bombCountdown.done) return;
-  bombCountdown = { t0: performance.now(), done: false, afterCb };
-}
-
-function updateAndDrawBombCountdown(ctx) {
-  if (!bombCountdown || bombCountdown.done) return;
-
-  const now = performance.now();
-  const t = now - bombCountdown.t0;
-  const D = 3000;        // totaal 3s (3 → 2 → 1)
-  const perStep = 1000;  // 1s per tel
-
-  if (t >= D) {
-    bombCountdown.done = true;
-    const cb = bombCountdown.afterCb; bombCountdown.afterCb = null;
-    if (typeof cb === "function") cb();
-    bombCountdown = null;
-    return;
-  }
-
-  const step = 3 - Math.floor(t / perStep);  // 3,2,1
-  const stepT = (t % perStep) / perStep;     // 0..1 binnen huidige tel
-  const { x: cx, y: cy } = getCountdownPos(step);
-
-  // Pulserende zwarte ring
-  const baseR = Math.min(canvas.width, canvas.height) * 0.18;
-  const pulse = 1 + 0.08 * Math.sin(stepT * Math.PI * 2);
-  const r = baseR * pulse;
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.lineWidth = 10;
-  ctx.strokeStyle = (Math.floor(stepT * 6) % 2 === 0)
-    ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.55)";
-  ctx.stroke();
-
-  // Korte witte flits bij begin van elke tel
-  const flash = (stepT < 0.08) ? (1 - stepT / 0.08) : 0;
-  if (flash > 0) {
-    ctx.fillStyle = `rgba(255,255,255,${0.25 * flash})`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  // Groot cijfer
-  ctx.font = "bold 120px Arial";
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#FFFFFF";
-  ctx.strokeStyle = "#000000";
-  ctx.lineWidth = 8;
-  ctx.strokeText(String(step), cx, cy + 40);
-  ctx.fillText(String(step), cx, cy + 40);
-  ctx.restore();
-}
-
-
-function triggerBombBanner(afterCb) {
-  if (bombBanner && !bombBanner.done) return;
-  bombBanner = { t0: performance.now(), done: false, afterCb };
-}
-
-function updateAndDrawBombBanner(ctx) {
-  if (!bombBanner || bombBanner.done) return;
-
-  const now = performance.now();
-  const t = now - bombBanner.t0;          // ms
-  const D = 900;                           // ~0.9s
-  const cx = canvas.width / 2, cy = canvas.height / 2;
-
-  // zachte warm-oranje gloed
-  ctx.save();
-  ctx.fillStyle = "rgba(255,140,40,0.15)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.restore();
-
-  // knipper wit <-> grijs elke 120ms
-  const blink = (Math.floor(t / 120) % 2) === 0;
-
-  ctx.save();
-  ctx.font = "bold 48px Arial";
-  ctx.textAlign = "center";
-  ctx.shadowColor = "rgba(255,200,120,0.9)";
-  ctx.shadowBlur = 14;
-  ctx.fillStyle = blink ? "#FFFFFF" : "#9AA0A6";
-  ctx.fillText("BITTY BOMB ACTIVATED!", cx, cy - 60);
-  ctx.restore();
-
-  if (t >= D) {
-    bombBanner.done = true;
-    const cb = bombBanner.afterCb; bombBanner.afterCb = null;
-    if (typeof cb === "function") cb();
-    bombBanner = null;
-  }
-}
-
-function getCountdownPos(step) {
-  const y = canvas.height * 0.46; // iets boven midden
-  if (step === 3) return { x: canvas.width * 0.25, y };
-  if (step === 2) return { x: canvas.width * 0.50, y };
-  return { x: canvas.width * 0.75, y }; // step === 1
-}
-
-function triggerBombVisuals(afterCb) {
-  if (bombVisuals && !bombVisuals.done) return;
-  bombVisuals = {
-    t0: performance.now(),
-    done: false,
-    particles: [],
-    afterCb
-  };
-}
-
-function updateAndDrawBombVisuals(ctx) {
-  if (!bombVisuals || bombVisuals.done) return;
-
-  const now = performance.now();
-  const t = now - bombVisuals.t0;
-  const cx = canvas.width / 2, cy = canvas.height / 2;
-
-  // timings (ms)
-  const T_FLASH_START= 500,  T_FLASH_END = 800;
-  const T_FIRE_START = 700,  T_FIRE_END  = 1600;
-  const T_BOLT_START = 900,  T_BOLT_END  = 1600;
-  const T_OUTRO      = 1650;
-
-  // ademende warm-gloed
-  if (t <= T_FIRE_END) {
-    const a = Math.min(0.25, 0.25 * (1 - Math.abs(((t % 300)/300)*2 - 1)));
-    ctx.save();
-    ctx.fillStyle = `rgba(255,130,30,${a})`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.restore();
-  }
-
-  // nuclear flash
-  if (t >= T_FLASH_START && t <= T_FLASH_END) {
-    const k = (t - T_FLASH_START) / (T_FLASH_END - T_FLASH_START);
-    const r = (0.1 + 0.9 * k) * Math.hypot(canvas.width, canvas.height) * 0.6;
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    g.addColorStop(0, "rgba(255,255,255,0.95)");
-    g.addColorStop(0.6, "rgba(255,250,200,0.35)");
-    g.addColorStop(1, "rgba(255,180,80,0.0)");
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-  }
-
-  // vlam-particles
-  if (t >= T_FIRE_START && t <= T_FIRE_END) {
-    for (let i = 0; i < 24; i++) {
-      const ang = Math.random() * Math.PI * 2;
-      const spd = 2.0 + Math.random() * 4.0;
-      bombVisuals.particles.push({
-        x: cx, y: cy,
-        vx: Math.cos(ang) * spd,
-        vy: Math.sin(ang) * spd,
-        life: 600 + Math.random() * 500,
-        t0: now,
-        r: 2 + Math.random() * 3
-      });
-    }
-  }
-  for (let i = bombVisuals.particles.length - 1; i >= 0; i--) {
-    const p = bombVisuals.particles[i];
-    const age = now - p.t0;
-    const lifeK = Math.max(0, 1 - age / p.life);
-    p.x += p.vx; p.y += p.vy;
-    p.vx *= 0.99; p.vy = p.vy * 0.99 + 0.02;
-
-    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
-    grad.addColorStop(0.0, `rgba(255,220,160,${0.85 * lifeK})`);
-    grad.addColorStop(0.4, `rgba(255,140,60,${0.55 * lifeK})`);
-    grad.addColorStop(1.0, `rgba(255,80,0,0)`);
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = grad;
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-
-    if (age >= p.life) bombVisuals.particles.splice(i, 1);
-  }
-
-  // bliksem
-  if (t >= T_BOLT_START && t <= T_BOLT_END) {
-    const count = 6 + Math.floor(Math.random() * 5);
-    for (let i = 0; i < count; i++) {
-      const edge = Math.floor(Math.random() * 4);
-      let tx, ty;
-      if (edge === 0) { tx = Math.random() * canvas.width; ty = -20; }
-      else if (edge === 1) { tx = canvas.width + 20; ty = Math.random() * canvas.height; }
-      else if (edge === 2) { tx = Math.random() * canvas.width; ty = canvas.height + 20; }
-      else { tx = -20; ty = Math.random() * canvas.height; }
-      drawBolt(ctx, cx, cy, tx, ty);
-    }
-  }
-
-  // einde → callback
-  if (t >= T_OUTRO && !bombVisuals.done) {
-    bombVisuals.done = true;
-    const cb = bombVisuals.afterCb; bombVisuals.afterCb = null;
-    if (typeof cb === "function") cb();
-    bombVisuals = null;
-  }
 }
 
 
@@ -4777,17 +4556,6 @@ if (showGameOver) {
   }
 }
 
- if (bombsCollected >= BOMB_TOKEN_TARGET) {
-  bombsCollected = 0;
-  triggerBombBanner(() => {                 // 1) Banner
-    triggerBombCountdown(() => {            // 2) Countdown
-      triggerBombVisuals(() => {            // 3) Visuals
-        startBombRain(BOMB_RAIN_COUNT);     // 4) Rain
-      });
-    });
-  });
-}
-
   // 🧱 Steenpuin tekenen
   stoneDebris.forEach(p => {
     ctx.beginPath();
@@ -4800,13 +4568,6 @@ if (showGameOver) {
   });
 
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
-
-updateAndDrawBombBanner(ctx);
-updateAndDrawBombCountdown(ctx);
-updateAndDrawBombVisuals(ctx);
-
-animationFrameId = requestAnimationFrame(draw);
-
 
   animationFrameId = requestAnimationFrame(draw);
 } // ✅ Sluit function draw() correct af
