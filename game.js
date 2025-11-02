@@ -242,6 +242,72 @@ function playVoiceOver(audio, opts = {}) {
   return true;
 }
 
+
+// Positie van 3/2/1 (links, midden, rechts). Altijd exact gecentreerd.
+function getCountdownPos(step) {
+  const y = canvas.height * 0.46; // iets boven midden
+  if (step === 3) return { x: canvas.width * 0.25, y };
+  if (step === 2) return { x: canvas.width * 0.50, y };
+  return { x: canvas.width * 0.75, y }; // step === 1
+}
+
+function triggerBombCountdown(afterCb) {
+  if (bombCountdown && !bombCountdown.done) return;
+  bombCountdown = { t0: performance.now(), done: false, afterCb };
+}
+
+function updateAndDrawBombCountdown(ctx) {
+  if (!bombCountdown || bombCountdown.done) return;
+
+  const now = performance.now();
+  const t = now - bombCountdown.t0;
+  const D = 3000;        // totaal 3s (3 → 2 → 1)
+  const perStep = 1000;  // 1s per tel
+
+  if (t >= D) {
+    bombCountdown.done = true;
+    const cb = bombCountdown.afterCb; bombCountdown.afterCb = null;
+    if (typeof cb === "function") cb();
+    bombCountdown = null;
+    return;
+  }
+
+  const step = 3 - Math.floor(t / perStep);  // 3,2,1
+  const stepT = (t % perStep) / perStep;     // 0..1 binnen huidige tel
+  const { x: cx, y: cy } = getCountdownPos(step);
+
+  // Pulserende zwarte ring
+  const baseR = Math.min(canvas.width, canvas.height) * 0.18;
+  const pulse = 1 + 0.08 * Math.sin(stepT * Math.PI * 2);
+  const r = baseR * pulse;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = (Math.floor(stepT * 6) % 2 === 0)
+    ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.55)";
+  ctx.stroke();
+
+  // Korte witte flits bij begin van elke tel
+  const flash = (stepT < 0.08) ? (1 - stepT / 0.08) : 0;
+  if (flash > 0) {
+    ctx.fillStyle = `rgba(255,255,255,${0.25 * flash})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Groot cijfer
+  ctx.font = "bold 120px Arial";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#FFFFFF";
+  ctx.strokeStyle = "#000000";
+  ctx.lineWidth = 8;
+  ctx.strokeText(String(step), cx, cy + 40);
+  ctx.fillText(String(step), cx, cy + 40);
+  ctx.restore();
+}
+
+
 function triggerBombBanner(afterCb) {
   if (bombBanner && !bombBanner.done) return;
   bombBanner = { t0: performance.now(), done: false, afterCb };
@@ -4735,7 +4801,7 @@ if (showGameOver) {
 
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
 
- updateAndDrawBombBanner(ctx);
+updateAndDrawBombBanner(ctx);
 updateAndDrawBombCountdown(ctx);
 updateAndDrawBombVisuals(ctx);
 
