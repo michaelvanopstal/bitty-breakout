@@ -1712,32 +1712,41 @@ const DROP_TYPES = {
     onMiss(drop) {},
   },
  
-  bomb_token: {
-    draw(drop, ctx) {
-      const s = 28;
-      const img = (bombTokenImg && bombTokenImg.complete) ? bombTokenImg : tntImg;
-      // kleine pulse om 'm speciaal te maken
-      drop.t = (drop.t || 0) + 0.16;
-      const k = 1 + 0.08 * Math.sin(drop.t * 6);
-      const size = s * k;
-      ctx.save();
-      ctx.globalAlpha = 0.95;
-      ctx.drawImage(img, drop.x - size/2, drop.y - size/2, size, size);
-      ctx.restore();
-    },
-    onCatch(drop) {
-      bombsCollected++;
-      pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`, alpha: 1 });
-      // leuk geluidje hergebruiken
-      try { coinSound.currentTime = 0; coinSound.play(); } catch {}
-      if (bombsCollected >= BOMB_TOKEN_TARGET) {
-        bombsCollected = 0;
-        triggerBombCountdown(() => {
-        triggerBombIntro(() => startBombRain(BOMB_RAIN_COUNT));;
-      }
-    },
-    onMiss(drop) { /* geen straf */ },
+ bomb_token: {
+  draw(drop, ctx) {
+    const s = 28;
+    const img = (bombTokenImg && bombTokenImg.complete) ? bombTokenImg : tntImg;
+    // kleine pulse om 'm speciaal te maken
+    drop.t = (drop.t || 0) + 0.16;
+    const k = 1 + 0.08 * Math.sin(drop.t * 6);
+    const size = s * k;
+    ctx.save();
+    ctx.globalAlpha = 0.95;
+    ctx.drawImage(img, drop.x - size / 2, drop.y - size / 2, size, size);
+    ctx.restore();
   },
+  onCatch(drop) {
+    bombsCollected++;
+    pointPopups.push({
+      x: drop.x,
+      y: drop.y,
+      value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`,
+      alpha: 1
+    });
+    // leuk geluidje hergebruiken
+    try { coinSound.currentTime = 0; coinSound.play(); } catch (e) {}
+
+    if (bombsCollected >= BOMB_TOKEN_TARGET) {
+      bombsCollected = 0;
+      // Eerst countdown, dan jouw bestaande intro, daarna bommenregen
+      triggerBombCountdown(() => {
+        triggerBombIntro(() => startBombRain(BOMB_RAIN_COUNT));
+      });
+    }
+  },
+  onMiss(drop) { /* geen straf */ },
+},
+
 
   star: {
     // Pulserend gouden sterretje
