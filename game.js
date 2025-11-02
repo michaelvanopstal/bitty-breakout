@@ -590,73 +590,7 @@ function renderBittyBombIntro() {
 }
 
 
-function drawBolt(ctx, x1, y1, x2, y2, opts = {}) {
-  const {
-    depth = 4,
-    roughness = 18,
-    forks = 2,
-    forkChance = 0.45,
-    forkAngle = Math.PI / 6,
-    shrink = 0.65
-  } = opts;
 
-  function jaggedLine(x1, y1, x2, y2, d, r) {
-    const pts = [{x:x1, y:y1}, {x:x2, y:y2}];
-    for (let i = 0; i < d; i++) {
-      const arr = [pts[0]];
-      for (let j = 0; j < pts.length - 1; j++) {
-        const a = pts[j], b = pts[j+1];
-        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-        const dx = b.x - a.x, dy = b.y - a.y;
-        const nx = -dy, ny = dx;
-        const off = (Math.random() - 0.5) * r;
-        const mag = Math.hypot(nx, ny) || 1;
-        arr.push({x: mx + nx * off / mag, y: my + ny * off / mag});
-        arr.push(b);
-      }
-      pts.splice(0, pts.length, ...arr);
-      r *= 0.55;
-    }
-    return pts;
-  }
-
-  const pts = jaggedLine(x1, y1, x2, y2, depth, roughness);
-
-  // blauwachtige gloed
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-  ctx.strokeStyle = "rgba(140,190,255,0.65)";
-  ctx.lineWidth = 3.2;
-  ctx.lineCap = "round";
-  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.stroke();
-
-  // witte kern
-  ctx.strokeStyle = "rgba(255,255,255,0.95)";
-  ctx.lineWidth = 1.8;
-  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.stroke();
-  ctx.restore();
-
-  // vertakkingen
-  if (forks > 0 && Math.random() < forkChance) {
-    const p = pts[Math.floor(lerp(1, pts.length - 2, Math.random()))];
-    const ang = Math.atan2(y2 - y1, x2 - x1) + randRange(-forkAngle, forkAngle);
-    const len = Math.hypot(x2 - x1, y2 - y1) * shrink * randRange(0.6, 1.0);
-    const fx = p.x + Math.cos(ang) * len;
-    const fy = p.y + Math.sin(ang) * len;
-    drawBolt(ctx, p.x, p.y, fx, fy, {
-      depth: Math.max(2, depth - 1),
-      roughness: Math.max(6, roughness * 0.6),
-      forks: forks - 1,
-      forkChance: forkChance * 0.7,
-      forkAngle,
-      shrink
-    });
-  }
-}
 
 function startBombVisuals(afterCb) {
   const now = performance.now();
