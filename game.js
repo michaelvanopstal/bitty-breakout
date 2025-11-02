@@ -1778,17 +1778,19 @@ const DROP_TYPES = {
       const img = blink ? tntBlinkImg : tntImg;
       ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
     },
-   onCatch(drop) {
+  
+  onCatch(drop) {
   bombsCollected++;
   pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/10`, alpha: 1 });
   try { coinSound.currentTime = 0; coinSound.play(); } catch {}
+
   if (bombsCollected >= 10) {
     bombsCollected = 0;
     startBombRain(20);
   }
+}, // 👈 sluit deze onCatch netjes af
 
-     
-     onCatch(drop) {
+onCatch(drop) {
   if (lives > 1) {
     lives--;
     updateLivesDisplay?.();
@@ -1797,14 +1799,15 @@ const DROP_TYPES = {
     triggerPaddleExplosion?.();
   }
   try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
-},
+}, // 👈 sluit ook deze netjes af
 
-
-  paddle_long: {
-    draw(drop, ctx) { ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
-    onCatch(drop) { startPaddleSizeEffect?.("long"); },
-    onMiss(drop) {},
+paddle_long: {
+  draw(drop, ctx) {
+    ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24);
   },
+  onCatch(drop) { startPaddleSizeEffect?.("long"); },
+  onMiss(drop) {},
+},
 
   paddle_small: {
     draw(drop, ctx) { ctx.drawImage(paddleSmallBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
