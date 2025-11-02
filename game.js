@@ -1580,12 +1580,14 @@ const DROP_TYPES = {
       const img = blink ? tntBlinkImg : tntImg;
       ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
     },
-    onCatch(drop) {
-      if (invincibleActive) {
-        pointPopups.push({ x: drop.x, y: drop.y, value: "🛡️ reflect", alpha: 1 });
-        try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
-        return;
-      }
+   onCatch(drop) {
+  bombsCollected++;
+  pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/10`, alpha: 1 });
+  try { coinSound.currentTime = 0; coinSound.play(); } catch {}
+  if (bombsCollected >= 10) {
+    bombsCollected = 0;
+    startBombRain(20);
+  }
 
       if (lives > 1) {
         lives--;
@@ -1978,15 +1980,16 @@ function startDrops(config) {
     minSpacing: 70,
     maxSilenceMs: 4000,        // watchdog
 
-    // item-keuze
-    types: ["coin","heart","bag"], // fallback set
+  
+   types: ["bom","heart","star"], // fallback set (bag eruit)
+ // fallback set
     typeQuota: null,           // { heart: 5, bomb: 2 } → exact zoveel keer in totaal
     typeWeights: null          // { coin:5, heart:2, bomb:1 } → gewogen random
   }, config || {});
 
   // normaliseer
   if (!Array.isArray(dropConfig.gridColumns)) dropConfig.gridColumns = [ dropConfig.gridColumns ];
-  if (!Array.isArray(dropConfig.types) || dropConfig.types.length === 0) dropConfig.types = ["coin","heart","bag"];
+  if (!Array.isArray(dropConfig.types) || dropConfig.types.length === 0) dropConfig.types = ["bom","heart","star"];
 
   // interne tellers
   dropsSpawned = 0;                   // aantal items gespawnd (telt individuele items)
@@ -2239,7 +2242,6 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
-
 function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
@@ -2257,18 +2259,16 @@ function resetBricks() {
     if (typeof redrawPaddleCanvas === 'function') redrawPaddleCanvas();
   }
 
-  // ⬇️ HIER alles per brick resetten
+  // alle bricks resetten
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
       b.status = 1;
 
-      // type bepalen uit levelmap
       const defined = currentMap.find(p => p.col === c && p.row === r);
       const brickType = defined ? defined.type : "normal";
       b.type = brickType;
 
-      // type-specifiek resetten
       if (brickType === "stone" || brickType === "silver") {
         b.hits = 0;
         b.hasDroppedBag = false;
@@ -2277,7 +2277,7 @@ function resetBricks() {
         delete b.hasDroppedBag;
       }
 
-      // 🧨 TNT goed initialiseren (en opruimen wanneer geen TNT)
+      // 🧨 TNT reset
       if (brickType === "tnt") {
         b.tntArmed = false;
         b.tntStart = 0;
@@ -2296,130 +2296,43 @@ function resetBricks() {
 
   assignHeartBlocks();
 
-  // ===== Veiligheid: bommenregen opruimen bij levelstart =====
-  if (typeof bombRain !== 'undefined') {
-    bombRain = [];
-  }
-  // (bewust GEEN reset van bombsCollected zodat voortgang kan blijven)
+  // bommenregen opruimen bij levelstart (voortgang teller behouden)
+  if (typeof bombRain !== 'undefined') bombRain = [];
 
-  // =========================
-  // DROPS SYSTEM: reset & start per level
-  // =========================
-  // opruimen van eerdere drops/scheduler state
-  if (typeof fallingDrops !== 'undefined') {
-    fallingDrops = [];
-  }
-  if (typeof dropsSpawned !== 'undefined') {
-    dropsSpawned = 0;
-  }
-  if (typeof lastDropAt !== 'undefined') {
-    lastDropAt = performance.now();
-  }
-  // (dropConfig wordt in startDrops gezet)
+  // drops resetten
+  if (typeof fallingDrops !== 'undefined') fallingDrops = [];
+  if (typeof dropsSpawned !== 'undefined') dropsSpawned = 0;
+  if (typeof lastDropAt !== 'undefined') lastDropAt = performance.now();
 
   const lvl = level || 1;
 
-  // Voorbeeldconfiguraties per level-range.
-  // Pas gerust aan naar jouw pacing.
-  if (lvl <= 3) {
-    // --- jouw bestaande mix ---
-    startDrops({
-      continuous: true,
-      minIntervalMs: 1200,
-      maxIntervalMs: 2600,
-      speed: 2.5,
-      types: ["coin","heart","bomb","star"],
-      xMargin: 40,
-      startDelayMs: 800,
-      mode: "well",          // goed gespreide x-waarden (geen grid)
-      avoidPaddle: false,
-      minSpacing: 70
-    });
+  // ======= ÉÉN enkele startDrops per level =======
+  startDrops({
+    continuous: true,
+    minIntervalMs: (lvl <= 3) ? 1200 : (lvl <= 10) ? 900 : 800,
+    maxIntervalMs: (lvl <= 3) ? 2600 : (lvl <= 10) ? 2200 : 1800,
+    speed:        (lvl <= 3) ? 2.5  : (lvl <= 10) ? 3.0  : 3.4,
 
-    // --- 💣 bomb_token drops (10 stuks te vangen) ---
-    startDrops({
-      continuous: true,
-      typeQuota: { bomb_token: 10 },   // precies 10 tokens “in omloop” in deze fase
-      minIntervalMs: 500,
-      maxIntervalMs: 900,
-      speed: 3.2,
-      types: ["bomb_token"],
-      xMargin: 40,
-      startDelayMs: 400,
-      mode: "well",
-      avoidPaddle: true,               // iets eerlijker: niet recht boven de paddle
-      avoidMarginPx: 40,
-      minSpacing: 70
-    });
+    // Alleen heart, star en bomb_token in het val­systeem
+    types: ["heart", "star", "bomb_token"],
 
-  } else if (lvl <= 10) {
-    // --- jouw bestaande mix ---
-    startDrops({
-      continuous: true,
-      minIntervalMs: 900,
-      maxIntervalMs: 2200,
-      speed: 3.0,
-      types: ["coin","heart","bomb","star"],
-      xMargin: 40,
-      startDelayMs: 600,
-      mode: "well",
-      avoidPaddle: false,
-      minSpacing: 70
-    });
+    // Zorgt dat bommen zeldzamer vallen dan hearts/stars
+    typeWeights: { heart: 4, star: 4, bomb_token: 1 },
 
-    // --- 💣 bomb_token drops ---
-    startDrops({
-      continuous: true,
-      typeQuota: { bomb_token: 10 },   // <-- FIX: object i.p.v. array
-      minIntervalMs: 500,
-      maxIntervalMs: 900,
-      speed: 3.2,
-      types: ["bomb_token"],
-      xMargin: 40,
-      startDelayMs: 400,
-      mode: "well",
-      avoidPaddle: true,
-      avoidMarginPx: 40,
-      minSpacing: 70
-    });
+    // Maximaal aantal bommen dat kan vallen in totaal
+    typeQuota: { bomb_token: 10 },
 
-  } else {
-    // --- jouw bestaande mix ---
-    startDrops({
-      continuous: true,
-      minIntervalMs: 800,
-      maxIntervalMs: 1800,
-      speed: 3.4,
-      types: ["coin","heart","bomb","star"],
-      xMargin: 40,
-      startDelayMs: 500,
-      mode: "grid",          // nette kolommen in hogere levels
-      gridColumns: 8,
-      gridJitterPx: 16,
-      avoidPaddle: true,     // eerlijker: niet direct boven de paddle spawnen
-      avoidMarginPx: 40,
-      minSpacing: 70
-    });
-
-    // --- 💣 bomb_token drops ---
-    startDrops({
-      continuous: true,
-      typeQuota: { bomb_token: 10 },
-      minIntervalMs: 500,
-      maxIntervalMs: 900,
-      speed: 3.2,
-      types: ["bomb_token"],
-      xMargin: 40,
-      startDelayMs: 400,
-      mode: "grid",
-      gridColumns: 8,
-      gridJitterPx: 16,
-      avoidPaddle: true,
-      avoidMarginPx: 40,
-      minSpacing: 70
-    });
-  }
+    xMargin: 40,
+    startDelayMs: (lvl <= 3) ? 800 : (lvl <= 10) ? 600 : 500,
+    mode: (lvl > 10) ? "grid" : "well",
+    gridColumns: 8,
+    gridJitterPx: 16,
+    avoidPaddle: (lvl > 10),
+    avoidMarginPx: 40,
+    minSpacing: 70
+  });
 }
+
 
 
 
