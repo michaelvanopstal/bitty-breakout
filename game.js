@@ -155,7 +155,8 @@ let bombsCollected = 0;
 let bombRain = []; // actieve vallende bommen tijdens de regen
 const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
 const BOMB_RAIN_COUNT  = 20;    // dan 20 laten vallen
-
+let bombsCollected = (typeof bombsCollected === "number") ? bombsCollected : 0;
+let bombIntro      = (typeof bombIntro === "object") ? bombIntro : null;
 
 
 
@@ -198,6 +199,8 @@ let levelMessageAlpha = 0;
 let levelMessageTimer = 0;
 const LEVEL_MESSAGE_DURATION = 180;
 
+
+
 // 🧱 Paddle-size bonus
 let paddleSizeEffect = null; // { type: "long"|"small", end: timestamp, multiplier: number }
 let paddleBaseWidth = 100;   // actuele 'basis' breedte voor dit level (zonder tijdelijke bonus)
@@ -238,6 +241,202 @@ function playVoiceOver(audio, opts = {}) {
   return true;
 }
 
+function triggerBombIntro(afterCb) {
+  bombIntro = {
+    t0: performance.now(),
+    particles: [],
+    bolts: [],
+    afterCb: (typeof afterCb === "function") ? afterCb : null,
+    done: false
+  };
+}
+
+/* =========================
+   INTRO RENDERER (bovenop alles)
+   Zet je NIETS aan je draw()—je roept hem daar al! 👍
+   ========================= */
+function updateAndDrawBombIntro(ctx) {
+  if (!bombIntro || bombIntro.done) return;
+
+  const now = performance.now();
+  const t = now - bombIntro.t0;
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  // Timings (ms)
+  const T_GLOW_END   = 300;   // brick glow fase (fallback: full-screen tint)
+  const T_TEXT_START = 300;   // "BITTY BOMB ACTIVATED"
+  const T_FLASH_START= 500;   // nuclear flash
+  const T_FLASH_END  = 800;
+  const T_FIRE_START = 700;   // vlam-particles
+  const T_FIRE_END   = 1600;
+  const T_BOLT_START = 900;   // bliksem
+  const T_BOLT_END   = 1600;
+  const T_OUTRO      = 1650;  // start regen
+
+  // 0) Warm energy tint (fallback voor brick glow als je draw() niet wil wijzigen)
+  if (t <= T_FIRE_END) {
+    const a = Math.min(0.25, 0.25 * (1 - Math.abs(((t % 300)/300)*2 - 1))); // adem-puls
+    ctx.save();
+    ctx.fillStyle = `rgba(255,130,30,${a})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+  }
+
+  // 1) Nuclear center flash
+  if (t >= T_FLASH_START && t <= T_FLASH_END) {
+    const k = (t - T_FLASH_START) / (T_FLASH_END - T_FLASH_START);
+    const r = (0.1 + 0.9 * k) * Math.hypot(canvas.width, canvas.height) * 0.6;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, "rgba(255,255,255,0.95)");
+    g.addColorStop(0.6, "rgba(255,250,200,0.35)");
+    g.addColorStop(1, "rgba(255,180,80,0.0)");
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // 2) Tekst: BITTY BOMB ACTIVATED (wit ↔ grijs)
+  if (t >= T_TEXT_START && t <= T_FIRE_END) {
+    const blink = (Math.floor(t / 120) % 2) === 0;
+    ctx.save();
+    ctx.font = "bold 42px Arial";
+    ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(255,200,120,0.8)";
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = blink ? "#FFFFFF" : "#9AA0A6";
+    ctx.fillText("BITTY BOMB  ACTIVATED", cx, cy - 80);
+    ctx.restore();
+  }
+
+  // 3) Vlam-particles (vanuit midden naar buiten)
+  if (t >= T_FIRE_START && t <= T_FIRE_END) {
+    for (let i = 0; i < 24; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const spd = 2.0 + Math.random() * 4.0;
+      bombIntro.particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        life: 600 + Math.random() * 500,
+        t0: now,
+        r: 2 + Math.random() * 3
+      });
+    }
+  }
+  for (let i = bombIntro.particles.length - 1; i >= 0; i--) {
+    const p = bombIntro.particles[i];
+    const age = now - p.t0;
+    const lifeK = Math.max(0, 1 - age / p.life);
+    p.x += p.vx; p.y += p.vy;
+    p.vx *= 0.99; p.vy = p.vy * 0.99 + 0.02;
+
+    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
+    grad.addColorStop(0.0, `rgba(255,220,160,${0.85 * lifeK})`);
+    grad.addColorStop(0.4, `rgba(255,140,60,${0.55 * lifeK})`);
+    grad.addColorStop(1.0, `rgba(255,80,0,0)`);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    if (age >= p.life) bombIntro.particles.splice(i, 1);
+  }
+
+  // 4) Bliksem (wit/blauw, dun en “energy style”)
+  if (t >= T_BOLT_START && t <= T_BOLT_END) {
+    const count = 6 + Math.floor(Math.random() * 5);
+    for (let i = 0; i < count; i++) {
+      const edge = Math.floor(Math.random() * 4);
+      let tx, ty;
+      if (edge === 0) { tx = Math.random() * canvas.width; ty = -20; }
+      else if (edge === 1) { tx = canvas.width + 20; ty = Math.random() * canvas.height; }
+      else if (edge === 2) { tx = Math.random() * canvas.width; ty = canvas.height + 20; }
+      else { tx = -20; ty = Math.random() * canvas.height; }
+      drawBolt(ctx, cx, cy, tx, ty);
+    }
+  }
+
+  // 5) Klaar? → start regen + clear state
+  if (t >= T_OUTRO && !bombIntro.done) {
+    bombIntro.done = true;
+    const cb = bombIntro.afterCb;
+    bombIntro.afterCb = null;
+    setTimeout(() => {
+      if (typeof cb === "function") cb();
+      bombIntro = null;
+    }, 0);
+  }
+}
+
+/* =========================
+   Bliksem helper
+   ========================= */
+function drawBolt(ctx, x1, y1, x2, y2) {
+  const segs = 14;
+  const jitter = 14;
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len, ny = dx / len; // normaal vector
+
+  const pts = [{ x: x1, y: y1 }];
+  for (let i = 1; i < segs; i++) {
+    const k = i / segs;
+    const x = x1 + dx * k;
+    const y = y1 + dy * k;
+    const off = (Math.random() * 2 - 1) * jitter * Math.sin(k * Math.PI);
+    pts.push({ x: x + nx * off, y: y + ny * off });
+  }
+  pts.push({ x: x2, y: y2 });
+
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.strokeStyle = "rgba(120,180,255,0.55)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.stroke();
+
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/* =========================
+   Bommenregen — veilige starter
+   (past zich aan aan jouw bestaande updateAndDrawBombRain)
+   ========================= */
+function startBombRain(count = 20) {
+  // Als jij al een queue-functie hebt, gebruik die:
+  if (typeof queueBombRain === "function") {
+    queueBombRain(count);
+    return;
+  }
+  // Anders: vul globale bombRain[] met simpele items; jouw updateAndDrawBombRain tekent/beweegt ze.
+  if (typeof bombRain === "undefined") window.bombRain = [];
+  for (let i = 0; i < count; i++) {
+    const x = 20 + Math.random() * (canvas.width - 40);
+    bombRain.push({
+      x,
+      y: - (10 + Math.random() * 200),   // verspreid in de lucht
+      dy: 3 + Math.random() * 2,         // valt lekker
+      radius: 10,
+      active: true
+    });
+  }
+}
 
 function stopStarAura(immediate = false) {
   try {
@@ -1589,17 +1788,18 @@ const DROP_TYPES = {
     startBombRain(20);
   }
 
-      if (lives > 1) {
-        lives--;
-        updateLivesDisplay?.();
-        pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
-      } else {
-        triggerPaddleExplosion?.();
-      }
-      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
-    },
-    onMiss(drop) { /* goed zo, niks */ },
-  },
+     
+     onCatch(drop) {
+  if (lives > 1) {
+    lives--;
+    updateLivesDisplay?.();
+    pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
+  } else {
+    triggerPaddleExplosion?.();
+  }
+  try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+},
+
 
   paddle_long: {
     draw(drop, ctx) { ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
@@ -1643,18 +1843,18 @@ const DROP_TYPES = {
       ctx.drawImage(img, drop.x - size/2, drop.y - size/2, size, size);
       ctx.restore();
     },
-    onCatch(drop) {
-      bombsCollected++;
-      pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`, alpha: 1 });
-      // leuk geluidje hergebruiken
-      try { coinSound.currentTime = 0; coinSound.play(); } catch {}
-      if (bombsCollected >= BOMB_TOKEN_TARGET) {
-        bombsCollected = 0;
-        startBombRain(BOMB_RAIN_COUNT);
-      }
-    },
-    onMiss(drop) { /* geen straf */ },
-  },
+   onCatch(drop) {
+  bombsCollected++;
+  pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`, alpha: 1 });
+  try { coinSound.currentTime = 0; coinSound.play(); } catch {}
+
+  if (bombsCollected >= BOMB_TOKEN_TARGET) {
+    bombsCollected = 0;
+    // Eerst de intro, daarna pas de bommenregen:
+    triggerBombIntro(() => startBombRain(BOMB_RAIN_COUNT));
+  }
+},
+
 
   star: {
     // Pulserend gouden sterretje
