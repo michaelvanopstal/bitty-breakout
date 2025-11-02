@@ -4752,6 +4752,12 @@ if (showGameOver) {
   }
 }
 
+  // in DROP_TYPES.bomb_token.onCatch
+if (bombsCollected >= BOMB_TOKEN_TARGET) {
+  bombsCollected = 0;
+  triggerBombIntro(() => startBombRain(BOMB_RAIN_COUNT));
+}
+
   // 🧱 Steenpuin tekenen
   stoneDebris.forEach(p => {
     ctx.beginPath();
@@ -4764,6 +4770,8 @@ if (showGameOver) {
   });
 
   stoneDebris = stoneDebris.filter(p => p.alpha > 0);
+
+  updateAndDrawBombIntro(ctx);
 
   animationFrameId = requestAnimationFrame(draw);
 } // ✅ Sluit function draw() correct af
