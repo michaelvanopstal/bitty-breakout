@@ -151,6 +151,7 @@ starCatchSfx.loop = false;
 starCatchSfx.volume = 0.85; // pas aan naar smaak
 
 // === Bomb Token & Rain ===
+let bombIntro = null;
 let bombsCollected = 0;
 let bombRain = []; // actieve vallende bommen tijdens de regen
 const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
@@ -466,6 +467,21 @@ function startStarPowerCelebration() {
   }
 }
 
+// ============== BOMB INTRO STATE ==============
+
+function triggerBombIntro(afterCb) {
+  // start éénmalige animatie; afterCb = () => startBombRain(20)
+  bombIntro = {
+    t0: performance.now(),
+    phase: "glow",
+    particles: [],
+    bolts: [],
+    flashed: false,
+    afterCb,
+    done: false
+  };
+}
+
 
 function renderStarPowerFX() {
   if (!starPowerFX.active || !fxCtx) return;
@@ -672,6 +688,166 @@ function spawnFireworkRockets(count = 8) {
       exploded: false
     });
   }
+}
+function updateAndDrawBombIntro(ctx) {
+  if (!bombIntro || bombIntro.done) return;
+
+  const now = performance.now();
+  const t = (now - bombIntro.t0);      // ms sinds start
+  const cx = canvas.width  / 2;
+  const cy = canvas.height / 2;
+
+  // ---- Timings (in ms) ----
+  const T_GLOW_END   = 300;   // brick glow duur
+  const T_TEXT_START = 300;   // start “BITTY BOMB ACTIVATED”
+  const T_FLASH_START= 500;   // start center flash
+  const T_FLASH_END  = 800;
+  const T_FIRE_START = 700;   // start vlam particles
+  const T_FIRE_END   = 1600;
+  const T_BOLT_START = 900;   // start bliksem
+  const T_BOLT_END   = 1600;
+  const T_OUTRO      = 1650;  // klaar -> start rain
+
+  // ---- 1) full-canvas energy tint / lichte puls ----
+  if (t >= 0 && t <= T_FIRE_END) {
+    const a = Math.min(0.25, 0.25 * (1 - Math.abs(((t % 300)/300)*2 - 1))); // ademende puls
+    ctx.save();
+    ctx.fillStyle = `rgba(255,130,30,${a})`; // warm energy tint
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.restore();
+  }
+
+  // ---- 2) Center flash (nucleair) ----
+  if (t >= T_FLASH_START && t <= T_FLASH_END) {
+    const k = (t - T_FLASH_START) / (T_FLASH_END - T_FLASH_START); // 0..1
+    const r = (0.1 + 0.9*k) * Math.hypot(canvas.width, canvas.height)*0.6;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, "rgba(255,255,255,0.95)");
+    g.addColorStop(0.6, "rgba(255,250,200,0.35)");
+    g.addColorStop(1, "rgba(255,180,80,0.0)");
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ---- 3) Tekst: BITTY BOMB ACTIVATED (flits wit ↔ grijs) ----
+  if (t >= T_TEXT_START && t <= T_FIRE_END) {
+    const blink = (Math.floor(t/120) % 2) === 0;
+    ctx.save();
+    ctx.font = "bold 42px Arial";
+    ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(255,200,120,0.8)";
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = blink ? "#FFFFFF" : "#9AA0A6"; // wit ↔ grijs
+    ctx.fillText("BITTY BOMB  ACTIVATED", cx, cy - 80);
+    ctx.restore();
+  }
+
+  // ---- 4) Vlam-particles (vanuit midden naar buiten) ----
+  if (t >= T_FIRE_START && t <= T_FIRE_END) {
+    // spawn per frame wat deeltjes
+    for (let i = 0; i < 24; i++) {
+      const ang = Math.random()*Math.PI*2;
+      const spd = 2.0 + Math.random()*4.0;
+      bombIntro.particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(ang)*spd,
+        vy: Math.sin(ang)*spd,
+        life: 600 + Math.random()*500, // ms
+        t0: now,
+        r: 2 + Math.random()*3
+      });
+    }
+  }
+  // update+draw particles
+  for (let i = bombIntro.particles.length-1; i >= 0; i--) {
+    const p = bombIntro.particles[i];
+    const age = now - p.t0;
+    const lifeK = Math.max(0, 1 - age/p.life);
+    p.x += p.vx;
+    p.y += p.vy;
+    // lichte zwaartekracht & wrijving
+    p.vx *= 0.99; p.vy = p.vy*0.99 + 0.02;
+
+    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*5);
+    grad.addColorStop(0.0, `rgba(255,220,160,${0.85*lifeK})`);
+    grad.addColorStop(0.4, `rgba(255,140,60,${0.55*lifeK})`);
+    grad.addColorStop(1.0, `rgba(255,80,0,0)`);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r*4, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+
+    if (age >= p.life) bombIntro.particles.splice(i,1);
+  }
+
+  // ---- 5) Bliksemstralen (dun wit/blauw, energiestijl) ----
+  if (t >= T_BOLT_START && t <= T_BOLT_END) {
+    // teken 6–10 bolts per frame met random targets aan randen
+    const count = 6 + Math.floor(Math.random()*5);
+    for (let i = 0; i < count; i++) {
+      const edge = Math.floor(Math.random()*4);
+      let tx, ty;
+      if (edge === 0) { tx = Math.random()*canvas.width; ty = -20; }             // top
+      else if (edge === 1) { tx = canvas.width+20; ty = Math.random()*canvas.height; } // right
+      else if (edge === 2) { tx = Math.random()*canvas.width; ty = canvas.height+20; } // bottom
+      else { tx = -20; ty = Math.random()*canvas.height; }                       // left
+      drawBolt(ctx, cx, cy, tx, ty);
+    }
+  }
+
+  // ---- 6) Klaar? -> start de regen ----
+  if (t >= T_OUTRO && !bombIntro.done) {
+    bombIntro.done = true;
+    const cb = bombIntro.afterCb;
+    bombIntro.afterCb = null;
+    // kleine safeguard timeout zodat laatste frame aftekent
+    setTimeout(() => {
+      if (typeof cb === "function") cb();
+      bombIntro = null;
+    }, 0);
+  }
+}
+
+// Dunne, fraaie lightning bolt tussen (x1,y1) en (x2,y2)
+function drawBolt(ctx, x1, y1, x2, y2) {
+  const segs = 14;              // segmenten
+  const jitter = 14;            // zijwaartse variatie
+  let pts = [{x:x1,y:y1}];
+  for (let i = 1; i < segs; i++) {
+    const k = i/segs;
+    const x = x1 + (x2-x1)*k;
+    const y = y1 + (y2-y1)*k;
+    // sinusoidale zij-jitter zodat het natuurlijk oogt
+    const off = (Math.random()*2-1) * jitter * Math.sin(k*Math.PI);
+    pts.push({ x: x + off*(y2-y1)/Math.hypot(x2-x1,y2-y1), y: y - off*(x2-x1)/Math.hypot(x2-x1,y2-y1) });
+  }
+  pts.push({x:x2,y:y2});
+
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  // blauwe gloed
+  ctx.strokeStyle = "rgba(120,180,255,0.55)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.stroke();
+  // witte kern
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.stroke();
+  ctx.restore();
 }
 
 function explodeFirework(x, y, baseColor) {
@@ -1665,9 +1841,9 @@ const DROP_TYPES = {
   pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/10`, alpha: 1 });
   try { coinSound.currentTime = 0; coinSound.play(); } catch {}
   if (bombsCollected >= 10) {
-    bombsCollected = 0;
-    startBombRain(20);
-  }
+  bombsCollected = 0;
+  triggerBombIntro(() => startBombRain(20));
+}
 
       if (lives > 1) {
         lives--;
@@ -4105,18 +4281,46 @@ function isPaddleBlockedHorizontally(newX) {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawElectricBursts(); // 🔄 VOORAF tekenen, zodat het ONDER alles ligt
+  // 1) effecten onder de scene
+  drawElectricBursts(); // onderlaag
 
+  // ------- 2) BRICKS met tijdelijke glow in de eerste 0.3s van de intro -------
+  let introT = 0;
+  if (bombIntro) introT = performance.now() - bombIntro.t0;
+
+  if (bombIntro && introT >= 0 && introT <= 300) {
+    ctx.save();
+    ctx.shadowColor = "rgba(255,190,120,0.9)";
+    ctx.shadowBlur  = 22;
+  }
+
+  // <--- jouw bricks-functie(s) hier aanroepen --->
+  // bijv.:
+  if (typeof drawBricks === "function") drawBricks();
+
+  if (bombIntro && introT >= 0 && introT <= 300) {
+    ctx.restore();
+  }
+
+  // 3) GAME LOGIC + ENTITIES
   collisionDetection();
+  // teken/ update je entities in jouw volgorde:
   drawCoins();
   drawFallingHearts();
-  drawFallingStones();  
-  drawHeartPopup();
+  drawFallingStones();
   checkCoinCollision();
   drawPaddleFlags();
   drawFlyingCoins();
   checkFlyingCoinHits();
+
+  // 4) UI / HUD
+  drawHeartPopup();
   drawPointPopups();
+
+  // 5) INTRO OVERLAYS ALS LAATSTE (text/flash/bolts boven alles)
+  updateAndDrawBombIntro(ctx);
+}
+
 
 
 // A) Time-out check heel vroeg in draw()
