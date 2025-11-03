@@ -197,8 +197,9 @@ body {
   }
 }
 
+/* ===== BONUS POWER PANEL ===== */
 #bonus-power-panel {
-  position: absolute;   /* ← hiermee kun je 'm neerzetten waar je wilt */
+  position: absolute;   /* ← zo had jij 'm */
   top: 280px;
   right: 60px;
   width: 230px;
@@ -207,7 +208,7 @@ body {
   border-radius: 14px;
   padding: 6px 8px 10px;
   font-family: Arial, sans-serif;
-  z-index: 50;         /* boven je canvas */
+  z-index: 50;         /* lager dan chat (9998), dus chat kan eroverheen */
   box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
@@ -229,19 +230,25 @@ body {
   margin: 6px 0;
 }
 
+/* ----- ICONS (met rood rond achtergrondje) ----- */
 .bp-icon {
-  width: 22px;
-  height: 22px;
-  border-radius: 0;
-  background-size: contain;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;           /* rond bubbeltje */
+  background-color: #4a0000;    /* rood zoals chat-binnenkant */
+  background-size: 70%;
   background-repeat: no-repeat;
   background-position: center;
-  box-shadow: none;
+  box-shadow: 0 0 4px rgba(255,255,255,0.35);
 }
 
-/* — eigen icoontjes voor BONUS POWER — */
+/* eigen icoontjes */
+.bp-icon-heart {
+  background-image: url("heart.png");
+}
+
 .bp-icon-star {
-  background-image: url("stars.png");
+  background-image: url("stars.png");    /* jouw bestand */
 }
 
 .bp-icon-bomb {
@@ -252,6 +259,7 @@ body {
   background-image: url("bad_cross.png");
 }
 
+/* ----- BUISJES ----- */
 .bp-tube {
   position: relative;
   flex: 1;
@@ -272,14 +280,22 @@ body {
   transition: width 0.25s ease-out;
 }
 
+/* ❤️ hartjes-buisje */
+#bp-hearts-liquid {
+  background: linear-gradient(90deg, #fff 0%, #ff5b6b 25%, #550000 100%);
+}
+
+/* ⭐ sterren-buisje */
 #bp-stars-liquid { 
   background: linear-gradient(90deg, #fff 0%, #ffe500 20%, #550000 100%);
 }
 
+/* 💣 bom-buisje */
 #bp-bombs-liquid {
   background: linear-gradient(90deg, #fff 0%, #e0e0e0 25%, #550000 100%);
 }
 
+/* ❌ kruis-buisje */
 #bp-cross-liquid {
   background: linear-gradient(90deg, #fff 0%, #ff4d4d 30%, #550000 100%);
 }
@@ -301,7 +317,7 @@ body {
   font-weight: bold;
 }
 
-/* neon flash effect */
+/* neon flash effect bij vol */
 .bp-row.flash .bp-tube {
   box-shadow: 0 0 10px #fff, 0 0 20px #fff;
 }
