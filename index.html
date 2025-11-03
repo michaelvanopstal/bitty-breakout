@@ -15,48 +15,80 @@
 </head>
 
 <body>
-  <!-- ===== Chat Box (rechts) ===== -->
-  <div id="chatbox">
-    <div class="chatbox-header">
-      <button id="chatToggleBtn" class="chat-icon-btn" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
-      <span>CHAT</span>
-      <button id="chatClearBtn" class="chat-icon-btn" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
-    </div>
-    <!-- hier blijft jouw chat-inhoud -->
-    <div id="chatMessages"></div>
+ <!-- ===== Chat Box (rechts) ===== -->
+<div id="chatbox">
+  <div class="chatbox-header">
+    <button id="chatToggleBtn" class="chat-icon-btn" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
+    <span>CHAT</span>
+    <button id="chatClearBtn" class="chat-icon-btn" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
   </div>
 
-  <!-- ===== BONUS POWER los van chat ===== -->
-  <div id="bonus-power-panel">
-    <div class="bp-header">BONUS POWER</div>
-    <div class="bp-row" data-type="stars">
-      <div class="bp-icon bp-icon-star"></div>
-      <div class="bp-tube">
-        <div class="bp-liquid" id="bp-stars-liquid"></div>
-        <div class="bp-glass"></div>
-      </div>
-      <div class="bp-value" id="bp-stars-value">0/10</div>
-    </div>
+  <!-- berichten -->
+  <div id="chatMessages"></div>
 
-    <div class="bp-row" data-type="bombs">
-      <div class="bp-icon bp-icon-bomb"></div>
-      <div class="bp-tube">
-        <div class="bp-liquid" id="bp-bombs-liquid"></div>
-        <div class="bp-glass"></div>
-      </div>
-      <div class="bp-value" id="bp-bombs-value">0/10</div>
-    </div>
-
-    <div class="bp-row" data-type="cross">
-      <div class="bp-icon bp-icon-cross"></div>
-      <div class="bp-tube">
-        <div class="bp-liquid" id="bp-cross-liquid"></div>
-        <div class="bp-glass"></div>
-      </div>
-      <div class="bp-value" id="bp-cross-value">0/3</div>
-    </div>
+  <!-- invoervelden onderaan de chat -->
+  <div class="chat-input-bar">
+    <input
+      type="text"
+      id="playerName"
+      placeholder="Player: michael"
+      maxlength="20"
+    />
+    <input
+      type="text"
+      id="chatInput"
+      placeholder="Schrijf een bericht..."
+      maxlength="200"
+    />
+    <button id="chatSendBtn" title="Verstuur bericht">▶</button>
   </div>
-</body>
+</div>
+
+<!-- ===== BONUS POWER los van chat ===== -->
+<div id="bonus-power-panel">
+  <div class="bp-header">BONUS POWER</div>
+
+  <!-- ❤️ HARTJES METER -->
+  <div class="bp-row" data-type="hearts">
+    <div class="bp-icon bp-icon-heart"></div>
+    <div class="bp-tube">
+      <div class="bp-liquid" id="bp-hearts-liquid"></div>
+      <div class="bp-glass"></div>
+    </div>
+    <div class="bp-value" id="bp-hearts-value">0/10</div>
+  </div>
+
+  <!-- ⭐ STERREN METER -->
+  <div class="bp-row" data-type="stars">
+    <div class="bp-icon bp-icon-star"></div>
+    <div class="bp-tube">
+      <div class="bp-liquid" id="bp-stars-liquid"></div>
+      <div class="bp-glass"></div>
+    </div>
+    <div class="bp-value" id="bp-stars-value">0/10</div>
+  </div>
+
+  <!-- 💣 BOM METER -->
+  <div class="bp-row" data-type="bombs">
+    <div class="bp-icon bp-icon-bomb"></div>
+    <div class="bp-tube">
+      <div class="bp-liquid" id="bp-bombs-liquid"></div>
+      <div class="bp-glass"></div>
+    </div>
+    <div class="bp-value" id="bp-bombs-value">0/10</div>
+  </div>
+
+  <!-- ❌ KRUIS METER -->
+  <div class="bp-row" data-type="cross">
+    <div class="bp-icon bp-icon-cross"></div>
+    <div class="bp-tube">
+      <div class="bp-liquid" id="bp-cross-liquid"></div>
+      <div class="bp-glass"></div>
+    </div>
+    <div class="bp-value" id="bp-cross-value">0/3</div>
+  </div>
+</div>
+
 
 
   <div id="chatMessages" aria-live="polite"></div>
