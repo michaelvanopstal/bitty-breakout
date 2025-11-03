@@ -2650,6 +2650,26 @@ function resetBricks() {
   if (typeof dropsSpawned !== 'undefined') dropsSpawned = 0;
   if (typeof lastDropAt !== 'undefined') lastDropAt = performance.now();
 
+  // 🔽 🔽 🔽 HIER: alle tijdelijke bonus-effecten killen 🔽 🔽 🔽
+  // magneet uit
+  if (typeof magnetActive !== "undefined") magnetActive = false;
+  // speed boost uit
+  if (typeof speedBoostActive !== "undefined") speedBoostActive = false;
+  // schild / invincible uit
+  if (typeof shieldActive !== "undefined") shieldActive = false;
+  if (typeof invincibleShieldActive !== "undefined") invincibleShieldActive = false;
+  // eventuele bom-visuals stoppen
+  if (typeof bombVisuals !== "undefined") {
+    bombVisuals.done = true;
+    bombVisuals.afterCb = null;
+  }
+  // lopende bittyBomb-intro afbreken
+  if (typeof bittyBomb !== "undefined") {
+    bittyBomb.active = false;
+    bittyBomb.phase = null;
+  }
+  // 🔼 🔼 🔼 klaar, punten blijven gewoon bestaan 🔼 🔼 🔼
+
   const lvl = level || 1;
 
   // ======= ÉÉN enkele startDrops per level =======
@@ -2659,18 +2679,14 @@ function resetBricks() {
     maxIntervalMs: (lvl <= 3) ? 2600 : (lvl <= 10) ? 2200 : 1800,
     speed:        (lvl <= 3) ? 2.5  : (lvl <= 10) ? 3.0  : 3.4,
 
-    // ✅ hier aangepast: nu ook bad_cross inbegrepen
     types: ["heart", "star", "bomb_token", "bad_cross"],
-
-    // ✅ typeWeights als object in plaats van array
     typeWeights: {
       heart: 3,
       star: 2,
-      bomb_token: 1,
+      bomb_token: 0.3,
       bad_cross: 1
     },
 
-   
     xMargin: 40,
     startDelayMs: (lvl <= 3) ? 800 : (lvl <= 10) ? 600 : 500,
     mode: (lvl > 10) ? "grid" : "well",
@@ -2681,8 +2697,6 @@ function resetBricks() {
     minSpacing: 70
   });
 }
-
-
 
 
 
