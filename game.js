@@ -122,8 +122,7 @@ let heartsCollected = 0;
 let heartBlocks = [];
 let fallingHearts = [];
 let heartPopupTimer = 0;
-let heartBoardX = 20;
-let heartBoardY = 20;
+
 
 // === DROPS SYSTEM: globals ===
 let fallingDrops = []; // actieve losse drops (niet uit bricks)
