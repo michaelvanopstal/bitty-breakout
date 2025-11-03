@@ -1681,55 +1681,51 @@ const DROP_TYPES = {
     },
     onMiss(drop) { /* niks */ },
   },
-
-  bomb: {
-    draw(drop, ctx) {
-      const s = 26;
-      const blink = (Math.floor(performance.now() / 200) % 2 === 0);
-      const img = blink ? tntBlinkImg : tntImg;
-      ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
-    },
-
-    onCatch(drop) {
-      // 🎵 Nieuw: speel bom.mp3 bij elke echte bom-pickup
-      SFX.play('bombPickup');
-
-      // Bestaande logica
-      bombsCollected++;
-      pointPopups.push({
-        x: drop.x,
-        y: drop.y,
-        value: `Bomb ${bombsCollected}/10`,
-        alpha: 1
-      });
-
-      try {
-        coinSound.currentTime = 0;
-        coinSound.play();
-      } catch {}
-
-      if (bombsCollected >= 10) {
-        bombsCollected = 0;
-        triggerBittyBombIntro(20);
-      }
-
-      // 💥 Hier stond het los: nu netjes binnen onCatch
-      if (lives > 1) {
-        lives--;
-        updateLivesDisplay?.();
-        pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
-      } else {
-        triggerPaddleExplosion?.();
-      }
-
-      try {
-        tntExplodeSound.currentTime = 0;
-        tntExplodeSound.play();
-      } catch {}
-    },
-
-    onMiss(drop) { /* goed zo, niks */ },
+bomb: {
+  draw(drop, ctx) {
+    const s = 26;
+    const blink = (Math.floor(performance.now() / 200) % 2 === 0);
+    const img = blink ? tntBlinkImg : tntImg;
+    ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
   },
+
+  onCatch(drop) {
+    // alleen bom-geluid
+    SFX.play('bombPickup');
+
+    // teller + popup
+    bombsCollected++;
+    pointPopups.push({
+      x: drop.x,
+      y: drop.y,
+      value: `Bomb ${bombsCollected}/10`,
+      alpha: 1
+    });
+
+    // 10 gehaald? start intro
+    if (bombsCollected >= 10) {
+      bombsCollected = 0;
+      triggerBittyBombIntro(20);
+    }
+
+    // jouw leven-weg-logica + tnt knal laten we verder staan
+    if (lives > 1) {
+      lives--;
+      updateLivesDisplay?.();
+      pointPopups.push({ x: drop.x, y: drop.y, value: "−1 life", alpha: 1 });
+    } else {
+      triggerPaddleExplosion?.();
+    }
+
+    try {
+      tntExplodeSound.currentTime = 0;
+      tntExplodeSound.play();
+    } catch {}
+  },
+
+  onMiss(drop) { /* goed zo, niks */ },
+},
+
 
   paddle_long: {
     draw(drop, ctx) { ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24); },
