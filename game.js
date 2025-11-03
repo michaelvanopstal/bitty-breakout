@@ -1762,31 +1762,46 @@ const DROP_TYPES = {
   },
 
   heart: {
-    draw(drop, ctx) {
-      const size = 24 + Math.sin(drop.t) * 2;
-      ctx.globalAlpha = 0.95;
-      ctx.drawImage(heartImg, drop.x - size / 2, drop.y - size / 2, size, size);
-      ctx.globalAlpha = 1;
-    },
-    onTick(drop, dt) { drop.t += 0.2; },
-    onCatch(drop) {
-      heartsCollected++;
-      document.getElementById("heartCount").textContent = heartsCollected;
-      coinSound.currentTime = 0;
-      coinSound.play();
-
-      if (heartsCollected >= 10) {
-        heartsCollected = 0;
-        lives++;
-        updateLivesDisplay?.();
-        heartPopupTimer = 100;
-        document.getElementById("heartCount").textContent = heartsCollected;
-      }
-    },
-    onMiss(drop) {
-      // gemist hart: geen straf
-    },
+  draw(drop, ctx) {
+    const size = 24 + Math.sin(drop.t) * 2;
+    ctx.globalAlpha = 0.95;
+    ctx.drawImage(heartImg, drop.x - size / 2, drop.y - size / 2, size, size);
+    ctx.globalAlpha = 1;
   },
+  onTick(drop, dt) {
+    drop.t += 0.2;
+  },
+  onCatch(drop) {
+    // +1 hart
+    heartsCollected++;
+
+    // html teller updaten (als element bestaat)
+    const hcEl = document.getElementById("heartCount");
+    if (hcEl) hcEl.textContent = heartsCollected;
+
+    // ❤️ eigen hartje-sound i.p.v. coin
+    try {
+      if (typeof heartPickupSfx !== "undefined" && heartPickupSfx) {
+        heartPickupSfx.currentTime = 0;
+        heartPickupSfx.play();
+      }
+    } catch (e) {}
+
+    // 10 gehaald? zelfde systeem als je nieuwe fullscreen animatie
+    if (heartsCollected >= 10) {
+      heartsCollected = 0;
+      lives++;
+      updateLivesDisplay?.();
+      if (hcEl) hcEl.textContent = heartsCollected;
+
+      // grote animatie + level mp3 zit al in triggerHeartCelebration()
+      triggerHeartCelebration();
+    }
+  },
+  onMiss(drop) {
+    // geen straf
+  },
+},
 
   bag: {
     draw(drop, ctx) {
