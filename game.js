@@ -2007,73 +2007,90 @@ const DROP_TYPES = {
     onMiss(drop) {},
   },
 
-  bomb_token: {
-    draw(drop, ctx) {
-      const s = 28;
-      const img =
-        bombTokenImg && bombTokenImg.complete ? bombTokenImg : tntImg;
-      drop.t = (drop.t || 0) + 0.16;
-      const k = 1 + 0.08 * Math.sin(drop.t * 6);
-      const size = s * k;
-      ctx.save();
-      ctx.globalAlpha = 0.95;
-      ctx.drawImage(img, drop.x - size / 2, drop.y - size / 2, size, size);
-      ctx.restore();
-    },
-    onCatch(drop) {
-      SFX.play("bombPickup");
-      bombsCollected++;
-      pointPopups.push({
-        x: drop.x,
-        y: drop.y,
-        value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`,
-        alpha: 1,
-      });
-      if (bombsCollected >= BOMB_TOKEN_TARGET) {
-        bombsCollected = 0;
-        triggerBittyBombIntro(BOMB_RAIN_COUNT);
-      }
-    },
-    onMiss(drop) {},
+bomb_token: {
+  draw(drop, ctx) {
+    const s = 28;
+    const img =
+      bombTokenImg && bombTokenImg.complete ? bombTokenImg : tntImg;
+    drop.t = (drop.t || 0) + 0.16;
+    const k = 1 + 0.08 * Math.sin(drop.t * 6);
+    const size = s * k;
+    ctx.save();
+    ctx.globalAlpha = 0.95;
+    ctx.drawImage(img, drop.x - size / 2, drop.y - size / 2, size, size);
+    ctx.restore();
   },
+  onCatch(drop) {
+    SFX.play("bombPickup");
+    bombsCollected++;
+    pointPopups.push({
+      x: drop.x,
+      y: drop.y,
+      value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`,
+      alpha: 1,
+    });
 
-  star: {
-    draw(drop, ctx) {
-      drop.t = (drop.t || 0) + 0.016;
-      const base = 28;
-      const pulse = 1 + 0.12 * Math.sin(drop.t * 8);
-      const size = base * pulse;
-      ctx.save();
-      ctx.globalAlpha = 0.9 + 0.1 * Math.sin(drop.t * 8);
-      ctx.drawImage(starImg, drop.x - size / 2, drop.y - size / 2, size, size);
-      ctx.restore();
-    },
-    onCatch(drop) {
-      try {
-        if (typeof playOnceSafe === "function") {
-          playOnceSafe(starCatchSfx);
-        } else {
-          starCatchSfx.pause();
-          starCatchSfx.currentTime = 0;
-          starCatchSfx.play();
-        }
-      } catch (e) {}
-      starsCollected++;
-      pointPopups.push({
-        x: drop.x,
-        y: drop.y,
-        value: "⭐+1",
-        alpha: 1,
-      });
-      if (starsCollected >= 10) {
-        starsCollected = 0;
-        startStarPowerCelebration();
-        activateInvincibleShield(30000);
-      }
-    },
-    onMiss(drop) {},
+    // ✅ update HTML-display
+    updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+
+    if (bombsCollected >= BOMB_TOKEN_TARGET) {
+      bombsCollected = 0;
+
+      // ✅ opnieuw updaten na reset
+      updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+
+      triggerBittyBombIntro(BOMB_RAIN_COUNT);
+    }
   },
+  onMiss(drop) {},
+},
+
+star: {
+  draw(drop, ctx) {
+    drop.t = (drop.t || 0) + 0.016;
+    const base = 28;
+    const pulse = 1 + 0.12 * Math.sin(drop.t * 8);
+    const size = base * pulse;
+    ctx.save();
+    ctx.globalAlpha = 0.9 + 0.1 * Math.sin(drop.t * 8);
+    ctx.drawImage(starImg, drop.x - size / 2, drop.y - size / 2, size, size);
+    ctx.restore();
+  },
+  onCatch(drop) {
+    try {
+      if (typeof playOnceSafe === "function") {
+        playOnceSafe(starCatchSfx);
+      } else {
+        starCatchSfx.pause();
+        starCatchSfx.currentTime = 0;
+        starCatchSfx.play();
+      }
+    } catch (e) {}
+    starsCollected++;
+    pointPopups.push({
+      x: drop.x,
+      y: drop.y,
+      value: "⭐+1",
+      alpha: 1,
+    });
+
+    // ✅ update HTML-display
+    updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+
+    if (starsCollected >= 10) {
+      starsCollected = 0;
+
+      // ✅ opnieuw updaten na reset
+      updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+
+      startStarPowerCelebration();
+      activateInvincibleShield(30000);
+    }
+  },
+  onMiss(drop) {},
+},
 }; // ✅ sluit het hele const DROP_TYPES object correct af
+
 
 
 
