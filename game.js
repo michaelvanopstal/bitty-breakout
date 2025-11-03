@@ -610,6 +610,146 @@ function renderBittyBombIntro() {
   }
 }
 
+// ❤️ full-screen heart celebration
+let heartCelebration = {
+  active: false,
+  t0: 0,
+  hearts: []
+};
+
+function triggerHeartCelebration() {
+  // we gebruiken hetzelfde overlay-canvas als je star power
+  ensureFxCanvas(); // bestaat al bij jou
+
+  heartCelebration.active = true;
+  heartCelebration.t0 = performance.now();
+  heartCelebration.hearts = [];
+
+  const W = fxCanvas.width;
+  const H = fxCanvas.height;
+
+  // 40–55 hartjes over hele scherm
+  const count = 50;
+  for (let i = 0; i < count; i++) {
+    heartCelebration.hearts.push({
+      x: Math.random() * W,
+      y: -40 - Math.random() * 200,      // van boven naar beneden
+      dx: (Math.random() - 0.5) * 1.2,   // beetje zigzag
+      dy: 2 + Math.random() * 2.5,
+      size: 32 + Math.random() * 26,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (-1 + Math.random() * 2) * 0.04,
+      pulse: Math.random() * Math.PI * 2
+    });
+  }
+}
+// ❤️ full-screen heart celebration
+let heartCelebration = {
+  active: false,
+  t0: 0,
+  hearts: []
+};
+
+function triggerHeartCelebration() {
+  // we gebruiken hetzelfde overlay-canvas als je star power
+  ensureFxCanvas(); // bestaat al bij jou
+
+  heartCelebration.active = true;
+  heartCelebration.t0 = performance.now();
+  heartCelebration.hearts = [];
+
+  const W = fxCanvas.width;
+  const H = fxCanvas.height;
+
+  // 40–55 hartjes over hele scherm
+  const count = 50;
+  for (let i = 0; i < count; i++) {
+    heartCelebration.hearts.push({
+      x: Math.random() * W,
+      y: -40 - Math.random() * 200,      // van boven naar beneden
+      dx: (Math.random() - 0.5) * 1.2,   // beetje zigzag
+      dy: 2 + Math.random() * 2.5,
+      size: 32 + Math.random() * 26,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (-1 + Math.random() * 2) * 0.04,
+      pulse: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function drawHeartCelebration() {
+  if (!heartCelebration.active || !fxCtx) return;
+
+  const now = performance.now();
+  const elapsed = now - heartCelebration.t0;
+  const W = fxCanvas.width;
+  const H = fxCanvas.height;
+
+  // na 4 sec uitfaden
+  if (elapsed > 4000) {
+    heartCelebration.active = false;
+    return;
+  }
+
+  // niet hele scherm grijs maken, gewoon leeg vegen
+  fxCtx.clearRect(0, 0, W, H);
+
+  // titel in het midden
+  const blink = Math.floor(elapsed / 250) % 2 === 0;
+  fxCtx.save();
+  fxCtx.textAlign = "center";
+  fxCtx.textBaseline = "middle";
+  fxCtx.font = "bold 46px Arial";
+  fxCtx.strokeStyle = "rgba(255,50,160,0.9)";
+  fxCtx.lineWidth = 4;
+  fxCtx.fillStyle = blink ? "rgba(255,220,240,1)" : "rgba(255,140,200,1)";
+  fxCtx.strokeText("BITTY LEVEL UP!", W / 2, H / 2 - 80);
+  fxCtx.fillText("BITTY LEVEL UP!", W / 2, H / 2 - 80);
+
+  fxCtx.font = "bold 22px Arial";
+  fxCtx.fillStyle = "rgba(255,230,240,0.95)";
+  fxCtx.fillText("10 hearts collected — extra life!", W / 2, H / 2 - 35);
+  fxCtx.restore();
+
+  // hartjes tekenen
+  heartCelebration.hearts.forEach(h => {
+    h.x += h.dx;
+    h.y += h.dy;
+    h.rot += h.rotSpeed;
+    h.pulse += 0.25;
+
+    // aura / energie-ringetje
+    fxCtx.save();
+    fxCtx.translate(h.x, h.y);
+    fxCtx.rotate(h.rot);
+
+    const auraR = h.size * (0.55 + 0.15 * Math.sin(h.pulse));
+    const auraGrad = fxCtx.createRadialGradient(0, 0, 4, 0, 0, auraR);
+    auraGrad.addColorStop(0, "rgba(255,180,220,0.9)");
+    auraGrad.addColorStop(0.6, "rgba(255,120,200,0.4)");
+    auraGrad.addColorStop(1, "rgba(255,120,200,0)");
+    fxCtx.globalAlpha = 0.85;
+    fxCtx.fillStyle = auraGrad;
+    fxCtx.beginPath();
+    fxCtx.ellipse(0, 0, auraR, auraR * 0.7, 0, 0, Math.PI * 2);
+    fxCtx.fill();
+    fxCtx.restore();
+
+    // hartje zelf erbovenop
+    fxCtx.save();
+    fxCtx.translate(h.x, h.y);
+    fxCtx.rotate(h.rot);
+    fxCtx.globalAlpha = 1;
+    fxCtx.drawImage(heartImg, -h.size / 2, -h.size / 2, h.size, h.size);
+    fxCtx.restore();
+
+    // als buiten beeld, zet 'm weer bovenaan
+    if (h.y > H + 60) {
+      h.y = -60;
+      h.x = Math.random() * W;
+    }
+  });
+}
 
 
 
@@ -4369,7 +4509,8 @@ function draw() {
   drawCoins();
   drawFallingHearts();
   drawFallingStones();  
-  drawHeartPopup();
+  drawHeartCelebration();
+
   checkCoinCollision();
   drawPaddleFlags();
   drawFlyingCoins();
