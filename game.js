@@ -113,6 +113,9 @@ const AURA_SPARK_RGB = "255,240,150";       // lichtere vonkjes (warm wit/goud)
 let starPowerFX = { active: false, t0: 0, duration: 3000, stars: [], particles: [] };
 let fxCanvas = null, fxCtx = null;
 
+// ❌ Foute kruisen
+let badCrossesCaught = 0;
+
 
 // ❤️ Hartjes-systeem
 let heartsCollected = 0;
@@ -1565,6 +1568,10 @@ const shootSound = new Audio("shoot_arcade.mp3");
 const wallSound = new Audio("tick.mp3");
 const blockSound = new Audio("tock.mp3");
 
+const wrongSfx = new Audio("wrong.mp3");
+wrongSfx.preload = "auto";
+wrongSfx.volume = 1.0;
+
 
 const tntBeepSound = new Audio("tnt_beep.mp3");
 tntBeepSound.volume = 0.7;
@@ -1678,6 +1685,8 @@ bombTokenImg.src = "bom.png";
 const doubleBallImg = new Image();
 doubleBallImg.src = "2 balls.png";  // upload dit naar dezelfde map
 
+const badCrossImg = new Image();
+badCrossImg.src = "bad_cross.png";  // jouw bestandsnaam
 
 const blockImg = new Image();
 blockImg.src = "block_logo.png";
@@ -1866,6 +1875,77 @@ bomb: {
 
   onMiss(drop) { /* goed zo, niks */ },
 },
+const DROP_TYPES = {
+  // ... alles wat je al hebt ...
+
+  bad_cross: {
+    draw(drop, ctx) {
+      const s = 40; // beetje groter dan hartje zodat het “gevaar” is
+      if (badCrossImg && badCrossImg.complete) {
+        ctx.drawImage(badCrossImg, drop.x - s/2, drop.y - s/2, s, s);
+      } else {
+        // fallback: rood kruis tekenen
+        ctx.save();
+        ctx.translate(drop.x, drop.y);
+        ctx.strokeStyle = "#ff3300";
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(-14, -14);
+        ctx.lineTo(14, 14);
+        ctx.moveTo(14, -14);
+        ctx.lineTo(-14, 14);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // markeer dat deze niet door magnet mag worden aangetrokken
+      drop.noMagnet = true;
+    },
+
+    onCatch(drop) {
+      // 1. geluid
+      try {
+        wrongSfx.currentTime = 0;
+        wrongSfx.play();
+      } catch {}
+
+      // 2. teller + popup
+      badCrossesCaught++;
+      pointPopups.push({
+        x: drop.x,
+        y: drop.y,
+        value: `❌ ${badCrossesCaught}/3`,
+        alpha: 1
+      });
+
+      // 3. bij 3x: ALLES van het vallende bonus-systeem resetten
+      if (badCrossesCaught >= 3) {
+        badCrossesCaught = 0;      // teller zelf ook resetten
+        heartsCollected = 0;
+        starsCollected = 0;
+        bombsCollected = 0;
+
+        // schermpje
+        pointPopups.push({
+          x: canvas.width / 2,
+          y: 90,
+          value: "BONUS VAL SYSTEEM GERESSET!",
+          alpha: 1
+        });
+
+        // UI bijwerken als je elementen hebt
+        const hcEl = document.getElementById("heartCount");
+        if (hcEl) hcEl.textContent = heartsCollected;
+        // sterren en bommen heb je nu weer 0, je systeem pakt dat weer op
+      }
+    },
+
+    onMiss(drop) {
+      // niks; hij is “straf” alleen als je ‘m pakt
+    },
+  },
+
+}; // ← je bestaande object eindigt nog steeds hier
 
 
   paddle_long: {
@@ -2344,7 +2424,7 @@ function startDrops(config) {
 
   // normaliseer
   if (!Array.isArray(dropConfig.gridColumns)) dropConfig.gridColumns = [ dropConfig.gridColumns ];
-  if (!Array.isArray(dropConfig.types) || dropConfig.types.length === 0) dropConfig.types = ["bom","heart","star"];
+  if (!Array.isArray(dropConfig.types) || dropConfig.types.length === 0) dropConfig.types = ["heart", "star", "bomb_token", "bad_cross"];
 
   // interne tellers
   dropsSpawned = 0;                   // aantal items gespawnd (telt individuele items)
@@ -3243,6 +3323,7 @@ function drawCoins() {
     }
   });
 }
+
 function drawFallingHearts() {
   // we lopen achteruit zodat we veilig kunnen splicen
   for (let i = fallingHearts.length - 1; i >= 0; i--) {
@@ -3350,6 +3431,9 @@ function applyMagnetToArray(items) {
   for (let i = 0; i < items.length; i++) {
     const it = items[i];
     if (!it) continue;
+    
+    if (it.noMagnet || it.type === "bad_cross") continue;
+
 
     // Bepaal itempositievelden
     let ix = it.x, iy = it.y;
@@ -5110,7 +5194,7 @@ updateAndDrawBombVisuals(ctx);
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 32) {
+  if (imagesLoaded === 33) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -5176,7 +5260,7 @@ tntImg.onload = onImageLoad;
 tntBlinkImg.onload = onImageLoad;
 starImg.onload = onImageLoad;
 bombTokenImg.onload = onImageLoad;
-
+badCrossImg.onload = onImageLoad;
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
