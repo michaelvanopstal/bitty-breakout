@@ -1913,56 +1913,67 @@ const DROP_TYPES = {
     onMiss(drop) {},
   },
 
-  // ⬇️ jouw nieuwe kruis komt hierbinnen, niet als nieuwe const
-  bad_cross: {
-    draw(drop, ctx) {
-      const s = 40;
-      if (badCrossImg && badCrossImg.complete) {
-        ctx.drawImage(badCrossImg, drop.x - s / 2, drop.y - s / 2, s, s);
-      } else {
-        ctx.save();
-        ctx.translate(drop.x, drop.y);
-        ctx.strokeStyle = "#ff3300";
-        ctx.lineWidth = 8;
-        ctx.beginPath();
-        ctx.moveTo(-14, -14);
-        ctx.lineTo(14, 14);
-        ctx.moveTo(14, -14);
-        ctx.lineTo(-14, 14);
-        ctx.stroke();
-        ctx.restore();
-      }
-      drop.noMagnet = true;
-    },
-    onCatch(drop) {
-      try {
-        wrongSfx.currentTime = 0;
-        wrongSfx.play();
-      } catch {}
-      badCrossesCaught++;
+ // ⬇️ jouw nieuwe kruis komt hierbinnen, niet als nieuwe const
+bad_cross: {
+  draw(drop, ctx) {
+    const s = 40;
+    if (badCrossImg && badCrossImg.complete) {
+      ctx.drawImage(badCrossImg, drop.x - s / 2, drop.y - s / 2, s, s);
+    } else {
+      ctx.save();
+      ctx.translate(drop.x, drop.y);
+      ctx.strokeStyle = "#ff3300";
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(-14, -14);
+      ctx.lineTo(14, 14);
+      ctx.moveTo(14, -14);
+      ctx.lineTo(-14, 14);
+      ctx.stroke();
+      ctx.restore();
+    }
+    drop.noMagnet = true;
+  },
+  onCatch(drop) {
+    try {
+      wrongSfx.currentTime = 0;
+      wrongSfx.play();
+    } catch {}
+    badCrossesCaught++;
+    pointPopups.push({
+      x: drop.x,
+      y: drop.y,
+      value: `❌ ${badCrossesCaught}/3`,
+      alpha: 1,
+    });
+
+    // ✅ meteen de display laten meegaan
+    if (typeof updateBonusPowerPanel === "function") {
+      updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+    }
+
+    if (badCrossesCaught >= 3) {
+      badCrossesCaught = 0;
+      heartsCollected = 0;
+      starsCollected = 0;
+      bombsCollected = 0;
       pointPopups.push({
-        x: drop.x,
-        y: drop.y,
-        value: `❌ ${badCrossesCaught}/3`,
+        x: canvas.width / 2,
+        y: 90,
+        value: "BONUS VAL SYSTEEM GERESSET!",
         alpha: 1,
       });
-      if (badCrossesCaught >= 3) {
-        badCrossesCaught = 0;
-        heartsCollected = 0;
-        starsCollected = 0;
-        bombsCollected = 0;
-        pointPopups.push({
-          x: canvas.width / 2,
-          y: 90,
-          value: "BONUS VAL SYSTEEM GERESSET!",
-          alpha: 1,
-        });
-        const hcEl = document.getElementById("heartCount");
-        if (hcEl) hcEl.textContent = heartsCollected;
+      const hcEl = document.getElementById("heartCount");
+      if (hcEl) hcEl.textContent = heartsCollected;
+
+      // ✅ na reset ook de display terug naar 0/0/0
+      if (typeof updateBonusPowerPanel === "function") {
+        updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
       }
-    },
-    onMiss(drop) {},
+    }
   },
+  onMiss(drop) {},
+},
 
   paddle_long: {
     draw(drop, ctx) {
