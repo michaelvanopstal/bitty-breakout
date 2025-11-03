@@ -296,6 +296,52 @@ function playVoiceOver(audio, opts = {}) {
 }
 
 
+function updateBonusPowerPanel(stars, bombs, crosses) {
+  const s = document.getElementById("bp-stars-liquid");
+  const b = document.getElementById("bp-bombs-liquid");
+  const c = document.getElementById("bp-cross-liquid");
+
+  const sv = document.getElementById("bp-stars-value");
+  const bv = document.getElementById("bp-bombs-value");
+  const cv = document.getElementById("bp-cross-value");
+
+  if (s) {
+    const pct = Math.min(1, stars / 10) * 100;
+    s.style.width = pct + "%";
+    sv.textContent = stars + "/10";
+
+    // flash bij 10
+    const row = s.closest(".bp-row");
+    if (stars >= 10 && row) {
+      row.classList.add("flash");
+      setTimeout(() => row.classList.remove("flash"), 500);
+    }
+  }
+  if (b) {
+    const pct = Math.min(1, bombs / 10) * 100;
+    b.style.width = pct + "%";
+    bv.textContent = bombs + "/10";
+
+    const row = b.closest(".bp-row");
+    if (bombs >= 10 && row) {
+      row.classList.add("flash");
+      setTimeout(() => row.classList.remove("flash"), 500);
+    }
+  }
+  if (c) {
+    const pct = Math.min(1, crosses / 3) * 100;
+    c.style.width = pct + "%";
+    cv.textContent = crosses + "/3";
+
+    const row = c.closest(".bp-row");
+    if (crosses >= 3 && row) {
+      row.classList.add("flash");
+      setTimeout(() => row.classList.remove("flash"), 500);
+    }
+  }
+}
+
+
 function stopStarAura(immediate = false) {
   try {
     if (immediate) {
