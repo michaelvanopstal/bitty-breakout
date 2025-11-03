@@ -618,14 +618,14 @@ let heartCelebration = {
 };
 
 function triggerHeartCelebration() {
-  // ⭐ zorg dat er een overlay-canvas is
+  // zorg dat overlay er is
   ensureFxCanvas();
 
-  // 🎵 nieuw: level-up geluid zodra de intro start
+  // 🎵 speel nu jouw nieuwe bitty-level-up mp3
   try {
-    heartLevelSfx.currentTime = 0;
-    heartLevelSfx.play();
-  } catch {}
+    bittyLevelUpSfx.currentTime = 0;
+    bittyLevelUpSfx.play();
+  } catch (e) {}
 
   const W = fxCanvas.width;
   const H = fxCanvas.height;
@@ -648,8 +648,6 @@ function triggerHeartCelebration() {
     });
   }
 }
-
-
 
 function drawHeartCelebration() {
   if (!heartCelebration.active || !fxCtx) return;
@@ -1573,6 +1571,9 @@ tntBeepSound.volume = 0.7;
 const tntExplodeSound = new Audio("tnt_explode.mp3");
 tntExplodeSound.volume = 0.9;
 
+const bittyLevelUpSfx = new Audio("bitty-level-up.mp3");
+bittyLevelUpSfx.preload = "auto";
+bittyLevelUpSfx.volume = 1.0; // mag je aanpasse
 
 const stonefallVoiceEvery = 5;
 const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
