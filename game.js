@@ -643,12 +643,7 @@ function triggerHeartCelebration() {
     });
   }
 }
-// ❤️ full-screen heart celebration
-let heartCelebration = {
-  active: false,
-  t0: 0,
-  hearts: []
-};
+
 
 function triggerHeartCelebration() {
   // we gebruiken hetzelfde overlay-canvas als je star power
