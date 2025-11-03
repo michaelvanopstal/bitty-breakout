@@ -618,23 +618,25 @@ let heartCelebration = {
 };
 
 function triggerHeartCelebration() {
-  // we gebruiken hetzelfde overlay-canvas als je star power
-  ensureFxCanvas(); // bestaat al bij jou
+  // 🎵 nieuw: level-up geluid zodra de intro start
+  try {
+    heartLevelSfx.currentTime = 0;
+    heartLevelSfx.play();
+  } catch {}
+
+  const W = fxCanvas.width;
+  const H = fxCanvas.height;
 
   heartCelebration.active = true;
   heartCelebration.t0 = performance.now();
   heartCelebration.hearts = [];
 
-  const W = fxCanvas.width;
-  const H = fxCanvas.height;
-
-  // 40–55 hartjes over hele scherm
   const count = 50;
   for (let i = 0; i < count; i++) {
     heartCelebration.hearts.push({
       x: Math.random() * W,
-      y: -40 - Math.random() * 200,      // van boven naar beneden
-      dx: (Math.random() - 0.5) * 1.2,   // beetje zigzag
+      y: -40 - Math.random() * 200,
+      dx: (Math.random() - 0.5) * 1.2,
       dy: 2 + Math.random() * 2.5,
       size: 32 + Math.random() * 26,
       rot: Math.random() * Math.PI * 2,
@@ -644,33 +646,6 @@ function triggerHeartCelebration() {
   }
 }
 
-
-function triggerHeartCelebration() {
-  // we gebruiken hetzelfde overlay-canvas als je star power
-  ensureFxCanvas(); // bestaat al bij jou
-
-  heartCelebration.active = true;
-  heartCelebration.t0 = performance.now();
-  heartCelebration.hearts = [];
-
-  const W = fxCanvas.width;
-  const H = fxCanvas.height;
-
-  // 40–55 hartjes over hele scherm
-  const count = 50;
-  for (let i = 0; i < count; i++) {
-    heartCelebration.hearts.push({
-      x: Math.random() * W,
-      y: -40 - Math.random() * 200,      // van boven naar beneden
-      dx: (Math.random() - 0.5) * 1.2,   // beetje zigzag
-      dy: 2 + Math.random() * 2.5,
-      size: 32 + Math.random() * 26,
-      rot: Math.random() * Math.PI * 2,
-      rotSpeed: (-1 + Math.random() * 2) * 0.04,
-      pulse: Math.random() * Math.PI * 2
-    });
-  }
-}
 
 function drawHeartCelebration() {
   if (!heartCelebration.active || !fxCtx) return;
