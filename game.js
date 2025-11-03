@@ -618,6 +618,9 @@ let heartCelebration = {
 };
 
 function triggerHeartCelebration() {
+  // ⭐ zorg dat er een overlay-canvas is
+  ensureFxCanvas();
+
   // 🎵 nieuw: level-up geluid zodra de intro start
   try {
     heartLevelSfx.currentTime = 0;
@@ -645,6 +648,7 @@ function triggerHeartCelebration() {
     });
   }
 }
+
 
 
 function drawHeartCelebration() {
@@ -1526,6 +1530,15 @@ LEVELS[20-1].params.machineGunDifficulty = 3; // L20 max
 
 
 const resetBallSound = new Audio("resetball.mp3");
+
+// ❤️ nieuwe hart-sfx
+const heartPickupSfx = new Audio("heart sound.mp3"); // speelt bij 1 hartje
+heartPickupSfx.preload = "auto";
+heartPickupSfx.volume = 0.9;
+
+const heartLevelSfx = new Audio("level.mp3"); // speelt bij 10 hartjes / level up
+heartLevelSfx.preload = "auto";
+heartLevelSfx.volume = 0.95;
 
 
 const levelUpSound = new Audio("levelup.mp3");
@@ -3210,9 +3223,11 @@ function drawCoins() {
     }
   });
 }
-
 function drawFallingHearts() {
-  fallingHearts.forEach((heart, i) => {
+  // we lopen achteruit zodat we veilig kunnen splicen
+  for (let i = fallingHearts.length - 1; i >= 0; i--) {
+    const heart = fallingHearts[i];
+
     // 🚀 Beweging
     heart.y += heart.dy;
 
@@ -3220,8 +3235,7 @@ function drawFallingHearts() {
     const size = 24 + Math.sin(heart.pulse) * 2;
     heart.pulse += 0.2;
 
-    // ✨ AURA rondom vallend hartje
-    // (licht pulserend, klein beetje draaiend)
+    // ✨ AURA rondom vallend hartje (licht pulserend, beetje draaiend)
     ctx.save();
     ctx.translate(heart.x + size / 2, heart.y + size / 2);
     const tAura = performance.now() / 300 + i * 0.2;
@@ -3263,37 +3277,43 @@ function drawFallingHearts() {
       heartLeft <= paddleRight &&
       heartBottom >= paddleTop &&
       heartTop <= paddleBottom;
-if (isOverlap && !heart.collected) {
-  heart.collected = true;
-  heartsCollected++;
 
-  // ⬇️ HTML teller updaten
-  document.getElementById("heartCount").textContent = heartsCollected;
+    if (isOverlap && !heart.collected) {
+      heart.collected = true;
+      heartsCollected++;
 
-  // 🎵 nieuw: eigen hartje-geluid
-  try {
-    heartPickupSfx.currentTime = 0;
-    heartPickupSfx.play();
-  } catch {}
+      // ⬇️ HTML teller updaten
+      const hcEl = document.getElementById("heartCount");
+      if (hcEl) hcEl.textContent = heartsCollected;
 
-  // ✅ Beloning bij 10 hartjes
-  if (heartsCollected >= 10) {
-    heartsCollected = 0;
-    lives++;
-    updateLivesDisplay?.();
-    document.getElementById("heartCount").textContent = heartsCollected;
+      // 🎵 nieuw: eigen hartje-geluid
+      try {
+        if (typeof heartPickupSfx !== "undefined" && heartPickupSfx) {
+          heartPickupSfx.currentTime = 0;
+          heartPickupSfx.play();
+        }
+      } catch {}
 
-    // 🚀 nieuwe fullscreen intro
-    triggerHeartCelebration();
-  }
-}
+      // ✅ Beloning bij 10 hartjes
+      if (heartsCollected >= 10) {
+        heartsCollected = 0;
+        lives++;
+        updateLivesDisplay?.();
+
+        if (hcEl) hcEl.textContent = heartsCollected;
+
+        // 🚀 nieuwe fullscreen intro
+        triggerHeartCelebration();
+      }
+    }
 
     // 💨 Verwijder uit array als buiten beeld of al gepakt
     if (heart.y > canvas.height || heart.collected) {
       fallingHearts.splice(i, 1);
     }
-  });
+  }
 }
+
 
 
 function tryCatchItem(item) {
