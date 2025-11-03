@@ -15,7 +15,7 @@
 </head>
 
 <body>
- <!-- ===== Chat Box (rechts) ===== -->
+<!-- ===== Chat Box (rechts) ===== -->
 <div id="chatbox">
   <div class="chatbox-header">
     <button id="chatToggleBtn" class="chat-icon-btn" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
@@ -23,26 +23,17 @@
     <button id="chatClearBtn" class="chat-icon-btn" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
   </div>
 
-  <!-- berichten -->
-  <div id="chatMessages"></div>
+  <!-- berichtenlijst -->
+  <div id="chatMessages" aria-live="polite"></div>
 
-  <!-- invoervelden onderaan de chat -->
-  <div class="chat-input-bar">
-    <input
-      type="text"
-      id="playerName"
-      placeholder="Player: michael"
-      maxlength="20"
-    />
-    <input
-      type="text"
-      id="chatInput"
-      placeholder="Schrijf een bericht..."
-      maxlength="200"
-    />
-    <button id="chatSendBtn" title="Verstuur bericht">▶</button>
-  </div>
+  <!-- invoer onderaan de chat (sluit aan op jouw CSS #chatForm ...) -->
+  <form id="chatForm" autocomplete="off">
+    <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
+    <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
+    <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
+  </form>
 </div>
+<!-- ===== /Chat Box ===== -->
 
 <!-- ===== BONUS POWER los van chat ===== -->
 <div id="bonus-power-panel">
@@ -89,21 +80,9 @@
   </div>
 </div>
 
-
-
-  <div id="chatMessages" aria-live="polite"></div>
-
-  <form id="chatForm" autocomplete="off">
-    <input id="chatName" type="text" placeholder="Naam" maxlength="18" />
-    <input id="chatInput" type="text" placeholder="Schrijf een bericht..." />
-    <button type="submit" title="Stuur">▶</button>
-  </form>
-</div>
-<!-- ===== /Chat Box ===== -->
-
-  
-  <span id="player-display">Player</span>
-  <span id="scoreDisplay">0</span>
+<!-- andere elementen die je al had -->
+<span id="player-display">Player</span>
+<span id="scoreDisplay">0</span>
 
 
   
