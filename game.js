@@ -3110,7 +3110,27 @@ function drawFallingHearts() {
     const size = 24 + Math.sin(heart.pulse) * 2;
     heart.pulse += 0.2;
 
-    // ✨ Teken hartje
+    // ✨ AURA rondom vallend hartje
+    // (licht pulserend, klein beetje draaiend)
+    ctx.save();
+    ctx.translate(heart.x + size / 2, heart.y + size / 2);
+    const tAura = performance.now() / 300 + i * 0.2;
+    const auraAlpha = 0.35 + 0.25 * Math.sin(tAura * 2);
+    const auraR = (size * 0.6) + 5;
+
+    ctx.rotate(tAura * 0.4);
+    ctx.globalAlpha = auraAlpha;
+    const grad = ctx.createRadialGradient(0, 0, auraR * 0.15, 0, 0, auraR);
+    grad.addColorStop(0, "rgba(255,180,220,0.9)");
+    grad.addColorStop(0.4, "rgba(255,120,200,0.4)");
+    grad.addColorStop(1, "rgba(255,120,200,0.0)");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, auraR, auraR * 0.7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // ✨ Teken hartje zelf
     ctx.globalAlpha = heart.alpha;
     ctx.drawImage(heartImg, heart.x, heart.y, size, size);
     ctx.globalAlpha = 1;
@@ -3134,27 +3154,31 @@ function drawFallingHearts() {
       heartBottom >= paddleTop &&
       heartTop <= paddleBottom;
 
-      if (isOverlap && !heart.collected) {
+    if (isOverlap && !heart.collected) {
       heart.collected = true;
       heartsCollected++;
 
       // ⬇️ HTML teller updaten
-     document.getElementById("heartCount").textContent = heartsCollected;
+      document.getElementById("heartCount").textContent = heartsCollected;
 
-     coinSound.currentTime = 0;
-     coinSound.play();
+      try {
+        coinSound.currentTime = 0;
+        coinSound.play();
+      } catch {}
 
-     // ✅ Beloning bij 10 hartjes
-    if (heartsCollected >= 10) {
-      heartsCollected = 0;
-      lives++;
-      updateLivesDisplay();
-      heartPopupTimer = 100;
+      // ✅ Beloning bij 10 hartjes
+      if (heartsCollected >= 10) {
+        heartsCollected = 0;
+        lives++;
+        updateLivesDisplay?.();
 
-    // Reset HTML teller ook!
-    document.getElementById("heartCount").textContent = heartsCollected;
-  }
-}
+        // Reset HTML teller ook!
+        document.getElementById("heartCount").textContent = heartsCollected;
+
+        // 🚀 nieuwe grote intro ipv heartPopupTimer
+        triggerHeartCelebration();
+      }
+    }
 
     // 💨 Verwijder uit array als buiten beeld of al gepakt
     if (heart.y > canvas.height || heart.collected) {
@@ -3162,6 +3186,7 @@ function drawFallingHearts() {
     }
   });
 }
+
 
 function tryCatchItem(item) {
   // Hearts worden in drawFallingHearts() al via overlap verwerkt,
