@@ -4355,6 +4355,7 @@ function startBombVisuals(afterCb) {
   };
 }
 
+
 function updateAndDrawBombVisuals(ctx) {
   if (!bombVisuals || bombVisuals.done) return;
 
@@ -4368,13 +4369,22 @@ function updateAndDrawBombVisuals(ctx) {
     const k = (t - BOMB_VFX.FLASH_START) / (BOMB_VFX.FLASH_END - BOMB_VFX.FLASH_START);
     const r = (0.2 + 0.8*k) * Math.hypot(W, H) * 0.55;
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    g.addColorStop(0.00, "rgba(255,255,255,0.95)");
-    g.addColorStop(0.35, "rgba(255,245,200,0.45)");
+
+    // ✨ hier alleen zachter gemaakt
+    g.addColorStop(0.00, "rgba(255,255,255,0.55)");   // was 0.95
+    g.addColorStop(0.35, "rgba(255,245,200,0.30)");   // was 0.45
     g.addColorStop(1.00, "rgba(255,180, 80,0.0)");
-    ctx.save(); ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.fill();
     ctx.restore();
-    bombVisuals.ringR = r * 0.55; bombVisuals.ringAlpha = 0.55;
+
+    bombVisuals.ringR = r * 0.55;
+    bombVisuals.ringAlpha = 0.55;
   }
 
   // SHOCKWAVE-RING
@@ -4437,9 +4447,12 @@ function updateAndDrawBombVisuals(ctx) {
     const age = now - s.born, k = Math.max(0, 1 - age / s.life);
     s.x += s.vx; s.y += s.vy; s.vx *= 0.985; s.vy = s.vy * 0.985 + 0.015;
     ctx.save(); ctx.globalCompositeOperation = "lighter";
-    ctx.strokeStyle = `rgba(255,255,180,${0.9*k})`; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(s.x, s.y);
-    ctx.lineTo(s.x - s.vx*1.8, s.y - s.vy*1.8); ctx.stroke();
+    ctx.strokeStyle = `rgba(255,255,180,${0.9*k})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(s.x - s.vx*1.8, s.y - s.vy*1.8);
+    ctx.stroke();
     ctx.restore();
     if (age >= s.life) bombVisuals.sparks.splice(i, 1);
   }
@@ -4495,8 +4508,6 @@ function updateAndDrawBombVisuals(ctx) {
     if (cb) cb();
   }
 }
-
-
 
 
 
