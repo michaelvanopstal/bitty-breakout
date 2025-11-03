@@ -2650,27 +2650,6 @@ function resetBricks() {
   if (typeof dropsSpawned !== 'undefined') dropsSpawned = 0;
   if (typeof lastDropAt !== 'undefined') lastDropAt = performance.now();
 
-  // 🔽 🔽 🔽 HIER: alle tijdelijke bonus-effecten killen 🔽 🔽 🔽
-  // magneet uit
-  if (typeof magnetActive !== "undefined") magnetActive = false;
-  // speed boost uit
-  if (typeof speedBoostActive !== "undefined") speedBoostActive = false;
-  // schild / invincible uit
-  if (typeof shieldActive !== "undefined") shieldActive = false;
-  if (typeof invincibleShieldActive !== "undefined") invincibleShieldActive = false;
-  // eventuele bom-visuals stoppen
-  if (typeof bombVisuals !== "undefined") {
-    bombVisuals.done = true;
-    bombVisuals.afterCb = null;
-  }
-  // lopende bittyBomb-intro afbreken
-  if (bombVisuals && typeof bombVisuals === "object") {
-  bombVisuals.done = true;
-  bombVisuals.afterCb = null;
-}
-
-  // 🔼 🔼 🔼 klaar, punten blijven gewoon bestaan 🔼 🔼 🔼
-
   const lvl = level || 1;
 
   // ======= ÉÉN enkele startDrops per level =======
@@ -2680,14 +2659,18 @@ function resetBricks() {
     maxIntervalMs: (lvl <= 3) ? 2600 : (lvl <= 10) ? 2200 : 1800,
     speed:        (lvl <= 3) ? 2.5  : (lvl <= 10) ? 3.0  : 3.4,
 
+    // ✅ hier aangepast: nu ook bad_cross inbegrepen
     types: ["heart", "star", "bomb_token", "bad_cross"],
+
+    // ✅ typeWeights als object in plaats van array
     typeWeights: {
       heart: 3,
       star: 2,
-      bomb_token: 0.3,
+      bomb_token: 1,
       bad_cross: 1
     },
 
+   
     xMargin: 40,
     startDelayMs: (lvl <= 3) ? 800 : (lvl <= 10) ? 600 : 500,
     mode: (lvl > 10) ? "grid" : "well",
@@ -2698,6 +2681,8 @@ function resetBricks() {
     minSpacing: 70
   });
 }
+
+
 
 
 
@@ -5210,7 +5195,75 @@ updateAndDrawBombVisuals(ctx);
   animationFrameId = requestAnimationFrame(draw);
 } // ✅ Sluit function draw() correct af
 
+function onImageLoad() {
+  imagesLoaded++;
+  if (imagesLoaded === 33) {
+    // Normale spelstart
+    level = 1;                // start op level 1
+    score = 0;
+    lives = 3;
 
+    updateLivesDisplay?.(); 
+    resetBricks();
+    resetPaddle?.();
+    resetBall();              // bal met juiste startsnelheid (via LEVELS params)
+    updateScoreDisplay?.();
+
+    // Timer pas starten wanneer jij de bal afschiet—blijft zoals je nu hebt
+    draw();                   // start render-loop
+  }
+}
+
+// 🎙️ Init Bitty-voice-line bij eerste spelstart
+  if (typeof window.rockWarnState === "undefined") {
+    window.rockWarnState = {
+      played: false,
+      hits: 0,
+      triggerIndex: Math.random() < 0.5 ? 1 : 3,
+      audio: (() => {
+        try {
+          const a = new Audio("bitty_watch_out.mp3"); // jouw mp3-bestand
+          a.volume = 0.85;
+          return a;
+        } catch (e) { return null; }
+      })()
+    };
+  }
+
+
+blockImg.onload = onImageLoad;
+ballImg.onload = onImageLoad;
+powerBlockImg.onload = onImageLoad;
+powerBlock2Img.onload = onImageLoad;
+rocketImg.onload = onImageLoad;
+doubleBallImg.onload = onImageLoad;
+doublePointsImg.onload = onImageLoad;
+vlagImgLeft.onload = onImageLoad;
+vlagImgRight.onload = onImageLoad;
+shootCoinImg.onload = onImageLoad;
+speedImg.onload = onImageLoad;
+pointpayPaddleImg.onload = onImageLoad;
+stone1Img.onload = onImageLoad;
+stone2Img.onload = onImageLoad;
+pxpBagImg.onload = onImageLoad;
+dollarPxpImg.onload = onImageLoad;
+machinegunBlockImg.onload = onImageLoad;
+machinegunGunImg.onload = onImageLoad;
+coinImg.onload = onImageLoad;
+heartImg.onload = onImageLoad; 
+heartBoardImg.onload = onImageLoad;
+silver1Img.onload = onImageLoad;
+silver2Img.onload = onImageLoad;
+paddleLongBlockImg.onload = onImageLoad;
+paddleSmallBlockImg.onload = onImageLoad;
+magnetImg.onload = onImageLoad;
+stoneBlockImg.onload  = onImageLoad;
+stoneLargeImg.onload  = onImageLoad;
+tntImg.onload = onImageLoad;
+tntBlinkImg.onload = onImageLoad;
+starImg.onload = onImageLoad;
+bombTokenImg.onload = onImageLoad;
+badCrossImg.onload = onImageLoad;
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
@@ -5388,78 +5441,65 @@ function triggerPaddleExplosion() {
     paddleExplodeSound.currentTime = 0;
     paddleExplodeSound.play();
 
-   setTimeout(() => {
-  saveHighscore();
-  stopTimer();
+    setTimeout(() => {
+      saveHighscore();
+      stopTimer();
 
-  lives = 3;
-  updateLivesDisplay();
+      lives = 3;
+      updateLivesDisplay();
 
-  // 💖 Alleen hier hartjes resetten bij Game Over
-  heartsCollected = 0;
-  document.getElementById("heartCount").textContent = heartsCollected;
+      // 💖 Alleen hier hartjes resetten bij Game Over
+      heartsCollected = 0;
+      document.getElementById("heartCount").textContent = heartsCollected;
 
-  // ⭐ sterren ook resetten
-  if (typeof starsCollected !== "undefined") {
-    starsCollected = 0;
+      score = 0;
+      level = 1;
+      elapsedTime = 0;
+
+      paddleExploding = false;
+      paddleExplosionParticles = [];
+
+      // 🧲 Magnet stoppen bij Game Over
+      stopMagnet();
+
+      // ⏩ Alle tijdelijke effecten/arrays resetten
+      speedBoostActive = false;
+      speedBoostStart = 0;
+      doublePointsActive = false;
+      doublePointsStartTime = 0;
+      flagsOnPaddle = false;
+      rocketActive = false;
+      rocketFired = false;
+      rocketAmmo = 0;
+      flyingCoins = [];
+      smokeParticles = [];
+      explosions = [];
+      coins = [];
+      pxpBags = [];
+      showGameOver = true;
+      gameOverAlpha = 0;
+      gameOverTimer = 0;
+
+      paddleFreeMove = false; // ⛓️ paddle opnieuw vergrendeld
+
+      resetBricks();
+      resetBall();
+      resetPaddle();
+
+      updateScoreDisplay();
+      document.getElementById("timeDisplay").textContent = "00:00";
+
+      // 🎙️ Reset Bitty-waarschuwing voor nieuwe game (1× per game, random op 1e/3e hit)
+      if (window.rockWarnState) {
+        window.rockWarnState.played = false;
+        window.rockWarnState.hits = 0;
+        window.rockWarnState.triggerIndex = Math.random() < 0.5 ? 1 : 3;
+      }
+
+      resetTriggered = false;
+    }, 1000);
   }
-
-  // 💣 bom-token teller resetten
-  if (typeof bombsCollected !== "undefined") {
-    bombsCollected = 0;
-  }
-
-  // ❌ kruis-teller resetten
-  if (typeof badCrossesCaught !== "undefined") {
-    badCrossesCaught = 0;
-  }
-
-  score = 0;
-  level = 1;
-  elapsedTime = 0;
-
-  paddleExploding = false;
-  paddleExplosionParticles = [];
-
-  // 🧲 Magnet stoppen bij Game Over
-  stopMagnet();
-
-  // ⏩ Alle tijdelijke effecten/arrays resetten
-  speedBoostActive = false;
-  speedBoostStart = 0;
-  doublePointsActive = false;
-  doublePointsStartTime = 0;
-  flagsOnPaddle = false;
-  rocketActive = false;
-  rocketFired = false;
-  rocketAmmo = 0;
-  flyingCoins = [];
-  smokeParticles = [];
-  explosions = [];
-  coins = [];
-  pxpBags = [];
-  showGameOver = true;
-  gameOverAlpha = 0;
-  gameOverTimer = 0;
-
-  paddleFreeMove = false;
-
-  resetBricks();
-  resetBall();
-  resetPaddle();
-
-  updateScoreDisplay();
-  document.getElementById("timeDisplay").textContent = "00:00";
-
-  // 🎙️ Reset Bitty-waarschuwing ...
-  if (window.rockWarnState) {
-    window.rockWarnState.played = false;
-    window.rockWarnState.hits = 0;
-    window.rockWarnState.triggerIndex = Math.random() < 0.5 ? 1 : 3;
-  }
-
-  resetTriggered = false;
-}, 1000);
+}
 
 
 function startLevelTransition() {
@@ -5774,80 +5814,6 @@ function triggerBallReset() {
   }, 10000);
 }
 
-// 🟢 BELANGRIJK: knop koppelen aan functie (alleen als hij bestaat)
-const resetBtn = document.getElementById("resetBallBtn");
-if (resetBtn) {
-  resetBtn.addEventListener("click", triggerBallReset);
-}
+// 🟢 BELANGRIJK: knop koppelen aan functie
+document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
 
-function onImageLoad() {
-  imagesLoaded++;
-  if (imagesLoaded === 33) {
-    // Normale spelstart
-    level = 1;                // start op level 1
-    score = 0;
-    lives = 3;
-
-    updateLivesDisplay?.();
-    resetBricks();
-    resetPaddle?.();
-    resetBall();              // bal met juiste startsnelheid
-    updateScoreDisplay?.();
-
-    // render-loop starten
-    draw();
-  }
-}
-
-// 🎙️ Init Bitty-voice-line bij eerste spelstart
-if (typeof window.rockWarnState === "undefined") {
-  window.rockWarnState = {
-    played: false,
-    hits: 0,
-    triggerIndex: Math.random() < 0.5 ? 1 : 3,
-    audio: (() => {
-      try {
-        const a = new Audio("bitty_watch_out.mp3");
-        a.volume = 0.85;
-        return a;
-      } catch (e) {
-        return null;
-      }
-    })()
-  };
-}
-
-// alle images aan onImageLoad hangen
-blockImg.onload = onImageLoad;
-ballImg.onload = onImageLoad;
-powerBlockImg.onload = onImageLoad;
-powerBlock2Img.onload = onImageLoad;
-rocketImg.onload = onImageLoad;
-doubleBallImg.onload = onImageLoad;
-doublePointsImg.onload = onImageLoad;
-vlagImgLeft.onload = onImageLoad;
-vlagImgRight.onload = onImageLoad;
-shootCoinImg.onload = onImageLoad;
-speedImg.onload = onImageLoad;
-pointpayPaddleImg.onload = onImageLoad;
-stone1Img.onload = onImageLoad;
-stone2Img.onload = onImageLoad;
-pxpBagImg.onload = onImageLoad;
-dollarPxpImg.onload = onImageLoad;
-machinegunBlockImg.onload = onImageLoad;
-machinegunGunImg.onload = onImageLoad;
-coinImg.onload = onImageLoad;
-heartImg.onload = onImageLoad;
-heartBoardImg.onload = onImageLoad;
-silver1Img.onload = onImageLoad;
-silver2Img.onload = onImageLoad;
-paddleLongBlockImg.onload = onImageLoad;
-paddleSmallBlockImg.onload = onImageLoad;
-magnetImg.onload = onImageLoad;
-stoneBlockImg.onload = onImageLoad;
-stoneLargeImg.onload = onImageLoad;
-tntImg.onload = onImageLoad;
-tntBlinkImg.onload = onImageLoad;
-starImg.onload = onImageLoad;
-bombTokenImg.onload = onImageLoad;
-badCrossImg.onload = onImageLoad;
