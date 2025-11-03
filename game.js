@@ -1733,7 +1733,8 @@ const DROP_TYPES = {
       try { coinSound.currentTime = 0; coinSound.play(); } catch {}
       if (bombsCollected >= BOMB_TOKEN_TARGET) {
         bombsCollected = 0;
-        startBombRain(BOMB_RAIN_COUNT);
+       triggerBittyBombIntro(BOMB_RAIN_COUNT);
+
       }
     },
     onMiss(drop) { /* geen straf */ },
