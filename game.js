@@ -5774,10 +5774,13 @@ function triggerBallReset() {
   }, 10000);
 }
 
-// 🟢 BELANGRIJK: knop koppelen aan functie
-document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
+// 🟢 BELANGRIJK: knop koppelen aan functie (alleen als hij bestaat)
+const resetBtn = document.getElementById("resetBallBtn");
+if (resetBtn) {
+  resetBtn.addEventListener("click", triggerBallReset);
+}
 
-    function onImageLoad() {
+function onImageLoad() {
   imagesLoaded++;
   if (imagesLoaded === 33) {
     // Normale spelstart
@@ -5785,7 +5788,7 @@ document.getElementById("resetBallBtn").addEventListener("click", triggerBallRes
     score = 0;
     lives = 3;
 
-    updateLivesDisplay?.(); 
+    updateLivesDisplay?.();
     resetBricks();
     resetPaddle?.();
     resetBall();              // bal met juiste startsnelheid (via LEVELS params)
@@ -5797,21 +5800,20 @@ document.getElementById("resetBallBtn").addEventListener("click", triggerBallRes
 }
 
 // 🎙️ Init Bitty-voice-line bij eerste spelstart
-  if (typeof window.rockWarnState === "undefined") {
-    window.rockWarnState = {
-      played: false,
-      hits: 0,
-      triggerIndex: Math.random() < 0.5 ? 1 : 3,
-      audio: (() => {
-        try {
-          const a = new Audio("bitty_watch_out.mp3"); // jouw mp3-bestand
-          a.volume = 0.85;
-          return a;
-        } catch (e) { return null; }
-      })()
-    };
-  }
-
+if (typeof window.rockWarnState === "undefined") {
+  window.rockWarnState = {
+    played: false,
+    hits: 0,
+    triggerIndex: Math.random() < 0.5 ? 1 : 3,
+    audio: (() => {
+      try {
+        const a = new Audio("bitty_watch_out.mp3"); // jouw mp3-bestand
+        a.volume = 0.85;
+        return a;
+      } catch (e) { return null; }
+    })()
+  };
+}
 
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
@@ -5832,18 +5834,17 @@ dollarPxpImg.onload = onImageLoad;
 machinegunBlockImg.onload = onImageLoad;
 machinegunGunImg.onload = onImageLoad;
 coinImg.onload = onImageLoad;
-heartImg.onload = onImageLoad; 
+heartImg.onload = onImageLoad;
 heartBoardImg.onload = onImageLoad;
 silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
 paddleLongBlockImg.onload = onImageLoad;
 paddleSmallBlockImg.onload = onImageLoad;
 magnetImg.onload = onImageLoad;
-stoneBlockImg.onload  = onImageLoad;
-stoneLargeImg.onload  = onImageLoad;
+stoneBlockImg.onload = onImageLoad;
+stoneLargeImg.onload = onImageLoad;
 tntImg.onload = onImageLoad;
 tntBlinkImg.onload = onImageLoad;
 starImg.onload = onImageLoad;
 bombTokenImg.onload = onImageLoad;
 badCrossImg.onload = onImageLoad;
-
