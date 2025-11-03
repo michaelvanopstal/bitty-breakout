@@ -234,12 +234,13 @@ body {
 .bp-icon {
   width: 26px;
   height: 26px;
-  border-radius: 50%;           /* rond bubbeltje */
-  background-color:  #e54b00;   /* rood zoals chat-binnenkant */
+  border-radius: 50%;                 /* ronde vorm */
+  background-color: transparent;      /* geen vulling */
+  border: 2px solid #4a0000;          /* donkerrode ring */
   background-size: 70%;
   background-repeat: no-repeat;
   background-position: center;
-  box-shadow: 0 0 4px rgba(255,255,255,0.35);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.25); /* lichte gloed */
 }
 
 /* eigen icoontjes */
