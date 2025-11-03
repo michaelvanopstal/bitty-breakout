@@ -5778,21 +5778,20 @@ function triggerBallReset() {
 const resetBtn = document.getElementById("resetBallBtn");
 if (resetBtn) {
   resetBtn.addEventListener("click", triggerBallReset);
-}// 1) alle images tellen
+}
+
 function onImageLoad() {
   imagesLoaded++;
-
-  // pas starten als álle 33 plaatjes geladen zijn
   if (imagesLoaded === 33) {
     // Normale spelstart
-    level = 1;   // start op level 1
+    level = 1;                // start op level 1
     score = 0;
     lives = 3;
 
     updateLivesDisplay?.();
     resetBricks();
     resetPaddle?.();
-    resetBall();
+    resetBall();              // bal met juiste startsnelheid
     updateScoreDisplay?.();
 
     // render-loop starten
@@ -5800,7 +5799,7 @@ function onImageLoad() {
   }
 }
 
-// 2) voice-state eenmalig aanmaken (buiten onImageLoad!)
+// 🎙️ Init Bitty-voice-line bij eerste spelstart
 if (typeof window.rockWarnState === "undefined") {
   window.rockWarnState = {
     played: false,
@@ -5818,7 +5817,7 @@ if (typeof window.rockWarnState === "undefined") {
   };
 }
 
-// 3) alle images aan dezelfde onload hangen
+// alle images aan onImageLoad hangen
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
 powerBlockImg.onload = onImageLoad;
@@ -5852,4 +5851,3 @@ tntBlinkImg.onload = onImageLoad;
 starImg.onload = onImageLoad;
 bombTokenImg.onload = onImageLoad;
 badCrossImg.onload = onImageLoad;
-
