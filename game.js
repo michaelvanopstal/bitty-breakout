@@ -2669,9 +2669,7 @@ function resetBricks() {
       bad_cross: 1
     },
 
-    // Maximaal aantal bommen dat kan vallen in totaal
-    typeQuota: { bomb_token: 10 },
-
+   
     xMargin: 40,
     startDelayMs: (lvl <= 3) ? 800 : (lvl <= 10) ? 600 : 500,
     mode: (lvl > 10) ? "grid" : "well",
