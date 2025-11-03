@@ -2366,8 +2366,6 @@ function drawBricks() {
     }
   }
 }
-
-
 function startDrops(config) {
   dropConfig = Object.assign({
     // timing
@@ -2393,16 +2391,18 @@ function startDrops(config) {
     minSpacing: 70,
     maxSilenceMs: 4000,        // watchdog
 
-  
-   types: ["bom","heart","star"], // fallback set (bag eruit)
- // fallback set
+    // ✅ hier goed zetten
+    types: ["heart", "star", "bomb_token", "bad_cross"],
+
+    // fallback set
     typeQuota: null,           // { heart: 5, bomb: 2 } → exact zoveel keer in totaal
     typeWeights: null          // { coin:5, heart:2, bomb:1 } → gewogen random
   }, config || {});
 
   // normaliseer
   if (!Array.isArray(dropConfig.gridColumns)) dropConfig.gridColumns = [ dropConfig.gridColumns ];
-  if (!Array.isArray(dropConfig.types) || dropConfig.types.length === 0) dropConfig.types = ["heart", "star", "bomb_token", "bad_cross"];
+  if (!Array.isArray(dropConfig.types) || dropConfig.types.length === 0)
+    dropConfig.types = ["heart", "star", "bomb_token", "bad_cross"];
 
   // interne tellers
   dropsSpawned = 0;                   // aantal items gespawnd (telt individuele items)
@@ -2425,14 +2425,12 @@ function startDrops(config) {
         const count = Math.max(0, n|0);
         for (let i = 0; i < count; i++) pool.push(t);
       }
-      // zorg dat bekende types nog bestaan als quota op is
       const fallback = cfg.types.slice();
       return function pickWithQuota() {
         if (pool.length > 0) {
           const idx = Math.floor(Math.random() * pool.length);
           return pool.splice(idx, 1)[0];
         }
-        // quota op → fallback naar types
         return fallback[Math.floor(Math.random() * fallback.length)];
       };
     }
@@ -2451,7 +2449,7 @@ function startDrops(config) {
           if (r < e.weight) return e.type;
           r -= e.weight;
         }
-        return base[base.length - 1].type; // fallback
+        return base[base.length - 1].type;
       };
     }
 
@@ -2462,6 +2460,7 @@ function startDrops(config) {
     };
   })(dropConfig);
 }
+
 
 
 // VERVANG JE OUDE FUNCTIE door deze:
