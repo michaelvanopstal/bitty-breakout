@@ -5455,65 +5455,78 @@ function triggerPaddleExplosion() {
     paddleExplodeSound.currentTime = 0;
     paddleExplodeSound.play();
 
-    setTimeout(() => {
-      saveHighscore();
-      stopTimer();
+   setTimeout(() => {
+  saveHighscore();
+  stopTimer();
 
-      lives = 3;
-      updateLivesDisplay();
+  lives = 3;
+  updateLivesDisplay();
 
-      // 💖 Alleen hier hartjes resetten bij Game Over
-      heartsCollected = 0;
-      document.getElementById("heartCount").textContent = heartsCollected;
+  // 💖 Alleen hier hartjes resetten bij Game Over
+  heartsCollected = 0;
+  document.getElementById("heartCount").textContent = heartsCollected;
 
-      score = 0;
-      level = 1;
-      elapsedTime = 0;
-
-      paddleExploding = false;
-      paddleExplosionParticles = [];
-
-      // 🧲 Magnet stoppen bij Game Over
-      stopMagnet();
-
-      // ⏩ Alle tijdelijke effecten/arrays resetten
-      speedBoostActive = false;
-      speedBoostStart = 0;
-      doublePointsActive = false;
-      doublePointsStartTime = 0;
-      flagsOnPaddle = false;
-      rocketActive = false;
-      rocketFired = false;
-      rocketAmmo = 0;
-      flyingCoins = [];
-      smokeParticles = [];
-      explosions = [];
-      coins = [];
-      pxpBags = [];
-      showGameOver = true;
-      gameOverAlpha = 0;
-      gameOverTimer = 0;
-
-      paddleFreeMove = false; // ⛓️ paddle opnieuw vergrendeld
-
-      resetBricks();
-      resetBall();
-      resetPaddle();
-
-      updateScoreDisplay();
-      document.getElementById("timeDisplay").textContent = "00:00";
-
-      // 🎙️ Reset Bitty-waarschuwing voor nieuwe game (1× per game, random op 1e/3e hit)
-      if (window.rockWarnState) {
-        window.rockWarnState.played = false;
-        window.rockWarnState.hits = 0;
-        window.rockWarnState.triggerIndex = Math.random() < 0.5 ? 1 : 3;
-      }
-
-      resetTriggered = false;
-    }, 1000);
+  // ⭐ sterren ook resetten
+  if (typeof starsCollected !== "undefined") {
+    starsCollected = 0;
   }
-}
+
+  // 💣 bom-token teller resetten
+  if (typeof bombsCollected !== "undefined") {
+    bombsCollected = 0;
+  }
+
+  // ❌ kruis-teller resetten
+  if (typeof badCrossesCaught !== "undefined") {
+    badCrossesCaught = 0;
+  }
+
+  score = 0;
+  level = 1;
+  elapsedTime = 0;
+
+  paddleExploding = false;
+  paddleExplosionParticles = [];
+
+  // 🧲 Magnet stoppen bij Game Over
+  stopMagnet();
+
+  // ⏩ Alle tijdelijke effecten/arrays resetten
+  speedBoostActive = false;
+  speedBoostStart = 0;
+  doublePointsActive = false;
+  doublePointsStartTime = 0;
+  flagsOnPaddle = false;
+  rocketActive = false;
+  rocketFired = false;
+  rocketAmmo = 0;
+  flyingCoins = [];
+  smokeParticles = [];
+  explosions = [];
+  coins = [];
+  pxpBags = [];
+  showGameOver = true;
+  gameOverAlpha = 0;
+  gameOverTimer = 0;
+
+  paddleFreeMove = false;
+
+  resetBricks();
+  resetBall();
+  resetPaddle();
+
+  updateScoreDisplay();
+  document.getElementById("timeDisplay").textContent = "00:00";
+
+  // 🎙️ Reset Bitty-waarschuwing ...
+  if (window.rockWarnState) {
+    window.rockWarnState.played = false;
+    window.rockWarnState.hits = 0;
+    window.rockWarnState.triggerIndex = Math.random() < 0.5 ? 1 : 3;
+  }
+
+  resetTriggered = false;
+}, 1000);
 
 
 function startLevelTransition() {
