@@ -659,70 +659,74 @@ function drawHeartCelebration() {
   const W = fxCanvas.width;
   const H = fxCanvas.height;
 
-  // na 4 sec uitfaden
-  if (elapsed > 4000) {
+  // duur van de animatie
+  const DURATION = 4000; // 4 sec
+  if (elapsed > DURATION) {
     heartCelebration.active = false;
     return;
   }
 
-  // niet hele scherm grijs maken, gewoon leeg vegen
+  // 0..1
+  const progress = elapsed / DURATION;
+  const fade = 1 - progress;
+
+  // canvas leegmaken
   fxCtx.clearRect(0, 0, W, H);
 
-  // titel in het midden
+  // titel in rood
   const blink = Math.floor(elapsed / 250) % 2 === 0;
   fxCtx.save();
   fxCtx.textAlign = "center";
   fxCtx.textBaseline = "middle";
   fxCtx.font = "bold 46px Arial";
-  fxCtx.strokeStyle = "rgba(255,50,160,0.9)";
+  fxCtx.strokeStyle = `rgba(160,0,0,${0.9 * fade})`;
   fxCtx.lineWidth = 4;
-  fxCtx.fillStyle = blink ? "rgba(255,220,240,1)" : "rgba(255,140,200,1)";
+  fxCtx.fillStyle = blink
+    ? `rgba(255,40,40,${0.95 * fade})`
+    : `rgba(220,0,0,${0.9 * fade})`;
   fxCtx.strokeText("BITTY LEVEL UP!", W / 2, H / 2 - 80);
   fxCtx.fillText("BITTY LEVEL UP!", W / 2, H / 2 - 80);
 
   fxCtx.font = "bold 22px Arial";
-  fxCtx.fillStyle = "rgba(255,230,240,0.95)";
+  fxCtx.fillStyle = `rgba(255,230,230,${0.9 * fade})`;
   fxCtx.fillText("10 hearts collected — extra life!", W / 2, H / 2 - 35);
   fxCtx.restore();
 
   // hartjes tekenen
-  heartCelebration.hearts.forEach(h => {
+  for (const h of heartCelebration.hearts) {
+    // bewegen
     h.x += h.dx;
     h.y += h.dy;
     h.rot += h.rotSpeed;
     h.pulse += 0.25;
 
-    // aura / energie-ringetje
+    // we RESPAWNEN NIET meer → als ze uit beeld zijn, tekenen we ze gewoon niet
+    if (h.y > H + 80) continue;
+
+    // aura
     fxCtx.save();
     fxCtx.translate(h.x, h.y);
-    fxCtx.rotate(h.rot);
 
     const auraR = h.size * (0.55 + 0.15 * Math.sin(h.pulse));
     const auraGrad = fxCtx.createRadialGradient(0, 0, 4, 0, 0, auraR);
+    fxCtx.globalAlpha = 0.7 * fade;
     auraGrad.addColorStop(0, "rgba(255,180,220,0.9)");
-    auraGrad.addColorStop(0.6, "rgba(255,120,200,0.4)");
+    auraGrad.addColorStop(0.6, "rgba(255,120,200,0.35)");
     auraGrad.addColorStop(1, "rgba(255,120,200,0)");
-    fxCtx.globalAlpha = 0.85;
     fxCtx.fillStyle = auraGrad;
     fxCtx.beginPath();
     fxCtx.ellipse(0, 0, auraR, auraR * 0.7, 0, 0, Math.PI * 2);
     fxCtx.fill();
     fxCtx.restore();
 
-    // hartje zelf erbovenop
+    // hartje zelf
     fxCtx.save();
     fxCtx.translate(h.x, h.y);
     fxCtx.rotate(h.rot);
-    fxCtx.globalAlpha = 1;
+    fxCtx.globalAlpha = fade;
     fxCtx.drawImage(heartImg, -h.size / 2, -h.size / 2, h.size, h.size);
     fxCtx.restore();
-
-    // als buiten beeld, zet 'm weer bovenaan
-    if (h.y > H + 60) {
-      h.y = -60;
-      h.x = Math.random() * W;
-    }
-  });
+  }
 }
 
 
