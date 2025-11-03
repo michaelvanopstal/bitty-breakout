@@ -572,41 +572,41 @@ function renderBittyBombIntro() {
     const remain = Math.max(0, bittyBomb.countdownFrom - secs);
     const blinkOn = (Math.floor(elapsed / 500) % 2) === 0;
 
-    // ⬇️ dit blijft HEEL licht zodat je niet verblind wordt
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    // titel
-    const title = "BITTY BOMB  ACTIVATED !";
-    ctx.font = "bold 40px Arial";
-    // lichtere grijs + lagere alpha
+    // TITEL
+    const title = "BITTY BOMB ACTIVATED!";
+    ctx.font = "bold 42px Arial";
+
+    // ✨ iets helderder dan voorheen
     ctx.fillStyle = blinkOn
-      ? "rgba(180,180,180,0.35)"
-      : "rgba(120,120,120,0.35)";
-    ctx.strokeStyle = "rgba(50,50,50,0.25)";
+      ? "rgba(210,210,210,0.65)"   // was 0.35
+      : "rgba(180,180,180,0.65)";
+    ctx.strokeStyle = "rgba(60,60,60,0.4)";
     ctx.lineWidth = 3;
     ctx.strokeText(title, cx, cy - 60);
-    ctx.fillText(title,  cx, cy - 60);
+    ctx.fillText(title, cx, cy - 60);
 
-    // cirkel om countdown
+    // CIRKEL (countdown)
     ctx.beginPath();
     ctx.arc(cx, cy + 10, 28, 0, Math.PI * 2);
     ctx.lineWidth = 6;
     ctx.strokeStyle = blinkOn
-      ? "rgba(200,200,200,0.35)"
-      : "rgba(160,160,160,0.35)";
+      ? "rgba(220,220,220,0.55)"
+      : "rgba(180,180,180,0.55)";
     ctx.stroke();
 
-    // nummer in de cirkel
-    ctx.font = "bold 34px Arial";
-    ctx.fillStyle = "rgba(220,220,220,0.4)";
+    // NUMMER IN DE CIRKEL
+    ctx.font = "bold 36px Arial";
+    ctx.fillStyle = "rgba(250,250,250,0.7)";
     ctx.fillText(String(Math.max(1, remain)), cx, cy + 10);
 
-    // ondertekst
-    ctx.font = "bold 22px Arial";
-    ctx.fillStyle = "rgba(170,170,170,0.35)";
-    ctx.fillText(`${title} ${Math.max(1, remain)}.`, cx, cy + 60);
+    // ONDERTEKST
+    ctx.font = "bold 24px Arial";
+    ctx.fillStyle = "rgba(190,190,190,0.6)";
+    ctx.fillText(`Detonation in ${Math.max(1, remain)}...`, cx, cy + 60);
 
     ctx.restore();
 
@@ -621,6 +621,7 @@ function renderBittyBombIntro() {
     }
   }
 }
+
 
 // ❤️ full-screen heart celebration
 let heartCelebration = {
