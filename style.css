@@ -199,8 +199,8 @@ body {
 
 #bonus-power-panel {
   position: absolute;   /* ← hiermee kun je 'm neerzetten waar je wilt */
-  top: 160px;
-  right: 20px;
+  top: 220px;
+  right: 60px;
   width: 230px;
   background: linear-gradient(#ffe066, #ffbb22);
   border: 3px solid #b32020;
