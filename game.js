@@ -3288,32 +3288,30 @@ function drawFallingHearts() {
       heartLeft <= paddleRight &&
       heartBottom >= paddleTop &&
       heartTop <= paddleBottom;
+if (isOverlap && !heart.collected) {
+  heart.collected = true;
+  heartsCollected++;
 
-    if (isOverlap && !heart.collected) {
-      heart.collected = true;
-      heartsCollected++;
+  // ⬇️ HTML teller updaten
+  document.getElementById("heartCount").textContent = heartsCollected;
 
-      // ⬇️ HTML teller updaten
-      document.getElementById("heartCount").textContent = heartsCollected;
+  // 🎵 nieuw: eigen hartje-geluid
+  try {
+    heartPickupSfx.currentTime = 0;
+    heartPickupSfx.play();
+  } catch {}
 
-      try {
-        coinSound.currentTime = 0;
-        coinSound.play();
-      } catch {}
+  // ✅ Beloning bij 10 hartjes
+  if (heartsCollected >= 10) {
+    heartsCollected = 0;
+    lives++;
+    updateLivesDisplay?.();
+    document.getElementById("heartCount").textContent = heartsCollected;
 
-      // ✅ Beloning bij 10 hartjes
-      if (heartsCollected >= 10) {
-        heartsCollected = 0;
-        lives++;
-        updateLivesDisplay?.();
-
-        // Reset HTML teller ook!
-        document.getElementById("heartCount").textContent = heartsCollected;
-
-        // 🚀 nieuwe grote intro ipv heartPopupTimer
-        triggerHeartCelebration();
-      }
-    }
+    // 🚀 nieuwe fullscreen intro
+    triggerHeartCelebration();
+  }
+}
 
     // 💨 Verwijder uit array als buiten beeld of al gepakt
     if (heart.y > canvas.height || heart.collected) {
