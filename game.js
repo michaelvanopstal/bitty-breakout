@@ -2640,7 +2640,6 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
-
 function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
@@ -2732,6 +2731,11 @@ function resetBricks() {
     avoidMarginPx: 40,
     minSpacing: 70
   });
+
+  // ✅ HTML / display in sync brengen na level reset
+  if (typeof updateBonusPowerPanel === "function") {
+    updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+  }
 }
 
 
