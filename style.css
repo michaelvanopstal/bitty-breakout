@@ -281,10 +281,11 @@ body {
   transition: width 0.25s ease-out;
 }
 
-/* ❤️ hartjes-buisje */
-#bp-hearts-liquid {
-  background: linear-gradient(90deg, #fff 0%, #ff5b6b 25%, #550000 100%);
+
+#bp-cross-liquid {
+  background: linear-gradient(90deg, #fff 0%, #ff4d4d 30%, #550000 100%);
 }
+
 
 /* ⭐ sterren-buisje */
 #bp-stars-liquid { 
