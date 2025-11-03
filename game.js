@@ -156,8 +156,35 @@ let bombRain = []; // actieve vallende bommen tijdens de regen
 const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
 const BOMB_RAIN_COUNT  = 20;    // dan 20 laten vallen
 
+// === BOMB / BITTY SFX ===
+const SFX = (() => {
+  const map = {
+    bombPickup:       new Audio('bom.mp3'),
+    bittyActivation:  new Audio('bitty-activatio.mp3'),
+  };
+  for (const a of Object.values(map)) {
+    a.preload = 'auto';
+    a.volume = 0.9;
+    a.crossOrigin = 'anonymous';
+  }
+  return {
+    play(name) {
+      const a = map[name];
+      if (!a) return;
+      try {
+        a.currentTime = 0;
+        a.play();
+      } catch {
+        try { a.cloneNode(true).play(); } catch {}
+      }
+    }
+  };
+})();
 
 
+
+// voorkomt dubbele 'bittyActivation' als intro -> rain elkaar snel volgen
+let _bittyActivationLock = false;
 
 let electricBursts = [];
 
@@ -1656,21 +1683,39 @@ const DROP_TYPES = {
     onMiss(drop) { /* niks */ },
   },
 
-  bomb: {
-    draw(drop, ctx) {
-      const s = 26;
-      const blink = (Math.floor(performance.now() / 200) % 2 === 0);
-      const img = blink ? tntBlinkImg : tntImg;
-      ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
-    },
-   onCatch(drop) {
-  bombsCollected++;
-  pointPopups.push({ x: drop.x, y: drop.y, value: `Bomb ${bombsCollected}/10`, alpha: 1 });
-  try { coinSound.currentTime = 0; coinSound.play(); } catch {}
-  if (bombsCollected >= 10) {
-  bombsCollected = 0;
-  triggerBittyBombIntro(20); 
-}
+ bomb: {
+  draw(drop, ctx) {
+    const s = 26;
+    const blink = (Math.floor(performance.now() / 200) % 2 === 0);
+    const img = blink ? tntBlinkImg : tntImg;
+    ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
+  },
+
+  onCatch(drop) {
+    // 🎵 Nieuw: speel bom.mp3 bij elke echte bom-pickup
+    SFX.play('bombPickup');
+
+    // Bestaande logica
+    bombsCollected++;
+    pointPopups.push({
+      x: drop.x,
+      y: drop.y,
+      value: `Bomb ${bombsCollected}/10`,
+      alpha: 1
+    });
+
+    try {
+      coinSound.currentTime = 0;
+      coinSound.play();
+    } catch {}
+
+    if (bombsCollected >= 10) {
+      bombsCollected = 0;
+      triggerBittyBombIntro(20);
+    }
+  }
+},
+
 
       if (lives > 1) {
         lives--;
@@ -2241,18 +2286,34 @@ function spawnRandomDrop() {
 }
 
 
-
 function triggerBittyBombIntro(n) {
+  // — stap 4: lock + geluid precies bij start van de bonus
+  _bittyActivationLock = true; // voorkomt dubbele afspeling
+  SFX.play('bittyActivation'); // speelt "bitty-activatio.mp3"
+
+  // Bestaande logica
   bittyBomb.active = true;
   bittyBomb.phase = "countdown";
   bittyBomb.start = performance.now();
   bittyBomb.lastTick = 0;
   bittyBomb.queuedRain = n || 20;
-  try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
+
+  try {
+    tntBeepSound.currentTime = 0;
+    tntBeepSound.play();
+  } catch {}
 }
 
 
+
+
 function startBombRain(n = 20) {
+  // — stap 4: speel 'bittyActivation' alleen als er géén intro net speelde
+  if (!_bittyActivationLock) {
+    SFX.play('bittyActivation');
+  }
+  _bittyActivationLock = false;
+
   // verzamel alle actieve bricks
   const pool = [];
   for (let c = 0; c < brickColumnCount; c++) {
@@ -2272,10 +2333,10 @@ function startBombRain(n = 20) {
   const count = Math.min(n, pool.length);
   for (let i = 0; i < count; i++) {
     const t = pool[i];
-    const delay = 150 + Math.random() * 1400;     // door elkaar
-    const startX = t.x + brickWidth/2 + (Math.random()*80 - 40);
-    const startY = -40 - Math.random() * 200;     // verschillende hoogtes
-    const targetY = t.y - 14;                     // nét voor de steen
+    const delay   = 150 + Math.random() * 1400;   // door elkaar
+    const startX  = t.x + brickWidth/2 + (Math.random()*80 - 40);
+    const startY  = -40 - Math.random() * 200;    // verschillende hoogtes
+    const targetY = t.y - 14;                      // nét voor de steen
     const speed   = 3.2 + Math.random() * 1.8;
 
     bombRain.push({
@@ -2289,6 +2350,7 @@ function startBombRain(n = 20) {
   // leuk: voice of sfx kan hier
   try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
 }
+
 
 
 
