@@ -196,6 +196,109 @@ body {
     opacity: 0.5;
   }
 }
+
+
+#bonus-power-panel {
+  position: absolute;   /* ← hiermee kun je 'm neerzetten waar je wilt */
+  top: 40px;
+  right: 20px;
+  width: 230px;
+  background: linear-gradient(#ffe066, #ffbb22);
+  border: 3px solid #b32020;
+  border-radius: 14px;
+  padding: 6px 8px 10px;
+  font-family: Arial, sans-serif;
+  z-index: 999;         /* boven je canvas */
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+#bonus-power-panel .bp-header {
+  background: #ffcc33;
+  color: #6b0000;
+  font-weight: bold;
+  text-align: center;
+  padding: 4px 0 6px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+#bonus-power-panel .bp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.bp-icon {
+  width: 20px;
+  height: 20px;
+  background: #6b0000;
+  border-radius: 50%;
+  box-shadow: inset 0 0 4px rgba(255,255,255,0.4);
+}
+
+/* als je echte plaatjes hebt kun je hier background-image zetten */
+.bp-icon-star { background: radial-gradient(circle, #fff68f 0%, #6b0000 80%); }
+.bp-icon-bomb { background: radial-gradient(circle, #ffffff 0%, #6b0000 80%); }
+.bp-icon-cross { background: radial-gradient(circle, #ff4d4d 0%, #6b0000 80%); }
+
+.bp-tube {
+  position: relative;
+  flex: 1;
+  height: 16px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(107,0,0,0.4);
+}
+
+.bp-liquid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  transition: width 0.25s ease-out;
+}
+
+#bp-stars-liquid { 
+  background: linear-gradient(90deg, #fff 0%, #ffe500 20%, #550000 100%);
+}
+
+#bp-bombs-liquid {
+  background: linear-gradient(90deg, #fff 0%, #e0e0e0 25%, #550000 100%);
+}
+
+#bp-cross-liquid {
+  background: linear-gradient(90deg, #fff 0%, #ff4d4d 30%, #550000 100%);
+}
+
+.bp-glass {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 50%);
+  mix-blend-mode: screen;
+  opacity: 0.35;
+}
+
+.bp-value {
+  width: 38px;
+  text-align: right;
+  font-size: 11px;
+  color: #6b0000;
+  font-weight: bold;
+}
+
+/* neon flash effect */
+.bp-row.flash .bp-tube {
+  box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+}
+
+
+
 /* ===== Chat Box styles ===== */
 /* was: position:absolute;  -> maak 'm fixed */
 #chatbox{
