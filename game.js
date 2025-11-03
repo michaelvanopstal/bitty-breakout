@@ -157,7 +157,7 @@ starCatchSfx.volume = 0.85; // pas aan naar smaak
 let bombsCollected = 0;
 let bombRain = []; // actieve vallende bommen tijdens de regen
 const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
-const BOMB_RAIN_COUNT  = 13;    // dan 20 laten vallen
+const BOMB_RAIN_COUNT  = 20;    // dan 20 laten vallen
 
 // === BOMB / BITTY SFX ===
 const SFX = (() => {
@@ -564,64 +564,54 @@ function renderBittyBombIntro() {
 
   const now = performance.now();
   const W = canvas.width, H = canvas.height;
-  const cx = W / 2, cy = H / 2;
+  const cx = W/2, cy = H/2;
 
   if (bittyBomb.phase === "countdown") {
     const elapsed = now - bittyBomb.start;
     const secs = Math.floor(elapsed / 1000);
     const remain = Math.max(0, bittyBomb.countdownFrom - secs);
-    const blinkOn = (Math.floor(elapsed / 500) % 2) === 0;
+    const blinkOn = (Math.floor(elapsed/500) % 2) === 0;
 
+    // 👇 overlay weggehaald
+
+    // tekst + nummer in cirkel
+    const title = "BITTY BOMB  ACTIVATED !";
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    // TITEL
-    const title = "BITTY BOMB ACTIVATED!";
-    ctx.font = "bold 42px Arial";
-
-    // ✨ iets helderder dan voorheen
-    ctx.fillStyle = blinkOn
-      ? "rgba(210,210,210,0.65)"   // was 0.35
-      : "rgba(180,180,180,0.65)";
-    ctx.strokeStyle = "rgba(60,60,60,0.4)";
+    ctx.font = "bold 40px Arial";
+    ctx.fillStyle = blinkOn ? "rgba(180,180,180,1)" : "rgba(120,120,120,1)";
+    ctx.strokeStyle = "rgba(50,50,50,0.7)";
     ctx.lineWidth = 3;
     ctx.strokeText(title, cx, cy - 60);
-    ctx.fillText(title, cx, cy - 60);
+    ctx.fillText(title,  cx, cy - 60);
 
-    // CIRKEL (countdown)
     ctx.beginPath();
-    ctx.arc(cx, cy + 10, 28, 0, Math.PI * 2);
+    ctx.arc(cx, cy + 10, 28, 0, Math.PI*2);
     ctx.lineWidth = 6;
-    ctx.strokeStyle = blinkOn
-      ? "rgba(220,220,220,0.55)"
-      : "rgba(180,180,180,0.55)";
+    ctx.strokeStyle = blinkOn ? "rgba(200,200,200,0.9)" : "rgba(160,160,160,0.9)";
     ctx.stroke();
 
-    // NUMMER IN DE CIRKEL
-    ctx.font = "bold 36px Arial";
-    ctx.fillStyle = "rgba(250,250,250,0.7)";
+    ctx.font = "bold 34px Arial";
+    ctx.fillStyle = "rgba(220,220,220,1)";
     ctx.fillText(String(Math.max(1, remain)), cx, cy + 10);
 
-    // ONDERTEKST
-    ctx.font = "bold 24px Arial";
-    ctx.fillStyle = "rgba(190,190,190,0.6)";
-    ctx.fillText(`Detonation in ${Math.max(1, remain)}...`, cx, cy + 60);
-
+    ctx.font = "bold 22px Arial";
+    ctx.fillStyle = "rgba(170,170,170,1)";
+    ctx.fillText(`${title} ${Math.max(1, remain)}.`, cx, cy + 60);
     ctx.restore();
 
-    // overgang naar regen
     if (remain <= 0) {
       bittyBomb.phase = "done";
       bittyBomb.active = false;
       startBombVisuals(() => startBombRain(bittyBomb.queuedRain));
       try {
-        (thunderSounds?.[Math.floor(Math.random() * thunderSounds.length)] || thunder1).play();
+        (thunderSounds?.[Math.floor(Math.random()*thunderSounds.length)] || thunder1).play();
       } catch {}
     }
   }
 }
-
 
 // ❤️ full-screen heart celebration
 let heartCelebration = {
@@ -2670,7 +2660,9 @@ function resetBricks() {
       bad_cross: 1
     },
 
-   
+    // Maximaal aantal bommen dat kan vallen in totaal
+    typeQuota: { bomb_token: 10 },
+
     xMargin: 40,
     startDelayMs: (lvl <= 3) ? 800 : (lvl <= 10) ? 600 : 500,
     mode: (lvl > 10) ? "grid" : "well",
@@ -4354,7 +4346,6 @@ function startBombVisuals(afterCb) {
   };
 }
 
-
 function updateAndDrawBombVisuals(ctx) {
   if (!bombVisuals || bombVisuals.done) return;
 
@@ -4368,22 +4359,13 @@ function updateAndDrawBombVisuals(ctx) {
     const k = (t - BOMB_VFX.FLASH_START) / (BOMB_VFX.FLASH_END - BOMB_VFX.FLASH_START);
     const r = (0.2 + 0.8*k) * Math.hypot(W, H) * 0.55;
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-
-    // ✨ hier alleen zachter gemaakt
-    g.addColorStop(0.00, "rgba(255,255,255,0.55)");   // was 0.95
-    g.addColorStop(0.35, "rgba(255,245,200,0.30)");   // was 0.45
+    g.addColorStop(0.00, "rgba(255,255,255,0.95)");
+    g.addColorStop(0.35, "rgba(255,245,200,0.45)");
     g.addColorStop(1.00, "rgba(255,180, 80,0.0)");
-
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI*2);
-    ctx.fill();
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
     ctx.restore();
-
-    bombVisuals.ringR = r * 0.55;
-    bombVisuals.ringAlpha = 0.55;
+    bombVisuals.ringR = r * 0.55; bombVisuals.ringAlpha = 0.55;
   }
 
   // SHOCKWAVE-RING
@@ -4446,12 +4428,9 @@ function updateAndDrawBombVisuals(ctx) {
     const age = now - s.born, k = Math.max(0, 1 - age / s.life);
     s.x += s.vx; s.y += s.vy; s.vx *= 0.985; s.vy = s.vy * 0.985 + 0.015;
     ctx.save(); ctx.globalCompositeOperation = "lighter";
-    ctx.strokeStyle = `rgba(255,255,180,${0.9*k})`;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(s.x, s.y);
-    ctx.lineTo(s.x - s.vx*1.8, s.y - s.vy*1.8);
-    ctx.stroke();
+    ctx.strokeStyle = `rgba(255,255,180,${0.9*k})`; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(s.x, s.y);
+    ctx.lineTo(s.x - s.vx*1.8, s.y - s.vy*1.8); ctx.stroke();
     ctx.restore();
     if (age >= s.life) bombVisuals.sparks.splice(i, 1);
   }
@@ -4507,6 +4486,8 @@ function updateAndDrawBombVisuals(ctx) {
     if (cb) cb();
   }
 }
+
+
 
 
 
