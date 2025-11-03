@@ -2664,10 +2664,11 @@ function resetBricks() {
     bombVisuals.afterCb = null;
   }
   // lopende bittyBomb-intro afbreken
-  if (typeof bittyBomb !== "undefined") {
-    bittyBomb.active = false;
-    bittyBomb.phase = null;
-  }
+  if (bombVisuals && typeof bombVisuals === "object") {
+  bombVisuals.done = true;
+  bombVisuals.afterCb = null;
+}
+
   // 🔼 🔼 🔼 klaar, punten blijven gewoon bestaan 🔼 🔼 🔼
 
   const lvl = level || 1;
