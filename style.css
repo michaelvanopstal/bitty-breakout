@@ -199,7 +199,7 @@ body {
 
 #bonus-power-panel {
   position: absolute;   /* ← hiermee kun je 'm neerzetten waar je wilt */
-  top: 80px;
+  top: 160px;
   right: 20px;
   width: 230px;
   background: linear-gradient(#ffe066, #ffbb22);
@@ -207,7 +207,7 @@ body {
   border-radius: 14px;
   padding: 6px 8px 10px;
   font-family: Arial, sans-serif;
-  z-index: 500;         /* boven je canvas */
+  z-index: 880;         /* boven je canvas */
   box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
