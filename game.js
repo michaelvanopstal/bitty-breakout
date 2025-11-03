@@ -157,7 +157,7 @@ starCatchSfx.volume = 0.85; // pas aan naar smaak
 let bombsCollected = 0;
 let bombRain = []; // actieve vallende bommen tijdens de regen
 const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
-const BOMB_RAIN_COUNT  = 20;    // dan 20 laten vallen
+const BOMB_RAIN_COUNT  = 13;    // dan 20 laten vallen
 
 // === BOMB / BITTY SFX ===
 const SFX = (() => {
