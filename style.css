@@ -241,7 +241,7 @@ body {
 
 /* — eigen icoontjes voor BONUS POWER — */
 .bp-icon-star {
-  background-image: url("star.png");
+  background-image: url("stars.png");
 }
 
 .bp-icon-bomb {
@@ -249,7 +249,7 @@ body {
 }
 
 .bp-icon-cross {
-  background-image: url("cross.png");
+  background-image: url("bad_cross.png");
 }
 
 .bp-tube {
