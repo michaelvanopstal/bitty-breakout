@@ -2310,7 +2310,7 @@ function triggerBittyBombIntro(n) {
 
 
 
-function startBombRain(n = 20) {
+function startBombRain(n = 13) {
   // — stap 4: speel 'bittyActivation' alleen als er géén intro net speelde
   if (!_bittyActivationLock) {
     SFX.play('bittyActivation');
