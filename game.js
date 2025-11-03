@@ -1781,6 +1781,86 @@ const DROP_TYPES = {
   }, // ✅ komma behouden, want er kunnen in de toekomst meer types bij
 }; // ✅ sluit het hele const DROP_TYPES object af
 
+function updateAndDrawDrops() {
+  // ——— Scheduler ———
+  const now = performance.now();
+  const dt  = Math.min(50, now - (updateAndDrawDrops._prev || now));
+  updateAndDrawDrops._prev = now;
+
+  if (dropConfig) {
+    // watchdog: voorkom lange stilte
+    if (dropConfig.maxSilenceMs && now - lastDropAt > dropConfig.maxSilenceMs) {
+      updateAndDrawDrops._nextDueMs = 0;
+    }
+
+    // stop met spawnen na totale duur (bestaande items blijven vallen)
+    if (updateAndDrawDrops._spawnEndAt && now >= updateAndDrawDrops._spawnEndAt) {
+      dropConfig.continuous = false;
+    }
+
+    // volgende spawn moment aftellen
+    if (updateAndDrawDrops._nextDueMs != null) {
+      updateAndDrawDrops._nextDueMs -= dt;
+    }
+
+    const canSpawnMore = !dropConfig.maxItems || (dropsSpawned < dropConfig.maxItems);
+    if (dropConfig.continuous && canSpawnMore && (updateAndDrawDrops._nextDueMs != null) && updateAndDrawDrops._nextDueMs <= 0) {
+      const nMin = Math.max(1, dropConfig.perSpawnMin | 0);
+      const nMax = Math.max(nMin, dropConfig.perSpawnMax | 0);
+      const count = nMin + Math.floor(Math.random() * (nMax - nMin + 1));
+
+      for (let i = 0; i < count && (!dropConfig.maxItems || dropsSpawned < dropConfig.maxItems); i++) {
+        spawnRandomDrop(); // gebruikt chooseSpawnX + typepicker
+      }
+
+      lastDropAt = now;
+      dropConfig._eventsSpawned = (dropConfig._eventsSpawned | 0) + 1;
+
+      const iMin = Math.max(100, dropConfig.minIntervalMs | 0);
+      const iMax = Math.max(iMin, dropConfig.maxIntervalMs | 0);
+      updateAndDrawDrops._nextDueMs = iMin + Math.random() * (iMax - iMin);
+    }
+  }
+
+  // ——— Items updaten + tekenen ———
+  for (let i = fallingDrops.length - 1; i >= 0; i--) {
+    const d = fallingDrops[i];
+    if (!d || d.active === false) { fallingDrops.splice(i, 1); continue; }
+
+    // basisval en optionele snelheidsvelden (magnet kan vx/vy invullen)
+    d.t = (d.t || 0) + (dt / 16.7);
+    d.y += (d.dy || (dropConfig?.speed || 2.5));
+    if (d.vx) d.x += d.vx;
+    if (d.vy) d.y += d.vy;
+
+    // tekenen via type-definitie
+    const def = DROP_TYPES[d.type] || DROP_TYPES.coin;
+    try { def.draw && def.draw(d, ctx); } catch (e) {}
+
+    // catch/miss detectie
+    const pb = getPaddleBounds(); // {left,right,top,bottom}
+    const size = 28;              // generieke AABB voor overlap
+    const l = d.x - size / 2, r = d.x + size / 2, t = d.y - size / 2, b = d.y + size / 2;
+
+    const overlap =
+      d.__forceCatch || (
+        r >= pb.left && l <= pb.right && b >= pb.top && t <= pb.bottom
+      );
+
+    if (overlap) {
+      try { def.onCatch && def.onCatch(d); } catch (e) {}
+      fallingDrops.splice(i, 1);
+      continue;
+    }
+
+    // onder uit beeld → gemist
+    if (d.y > canvas.height + 40) {
+      try { def.onMiss && def.onMiss(d); } catch (e) {}
+      fallingDrops.splice(i, 1);
+    }
+  }
+}
+
 
 
 let rocketActive = false; // Voor nu altijd zichtbaar om te testen
