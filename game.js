@@ -1734,9 +1734,6 @@ silver1Img.src = "silver1.png";
 const silver2Img = new Image();
 silver2Img.src = "silver2.png";
 
-const heartBoardImg = new Image();
-heartBoardImg.src = "heart_board.png";
-
 const heartImg = new Image();
 heartImg.src = "heart.png"; // zorg dat je dit bestand hebt!
 
@@ -5330,7 +5327,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 33) {
+  if (imagesLoaded === 32) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -5384,7 +5381,6 @@ machinegunBlockImg.onload = onImageLoad;
 machinegunGunImg.onload = onImageLoad;
 coinImg.onload = onImageLoad;
 heartImg.onload = onImageLoad; 
-heartBoardImg.onload = onImageLoad;
 silver1Img.onload = onImageLoad;
 silver2Img.onload = onImageLoad;
 paddleLongBlockImg.onload = onImageLoad;
