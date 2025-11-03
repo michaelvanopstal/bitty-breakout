@@ -5466,7 +5466,6 @@ function spawnStoneDebris(x, y) {
   }
 }
 
-
 function triggerPaddleExplosion() {
   // 🛡️ STAR-bonus actief: geen life loss, geen pauze, alleen bal terug op paddle
   if (invincibleActive) {
@@ -5577,9 +5576,25 @@ function triggerPaddleExplosion() {
       lives = 3;
       updateLivesDisplay();
 
-      // 💖 Alleen hier hartjes resetten bij Game Over
+      // 💖⭐💣❌ alle bonus-meters resetten bij Game Over
       heartsCollected = 0;
-      document.getElementById("heartCount").textContent = heartsCollected;
+      starsCollected = 0;
+      bombsCollected = 0;
+      badCrossesCaught = 0;
+
+      // als het oude element nog bestaat, leegzetten (kan straks weg)
+      const hc = document.getElementById("heartCount");
+      if (hc) hc.textContent = heartsCollected;
+
+      // display meteen mee laten gaan
+      if (typeof updateBonusPowerPanel === "function") {
+        updateBonusPowerPanel(
+          starsCollected,
+          bombsCollected,
+          badCrossesCaught,
+          heartsCollected
+        );
+      }
 
       score = 0;
       level = 1;
