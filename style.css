@@ -200,7 +200,7 @@ body {
 /* ===== BONUS POWER PANEL ===== */
 #bonus-power-panel {
   position: absolute;   /* ← zo had jij 'm */
-  top: 280px;
+  top: 320px;
   right: 60px;
   width: 230px;
   background: linear-gradient(#ffe066, #ffbb22);
