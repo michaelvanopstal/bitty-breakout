@@ -2578,6 +2578,7 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
+
 function resetBricks() {
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
@@ -2649,11 +2650,16 @@ function resetBricks() {
     maxIntervalMs: (lvl <= 3) ? 2600 : (lvl <= 10) ? 2200 : 1800,
     speed:        (lvl <= 3) ? 2.5  : (lvl <= 10) ? 3.0  : 3.4,
 
-    // Alleen heart, star en bomb_token in het val­systeem
-    types: ["heart", "star", "bomb_token"],
+    // ✅ hier aangepast: nu ook bad_cross inbegrepen
+    types: ["heart", "star", "bomb_token", "bad_cross"],
 
-    // Zorgt dat bommen zeldzamer vallen dan hearts/stars
-    typeWeights: ["heart", "star", "bomb_token", "bad_cross"],
+    // ✅ typeWeights als object in plaats van array
+    typeWeights: {
+      heart: 3,
+      star: 2,
+      bomb_token: 1,
+      bad_cross: 1
+    },
 
     // Maximaal aantal bommen dat kan vallen in totaal
     typeQuota: { bomb_token: 10 },
@@ -2668,6 +2674,7 @@ function resetBricks() {
     minSpacing: 70
   });
 }
+
 
 
 
