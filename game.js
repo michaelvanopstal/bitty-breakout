@@ -2869,7 +2869,6 @@ function drawMagnetHUD(ctx) {
   // ...
 }
 
-
 function resetAllBonuses() {
   // 🔁 Ballen en bonussen resetten
   balls = [{
@@ -2883,41 +2882,78 @@ function resetAllBonuses() {
   ballLaunched = false;
   ballMoving = false;
 
+  // 🏳️ vlaggenbonus uit
   flagsOnPaddle = false;
   flagTimer = 0;
 
+  // 🚀 raket uit
   rocketActive = false;
   rocketAmmo = 0;
   rocketFired = false;
 
+  // 🔫 machinegun uit
   machineGunActive = false;
   machineGunCooldownActive = false;
   machineGunBullets = [];
   machineGunShotsFired = 0;
   paddleDamageZones = [];
+  machineGunGunX = 0;
+  machineGunGunY = 0;
 
+  // ✖️ 2x points uit
   doublePointsActive = false;
   doublePointsStartTime = 0;
 
+  // 🏃 speed boost uit
   speedBoostActive = false;
   speedBoostStart = 0;
 
+  // 🧹 losse effecten leeg
   flyingCoins = [];
   smokeParticles = [];
   explosions = [];
   coins = [];
-  pxpBags = []; 
+  pxpBags = [];
 
-  machineGunGunX = 0;
-  machineGunGunY = 0;
+  // 🛶 paddle-size-effect stoppen
+  if (typeof stopPaddleSizeEffect === "function" && paddleSizeEffect) {
+    stopPaddleSizeEffect();
+  }
 
+  // 🧲 magneet uit
+  stopMagnet?.();
 
+  // ⭐️ STER / INVINCIBLE direct uitzetten
+  // (dit voorkomt dat autolance in het nieuwe level nog afgaat) :contentReference[oaicite:1]{index=1}
+  invincibleActive = false;
+  invincibleEndTime = 0;
+  // aura/geluid meteen stoppen als functie bestaat
+  if (typeof stopStarAura === "function") {
+    stopStarAura(true);
+  }
+  // ook eventuel fullscreen star FX uit
+  if (typeof starPowerFX !== "undefined" && starPowerFX) {
+    starPowerFX.active = false;
+  }
 
-  if (typeof stopPaddleSizeEffect === "function" && paddleSizeEffect) stopPaddleSizeEffect();
+  // 💣 BITTY BOMB / BOMB RAIN resetten
+  // zo komt er geen regen meer in het volgende level als hij net bezig was :contentReference[oaicite:2]{index=2}
+  if (typeof bittyBomb !== "undefined") {
+    bittyBomb.active = false;
+    bittyBomb.phase = "idle";
+    bittyBomb.queuedRain = 0;
+  }
+  if (typeof bombRain !== "undefined") {
+    bombRain = []; // regen stoppen :contentReference[oaicite:3]{index=3}
+  }
+  if (typeof _bittyActivationLock !== "undefined") {
+    _bittyActivationLock = false;
+  }
 
-  stopMagnet();
-
+  // (belangrijk:) we laten bombsCollected / starsCollected met rust,
+  // zodat je “punten/tokens” wél meeneemt, maar de ACTIE niet.
 }
+
 
 
 
