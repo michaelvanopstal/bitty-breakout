@@ -5778,28 +5778,29 @@ function triggerBallReset() {
 const resetBtn = document.getElementById("resetBallBtn");
 if (resetBtn) {
   resetBtn.addEventListener("click", triggerBallReset);
-}
-
+}// 1) alle images tellen
 function onImageLoad() {
   imagesLoaded++;
+
+  // pas starten als álle 33 plaatjes geladen zijn
   if (imagesLoaded === 33) {
     // Normale spelstart
-    level = 1;                // start op level 1
+    level = 1;   // start op level 1
     score = 0;
     lives = 3;
 
     updateLivesDisplay?.();
     resetBricks();
     resetPaddle?.();
-    resetBall();              // bal met juiste startsnelheid (via LEVELS params)
+    resetBall();
     updateScoreDisplay?.();
 
-    // Timer pas starten wanneer jij de bal afschiet—blijft zoals je nu hebt
-    draw();                   // start render-loop
+    // render-loop starten
+    draw();
   }
 }
 
-// 🎙️ Init Bitty-voice-line bij eerste spelstart
+// 2) voice-state eenmalig aanmaken (buiten onImageLoad!)
 if (typeof window.rockWarnState === "undefined") {
   window.rockWarnState = {
     played: false,
@@ -5807,14 +5808,17 @@ if (typeof window.rockWarnState === "undefined") {
     triggerIndex: Math.random() < 0.5 ? 1 : 3,
     audio: (() => {
       try {
-        const a = new Audio("bitty_watch_out.mp3"); // jouw mp3-bestand
+        const a = new Audio("bitty_watch_out.mp3");
         a.volume = 0.85;
         return a;
-      } catch (e) { return null; }
+      } catch (e) {
+        return null;
+      }
     })()
   };
 }
 
+// 3) alle images aan dezelfde onload hangen
 blockImg.onload = onImageLoad;
 ballImg.onload = onImageLoad;
 powerBlockImg.onload = onImageLoad;
@@ -5848,3 +5852,4 @@ tntBlinkImg.onload = onImageLoad;
 starImg.onload = onImageLoad;
 bombTokenImg.onload = onImageLoad;
 badCrossImg.onload = onImageLoad;
+
