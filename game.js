@@ -2653,7 +2653,7 @@ function resetBricks() {
     types: ["heart", "star", "bomb_token"],
 
     // Zorgt dat bommen zeldzamer vallen dan hearts/stars
-    typeWeights: { heart: 4, star: 4, bomb_token: 1 },
+    typeWeights: ["heart", "star", "bomb_token", "bad_cross"],
 
     // Maximaal aantal bommen dat kan vallen in totaal
     typeQuota: { bomb_token: 10 },
