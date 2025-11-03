@@ -207,7 +207,7 @@ body {
   border-radius: 14px;
   padding: 6px 8px 10px;
   font-family: Arial, sans-serif;
-  z-index: 880;         /* boven je canvas */
+  z-index: 50;         /* boven je canvas */
   box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
