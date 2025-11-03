@@ -295,46 +295,75 @@ function playVoiceOver(audio, opts = {}) {
   return true;
 }
 
+function updateBonusPowerPanel(stars, bombs, crosses, hearts) {
+  // als je 'hearts' vergeet mee te geven, pakken we de globale
+  if (typeof hearts !== "number") {
+    hearts = typeof heartsCollected === "number" ? heartsCollected : 0;
+  }
 
-function updateBonusPowerPanel(stars, bombs, crosses) {
-  const s = document.getElementById("bp-stars-liquid");
-  const b = document.getElementById("bp-bombs-liquid");
-  const c = document.getElementById("bp-cross-liquid");
-
+  // ⭐
+  const s  = document.getElementById("bp-stars-liquid");
   const sv = document.getElementById("bp-stars-value");
+
+  // 💣
+  const b  = document.getElementById("bp-bombs-liquid");
   const bv = document.getElementById("bp-bombs-value");
+
+  // ❌
+  const c  = document.getElementById("bp-cross-liquid");
   const cv = document.getElementById("bp-cross-value");
 
-  if (s) {
-    const pct = Math.min(1, stars / 10) * 100;
-    s.style.width = pct + "%";
-    sv.textContent = stars + "/10";
+  // ❤️
+  const h  = document.getElementById("bp-hearts-liquid");
+  const hv = document.getElementById("bp-hearts-value");
 
-    // flash bij 10
+  // ⭐ sterren
+  if (s && sv) {
+    const pct = Math.min(1, (stars || 0) / 10) * 100;
+    s.style.width = pct + "%";
+    sv.textContent = (stars || 0) + "/10";
+
     const row = s.closest(".bp-row");
-    if (stars >= 10 && row) {
+    if ((stars || 0) >= 10 && row) {
       row.classList.add("flash");
       setTimeout(() => row.classList.remove("flash"), 500);
     }
   }
-  if (b) {
-    const pct = Math.min(1, bombs / 10) * 100;
+
+  // 💣 bommen
+  if (b && bv) {
+    const pct = Math.min(1, (bombs || 0) / 10) * 100;
     b.style.width = pct + "%";
-    bv.textContent = bombs + "/10";
+    bv.textContent = (bombs || 0) + "/10";
 
     const row = b.closest(".bp-row");
-    if (bombs >= 10 && row) {
+    if ((bombs || 0) >= 10 && row) {
       row.classList.add("flash");
       setTimeout(() => row.classList.remove("flash"), 500);
     }
   }
-  if (c) {
-    const pct = Math.min(1, crosses / 3) * 100;
+
+  // ❌ kruis
+  if (c && cv) {
+    const pct = Math.min(1, (crosses || 0) / 3) * 100;
     c.style.width = pct + "%";
-    cv.textContent = crosses + "/3";
+    cv.textContent = (crosses || 0) + "/3";
 
     const row = c.closest(".bp-row");
-    if (crosses >= 3 && row) {
+    if ((crosses || 0) >= 3 && row) {
+      row.classList.add("flash");
+      setTimeout(() => row.classList.remove("flash"), 500);
+    }
+  }
+
+  // ❤️ hartjes
+  if (h && hv) {
+    const pct = Math.min(1, (hearts || 0) / 10) * 100;
+    h.style.width = pct + "%";
+    hv.textContent = (hearts || 0) + "/10";
+
+    const row = h.closest(".bp-row");
+    if ((hearts || 0) >= 10 && row) {
       row.classList.add("flash");
       setTimeout(() => row.classList.remove("flash"), 500);
     }
@@ -1832,26 +1861,37 @@ const DROP_TYPES = {
     onTick(drop, dt) {
       drop.t += 0.2;
     },
-    onCatch(drop) {
-      heartsCollected++;
-      const hcEl = document.getElementById("heartCount");
-      if (hcEl) hcEl.textContent = heartsCollected;
+   onCatch(drop) {
+  heartsCollected++;
 
-      try {
-        if (typeof heartPickupSfx !== "undefined" && heartPickupSfx) {
-          heartPickupSfx.currentTime = 0;
-          heartPickupSfx.play();
-        }
-      } catch (e) {}
+  // NIEUW: display-balk updaten
+  if (typeof updateBonusPowerPanel === "function") {
+    updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught, heartsCollected);
+  }
 
-      if (heartsCollected >= 10) {
-        heartsCollected = 0;
-        lives++;
-        updateLivesDisplay?.();
-        if (hcEl) hcEl.textContent = heartsCollected;
-        triggerHeartCelebration();
-      }
-    },
+  // eventueel nog je oude geluid
+  try {
+    if (typeof heartPickupSfx !== "undefined" && heartPickupSfx) {
+      heartPickupSfx.currentTime = 0;
+      heartPickupSfx.play();
+    }
+  } catch (e) {}
+
+  // bij 10 hartjes -> 1 leven + reset meter
+  if (heartsCollected >= 10) {
+    heartsCollected = 0;
+    lives++;
+    updateLivesDisplay?.();
+
+    // display opnieuw met 0 hartjes
+    if (typeof updateBonusPowerPanel === "function") {
+      updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught, heartsCollected);
+    }
+
+    triggerHeartCelebration?.();
+  }
+},
+
     onMiss(drop) {},
   },
 
