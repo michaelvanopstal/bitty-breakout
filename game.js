@@ -569,12 +569,7 @@ function renderBittyBombIntro() {
     const remain = Math.max(0, bittyBomb.countdownFrom - secs);
     const blinkOn = (Math.floor(elapsed/500) % 2) === 0;
 
-    // zachte pulserende overlay
-    const pulse = 0.12 + 0.08 * Math.sin(elapsed/120);
-    ctx.save();
-    ctx.fillStyle = `rgba(255,255,255,${pulse})`;
-    ctx.fillRect(0, 0, W, H);
-    ctx.restore();
+    // 👇 overlay weggehaald
 
     // tekst + nummer in cirkel
     const title = "BITTY BOMB  ACTIVATED !";
@@ -608,10 +603,13 @@ function renderBittyBombIntro() {
       bittyBomb.phase = "done";
       bittyBomb.active = false;
       startBombVisuals(() => startBombRain(bittyBomb.queuedRain));
-      try { (thunderSounds?.[Math.floor(Math.random()*thunderSounds.length)] || thunder1).play(); } catch {}
+      try {
+        (thunderSounds?.[Math.floor(Math.random()*thunderSounds.length)] || thunder1).play();
+      } catch {}
     }
   }
 }
+
 
 
 
