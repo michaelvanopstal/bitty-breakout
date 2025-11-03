@@ -1620,7 +1620,6 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
-
 // === DROPS SYSTEM: item type registry ===
 // Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
 const DROP_TYPES = {
@@ -1683,40 +1682,38 @@ const DROP_TYPES = {
     onMiss(drop) { /* niks */ },
   },
 
- bomb: {
-  draw(drop, ctx) {
-    const s = 26;
-    const blink = (Math.floor(performance.now() / 200) % 2 === 0);
-    const img = blink ? tntBlinkImg : tntImg;
-    ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
-  },
+  bomb: {
+    draw(drop, ctx) {
+      const s = 26;
+      const blink = (Math.floor(performance.now() / 200) % 2 === 0);
+      const img = blink ? tntBlinkImg : tntImg;
+      ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
+    },
 
-  onCatch(drop) {
-    // 🎵 Nieuw: speel bom.mp3 bij elke echte bom-pickup
-    SFX.play('bombPickup');
+    onCatch(drop) {
+      // 🎵 Nieuw: speel bom.mp3 bij elke echte bom-pickup
+      SFX.play('bombPickup');
 
-    // Bestaande logica
-    bombsCollected++;
-    pointPopups.push({
-      x: drop.x,
-      y: drop.y,
-      value: `Bomb ${bombsCollected}/10`,
-      alpha: 1
-    });
+      // Bestaande logica
+      bombsCollected++;
+      pointPopups.push({
+        x: drop.x,
+        y: drop.y,
+        value: `Bomb ${bombsCollected}/10`,
+        alpha: 1
+      });
 
-    try {
-      coinSound.currentTime = 0;
-      coinSound.play();
-    } catch {}
+      try {
+        coinSound.currentTime = 0;
+        coinSound.play();
+      } catch {}
 
-    if (bombsCollected >= 10) {
-      bombsCollected = 0;
-      triggerBittyBombIntro(20);
-    }
-  }
-},
+      if (bombsCollected >= 10) {
+        bombsCollected = 0;
+        triggerBittyBombIntro(20);
+      }
 
-
+      // 💥 Hier stond het los: nu netjes binnen onCatch
       if (lives > 1) {
         lives--;
         updateLivesDisplay?.();
@@ -1724,8 +1721,13 @@ const DROP_TYPES = {
       } else {
         triggerPaddleExplosion?.();
       }
-      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+
+      try {
+        tntExplodeSound.currentTime = 0;
+        tntExplodeSound.play();
+      } catch {}
     },
+
     onMiss(drop) { /* goed zo, niks */ },
   },
 
@@ -1778,8 +1780,7 @@ const DROP_TYPES = {
       try { coinSound.currentTime = 0; coinSound.play(); } catch {}
       if (bombsCollected >= BOMB_TOKEN_TARGET) {
         bombsCollected = 0;
-       triggerBittyBombIntro(BOMB_RAIN_COUNT);
-
+        triggerBittyBombIntro(BOMB_RAIN_COUNT);
       }
     },
     onMiss(drop) { /* geen straf */ },
