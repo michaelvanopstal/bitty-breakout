@@ -3514,9 +3514,10 @@ function drawFallingHearts() {
       heart.collected = true;
       heartsCollected++;
 
-      // ⬇️ HTML teller updaten
-      const hcEl = document.getElementById("heartCount");
-      if (hcEl) hcEl.textContent = heartsCollected;
+      if (typeof updateBonusPowerPanel === "function") {
+      updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught, heartsCollected);
+     }
+
 
       // 🎵 nieuw: eigen hartje-geluid
       try {
