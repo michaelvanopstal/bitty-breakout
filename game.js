@@ -4888,8 +4888,9 @@ if (
   const sampleHalf = Math.max(1, Math.floor(ball.radius)); // aantal pixels boven/onder om te testen
   let opaqueHit = false;
 
-  // Clamp X binnen de paddle
-  const px = Math.max(0, Math.min(paddleWidth - 1, localX));
+ const edgeMargin = 2;
+ const px = Math.max(edgeMargin, Math.min(paddleWidth - 1 - edgeMargin, localX));
+
 
   for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
     const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
