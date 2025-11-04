@@ -3173,7 +3173,7 @@ function resetBall() {
     x: paddleX + paddleWidth / 2 - ballRadius,
     y: paddleY - ballRadius * 2,
     dx: 0,
-    dy: -speed,          // 🔥 zelfde snelheid als in keyDownHandler
+    dy: -speed,          // 🔥 startsnelheid van dit level
     radius: ballRadius,
     isMain: true
   }];
@@ -3208,15 +3208,23 @@ function resetBall() {
         b.dx = (Math.random() < 0.5 ? -1 : 1) * 2;
       }
 
-      // altijd omhoog
-      b.dy = -Math.abs(b.dy);
+      // ⚠️ hier NIET de oude dy pakken (die kan 0 zijn door resetPaddle),
+      // maar opnieuw de level-snelheid ophalen
+      const lvlIndex2 = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+      const lvl2 = LEVELS[lvlIndex2];
+      const launchSpeed = (lvl2 && lvl2.params && typeof lvl2.params.ballSpeed === "number")
+        ? lvl2.params.ballSpeed
+        : 6;
 
-      ballLaunched = true;
-      ballMoving   = true;
+      b.dy = -launchSpeed;   // altijd met volle level-snelheid omhoog
+
+      ballLaunched   = true;
+      ballMoving     = true;
       paddleFreeMove = true;
     }, 200);
   }
 }
+
 
 function resetPaddle(skipBallReset = false, skipCentering = false) {
   // 🔐 Niet centreren/resetten tijdens machinegun-fase
