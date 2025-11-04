@@ -3149,10 +3149,14 @@ function resetAllBonuses(opts = {}) {
     _bittyActivationLock = false;
   }
 
+  // 🚫 heel belangrijk: ook de visuals killen, anders kan er later tóch nog een rain starten
+  if (typeof bombVisuals !== "undefined") {
+    bombVisuals = null;
+  }
+
   // (belangrijk:) we laten bombsCollected / starsCollected met rust,
   // zodat je “punten/tokens” wél meeneemt, maar de ACTIE niet.
 }
-
 
 
 
