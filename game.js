@@ -2359,8 +2359,15 @@ function keyDownHandler(e) {
     shootSound.currentTime = 0;
     shootSound.play();
 
+    // 🔥 snelheid uit huidige level halen
+    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+    const lvl = LEVELS[lvlIndex];
+    const launchSpeed = (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
+      ? lvl.params.ballSpeed
+      : 6; // fallback
+
     balls[0].dx = 0;
-    balls[0].dy = -6;
+    balls[0].dy = -launchSpeed;
 
     if (!timerRunning) startTimer();
   }
