@@ -119,8 +119,6 @@ let badCrossesCaught = 0;
 
 // ❤️ Hartjes-systeem
 let heartsCollected = 0;
-let heartBlocks = [];
-let fallingHearts = [];
 let heartPopupTimer = 0;
 
 
