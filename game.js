@@ -2552,6 +2552,7 @@ function drawBricks() {
     }
   }
 }
+
 function startDrops(config) {
   dropConfig = Object.assign({
     // timing
@@ -2564,7 +2565,7 @@ function startDrops(config) {
     // hoeveelheid
     perSpawnMin: 1,            // min items per event
     perSpawnMax: 1,            // max items per event
-    maxItems: null,            // ⛔ hard cap op totaal aantal items (over alle events); null = geen cap
+    maxItems: null,            // ⛔ hard cap op totaal aantal items; null = geen cap
 
     // val/plaatsing
     speed: 3.0,
@@ -2577,7 +2578,7 @@ function startDrops(config) {
     minSpacing: 70,
     maxSilenceMs: 4000,        // watchdog
 
-    // ✅ hier goed zetten
+    // ✅ beschikbare droptypes
     types: ["heart", "star", "bomb_token", "bad_cross"],
 
     // fallback set
@@ -2585,26 +2586,29 @@ function startDrops(config) {
     typeWeights: null          // { coin:5, heart:2, bomb:1 } → gewogen random
   }, config || {});
 
-  // normaliseer
-  if (!Array.isArray(dropConfig.gridColumns)) dropConfig.gridColumns = [ dropConfig.gridColumns ];
+  // normaliseer arrays
+  if (!Array.isArray(dropConfig.gridColumns))
+    dropConfig.gridColumns = [ dropConfig.gridColumns ];
   if (!Array.isArray(dropConfig.types) || dropConfig.types.length === 0)
     dropConfig.types = ["heart", "star", "bomb_token", "bad_cross"];
 
   // interne tellers
-  dropsSpawned = 0;                   // aantal items gespawnd (telt individuele items)
-  dropConfig._eventsSpawned = 0;      // aantal spawn-events
+  dropsSpawned = 0;
+  dropConfig._eventsSpawned = 0;
   const now = performance.now();
   lastDropAt = now;
   updateAndDrawDrops._nextDueMs = dropConfig.startDelayMs || 0;
   updateAndDrawDrops._sinceLastSpawn = 0;
-  updateAndDrawDrops._spawnEndAt = (dropConfig.durationMs != null) ? (now + dropConfig.durationMs) : null;
+  updateAndDrawDrops._spawnEndAt = (dropConfig.durationMs != null)
+    ? (now + dropConfig.durationMs)
+    : null;
 
   // grid/well helpers
   gridColumnsIndex = 0;
 
-  // === type picker opzetten ===
+  // === oude random-picker behouden (veiligheid, niet meer gebruikt) ===
   dropConfig._pickType = (function initTypePicker(cfg) {
-    // 1) QUOTA: exact aantal keren per type
+    // QUOTA
     if (cfg.typeQuota && typeof cfg.typeQuota === "object") {
       const pool = [];
       for (const [t, n] of Object.entries(cfg.typeQuota)) {
@@ -2621,7 +2625,7 @@ function startDrops(config) {
       };
     }
 
-    // 2) WEIGHTS: gewogen random
+    // WEIGHTS
     if (cfg.typeWeights && typeof cfg.typeWeights === "object") {
       const entries = Object.entries(cfg.typeWeights)
         .map(([type, w]) => ({ type, weight: Math.max(0, Number(w) || 0) }))
@@ -2639,14 +2643,18 @@ function startDrops(config) {
       };
     }
 
-    // 3) Eenvoudig uniform random uit types
+    // fallback uniform random
     const arr = cfg.types.slice();
     return function pickUniform() {
       return arr[Math.floor(Math.random() * arr.length)];
     };
   })(dropConfig);
-}
 
+  // 💥 GEBALANCEERDE DROP-MANAGER resetten bij start
+  if (typeof dropManager !== "undefined" && dropManager && typeof dropManager.refill === "function") {
+    dropManager.refill();
+  }
+}
 
 
 function spawnRandomDrop() {
