@@ -2221,35 +2221,6 @@ function updateAndDrawDrops() {
   }
 }
 
-function spawnRandomDrop() {
-  if (!dropConfig) return;
-
-  // ❗ alleen droppen als de bal echt onderweg is
-  if (!ballLaunched && !ballMoving) {
-    return;
-  }
-
-  // typekeuze via picker (quota/gewichten) of fallback
-  const type = dropConfig._pickType
-    ? dropConfig._pickType()
-    : (dropConfig.types?.[0] || "coin");
-
-  // X bepalen volgens gekozen modus (well/grid) + avoidPaddle
-  const x = chooseSpawnX(dropConfig);
-
-  fallingDrops.push({
-    type,
-    x,
-    y: -20 - Math.random() * 30,
-    dy: dropConfig.speed || 2.5,
-    vx: 0,
-    vy: 0,
-    t: 0,
-    active: true
-  });
-  dropsSpawned++;
-}
-
 
 
 let rocketActive = false; // Voor nu altijd zichtbaar om te testen
@@ -2602,66 +2573,29 @@ function startDrops(config) {
 
 
 
-function updateAndDrawDrops() {
-  // ——— Scheduler ———
-  const now = performance.now();
-  const dt  = Math.min(50, now - (updateAndDrawDrops._prev || now));
-  updateAndDrawDrops._prev = now;
+// VERVANG JE OUDE FUNCTIE door deze:
+function spawnRandomDrop() {
+  if (!dropConfig) return;
 
-  if (dropConfig) {
-    // watchdog: voorkom lange stilte
-    if (dropConfig.maxSilenceMs && now - lastDropAt > dropConfig.maxSilenceMs) {
-      updateAndDrawDrops._nextDueMs = 0;
-    }
+  // typekeuze via picker (quota/gewichten) of fallback
+  const type = dropConfig._pickType
+    ? dropConfig._pickType()
+    : (dropConfig.types?.[0] || "coin");
 
-    // stop met spawnen na totale duur (bestaande items blijven vallen)
-    if (updateAndDrawDrops._spawnEndAt && now >= updateAndDrawDrops._spawnEndAt) {
-      dropConfig.continuous = false;
-    }
+  // X bepalen volgens gekozen modus (well/grid) + avoidPaddle
+  const x = chooseSpawnX(dropConfig);
 
-    // volgende spawn moment aftellen
-    if (updateAndDrawDrops._nextDueMs != null) {
-      updateAndDrawDrops._nextDueMs -= dt;
-    }
-
-    const canSpawnMore = !dropConfig.maxItems || (dropsSpawned < dropConfig.maxItems);
-    if (dropConfig.continuous && canSpawnMore && (updateAndDrawDrops._nextDueMs != null) && updateAndDrawDrops._nextDueMs <= 0) {
-      const nMin = Math.max(1, dropConfig.perSpawnMin | 0);
-      const nMax = Math.max(nMin, dropConfig.perSpawnMax | 0);
-      const count = nMin + Math.floor(Math.random() * (nMax - nMin + 1));
-
-      for (let i = 0; i < count && (!dropConfig.maxItems || dropsSpawned < dropConfig.maxItems); i++) {
-        spawnRandomDrop(); // gebruikt chooseSpawnX + typepicker
-      }
-
-      lastDropAt = now;
-      dropConfig._eventsSpawned = (dropConfig._eventsSpawned | 0) + 1;
-
-      const iMin = Math.max(100, dropConfig.minIntervalMs | 0);
-      const iMax = Math.max(iMin, dropConfig.maxIntervalMs | 0);
-      updateAndDrawDrops._nextDueMs = iMin + Math.random() * (iMax - iMin);
-    }
-  }
-
-  // ——— Items updaten + tekenen ———
-  // 🛑 NIEUW: blokkeer val als bal nog op paddle ligt
-  if (!ballLaunched && !ballMoving) {
-    return; // niets laten vallen of tekenen zolang speler nog niet geslagen heeft
-  }
-
-  for (let i = fallingDrops.length - 1; i >= 0; i--) {
-    const d = fallingDrops[i];
-    if (!d || d.active === false) { fallingDrops.splice(i, 1); continue; }
-
-    // basisval en optionele snelheidsvelden (magnet kan vx/vy invullen)
-    d.t = (d.t || 0) + (dt / 16.7);
-    d.y += (d.dy || (dropConfig?.speed || 2.5));
-    if (d.vx) d.x += d.vx;
-    if (d.vy) d.y += d.vy;
-
-    const def = DROP_TYPES[d.type] || DROP_TYPES.coin;
-    try { def.draw && def.draw(d, ctx); } catch (e) {}
-  }
+  fallingDrops.push({
+    type,
+    x,
+    y: -20 - Math.random() * 30,
+    dy: dropConfig.speed || 2.5,
+    vx: 0,
+    vy: 0,
+    t: 0,
+    active: true
+  });
+  dropsSpawned++;
 }
 
 
