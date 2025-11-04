@@ -120,7 +120,7 @@ let badCrossesCaught = 0;
 // ❤️ Hartjes-systeem
 let heartsCollected = 0;
 let heartPopupTimer = 0;
-
+let fallingHearts = [];
 
 // === DROPS SYSTEM: globals ===
 let fallingDrops = []; // actieve losse drops (niet uit bricks)
