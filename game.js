@@ -5324,7 +5324,6 @@ if (levelMessageVisible) {
 
 // 🎬 Overgangstimer & animatie
 if (levelTransitionActive) {
-  // NIET levelMessageAlpha forceren en NIET nogmaals levelMessageTimer++
   if (transitionOffsetY < 0) {
     transitionOffsetY += 2;
   } else {
@@ -5337,6 +5336,16 @@ if (levelTransitionActive) {
 if (invincibleActive && performance.now() >= invincibleEndTime) {
   invincibleActive = false;
   stopStarAura(false);   // fade-out
+}
+
+// ✅ ZOLANG de ster actief is, moet het geluid gewoon aanstaan
+if (invincibleActive) {
+  try {
+    if (starAuraSound.paused) {
+      starAuraSound.currentTime = 0;
+      starAuraSound.play();
+    }
+  } catch (e) {}
 }
 
 // 🔒 Fail-safe: als er om welke reden dan ook géén shield is, mag de aura-sound niet spelen
