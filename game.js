@@ -2958,7 +2958,9 @@ function drawMagnetHUD(ctx) {
   // ...
 }
 
-function resetAllBonuses() {
+function resetAllBonuses(opts = {}) {
+  const { keepStar = false } = opts;
+
   // 🔁 Ballen en bonussen resetten
   balls = [{
     x: paddleX + paddleWidth / 2 - ballRadius,
@@ -3012,28 +3014,30 @@ function resetAllBonuses() {
   // 🧲 magneet uit
   stopMagnet?.();
 
-  // ⭐️ STER / INVINCIBLE direct uitzetten
-  // (dit voorkomt dat autolance in het nieuwe level nog afgaat) :contentReference[oaicite:1]{index=1}
-  invincibleActive = false;
-  invincibleEndTime = 0;
-  // aura/geluid meteen stoppen als functie bestaat
-  if (typeof stopStarAura === "function") {
-    stopStarAura(true);
-  }
-  // ook eventuel fullscreen star FX uit
-  if (typeof starPowerFX !== "undefined" && starPowerFX) {
-    starPowerFX.active = false;
+  // ⭐️ STER / INVINCIBLE alleen uitzetten als we 'm níet willen houden
+  if (!keepStar) {
+    // (dit voorkomt dat autolance in het nieuwe level nog afgaat)
+    invincibleActive = false;
+    invincibleEndTime = 0;
+    // aura/geluid meteen stoppen als functie bestaat
+    if (typeof stopStarAura === "function") {
+      stopStarAura(true);
+    }
+    // ook eventuel fullscreen star FX uit
+    if (typeof starPowerFX !== "undefined" && starPowerFX) {
+      starPowerFX.active = false;
+    }
   }
 
   // 💣 BITTY BOMB / BOMB RAIN resetten
-  // zo komt er geen regen meer in het volgende level als hij net bezig was :contentReference[oaicite:2]{index=2}
+  // zo komt er geen regen meer in het volgende level als hij net bezig was
   if (typeof bittyBomb !== "undefined") {
     bittyBomb.active = false;
     bittyBomb.phase = "idle";
     bittyBomb.queuedRain = 0;
   }
   if (typeof bombRain !== "undefined") {
-    bombRain = []; // regen stoppen :contentReference[oaicite:3]{index=3}
+    bombRain = []; // regen stoppen
   }
   if (typeof _bittyActivationLock !== "undefined") {
     _bittyActivationLock = false;
