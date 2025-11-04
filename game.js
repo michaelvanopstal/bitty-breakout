@@ -709,6 +709,10 @@ function triggerHeartCelebration() {
   heartCelebration.t0 = performance.now();
   heartCelebration.hearts = [];
 
+  // 👇 nieuw: kort het levelup-plaatje laten zien
+  heartCelebration.showMascot = true;
+  heartCelebration.mascotStart = performance.now();
+
   const count = 50;
   for (let i = 0; i < count; i++) {
     heartCelebration.hearts.push({
@@ -765,6 +769,35 @@ function drawHeartCelebration() {
   fxCtx.fillText("10 hearts collected — extra life!", W / 2, H / 2 - 35);
   fxCtx.restore();
 
+  // 👇 NIEUW: jouw levelup-plaatje heel kort laten poppen
+  if (
+    heartCelebration.showMascot &&
+    typeof heartLevelupImg !== "undefined" &&
+    heartLevelupImg.complete
+  ) {
+    const POP_DURATION = 700; // ms
+    const popElapsed = now - heartCelebration.mascotStart;
+    if (popElapsed < POP_DURATION) {
+      const a = 1 - popElapsed / POP_DURATION; // fade-out
+      const scale = 0.45; // beetje kleiner
+      const drawW = heartLevelupImg.width * scale;
+      const drawH = heartLevelupImg.height * scale;
+
+      fxCtx.save();
+      fxCtx.globalAlpha = a * fade; // ook meefaden met hele celebration
+      fxCtx.drawImage(
+        heartLevelupImg,
+        (W - drawW) / 2,
+        (H - drawH) / 2 + 20, // net onder de tekst
+        drawW,
+        drawH
+      );
+      fxCtx.restore();
+    } else {
+      heartCelebration.showMascot = false;
+    }
+  }
+
   // hartjes tekenen
   for (const h of heartCelebration.hearts) {
     // bewegen
@@ -801,7 +834,6 @@ function drawHeartCelebration() {
     fxCtx.restore();
   }
 }
-
 
 
 function showLevelBanner(text) {
@@ -1734,6 +1766,8 @@ silver2Img.src = "silver2.png";
 const heartImg = new Image();
 heartImg.src = "heart.png"; // zorg dat je dit bestand hebt!
 
+const heartLevelupImg = new Image();
+heartLevelupImg.src = "levelup.png";
 
 const machinegunBlockImg = new Image();
 machinegunBlockImg.src = "machinegun_block.png";
@@ -5308,7 +5342,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 32) {
+  if (imagesLoaded === 33) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -5374,6 +5408,7 @@ tntBlinkImg.onload = onImageLoad;
 starImg.onload = onImageLoad;
 bombTokenImg.onload = onImageLoad;
 badCrossImg.onload = onImageLoad;
+heartLevelupImg.onload = onImageLoad;
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
