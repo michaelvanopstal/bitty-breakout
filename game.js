@@ -1163,7 +1163,7 @@ const LEVELS = Array.from({ length: TOTAL_LEVELS }, (_, i) => ({
   map: createEmptyMap(),
   params: {
     // basis-schaal: elke 5 levels mini-stapjes, pas vrij aan
-    ballSpeed: 8 + 0.2 * i,                 // start snelheid
+    ballSpeed: 10 + 0.2 * i,                 // start snelheid
     paddleWidth: 100 - Math.floor(i / 4) * 4, // per 4 levels -4px, min later clampen
     machineGunDifficulty: Math.min(1 + Math.floor(i / 7), 3) // 1..3
   }
