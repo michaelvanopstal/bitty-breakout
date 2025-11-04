@@ -4194,19 +4194,6 @@ function collisionDetection() {
             ball.y = b.y + brickHeight + ball.radius + 1;
           }
 
-          // 💖 Hartje laten vallen
-          if (b.hasHeart && !b.heartDropped) {
-            fallingHearts.push({
-              x: b.x + brickWidth / 2 - 12,
-              y: b.y + brickHeight,
-              dy: 2,
-              collected: false,
-              alpha: 1,
-              pulse: 0
-            });
-            b.heartDropped = true;
-          }
-
           // 🪨 Steen-blok gedrag
           if (b.type === "stone") {
             bricksSound.currentTime = 0;
