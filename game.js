@@ -2328,6 +2328,7 @@ function keyDownHandler(e) {
   // 🛡️ Voorkom acties als gebruiker in een inputveld of knop zit
   if (["INPUT", "TEXTAREA", "BUTTON"].includes(document.activeElement.tagName)) return;
 
+  // 🚗 Bewegingstoetsen
   if (
     e.key === "Right" || e.key === "ArrowRight" || e.key === ">" || e.key === "."
   ) {
@@ -2356,36 +2357,48 @@ function keyDownHandler(e) {
     ballMoving = true;
     paddleFreeMove = true; // ✅ Laat paddle vrij bewegen na eerste schot
 
-    shootSound.currentTime = 0;
-    shootSound.play();
+    // sound
+    if (typeof shootSound !== "undefined") {
+      shootSound.currentTime = 0;
+      shootSound.play();
+    }
 
     // 🔥 snelheid uit huidige level halen
     const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
     const lvl = LEVELS[lvlIndex];
-    const launchSpeed = (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
-      ? lvl.params.ballSpeed
-      : 6; // fallback
+    const launchSpeed =
+      (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
+        ? lvl.params.ballSpeed
+        : 6; // fallback als er niks staat
 
+    // bal omhoog schieten met level-snelheid
     balls[0].dx = 0;
     balls[0].dy = -launchSpeed;
 
-    if (!timerRunning) startTimer();
+    // timer starten
+    if (!timerRunning && typeof startTimer === "function") {
+      startTimer();
+    }
   }
 
-  // 🔫 Raket afvuren (alleen met spatie)
+  // 🔫 Raket afvuren (ook spatie, maar alleen als raket actief is)
   if (e.code === "Space" && rocketActive && rocketAmmo > 0 && !rocketFired) {
     rocketFired = true;
     rocketAmmo--;
-    rocketLaunchSound.currentTime = 0;
-    rocketLaunchSound.play();
+    if (typeof rocketLaunchSound !== "undefined") {
+      rocketLaunchSound.currentTime = 0;
+      rocketLaunchSound.play();
+    }
   }
 
-  // 🎯 Schieten met vlaggetjes (alleen met spatie)
+  // 🎯 Schieten met vlaggetjes (spatie)
   if (flagsOnPaddle && e.code === "Space") {
-    shootFromFlags();
+    if (typeof shootFromFlags === "function") {
+      shootFromFlags();
+    }
   }
 
-  // 🧪 Extra beveiliging bij opnieuw starten na Game Over (alleen met spatie)
+  // 🧪 Extra beveiliging bij opnieuw starten na Game Over (spatie)
   if (!ballMoving && e.code === "Space") {
     if (lives <= 0) {
       lives = 3;
@@ -2397,8 +2410,12 @@ function keyDownHandler(e) {
       startTime = new Date();
       gameOver = false;
 
-      updateScoreDisplay();
-      document.getElementById("timeDisplay").textContent = "00:00";
+      if (typeof updateScoreDisplay === "function") {
+        updateScoreDisplay();
+      }
+
+      const timeEl = document.getElementById("timeDisplay");
+      if (timeEl) timeEl.textContent = "00:00";
 
       flagsOnPaddle = false;
       flyingCoins = [];
@@ -2407,6 +2424,7 @@ function keyDownHandler(e) {
     ballMoving = true;
   }
 }
+
 
 function keyUpHandler(e) {
   if (
