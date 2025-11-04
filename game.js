@@ -2221,6 +2221,35 @@ function updateAndDrawDrops() {
   }
 }
 
+function spawnRandomDrop() {
+  if (!dropConfig) return;
+
+  // ❗ alleen droppen als de bal echt onderweg is
+  if (!ballLaunched && !ballMoving) {
+    return;
+  }
+
+  // typekeuze via picker (quota/gewichten) of fallback
+  const type = dropConfig._pickType
+    ? dropConfig._pickType()
+    : (dropConfig.types?.[0] || "coin");
+
+  // X bepalen volgens gekozen modus (well/grid) + avoidPaddle
+  const x = chooseSpawnX(dropConfig);
+
+  fallingDrops.push({
+    type,
+    x,
+    y: -20 - Math.random() * 30,
+    dy: dropConfig.speed || 2.5,
+    vx: 0,
+    vy: 0,
+    t: 0,
+    active: true
+  });
+  dropsSpawned++;
+}
+
 
 
 let rocketActive = false; // Voor nu altijd zichtbaar om te testen
