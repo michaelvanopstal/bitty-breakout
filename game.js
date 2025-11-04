@@ -749,25 +749,6 @@ function drawHeartCelebration() {
 
   // canvas leegmaken
   fxCtx.clearRect(0, 0, W, H);
-
-  // titel in rood
-  const blink = Math.floor(elapsed / 250) % 2 === 0;
-  fxCtx.save();
-  fxCtx.textAlign = "center";
-  fxCtx.textBaseline = "middle";
-  fxCtx.font = "bold 46px Arial";
-  fxCtx.strokeStyle = `rgba(160,0,0,${0.9 * fade})`;
-  fxCtx.lineWidth = 4;
-  fxCtx.fillStyle = blink
-    ? `rgba(255,40,40,${0.95 * fade})`
-    : `rgba(220,0,0,${0.9 * fade})`;
-  fxCtx.strokeText("BITTY LEVEL UP!", W / 2, H / 2 - 80);
-  fxCtx.fillText("BITTY LEVEL UP!", W / 2, H / 2 - 80);
-
-  fxCtx.font = "bold 22px Arial";
-  fxCtx.fillStyle = `rgba(255,230,230,${0.9 * fade})`;
-  fxCtx.fillText("10 hearts collected — extra life!", W / 2, H / 2 - 35);
-  fxCtx.restore();
  
   // 👇 NIEUW: jouw levelup-plaatje 2 seconden tonen op originele grootte
   if (
