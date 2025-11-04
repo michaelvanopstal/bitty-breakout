@@ -3432,7 +3432,6 @@ function drawCoins() {
     }
   });
 }
-
 function drawFallingHearts() {
   // we lopen achteruit zodat we veilig kunnen splicen
   for (let i = fallingHearts.length - 1; i >= 0; i--) {
@@ -3445,7 +3444,7 @@ function drawFallingHearts() {
     const size = 24 + Math.sin(heart.pulse) * 2;
     heart.pulse += 0.2;
 
-    // ✨ AURA rondom vallend hartje (licht pulserend, beetje draaiend)
+    // ✨ AURA rondom vallend hartje
     ctx.save();
     ctx.translate(heart.x + size / 2, heart.y + size / 2);
     const tAura = performance.now() / 300 + i * 0.2;
@@ -3492,10 +3491,15 @@ function drawFallingHearts() {
       heart.collected = true;
       heartsCollected++;
 
+      // display bijwerken
       if (typeof updateBonusPowerPanel === "function") {
-      updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught, heartsCollected);
-     }
-
+        updateBonusPowerPanel(
+          starsCollected,
+          bombsCollected,
+          badCrossesCaught,
+          heartsCollected
+        );
+      }
 
       // 🎵 nieuw: eigen hartje-geluid
       try {
@@ -3511,10 +3515,18 @@ function drawFallingHearts() {
         lives++;
         updateLivesDisplay?.();
 
-        if (hcEl) hcEl.textContent = heartsCollected;
+        // display opnieuw tonen met 0 hartjes
+        if (typeof updateBonusPowerPanel === "function") {
+          updateBonusPowerPanel(
+            starsCollected,
+            bombsCollected,
+            badCrossesCaught,
+            heartsCollected
+          );
+        }
 
         // 🚀 nieuwe fullscreen intro
-        triggerHeartCelebration();
+        triggerHeartCelebration?.();
       }
     }
 
