@@ -5685,7 +5685,10 @@ function startLevelTransition() {
   level++;
 
   // Alle tijdelijke bonussen/cooldowns resetten als je daar een helper voor hebt
-  if (typeof resetAllBonuses === "function") resetAllBonuses();
+  if (typeof resetAllBonuses === "function") {
+  // als de ster nog bezig was op het moment van overgang, niet uitzetten
+  resetAllBonuses({ keepStar: invincibleActive });
+}
 
   // Bricks voor het nieuwe level klaarzetten
   resetBricks();
