@@ -1856,6 +1856,53 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
+// === GEBALANCEERDE DROP-BAG ===
+const DROP_BOMB  = "bomb_token";
+const DROP_STAR  = "star";
+const DROP_HEART = "heart";
+const DROP_CROSS = "bad_cross";
+
+function shuffleArray(a) {
+  const arr = a.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+const dropManager = {
+  bag: [],
+  refill() {
+    const arr = [
+      DROP_BOMB,
+      DROP_STAR, DROP_STAR,
+      DROP_HEART, DROP_HEART,
+      DROP_BOMB, DROP_BOMB,
+      DROP_STAR,
+      DROP_BOMB,
+      DROP_HEART, DROP_HEART,
+      DROP_CROSS, DROP_CROSS,
+      DROP_STAR
+    ];
+
+    const firstShuffle = shuffleArray(arr);
+    const grouped = [];
+    for (let i = 0; i < firstShuffle.length; i += 3) {
+      const chunk = firstShuffle.slice(i, i + 3);
+      grouped.push(...shuffleArray(chunk));
+    }
+    this.bag = grouped;
+  },
+  next() {
+    if (this.bag.length === 0) {
+      this.refill();
+    }
+    return this.bag.shift();
+  }
+};
+
+
 // === DROPS SYSTEM: item type registry ===
 // Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
 const DROP_TYPES = {
@@ -2605,17 +2652,13 @@ function startDrops(config) {
 function spawnRandomDrop() {
   if (!dropConfig) return;
 
-  // ❗ alleen droppen als de bal echt onderweg is
   if (!ballLaunched && !ballMoving) {
     return;
   }
 
-  // typekeuze via picker (quota/gewichten) of fallback
-  const type = dropConfig._pickType
-    ? dropConfig._pickType()
-    : (dropConfig.types?.[0] || "coin");
+  // 🎯 in plaats van dropConfig._pickType():
+  const type = dropManager.next();
 
-  // X bepalen volgens gekozen modus (well/grid) + avoidPaddle
   const x = chooseSpawnX(dropConfig);
 
   fallingDrops.push({
@@ -2630,7 +2673,6 @@ function spawnRandomDrop() {
   });
   dropsSpawned++;
 }
-
 
 
 function triggerBittyBombIntro(n) {
