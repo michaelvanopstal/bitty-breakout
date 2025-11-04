@@ -2742,8 +2742,6 @@ function resetBricks() {
     }
   }
 
-  assignHeartBlocks();
-
   // bommenregen opruimen bij levelstart (voortgang teller behouden)
   if (typeof bombRain !== 'undefined') bombRain = [];
 
