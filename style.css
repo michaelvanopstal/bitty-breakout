@@ -197,9 +197,10 @@ body {
   }
 }
 
+
 /* ===== BONUS POWER PANEL ===== */
 #bonus-power-panel {
-  position: absolute;
+  position: absolute;   /* â† zo had jij 'm */
   top: 320px;
   right: 60px;
   width: 230px;
@@ -208,7 +209,7 @@ body {
   border-radius: 14px;
   padding: 6px 8px 10px;
   font-family: Arial, sans-serif;
-  z-index: 50; /* lager dan chat (9998) */
+  z-index: 50;         /* lager dan chat (9998), dus chat kan eroverheen */
   box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
@@ -230,38 +231,34 @@ body {
   margin: 6px 0;
 }
 
-/* Achtergrondvakje achter de icoontjes (RONDE versie) */
+/* ----- ICONS (met rood rond achtergrondje) ----- */
 .bp-icon {
-  position: relative;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;                 /* 🔵 nu echt rond */
-  background: rgba(0, 0, 0, 0.25);    /* transparant donker vlak */
-  backdrop-filter: blur(2px);         /* zacht glas-effect */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4); /* lichte gloed */
-}
-
-/* icoonafbeeldingen */
-.bp-icon-heart,
-.bp-icon-star,
-.bp-icon-bomb,
-.bp-icon-cross {
-  width: 20px;
-  height: 20px;
-  background-size: contain;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;           /* rond bubbeltje */
+  background-color:  #e54b00;   /* rood zoals chat-binnenkant */
+  background-size: 70%;
   background-repeat: no-repeat;
   background-position: center;
+  box-shadow: 0 0 4px rgba(255,255,255,0.35);
 }
 
-/* afzonderlijke plaatjes */
-.bp-icon-heart  { background-image: url("heart.png"); }
-.bp-icon-star   { background-image: url("stars.png"); }
-.bp-icon-bomb   { background-image: url("bom.png"); }
-.bp-icon-cross  { background-image: url("bad_cross.png"); }
+/* eigen icoontjes */
+.bp-icon-heart {
+  background-image: url("heart.png");
+}
+
+.bp-icon-star {
+  background-image: url("stars.png");    /* jouw bestand */
+}
+
+.bp-icon-bomb {
+  background-image: url("bom.png");
+}
+
+.bp-icon-cross {
+  background-image: url("bad_cross.png");
+}
 
 /* ----- BUISJES ----- */
 .bp-tube {
@@ -284,35 +281,31 @@ body {
   transition: width 0.25s ease-out;
 }
 
-/* ❤️ hartjes-buisje */
+/* â¤ï¸ hartjes-buisje */
 #bp-hearts-liquid {
   background: linear-gradient(90deg, #fff 0%, #ff5b6b 25%, #550000 100%);
 }
 
-/* ⭐ sterren-buisje */
-#bp-stars-liquid {
+/* â­ sterren-buisje */
+#bp-stars-liquid { 
   background: linear-gradient(90deg, #fff 0%, #ffe500 20%, #550000 100%);
 }
 
-/* 💣 bom-buisje */
+/* ðŸ’£ bom-buisje */
 #bp-bombs-liquid {
   background: linear-gradient(90deg, #fff 0%, #e0e0e0 25%, #550000 100%);
 }
 
-/* ❌ kruis-buisje – donkerder rood */
+/* âŒ kruis-buisje */
 #bp-cross-liquid {
-  background: linear-gradient(90deg, #fff 0%, #8b0000 25%, #3b0000 100%);
+  background: linear-gradient(90deg, #fff 0%, #ff4d4d 30%, #550000 100%);
 }
 
 .bp-glass {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.5) 0%,
-    rgba(255,255,255,0) 50%
-  );
+  background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 50%);
   mix-blend-mode: screen;
   opacity: 0.35;
 }
