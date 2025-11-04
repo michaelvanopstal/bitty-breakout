@@ -2794,29 +2794,6 @@ function resetBricks() {
 
 
 
-// 🔧 Hulp-functie om 4 hartjes te verdelen
-function assignHeartBlocks() {
-  heartBlocks = [];
-
-  let normalBricks = [];
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      const brick = bricks[c][r];
-      if (brick.status === 1 && brick.type === "normal") {
-        normalBricks.push(brick);
-      }
-    }
-  }
-
-  for (let i = 0; i < 4 && normalBricks.length > 0; i++) {
-    const index = Math.floor(Math.random() * normalBricks.length);
-    const brick = normalBricks.splice(index, 1)[0];
-    brick.hasHeart = true;
-    brick.heartDropped = false;
-    heartBlocks.push(brick); // eventueel handig voor later
-  }
-}
-
 // === Dev helper: snel naar elk level springen ===
 function goToLevel(n, opts = {}) {
   const cfg = Object.assign({
