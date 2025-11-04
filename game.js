@@ -768,27 +768,42 @@ function drawHeartCelebration() {
   fxCtx.fillStyle = `rgba(255,230,230,${0.9 * fade})`;
   fxCtx.fillText("10 hearts collected — extra life!", W / 2, H / 2 - 35);
   fxCtx.restore();
-
-  // 👇 NIEUW: jouw levelup-plaatje heel kort laten poppen
+ 
+  // 👇 NIEUW: jouw levelup-plaatje 2 seconden tonen op originele grootte
   if (
     heartCelebration.showMascot &&
     typeof heartLevelupImg !== "undefined" &&
     heartLevelupImg.complete
   ) {
-    const POP_DURATION = 700; // ms
+    const POP_DURATION = 2000; // 2 sec
     const popElapsed = now - heartCelebration.mascotStart;
     if (popElapsed < POP_DURATION) {
       const a = 1 - popElapsed / POP_DURATION; // fade-out
-      const scale = 0.45; // beetje kleiner
-      const drawW = heartLevelupImg.width * scale;
-      const drawH = heartLevelupImg.height * scale;
+
+      // originele grootte
+      let drawW = heartLevelupImg.width;
+      let drawH = heartLevelupImg.height;
+
+      // veiligheidscheck: als het groter is dan canvas, dan passend maken
+      const maxW = W * 0.9;
+      const maxH = H * 0.9;
+      if (drawW > maxW) {
+        const f = maxW / drawW;
+        drawW *= f;
+        drawH *= f;
+      }
+      if (drawH > maxH) {
+        const f = maxH / drawH;
+        drawW *= f;
+        drawH *= f;
+      }
 
       fxCtx.save();
-      fxCtx.globalAlpha = a * fade; // ook meefaden met hele celebration
+      fxCtx.globalAlpha = a * fade;
       fxCtx.drawImage(
         heartLevelupImg,
         (W - drawW) / 2,
-        (H - drawH) / 2 + 20, // net onder de tekst
+        (H - drawH) / 2 + 20, // mag je nog tunen
         drawW,
         drawH
       );
@@ -797,6 +812,7 @@ function drawHeartCelebration() {
       heartCelebration.showMascot = false;
     }
   }
+
 
   // hartjes tekenen
   for (const h of heartCelebration.hearts) {
