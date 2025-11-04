@@ -205,7 +205,7 @@ body {
   right: 60px;
   width: 230px;
   background: linear-gradient(#ffe066, #ffbb22);
-  border: 3px solid #b32020;
+  border: 3px solid rgba(50, 50, 50, 0.4);
   border-radius: 14px;
   padding: 6px 8px 10px;
   font-family: Arial, sans-serif;
@@ -299,7 +299,8 @@ body {
 
 /* âŒ kruis-buisje */
 #bp-cross-liquid {
-  background: linear-gradient(90deg, #fff 0%, #ff4d4d 30%, #550000 100%);
+  background: linear-gradient(90deg, #fff 0%, #a00000 25%, #400000 100%);
+
 }
 
 .bp-glass {
