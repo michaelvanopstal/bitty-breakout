@@ -2577,6 +2577,11 @@ function startDrops(config) {
 function spawnRandomDrop() {
   if (!dropConfig) return;
 
+  // ❗ alleen droppen als de bal echt onderweg is
+  if (!ballLaunched && !ballMoving) {
+    return;
+  }
+
   // typekeuze via picker (quota/gewichten) of fallback
   const type = dropConfig._pickType
     ? dropConfig._pickType()
