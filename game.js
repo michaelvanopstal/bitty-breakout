@@ -3410,11 +3410,17 @@ function checkFlyingCoinHits() {
           coin.y > b.y &&
           coin.y < b.y + brickHeight
         ) {
+
+          // 🚫 vlag-kogels mogen het 10-hit blok NIET kapot maken
+          if (b.type === "tenhit") {
+            coin.active = false;   // kogel weg
+            return;                // maar blok blijft
+          }
+
           // 🪨 Als het een stenen blok is
           if (b.type === "stone") {
             b.hits = (b.hits || 0) + 1;
 
-            // 🔸 Steenpuin toevoegen
             for (let i = 0; i < 5; i++) {
               stoneDebris.push({
                 x: b.x + brickWidth / 2,
@@ -3440,7 +3446,7 @@ function checkFlyingCoinHits() {
 
               const earned = doublePointsActive ? 120 : 60;
               score += earned;
-              updateScoreDisplay(); // 👈 aangepaste regel
+              updateScoreDisplay();
 
               pointPopups.push({
                 x: b.x + brickWidth / 2,
@@ -3481,10 +3487,9 @@ function checkFlyingCoinHits() {
               speedBoostStart = Date.now();
               speedBoostSound.play();
               break;
-              case "magnet":
+            case "magnet":
               activateMagnet(20000);
               break;
-
           }
 
           b.status = 0;
@@ -3492,7 +3497,7 @@ function checkFlyingCoinHits() {
 
           const earned = doublePointsActive ? 20 : 10;
           score += earned;
-          updateScoreDisplay(); // 👈 aangepaste regel
+          updateScoreDisplay();
 
           coinSound.currentTime = 0;
           coinSound.play();
@@ -3511,6 +3516,7 @@ function checkFlyingCoinHits() {
     }
   });
 }
+
 
 function saveHighscore() {
   const playerName = window.currentPlayer || "Unknown";
