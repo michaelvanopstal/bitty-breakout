@@ -4314,7 +4314,6 @@ function checkCoinCollision() {
     }
   });
 }
-
 function collisionDetection() {
   // 🔧 Instelling: hoe vaak moet hij "watch out..." zeggen (1x per X hits)
   const stonefallVoiceEvery = 5; // ← verander dit getal naar wens
@@ -4432,11 +4431,12 @@ function collisionDetection() {
             // tel de hit
             b.hits = (b.hits || 0) + 1;
 
-            // elke hit = +10
+            // elke hit = +10 (of 20 bij 2x)
             const perHit = doublePointsActive ? 20 : 10;
             score += perHit;
             updateScoreDisplay();
 
+            // popup bij het blokje zelf
             pointPopups.push({
               x: b.x + brickWidth / 2,
               y: b.y,
@@ -4444,7 +4444,7 @@ function collisionDetection() {
               alpha: 1
             });
 
-            // beetje effect mag altijd
+            // klein effectje
             for (let i = 0; i < 3; i++) {
               stoneDebris.push({
                 x: b.x + brickWidth / 2,
@@ -4465,18 +4465,19 @@ function collisionDetection() {
               score += finalEarned;
               updateScoreDisplay();
 
+              // hier jouw “100 +”
               pointPopups.push({
                 x: b.x + brickWidth / 2,
                 y: b.y,
-                value: "+" + finalEarned,
+                value: "+100 +",
                 alpha: 1
               });
 
-              // optioneel: coin droppen
+              // evt. coin droppen
               spawnCoin(b.x + brickWidth / 2, b.y);
             }
 
-            return; // we zijn klaar met deze hit
+            return; // klaar met deze hit
           }
 
           // 🎁 Bonusacties
