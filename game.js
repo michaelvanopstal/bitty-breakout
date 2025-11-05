@@ -4164,6 +4164,12 @@ function checkRocketCollision() {
           ) {
             const target = bricks[col][row];
 
+            // 🛡️ NIEUW: raket mag tenhit-blokken niet beschadigen
+            if (target.type === "tenhit") {
+              // gewoon overslaan, maar andere targets mogen nog wel geraakt worden
+              return;
+            }
+
             // 🪨 Gedrag voor stenen blokken
             if (target.type === "stone") {
               target.hits = (target.hits || 0) + 1;
@@ -4236,6 +4242,7 @@ function checkRocketCollision() {
                 break;
             }
 
+            // normaal blok weghalen
             target.status = 0;
             target.type = "normal";
             score += doublePointsActive ? 20 : 10;
@@ -4247,7 +4254,7 @@ function checkRocketCollision() {
           rocketExplosionSound.currentTime = 0;
           rocketExplosionSound.play();
 
-          updateScoreDisplay(); // 👈 aangepaste regel
+          updateScoreDisplay();
           rocketFired = false;
 
           explosions.push({
@@ -4257,6 +4264,7 @@ function checkRocketCollision() {
             alpha: 1
           });
         } else {
+          // niks geraakt → raket alsnog weg
           rocketFired = false;
         }
 
@@ -4269,8 +4277,6 @@ function checkRocketCollision() {
     }
   }
 }
-
-
 
 
 function checkCoinCollision() {
