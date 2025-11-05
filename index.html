@@ -14,13 +14,13 @@
   <link rel="stylesheet" href="style.css">
 </head>
 
-<body><!-- ===== Chat Box (rechts) ===== -->
+<body>
+<!-- ===== Chat Box (rechts) ===== -->
 <div id="chatbox">
   <div class="chatbox-header">
     <button id="chatToggleBtn" class="chat-icon-btn" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
     <span>CHAT</span>
-    <!-- NIEUW: stickers-knop -->
-    <button id="chatStickersBtn" class="chat-icon-btn" title="Stickers">🖼</button>
+    <!-- Alleen de leegmaak-knop blijft -->
     <button id="chatClearBtn" class="chat-icon-btn" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
   </div>
 
@@ -36,8 +36,25 @@
   <form id="chatForm" autocomplete="off">
     <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
     <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
+
+    <!-- 📷 Camera-icoon opent nu de sticker-popup -->
+    <button id="chatStickersBtn" class="chat-icon-btn" type="button" title="Kies een plaatje">📷</button>
+
     <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
   </form>
+</div>
+<!-- ===== /Chat Box ===== -->
+
+<script>
+  // vaste stickers (in dezelfde map als index.html zetten)
+  const STICKERS = [
+    'grumpy (11).png',
+    'Sandwich (7).png',
+    'jack-mallers (2).png',
+    'fcvhjkjk.jpg'
+  ];
+</script>
+
 </div>
 <!-- ===== /Chat Box ===== -->
 
