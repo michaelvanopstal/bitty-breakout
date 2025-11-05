@@ -15,31 +15,39 @@
 </head>
 
 <body>
-<!-- ===== Chat Box (rechts) ===== -->
+
+  <!-- ===== Chat Box (rechts) ===== -->
 <div id="chatbox">
   <div class="chatbox-header">
     <button id="chatToggleBtn" class="chat-icon-btn" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
     <span>CHAT</span>
+    <!-- NIEUW: stickers-knop -->
+    <button id="chatStickersBtn" class="chat-icon-btn" title="Stickers">🖼</button>
     <button id="chatClearBtn" class="chat-icon-btn" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
+  </div>
+
+  <!-- Sticker popup (los, maar wel binnen de chatbox) -->
+  <div id="chat-sticker-panel" aria-label="Kies een sticker">
+    <!-- inhoud vullen we met JS -->
   </div>
 
   <!-- berichtenlijst -->
   <div id="chatMessages" aria-live="polite"></div>
 
-  <!-- invoer onderaan de chat (sluit aan op jouw CSS #chatForm ...) -->
- <form id="chatForm" autocomplete="off">
-  <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
-  <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
+  <!-- invoer onderaan de chat -->
+  <form id="chatForm" autocomplete="off">
+    <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
+    <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
 
-  <!-- 📷 Nieuw: verborgen input + camera-knop -->
-  <input type="file" id="chatImage" accept="image/*" style="display:none;">
-  <label for="chatImage" class="chat-icon-btn" title="Stuur afbeelding">📷</label>
+    <!-- 📷 Nieuw: verborgen input + camera-knop -->
+    <input type="file" id="chatImage" accept="image/*" style="display:none;">
+    <label for="chatImage" class="chat-icon-btn" title="Stuur afbeelding">📷</label>
 
-  <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
-</form>
-
+    <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
+  </form>
 </div>
 <!-- ===== /Chat Box ===== -->
+
 
 <!-- ===== BONUS POWER los van chat ===== -->
 <div id="bonus-power-panel">
