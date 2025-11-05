@@ -1060,7 +1060,7 @@ function activateInvincibleShield(ms = 30000) {
 const bonusBricks = [
   { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" }, 
   { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" }, 
-  { col: 3, row: 6, type: "tenhit" },
+  { col: 3, row: 7, type: "tenhit" },
 
 
 
