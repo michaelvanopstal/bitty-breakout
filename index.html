@@ -18,16 +18,13 @@
 <!-- ===== Chat Box (rechts) ===== -->
 <div id="chatbox">
   <div class="chatbox-header">
-    <button id="chatToggleBtn" class="chat-icon-btn" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
+    <button id="chatToggleBtn" class="chat-icon-btn" type="button" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
     <span>CHAT</span>
-    <!-- Alleen de leegmaak-knop blijft -->
-    <button id="chatClearBtn" class="chat-icon-btn" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
+    <button id="chatClearBtn" class="chat-icon-btn" type="button" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
   </div>
 
   <!-- Sticker popup (los, maar wel binnen de chatbox) -->
-  <div id="chat-sticker-panel" aria-label="Kies een sticker">
-    <!-- inhoud vullen we met JS -->
-  </div>
+  <div id="chat-sticker-panel" aria-label="Kies een sticker"></div>
 
   <!-- berichtenlijst -->
   <div id="chatMessages" aria-live="polite"></div>
@@ -36,17 +33,15 @@
   <form id="chatForm" autocomplete="off">
     <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
     <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
-
     <!-- 📷 Camera-icoon opent nu de sticker-popup -->
     <button id="chatStickersBtn" class="chat-icon-btn" type="button" title="Kies een plaatje">📷</button>
-
     <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
   </form>
 </div>
 <!-- ===== /Chat Box ===== -->
 
+<!-- 1x STICKERS definieren -->
 <script>
-  // vaste stickers (in dezelfde map als index.html zetten)
   const STICKERS = [
     'grumpy (11).png',
     'Sandwich (7).png',
@@ -55,18 +50,7 @@
   ];
 </script>
 
-</div>
-<!-- ===== /Chat Box ===== -->
 
-<script>
-  // vaste stickers (in dezelfde map als index.html zetten)
-  const STICKERS = [
-    'grumpy (11).png',
-    'Sandwich (7).png',
-    'jack-mallers (2).png',
-    'fcvhjkjk.jpg'   // extra afbeelding
-  ];
-</script>
 
 
 
@@ -224,7 +208,7 @@
     return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
   }
 <script>
-(()=>{
+(()=> {
   const $msgs   = document.getElementById('chatMessages');
   const $form   = document.getElementById('chatForm');
   const $input  = document.getElementById('chatInput');
@@ -232,14 +216,13 @@
   const $clear  = document.getElementById('chatClearBtn');
 
   const STORE_KEY = 'bb_chat_messages';
-  const LIMIT = 100; // na 100 regels schoonmaken
+  const LIMIT = 100;
 
-  // 🔸 Functie om spelernaam uit het spel te halen
+  // naam uit spel
   function detectPlayerName() {
     let playerName = '';
-
     const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
-    const display = document.getElementById('player-display');
+    const display   = document.getElementById('player-display');
 
     if (nameInput && nameInput.value.trim() !== '') playerName = nameInput.value.trim();
     else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player')
@@ -253,21 +236,22 @@
 
   function updateChatName() {
     const name = detectPlayerName();
-    $name.value = name;
-    $name.disabled = true;
+    if ($name) {
+      $name.value = name;
+      $name.disabled = true;
+    }
     localStorage.setItem('chatName', name);
   }
-
   updateChatName();
   setInterval(updateChatName, 1000);
 
-  // opslag helpers
+  // opslag
   function getStore(){
-    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
     catch(e){ return []; }
   }
   function setStore(arr){
-    try{ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }catch(e){}
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); } catch(e){}
   }
 
   function pad(n){ return String(n).padStart(2,'0'); }
@@ -285,8 +269,8 @@
     return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
   }
 
-  // ---------- render chat ----------
   function render(all){
+    if (!$msgs) return;
     $msgs.innerHTML = '';
     all.forEach(m=>{
       const wrap = document.createElement('div');
@@ -308,46 +292,51 @@
     $msgs.scrollTop = $msgs.scrollHeight;
   }
 
-  // ---------- bericht toevoegen ----------
   function addMessage(name, text, imgData = null){
     let all = getStore();
-    if(all.length >= LIMIT){
-      all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
+    if (all.length >= LIMIT) {
+      all = [{ name:'System', text:'Chat automatisch geleegd (100 berichten).', time: nowTime() }];
     }
     all.push({ name, text, time: nowTime(), img: imgData });
     setStore(all);
     render(all);
   }
 
-  // ---------- chat laden ----------
+  // tonen wat er al was
   render(getStore());
 
-  // ---------- bericht versturen (alleen tekst) ----------
-  $form.addEventListener('submit', e=>{
-    e.preventDefault();
-    const name = detectPlayerName();
-    const text = $input.value.trim();
-    if(!text) return;
-    addMessage(name, text);
-    $input.value = '';
-    $input.focus();
-  });
-
-  // ---------- chat leegknop ----------
-  $clear.addEventListener('click', ()=>{
-    setStore([]);
-    render([]);
-  });
-
-  // ---------- enter = versturen ----------
-  $input.addEventListener('keydown', e=>{
-    if(e.key === 'Enter' && !e.shiftKey){
+  // versturen tekst
+  if ($form) {
+    $form.addEventListener('submit', e=>{
       e.preventDefault();
-      $form.requestSubmit();
-    }
-  });
+      const name = detectPlayerName();
+      const text = $input.value.trim();
+      if (!text) return;
+      addMessage(name, text);
+      $input.value = '';
+      $input.focus();
+    });
+  }
 
-  // ---------- STICKER PANEL ----------
+  // leegknop
+  if ($clear) {
+    $clear.addEventListener('click', ()=>{
+      setStore([]);
+      render([]);
+    });
+  }
+
+  // enter = versturen
+  if ($input) {
+    $input.addEventListener('keydown', e=>{
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        $form.requestSubmit();
+      }
+    });
+  }
+
+  // ===== STICKER PANEL =====
   const stickerBtn   = document.getElementById('chatStickersBtn');
   const stickerPanel = document.getElementById('chat-sticker-panel');
 
@@ -355,7 +344,8 @@
     const grid = document.createElement('div');
     grid.className = 'sticker-grid';
 
-    (STICKERS || []).forEach(src => {
+    const list = Array.isArray(STICKERS) ? STICKERS : [];
+    list.forEach(src => {
       const item = document.createElement('div');
       item.className = 'sticker-item';
 
@@ -365,7 +355,6 @@
 
       item.appendChild(img);
 
-      // klik op sticker -> voeg bericht toe met alleen dit plaatje
       item.addEventListener('click', () => {
         const name = detectPlayerName();
         addMessage(name, '', src);
@@ -377,10 +366,9 @@
 
     stickerPanel.appendChild(grid);
 
-    // knop laat popup zien/verbergen
     stickerBtn.addEventListener('click', () => {
-      const isHidden = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
-      stickerPanel.style.display = isHidden ? 'block' : 'none';
+      const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
+      stickerPanel.style.display = show ? 'block' : 'none';
     });
   }
 
