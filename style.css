@@ -391,6 +391,15 @@ body {
   word-break: break-word;
 }
 
+.chat-thumb {
+  display: block;
+  max-width: 120px;
+  max-height: 120px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.3);
+  object-fit: cover;
+}
 
 
 
