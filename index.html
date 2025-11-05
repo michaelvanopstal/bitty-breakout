@@ -27,11 +27,17 @@
   <div id="chatMessages" aria-live="polite"></div>
 
   <!-- invoer onderaan de chat (sluit aan op jouw CSS #chatForm ...) -->
-  <form id="chatForm" autocomplete="off">
-    <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
-    <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
-    <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
-  </form>
+ <form id="chatForm" autocomplete="off">
+  <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
+  <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
+
+  <!-- 📷 Nieuw: verborgen input + camera-knop -->
+  <input type="file" id="chatImage" accept="image/*" style="display:none;">
+  <label for="chatImage" class="chat-icon-btn" title="Stuur afbeelding">📷</label>
+
+  <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
+</form>
+
 </div>
 <!-- ===== /Chat Box ===== -->
 
@@ -190,52 +196,85 @@
   }
 
   function render(all){
-    $msgs.innerHTML = '';
-    all.forEach(m=>{
-      const wrap = document.createElement('div');
-      wrap.className = 'chat-msg';
-      wrap.innerHTML =
-        `<div class="chat-meta">${m.time} — <b>${escapeHTML(m.name)}</b></div>
-         <div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
-      $msgs.appendChild(wrap);
-    });
-    $msgs.scrollTop = $msgs.scrollHeight;
-  }
+  $msgs.innerHTML = '';
+  all.forEach(m=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-msg';
 
-  function addMessage(name, text){
-    let all = getStore();
-    if(all.length >= LIMIT){
-      all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
+    let html = `<div class="chat-meta">${m.time} — <b>${escapeHTML(m.name)}</b></div>`;
+
+    if (m.text) {
+      html += `<div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
     }
-    all.push({ name, text, time: nowTime() });
-    setStore(all);
-    render(all);
-  }
 
+    if (m.img) {
+      html += `<img src="${m.img}" class="chat-thumb" alt="image">`;
+    }
+
+    wrap.innerHTML = html;
+    $msgs.appendChild(wrap);
+  });
+  $msgs.scrollTop = $msgs.scrollHeight;
+}
+
+
+ function addMessage(name, text, imgData = null){
+  let all = getStore();
+  if(all.length >= LIMIT){
+    all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
+  }
+  all.push({ name, text, time: nowTime(), img: imgData });
+  setStore(all);
+  render(all);
+}
+
+
+   // eerst de opgeslagen berichten tonen
   render(getStore());
 
-  // versturen
+  // versturen (tekst + optioneel plaatje)
   $form.addEventListener('submit', e=>{
     e.preventDefault();
-    const name = detectPlayerName();
-    const text = $input.value.trim();
-    if(!text) return;
-    addMessage(name, text);
+    const name    = detectPlayerName();
+    const text    = $input.value.trim();
+    const imgInput = document.getElementById('chatImage');
+    const imgFile  = imgInput ? imgInput.files[0] : null;
+
+    // niks ingevuld? dan niks doen
+    if (!text && !imgFile) return;
+
+    // als er een plaatje is: eerst inlezen
+    if (imgFile) {
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        addMessage(name, text, ev.target.result);   // text + image
+        imgInput.value = '';                        // reset file input
+      };
+      reader.readAsDataURL(imgFile);
+    } else {
+      // alleen tekst
+      addMessage(name, text);
+    }
+
+    // input leeghalen en focus terug
     $input.value = '';
     $input.focus();
   });
 
+  // chat leegknop
   $clear.addEventListener('click', ()=>{
     setStore([]);
     render([]);
   });
 
+  // enter = versturen
   $input.addEventListener('keydown', e=>{
     if(e.key === 'Enter' && !e.shiftKey){
       e.preventDefault();
       $form.requestSubmit();
     }
   });
+
 
 })();
 </script>
