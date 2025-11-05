@@ -4314,6 +4314,7 @@ function checkCoinCollision() {
     }
   });
 }
+
 function collisionDetection() {
   // 🔧 Instelling: hoe vaak moet hij "watch out..." zeggen (1x per X hits)
   const stonefallVoiceEvery = 5; // ← verander dit getal naar wens
@@ -4590,6 +4591,7 @@ function collisionDetection() {
     } // <-- einde for c
   }); // <-- einde balls.forEach
 } // <-- einde function
+
 
 
 // === BITTY BOMB VFX (enige set, geen duplicaten!) ===
