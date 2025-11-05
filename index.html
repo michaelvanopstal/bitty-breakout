@@ -223,80 +223,123 @@
   function linkify(s){
     return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
   }
+<script>
+(()=>{
+  const $msgs   = document.getElementById('chatMessages');
+  const $form   = document.getElementById('chatForm');
+  const $input  = document.getElementById('chatInput');
+  const $name   = document.getElementById('chatName');
+  const $clear  = document.getElementById('chatClearBtn');
 
-  function render(all){
-  $msgs.innerHTML = '';
-  all.forEach(m=>{
-    const wrap = document.createElement('div');
-    wrap.className = 'chat-msg';
+  const STORE_KEY = 'bb_chat_messages';
+  const LIMIT = 100; // na 100 regels schoonmaken
 
-    let html = `<div class="chat-meta">${m.time} — <b>${escapeHTML(m.name)}</b></div>`;
+  // 🔸 Functie om spelernaam uit het spel te halen
+  function detectPlayerName() {
+    let playerName = '';
 
-    if (m.text) {
-      html += `<div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
-    }
+    const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
+    const display = document.getElementById('player-display');
 
-    if (m.img) {
-      html += `<img src="${m.img}" class="chat-thumb" alt="image">`;
-    }
+    if (nameInput && nameInput.value.trim() !== '') playerName = nameInput.value.trim();
+    else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player')
+      playerName = display.textContent.trim();
 
-    wrap.innerHTML = html;
-    $msgs.appendChild(wrap);
-  });
-  $msgs.scrollTop = $msgs.scrollHeight;
-}
+    if (!playerName && localStorage.getItem('chatName'))
+      playerName = localStorage.getItem('chatName');
 
-
- function addMessage(name, text, imgData = null){
-  let all = getStore();
-  if(all.length >= LIMIT){
-    all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
+    return playerName || 'Anon';
   }
-  all.push({ name, text, time: nowTime(), img: imgData });
-  setStore(all);
-  render(all);
-}
 
+  function updateChatName() {
+    const name = detectPlayerName();
+    $name.value = name;
+    $name.disabled = true;
+    localStorage.setItem('chatName', name);
+  }
 
-   // eerst de opgeslagen berichten tonen
+  updateChatName();
+  setInterval(updateChatName, 1000);
+
+  // opslag helpers
+  function getStore(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+    catch(e){ return []; }
+  }
+  function setStore(arr){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }catch(e){}
+  }
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function nowTime(){
+    const d = new Date();
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function escapeHTML(s){
+    return s.replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[c]));
+  }
+  function linkify(s){
+    return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+  }
+
+  // ---------- render chat ----------
+  function render(all){
+    $msgs.innerHTML = '';
+    all.forEach(m=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'chat-msg';
+
+      let html = `<div class="chat-meta">${m.time} — <b>${escapeHTML(m.name)}</b></div>`;
+
+      if (m.text) {
+        html += `<div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
+      }
+
+      if (m.img) {
+        html += `<img src="${m.img}" class="chat-thumb" alt="image">`;
+      }
+
+      wrap.innerHTML = html;
+      $msgs.appendChild(wrap);
+    });
+    $msgs.scrollTop = $msgs.scrollHeight;
+  }
+
+  // ---------- bericht toevoegen ----------
+  function addMessage(name, text, imgData = null){
+    let all = getStore();
+    if(all.length >= LIMIT){
+      all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
+    }
+    all.push({ name, text, time: nowTime(), img: imgData });
+    setStore(all);
+    render(all);
+  }
+
+  // ---------- chat laden ----------
   render(getStore());
 
-  // versturen (tekst + optioneel plaatje)
+  // ---------- bericht versturen (alleen tekst) ----------
   $form.addEventListener('submit', e=>{
     e.preventDefault();
-    const name    = detectPlayerName();
-    const text    = $input.value.trim();
-    const imgInput = document.getElementById('chatImage');
-    const imgFile  = imgInput ? imgInput.files[0] : null;
-
-    // niks ingevuld? dan niks doen
-    if (!text && !imgFile) return;
-
-    // als er een plaatje is: eerst inlezen
-    if (imgFile) {
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        addMessage(name, text, ev.target.result);   // text + image
-        imgInput.value = '';                        // reset file input
-      };
-      reader.readAsDataURL(imgFile);
-    } else {
-      // alleen tekst
-      addMessage(name, text);
-    }
-
-    // input leeghalen en focus terug
+    const name = detectPlayerName();
+    const text = $input.value.trim();
+    if(!text) return;
+    addMessage(name, text);
     $input.value = '';
     $input.focus();
   });
 
-  // chat leegknop
+  // ---------- chat leegknop ----------
   $clear.addEventListener('click', ()=>{
     setStore([]);
     render([]);
   });
 
-  // enter = versturen
+  // ---------- enter = versturen ----------
   $input.addEventListener('keydown', e=>{
     if(e.key === 'Enter' && !e.shiftKey){
       e.preventDefault();
@@ -304,9 +347,46 @@
     }
   });
 
+  // ---------- STICKER PANEL ----------
+  const stickerBtn   = document.getElementById('chatStickersBtn');
+  const stickerPanel = document.getElementById('chat-sticker-panel');
+
+  if (stickerBtn && stickerPanel) {
+    const grid = document.createElement('div');
+    grid.className = 'sticker-grid';
+
+    (STICKERS || []).forEach(src => {
+      const item = document.createElement('div');
+      item.className = 'sticker-item';
+
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = 'sticker';
+
+      item.appendChild(img);
+
+      // klik op sticker -> voeg bericht toe met alleen dit plaatje
+      item.addEventListener('click', () => {
+        const name = detectPlayerName();
+        addMessage(name, '', src);
+        stickerPanel.style.display = 'none';
+      });
+
+      grid.appendChild(item);
+    });
+
+    stickerPanel.appendChild(grid);
+
+    // knop laat popup zien/verbergen
+    stickerBtn.addEventListener('click', () => {
+      const isHidden = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
+      stickerPanel.style.display = isHidden ? 'block' : 'none';
+    });
+  }
 
 })();
 </script>
+
 
 
 
