@@ -325,12 +325,9 @@ body {
   box-shadow: 0 0 10px #fff, 0 0 20px #fff;
 }
 
-
-
-
 /* ===== Chat Box styles ===== */
 /* was: position:absolute;  -> maak 'm fixed */
-#chatbox{
+#chatbox {
   position: fixed;
   right: 40px;
   top: 160px;
@@ -342,34 +339,38 @@ body {
   font-family: system-ui, Arial, sans-serif;
   border-radius: 18px;
   background: linear-gradient(#f6a53b,#e27e22);
-  box-shadow: 0 8px 20px rgba(0,0,0,.35), inset 0 0 0 4px #c76b12, inset 0 0 0 8px #ffc85a;
+  box-shadow: 0 8px 20px rgba(0,0,0,.35),
+              inset 0 0 0 4px #c76b12,
+              inset 0 0 0 8px #ffc85a;
   overflow: hidden;
   max-width: 90vw;            /* extra veiligheid op smalle schermen */
 }
 
-
-#chatbox .chatbox-header{
-  height:42px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 12px 0 16px;
+#chatbox .chatbox-header {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px 0 16px;
   background: linear-gradient(#ffd56a,#ffb12b);
-  color:#7a2b00;
-  font-weight:800;
-  letter-spacing:.5px;
-  border-bottom:2px solid #b66414;
+  color: #7a2b00;
+  font-weight: 800;
+  letter-spacing: .5px;
+  border-bottom: 2px solid #b66414;
 }
 
-#chatClearBtn{
-  border:none;
-  background:rgba(0,0,0,.08);
-  color:#7a2b00;
-  width:28px;height:28px; border-radius:8px; cursor:pointer;
+#chatClearBtn {
+  border: none;
+  background: rgba(0,0,0,.08);
+  color: #7a2b00;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
 }
-#chatClearBtn:hover{ background:rgba(0,0,0,.16); }
+#chatClearBtn:hover { background: rgba(0,0,0,.16); }
 
-#chatMessages{
+#chatMessages {
   flex: 1;
   padding: 10px 10px 6px 10px;
   background: #6a0f0f;
@@ -377,20 +378,35 @@ body {
   border-top: 2px solid #ffcf62;
   border-bottom: 2px solid #b66414;
   overflow-y: auto;
-  overflow-x: auto;      /* <-- horizontale balk alleen hier */
+  overflow-x: auto;      /* horizontale balk alleen hier */
   word-wrap: break-word;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-
-.chat-text{
+.chat-msg {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,200,90,.35);
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  line-height: 1.2;
+  box-shadow: inset 0 0 8px rgba(0,0,0,.15);
+}
+.chat-meta {
+  font-size: 11px;
+  opacity: .8;
+  margin-bottom: 2px;
+  color: #ffdfa0;
+}
+.chat-text {
   font-size: 13px;
   word-wrap: break-word;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
+/* 📸 Mini-afbeeldingen in chatberichten */
 .chat-thumb {
   display: block;
   max-width: 120px;
@@ -399,69 +415,120 @@ body {
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.3);
   object-fit: cover;
+  box-shadow: 0 0 4px rgba(0,0,0,0.4);
 }
 
-
-
-
-.chat-msg{
-  background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,200,90,.35);
-  padding:6px 8px;
-  margin-bottom:6px;
-  border-radius:10px;
-  word-break:break-word;
-  line-height:1.2;
-  box-shadow: inset 0 0 8px rgba(0,0,0,.15);
+/* Onderste invoerbalk */
+#chatForm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: linear-gradient(#ffb545,#f08a25);
+  border-top: 2px solid #b66414;
 }
-.chat-meta{
-  font-size:11px; opacity:.8; margin-bottom:2px; color:#ffdfa0;
-}
-.chat-text{ font-size:13px; }
-
-#chatForm { display:flex; gap:6px; padding:8px; background: linear-gradient(#ffb545,#f08a25); border-top:2px solid #b66414; }
-#chatForm input{
+#chatForm input {
   flex: 1;
-  min-width: 0;              /* ← essentieel: mag krimpen in flex */
+  min-width: 0;              /* mag krimpen in flex */
   height: 34px;
-  border: none; outline: none;
+  border: none;
+  outline: none;
   border-radius: 10px;
   padding: 0 10px;
   background: #fff5e3;
 }
-#chatInput{
+#chatInput {
   white-space: nowrap;       /* één regel */
   overflow: hidden;
-  text-overflow: ellipsis;   /* laat '...' zien bij superlange strings */
+  text-overflow: ellipsis;   /* '...' bij superlang */
 }
+#chatName { flex: 0 0 98px; }
 
-#chatName{ flex:0 0 98px; }
-#chatForm button{
-  flex:0 0 46px;
-  border:none; cursor:pointer;
-  border-radius:10px;
-  background:#7a2b00; color:#ffd56a; font-weight:700;
+#chatForm button,
+#chatForm label.chat-icon-btn {
+  flex: 0 0 46px;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  background: #7a2b00;
+  color: #ffd56a;
+  font-weight: 700;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-
-#chatForm button:hover{ filter:brightness(1.08); }
-/* ===== /Chat Box styles ===== */
+#chatForm button:hover,
+#chatForm label.chat-icon-btn:hover {
+  filter: brightness(1.08);
+}
 
 /* Header-knopjes uniform */
-.chat-icon-btn{
-  border:none; background:rgba(0,0,0,.08); color:#7a2b00;
-  width:28px; height:28px; border-radius:8px; cursor:pointer;
+.chat-icon-btn {
+  border: none;
+  background: rgba(0,0,0,.08);
+  color: #7a2b00;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
 }
-.chat-icon-btn:hover{ background:rgba(0,0,0,.16); }
+.chat-icon-btn:hover { background: rgba(0,0,0,.16); }
 
 /* Ingeklapt: alleen header zichtbaar */
-#chatbox.collapsed{ height:42px; overflow:hidden; }
+#chatbox.collapsed { height: 42px; overflow: hidden; }
 #chatbox.collapsed #chatMessages,
-#chatbox.collapsed #chatForm{ display:none; }
+#chatbox.collapsed #chatForm { display: none; }
 
 /* Pijltje draait als open */
-#chatbox:not(.collapsed) #chatToggleBtn{ transform: rotate(90deg); }
-#chatbox.collapsed #chatToggleBtn{ transform: rotate(0deg); }
+#chatbox:not(.collapsed) #chatToggleBtn { transform: rotate(90deg); }
+#chatbox.collapsed #chatToggleBtn { transform: rotate(0deg); }
+
+/* ===== Sticker panel ===== */
+#chat-sticker-panel {
+  position: fixed;
+  right: 40px;           /* hetzelfde als chat */
+  top: 520px;            /* onder de chat - pas aan als hij te hoog/laag is */
+  width: 220px;
+  max-height: 180px;
+  background: rgba(106, 15, 15, 0.97);
+  border: 2px solid #ffcf62;
+  border-radius: 12px;
+  padding: 6px;
+  display: none;         /* standaard uit */
+  z-index: 9999;
+  overflow-y: auto;
+  box-shadow: 0 6px 16px rgba(0,0,0,.35);
+}
+
+#chat-sticker-panel .sticker-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#chat-sticker-panel .sticker-item {
+  width: 58px;
+  height: 58px;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .1s ease;
+}
+#chat-sticker-panel .sticker-item:hover {
+  transform: scale(1.04);
+}
+
+#chat-sticker-panel .sticker-item img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
 
 
 
