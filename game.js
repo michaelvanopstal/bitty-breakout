@@ -1059,7 +1059,9 @@ function activateInvincibleShield(ms = 30000) {
 
 const bonusBricks = [
   { col: 5, row: 3, type: "rocket" },  { col: 2, row: 12, type: "machinegun" }, 
-  { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" },
+  { col: 4, row: 0, type: "paddle_small" },{ col: 7, row: 10, type: "paddle_long" }, 
+  { col: 3, row: 6, type: "tenhit" },
+
 
 
   { col: 4, row: 4, type: "magnet" },{ col: 4, row: 10, type: "tnt" },{ col: 1, row: 1, type: "tnt" },{ col: 7, row: 1, type: "tnt" },
@@ -1781,6 +1783,9 @@ dollarPxpImg.src = "dollarpxp.png";
 const bombTokenImg = new Image();
 bombTokenImg.src = "bom.png"; 
 
+const tenHitImg = new Image();
+tenHitImg.src = "gold.png"; // of geef hier de gewenste bestandsnaam van je nieuwe blokje
+
 
 const doubleBallImg = new Image();
 doubleBallImg.src = "2 balls.png";  // upload dit naar dezelfde map
@@ -2501,6 +2506,11 @@ function drawBricks() {
             ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
             break;
 
+            case "tenhit":
+            ctx.drawImage(tenHitImg, brickX, brickY, brickWidth, brickHeight);
+            break;
+
+            
           case "machinegun":
             ctx.drawImage(machinegunBlockImg, brickX, brickY, brickWidth, brickHeight);
             break;
@@ -2819,15 +2829,30 @@ function resetBricks() {
       const b = bricks[c][r];
       b.status = 1;
 
+      // check of dit blok in de level-map is gedefinieerd
       const defined = currentMap.find(p => p.col === c && p.row === r);
       const brickType = defined ? defined.type : "normal";
       b.type = brickType;
 
-      if (brickType === "stone" || brickType === "silver") {
+      // hits / speciale velden per type
+      if (brickType === "stone") {
         b.hits = 0;
+        b.hitsNeeded = 3;
         b.hasDroppedBag = false;
+      } else if (brickType === "silver") {
+        b.hits = 0;
+        b.hitsNeeded = 2;
+        b.hasDroppedBag = false;
+      } else if (brickType === "tenhit") {
+        // 👈 jouw nieuwe blok
+        b.hits = 0;
+        b.hitsNeeded = 10;
+        // meestal geen bag hier, dus:
+        delete b.hasDroppedBag;
       } else {
+        // gewone blokken: rommel opruimen
         delete b.hits;
+        delete b.hitsNeeded;
         delete b.hasDroppedBag;
       }
 
@@ -2891,7 +2916,6 @@ function resetBricks() {
     updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
   }
 }
-
 
 
 
@@ -4291,7 +4315,6 @@ function checkCoinCollision() {
   });
 }
 
-
 function collisionDetection() {
   // 🔧 Instelling: hoe vaak moet hij "watch out..." zeggen (1x per X hits)
   const stonefallVoiceEvery = 5; // ← verander dit getal naar wens
@@ -4326,6 +4349,7 @@ function collisionDetection() {
           blockSound.currentTime = 0;
           blockSound.play();
 
+          // simpele bounce
           ball.dy = -ball.dy;
           if (ball.dy < 0) {
             ball.y = b.y - ball.radius - 1;
@@ -4401,6 +4425,58 @@ function collisionDetection() {
             }
 
             return; // klaar met deze hit
+          }
+
+          // ⭐️ NIEUW: ten-hit blok
+          if (b.type === "tenhit") {
+            // tel de hit
+            b.hits = (b.hits || 0) + 1;
+
+            // elke hit = +10
+            const perHit = doublePointsActive ? 20 : 10;
+            score += perHit;
+            updateScoreDisplay();
+
+            pointPopups.push({
+              x: b.x + brickWidth / 2,
+              y: b.y,
+              value: "+" + perHit,
+              alpha: 1
+            });
+
+            // beetje effect mag altijd
+            for (let i = 0; i < 3; i++) {
+              stoneDebris.push({
+                x: b.x + brickWidth / 2,
+                y: b.y + brickHeight / 2,
+                dx: (Math.random() - 0.5) * 2,
+                dy: (Math.random() - 0.5) * 2,
+                radius: Math.random() * 1.5 + 0.5,
+                alpha: 1
+              });
+            }
+
+            // bij de 10e keer echt slopen +100
+            const needed = b.hitsNeeded || 10;
+            if (b.hits >= needed) {
+              b.status = 0;
+
+              const finalEarned = doublePointsActive ? 200 : 100;
+              score += finalEarned;
+              updateScoreDisplay();
+
+              pointPopups.push({
+                x: b.x + brickWidth / 2,
+                y: b.y,
+                value: "+" + finalEarned,
+                alpha: 1
+              });
+
+              // optioneel: coin droppen
+              spawnCoin(b.x + brickWidth / 2, b.y);
+            }
+
+            return; // we zijn klaar met deze hit
           }
 
           // 🎁 Bonusacties
@@ -4499,7 +4575,7 @@ function collisionDetection() {
               break;
           } // <-- einde switch
 
-          // 🔽 Gedeelde cleanup (voor alle reguliere bonussen, NIET stonefall/tnt/silver/stone)
+          // 🔽 Gedeelde cleanup (voor alle reguliere bonussen, NIET stonefall/tnt/silver/stone/tenhit)
           b.status = 0;
 
           let earned = (b.type === "normal") ? 5 : (doublePointsActive ? 20 : 10);
@@ -5441,7 +5517,7 @@ if (showGameOver) {
 
 function onImageLoad() {
   imagesLoaded++;
-  if (imagesLoaded === 33) {
+  if (imagesLoaded === 34) {
     // Normale spelstart
     level = 1;                // start op level 1
     score = 0;
@@ -5508,6 +5584,7 @@ starImg.onload = onImageLoad;
 bombTokenImg.onload = onImageLoad;
 badCrossImg.onload = onImageLoad;
 heartLevelupImg.onload = onImageLoad;
+tenHitImg.onload = onImageLoad;
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
