@@ -14,9 +14,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-
-  <!-- ===== Chat Box (rechts) ===== -->
+<body><!-- ===== Chat Box (rechts) ===== -->
 <div id="chatbox">
   <div class="chatbox-header">
     <button id="chatToggleBtn" class="chat-icon-btn" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
@@ -38,17 +36,13 @@
   <form id="chatForm" autocomplete="off">
     <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
     <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
-
-    <!-- 📷 Nieuw: verborgen input + camera-knop -->
-    <input type="file" id="chatImage" accept="image/*" style="display:none;">
-    <label for="chatImage" class="chat-icon-btn" title="Stuur afbeelding">📷</label>
-
     <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
   </form>
 </div>
+<!-- ===== /Chat Box ===== -->
 
-  <script>
-  // Zet deze bestanden in dezelfde map als index.html
+<script>
+  // vaste stickers (in dezelfde map als index.html zetten)
   const STICKERS = [
     'grumpy (11).png',
     'Sandwich (7).png',
@@ -56,7 +50,7 @@
     'fcvhjkjk.jpg'   // extra afbeelding
   ];
 </script>
-<!-- ===== /Chat Box ===== -->
+
 
 
 <!-- ===== BONUS POWER los van chat ===== -->
