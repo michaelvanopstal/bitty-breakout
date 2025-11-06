@@ -485,7 +485,7 @@ body {
 #chatbox.collapsed #chatToggleBtn { transform: rotate(0deg); }
 
 
-/* === Sticker/GIF panel === */
+
 /* === Sticker/GIF panel (onder chatbox) === */
 #chat-sticker-panel {
   position: fixed;        /* buiten de chatbox, dus fixed */
