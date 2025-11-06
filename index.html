@@ -77,17 +77,17 @@
 <script>
   // TODO: vul deze config in met jouw gegevens uit Firebase Console
   const firebaseConfig = {
+   const firebaseConfig = {
     apiKey: "JOUW_API_KEY_HIER",
-    authDomain: "JOUW_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://JOUW_PROJECT_ID-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "JOUW_PROJECT_ID",
-    storageBucket: "JOUW_PROJECT_ID.appspot.com",
-    messagingSenderId: "1234567890",
-    appId: "1:1234567890:web:abcdef123456"
+    authDomain: "bitty-brickshift.firebaseapp.com",        // meestal zo
+    databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "bitty-brickshift",
+    storageBucket: "bitty-brickshift.appspot.com",
+    messagingSenderId: "…",
+    appId: "…"
   };
   firebase.initializeApp(firebaseConfig);
 
-  // refs die we in je chat en highscores gaan gebruiken
   const db        = firebase.database();
   const chatRef   = db.ref("chat");
   const scoresRef = db.ref("scores");
