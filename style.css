@@ -492,7 +492,7 @@ body {
   top: calc(160px + 360px); /* 160px (chatbox top) + 360px (chatbox height) = direct eronder */
   right: 40px;            /* zelfde als chatbox */
   width: 300px;           /* zelfde breedte als chatbox */
-  background: #ffcc70;
+  background: #6a0f0f;
   border: 2px solid #b66414;
   border-top: none;
   border-radius: 0 0 12px 12px;
