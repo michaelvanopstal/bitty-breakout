@@ -50,10 +50,6 @@
   ];
 </script>
 
-
-
-
-
 <!-- ===== BONUS POWER los van chat ===== -->
 <div id="bonus-power-panel">
   <div class="bp-header">BONUS POWER</div>
@@ -103,12 +99,8 @@
 <span id="player-display">Player</span>
 <span id="scoreDisplay">0</span>
 
-
-  
-
-
-  <!-- Tooltip -->
-  <div id="resetTooltip" style="
+<!-- Tooltip -->
+<div id="resetTooltip" style="
     display: none;
     position: fixed;
     bottom: 100px;
@@ -124,26 +116,28 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   ">Use when the ball is stuck — no lives will be lost.</div>
 
-  <!-- Reset-knop -->
-  <img id="resetBallBtn" 
-       src="resetball.png" 
-       alt="Reset Ball" 
-                  style="
-         position: fixed;
-         bottom: 40px;
-         right: 30px;
-         width: 100px;
-         height: 100px;
-         cursor: pointer;
-         z-index: 13000;
-         transition: transform 0.2s ease;
-       "
-       onmouseover="this.style.transform='scale(1.1)'"
-       onmouseout="this.style.transform='scale(1)'"
-  >
+<!-- Reset-knop -->
+<img id="resetBallBtn" 
+     src="resetball.png" 
+     alt="Reset Ball" 
+     style="
+       position: fixed;
+       bottom: 40px;
+       right: 30px;
+       width: 100px;
+       height: 100px;
+       cursor: pointer;
+       z-index: 13000;
+       transition: transform 0.2s ease;
+     "
+     onmouseover="this.style.transform='scale(1.1)'"
+     onmouseout="this.style.transform='scale(1)'"
+>
 </body>
+
+<!-- ✅ CHAT SCRIPT (opgeschoond, 1x) -->
 <script>
-(()=>{
+(() => {
   const $msgs   = document.getElementById('chatMessages');
   const $form   = document.getElementById('chatForm');
   const $input  = document.getElementById('chatInput');
@@ -159,15 +153,18 @@
 
     // zoek inlogveld of display-element
     const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
-    const display = document.getElementById('player-display');
+    const display   = document.getElementById('player-display');
 
-    if (nameInput && nameInput.value.trim() !== '') playerName = nameInput.value.trim();
-    else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player')
+    if (nameInput && nameInput.value.trim() !== '') {
+      playerName = nameInput.value.trim();
+    } else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player') {
       playerName = display.textContent.trim();
+    }
 
     // fallback: bewaar oude naam
-    if (!playerName && localStorage.getItem('chatName'))
+    if (!playerName && localStorage.getItem('chatName')) {
       playerName = localStorage.getItem('chatName');
+    }
 
     return playerName || 'Anon';
   }
@@ -175,8 +172,10 @@
   // automatische naamdetectie
   function updateChatName() {
     const name = detectPlayerName();
-    $name.value = name;
-    $name.disabled = true; // vergrendeld
+    if ($name) {
+      $name.value = name;
+      $name.disabled = true; // vergrendeld
+    }
     localStorage.setItem('chatName', name);
   }
 
@@ -207,68 +206,8 @@
   function linkify(s){
     return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
   }
-<script>
-(()=> {
-  const $msgs   = document.getElementById('chatMessages');
-  const $form   = document.getElementById('chatForm');
-  const $input  = document.getElementById('chatInput');
-  const $name   = document.getElementById('chatName');
-  const $clear  = document.getElementById('chatClearBtn');
 
-  const STORE_KEY = 'bb_chat_messages';
-  const LIMIT = 100;
-
-  // naam uit spel
-  function detectPlayerName() {
-    let playerName = '';
-    const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
-    const display   = document.getElementById('player-display');
-
-    if (nameInput && nameInput.value.trim() !== '') playerName = nameInput.value.trim();
-    else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player')
-      playerName = display.textContent.trim();
-
-    if (!playerName && localStorage.getItem('chatName'))
-      playerName = localStorage.getItem('chatName');
-
-    return playerName || 'Anon';
-  }
-
-  function updateChatName() {
-    const name = detectPlayerName();
-    if ($name) {
-      $name.value = name;
-      $name.disabled = true;
-    }
-    localStorage.setItem('chatName', name);
-  }
-  updateChatName();
-  setInterval(updateChatName, 1000);
-
-  // opslag
-  function getStore(){
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
-    catch(e){ return []; }
-  }
-  function setStore(arr){
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); } catch(e){}
-  }
-
-  function pad(n){ return String(n).padStart(2,'0'); }
-  function nowTime(){
-    const d = new Date();
-    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
-
-  function escapeHTML(s){
-    return s.replace(/[&<>"']/g, c => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-    }[c]));
-  }
-  function linkify(s){
-    return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-  }
-
+  // renderen van berichten
   function render(all){
     if (!$msgs) return;
     $msgs.innerHTML = '';
@@ -292,33 +231,34 @@
     $msgs.scrollTop = $msgs.scrollHeight;
   }
 
+  // bericht toevoegen
   function addMessage(name, text, imgData = null){
     let all = getStore();
-    if (all.length >= LIMIT) {
-      all = [{ name:'System', text:'Chat automatisch geleegd (100 berichten).', time: nowTime() }];
+    if(all.length >= LIMIT){
+      all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
     }
     all.push({ name, text, time: nowTime(), img: imgData });
     setStore(all);
     render(all);
   }
 
-  // tonen wat er al was
+  // eerst de opgeslagen berichten tonen
   render(getStore());
 
-  // versturen tekst
+  // versturen (alleen tekst)
   if ($form) {
     $form.addEventListener('submit', e=>{
       e.preventDefault();
       const name = detectPlayerName();
       const text = $input.value.trim();
-      if (!text) return;
+      if(!text) return;
       addMessage(name, text);
       $input.value = '';
       $input.focus();
     });
   }
 
-  // leegknop
+  // chat leegknop
   if ($clear) {
     $clear.addEventListener('click', ()=>{
       setStore([]);
@@ -329,7 +269,7 @@
   // enter = versturen
   if ($input) {
     $input.addEventListener('keydown', e=>{
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if(e.key === 'Enter' && !e.shiftKey){
         e.preventDefault();
         $form.requestSubmit();
       }
@@ -355,6 +295,7 @@
 
       item.appendChild(img);
 
+      // klik op sticker -> als bericht plaatsen
       item.addEventListener('click', () => {
         const name = detectPlayerName();
         addMessage(name, '', src);
@@ -366,6 +307,7 @@
 
     stickerPanel.appendChild(grid);
 
+    // camera-knop opent/sluitt het paneel
     stickerBtn.addEventListener('click', () => {
       const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
       stickerPanel.style.display = show ? 'block' : 'none';
@@ -375,26 +317,21 @@
 })();
 </script>
 
-
-
-
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="600"></canvas>
    
- <div id="time-box">
-  <span id="timeDisplay">00:00</span>
-</div>
-
-
-
- <div id="login-overlay">
-<div id="login-box">
-  <input type="text" id="player-name" placeholder="Voer je naam in" />
-  <button id="login-btn">Login</button>
-  <button id="logout-btn" style="display: none;">Logout</button>
-</div>
+    <div id="time-box">
+      <span id="timeDisplay">00:00</span>
     </div>
-     <img id="musicToggle" src="playmusic button.png" alt="Play Music" style="cursor: pointer; width: 180px;" />
+
+    <div id="login-overlay">
+      <div id="login-box">
+        <input type="text" id="player-name" placeholder="Voer je naam in" />
+        <button id="login-btn">Login</button>
+        <button id="logout-btn" style="display: none;">Logout</button>
+      </div>
+    </div>
+    <img id="musicToggle" src="playmusic button.png" alt="Play Music" style="cursor: pointer; width: 180px;" />
     <div id="highscore-overlay">
       <ol id="highscore-list">
         <li></li><li></li><li></li><li></li><li></li>
@@ -402,12 +339,12 @@
       </ol>
     </div>
   </div>
-<div id="hud" style="position: absolute; top: 10px; left: 80px; z-index: 1000;">
-  <div id="livesDisplay" style="display: flex; gap: 6px;"></div>
-</div>
 
-<img src="beker_clipped_rev_2.png" id="trophy" alt="Trophy">
+  <div id="hud" style="position: absolute; top: 10px; left: 80px; z-index: 1000;">
+    <div id="livesDisplay" style="display: flex; gap: 6px;"></div>
+  </div>
 
+  <img src="beker_clipped_rev_2.png" id="trophy" alt="Trophy">
 
   <script src="login.js"></script>
   <script src="game.js"></script>
@@ -476,7 +413,6 @@
   
 <img id="bikeFlyer" src="pointpay-bike.png" style="position:absolute; display:none; width:180px;" />
 
-
 <script>
   function animateFlyer(flyerId, duration, delay) {
     setTimeout(() => {
@@ -524,12 +460,8 @@
   setInterval(() => animateFlyer("bikeFlyer", 20000, 1000), 30000);
 </script>
 
-
-
-
 <!-- Externe scripts -->
 <script src="login.js"></script>
-
 
 <!-- Muziekalbumscript -->
 <script>
@@ -575,7 +507,6 @@ document.addEventListener('DOMContentLoaded', () => {
     musicBtn.title = playing ? 'Stop Music' : 'Play Music';
     musicBtn.alt   = playing ? 'Stop Music' : 'Play Music';
     musicBtn.src   = playing ? 'playmusic button.png' : 'playmusic button.png';
-    // ^ pas bestandsnamen aan naar jouw assets
   }
   updateBtnUI(musicPlaying);
 
@@ -591,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
         p.catch(() => { musicPlaying = false; updateBtnUI(false); });
       }
     } else {
-      currentTrackIndex = 0; // optioneel
+      currentTrackIndex = 0;
     }
 
     updateBtnUI(musicPlaying);
@@ -599,7 +530,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-
 
 <!-- 💬 Chat open/dicht -->
 <script>
@@ -622,5 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (chatInput) chatInput.setAttribute('maxlength','300');
 })();
 </script>
+
 </body>
 </html>
+
