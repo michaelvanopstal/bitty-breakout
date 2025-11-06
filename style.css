@@ -523,6 +523,11 @@ body {
   transform: scale(1.04);
 }
 
+#chat-sticker-panel .sticker-item.selected {
+  outline: 2px solid #ffcf62;
+  box-shadow: 0 0 6px rgba(0,0,0,.4);
+}
+
 #chat-sticker-panel .sticker-item img {
   max-width: 100%;
   max-height: 100%;
