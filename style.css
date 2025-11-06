@@ -365,18 +365,15 @@ body {
 }
 
 /* =========================================================
-   ✅ PC-MODE (grote schermen) – hier doen we de correctie
+   ✅ PC-MODE (grote schermen)
    ========================================================= */
 @media (min-width: 1500px) {
-  /* centreren van het hele spel */
   #game-container {
     position: relative;
-    width: 1200px;          /* vaste mooie breedte */
+    width: 1200px;
     margin: 15px auto 0 auto;
   }
 
-  /* canvas niet meer absolute in het midden duwen,
-     maar gewoon binnen de container */
   #gameCanvas {
     position: relative;
     top: 0;
@@ -387,7 +384,6 @@ body {
     aspect-ratio: 645 / 600;
   }
 
-  /* overlays opnieuw positioneren t.o.v. container */
   #player-display {
     top: 40px;
     left: 20px;
@@ -410,11 +406,100 @@ body {
     left: 20px;
   }
 
-  /* bonus panel iets meer naar links omdat er meer ruimte is */
   #bonus-power-panel {
     position: fixed;
     top: 320px;
     right: 360px;
+  }
+}
+
+/* =========================================================
+   📱 MOBIEL / SMAL SCHERM
+   ========================================================= */
+@media (max-width: 900px) {
+  body {
+    overflow-y: auto;        /* mag scrollen op telefoon */
+    background-size: cover;
+  }
+
+  #gameCanvas {
+    position: relative;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 96vw;
+    max-width: 640px;
+    height: auto;
+  }
+
+  #game-container {
+    margin: 0 auto;
+    display: block;
+  }
+
+  /* dingen links/rechts even centreren */
+  #player-display {
+    top: 10px;
+    left: 10px;
+  }
+
+  #scoreDisplay {
+    top: 10px;
+    right: 10px;
+    left: auto;
+  }
+
+  #time-box {
+    top: 50px;
+    right: 10px;
+    left: auto;
+  }
+
+  /* minder rommel op klein scherm */
+  #highscore-overlay,
+  #bonus-power-panel,
+  #trophy {
+    display: none;
+  }
+
+  /* chat meeschalen */
+  #chatbox {
+    right: 2vw;
+    top: 140px;
+    width: 94vw;
+    max-width: none;
+  }
+
+  /* stickerpanel direct onder de nieuwe brede chat */
+  #chat-sticker-panel {
+    right: 2vw;
+    width: 94vw;
+    max-height: 180px;
+    top: calc(140px + 360px);
+  }
+
+  #login-overlay {
+    top: 80px;
+    right: 10px;
+  }
+
+  #musicToggle {
+    left: 10px;
+    bottom: 10px;
+    width: 150px;
+  }
+}
+
+/* nog wat extra strakker voor echt smal (<600) */
+@media (max-width: 600px) {
+  #chatForm {
+    gap: 4px;
+  }
+  #chatName {
+    flex: 0 0 80px;
+  }
+  #chatForm button {
+    flex: 0 0 38px;
   }
 }
 
