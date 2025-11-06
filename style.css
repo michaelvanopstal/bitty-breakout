@@ -429,70 +429,75 @@ body {
     right: 20px;
   }
 }
-/* =========================================================
-   📱 MOBIEL / SMALLE SCHERMEN
-   ========================================================= */
-/* =========================================
-   📱 Mobiel: geen chat + vaste achtergrond
-   ========================================= */
+
+/* =========================
+   📱 MOBIEL FIX (max 768px)
+   ========================= */
 @media (max-width: 768px) {
 
-  /* vaste achtergrond (geen scroll) */
+  /* vaste achtergrond, niet scrollen */
   body {
+    margin: 0;
     background: #c94a0a;
-    overflow: hidden;              /* voorkomt scrollen */
-    background-attachment: fixed;  /* laat de achtergrond vaststaan */
+    overflow: hidden;
   }
 
-  /* spel gecentreerd en niet breder dan 640 */
+  /* we doen alsof het canvas nog steeds 640x600 is,
+     maar tonen het kleiner met scale */
   #gameCanvas {
-    position: relative;
+    position: absolute;
     top: 0;
     left: 50%;
-    transform: translateX(-50%);
-    width: 100vw;
-    max-width: 640px;
-    height: auto;
+    width: 640px;     /* originele maat */
+    height: 600px;    /* originele maat */
+    transform: translateX(-50%) scale(0.55);  /* schaal kleiner tonen */
+    transform-origin: top center;
   }
 
-  /* container mooi gecentreerd */
-  #game-container {
-    margin: 0 auto;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  /* alles wat stoort: weg */
+  /* dingen die op mobiel in de weg zitten: uit */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
   #musicToggle,
-  #resetBallBtn,
-  #chatbox,
-  #chat-sticker-panel {
+  #resetBallBtn {
     display: none !important;
   }
 
-  /* HUD compacter */
-  #player-display {
+  /* login + score + time wat dichter bij elkaar */
+  #login-overlay {
     top: 8px;
-    left: 8px;
+    right: 8px;
+  }
+
+  #player-display {
+    top: 12px;
+    left: 10px;
     font-size: 14px;
   }
 
   #scoreDisplay {
-    top: 8px;
-    right: 8px;
+    top: 12px;
+    right: 10px;
     left: auto;
     font-size: 14px;
+    z-index: 9999;
   }
 
   #time-box {
-    top: 34px;
-    right: 8px;
+    top: 12px;
+    right: 90px;
     left: auto;
+    z-index: 9999;
+  }
+
+  /* chat: op mobiel niet tonen tijdens spelen */
+  #chatbox,
+  #chat-sticker-panel {
+    display: none !important;
   }
 }
+
+
 
 
 
