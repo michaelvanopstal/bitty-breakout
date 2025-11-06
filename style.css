@@ -486,27 +486,28 @@ body {
 
 
 /* === Sticker/GIF panel === */
+/* === Sticker/GIF panel (onder chatbox) === */
 #chat-sticker-panel {
-  position: absolute;
-  bottom: 60px;          /* iets boven het invoerveld */
-  left: 0;
-  width: 100%;           /* zelfde breedte als de chatbox */
+  position: fixed;        /* buiten de chatbox, dus fixed */
+  top: calc(160px + 360px); /* 160px (chatbox top) + 360px (chatbox height) = direct eronder */
+  right: 40px;            /* zelfde als chatbox */
+  width: 300px;           /* zelfde breedte als chatbox */
   background: #ffcc70;
-  border-top: 2px solid #b66414;
-  border-bottom: 2px solid #b66414;
+  border: 2px solid #b66414;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,.3);
   padding: 8px;
   display: none;
   z-index: 9999;
-  box-shadow: inset 0 0 6px rgba(0,0,0,.2);
   overflow-y: auto;
   max-height: 160px;
-  border-radius: 0 0 12px 12px;
 }
 
-/* Raster met stickers */
+/* Raster met stickers/gifs */
 .sticker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); /* zoveel mogelijk naast elkaar */
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
   gap: 8px;
 }
 
@@ -516,12 +517,10 @@ body {
   overflow: hidden;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-
 .sticker-item:hover {
   transform: scale(1.08);
   box-shadow: 0 0 6px rgba(0,0,0,.25);
 }
-
 .sticker-item img {
   width: 100%;
   height: auto;
@@ -534,14 +533,3 @@ body {
   outline: 2px solid #ffcf62;
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
-
-
-
-
-
-
-
-
-
-
-
