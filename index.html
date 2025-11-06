@@ -154,34 +154,35 @@
       onmouseout="this.style.transform='scale(1)'"
   >
 
-  <!-- 🔹 1. Firebase libs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+ <!-- Firebase compat libraries -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
+    authDomain: "bitty-brickshift.firebaseapp.com",
+    databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "bitty-brickshift",
+    storageBucket: "bitty-brickshift.appspot.com",
+    messagingSenderId: "823337012487",
+    appId: "1:823337012487:web:1d217b13195f48809389a2"
+  };
 
-  <!-- 🔹 2. Firebase init + globale refs -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
-      authDomain: "bitty-brickshift.firebaseapp.com",
-      databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "bitty-brickshift",
-      storageBucket: "bitty-brickshift.appspot.com",
-      messagingSenderId: "823337012487",
-      appId: "1:823337012487:web:1d217b13195f48809389a2"
-    };
+  // init
+  firebase.initializeApp(firebaseConfig);
 
-    firebase.initializeApp(firebaseConfig);
+  // refs
+  const db        = firebase.database();
+  const chatRef   = db.ref("chat");
+  const scoresRef = db.ref("scores");
 
-    const db        = firebase.database();
-    const chatRef   = db.ref("chat");
-    const scoresRef = db.ref("scores");
+  // globaal maken
+  window.chatRef   = chatRef;
+  window.scoresRef = scoresRef;
 
-    // globaal maken zodat andere scripts 'm zien
-    window.chatRef   = chatRef;
-    window.scoresRef = scoresRef;
+  console.log("✅ Firebase connected!");
+</script>
 
-    console.log("✅ Firebase connected!");
-  </script>
 
   <!-- ✅ CHAT SCRIPT (nu met Firebase) -->
   <script>
