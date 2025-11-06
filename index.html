@@ -689,32 +689,42 @@
   </script>
 
   <!-- 💬 Chat open/dicht -->
-  <script>
  (()=> {
   const chat = document.getElementById('chatbox');
   const toggleBtn = document.getElementById('chatToggleBtn');
-  const stickerPanel = document.getElementById('chat-sticker-panel'); // 👈 erbij
+  const chatInput = document.getElementById('chatInput');
 
+  // Herstel laatst opgeslagen status
   try {
-    if (localStorage.getItem('chatCollapsed') === '1') chat.classList.add('collapsed');
+    if (localStorage.getItem('chatCollapsed') === '1') {
+      chat.classList.add('collapsed');
+    }
   } catch(e){}
 
+  // Alleen met muisklik open/dicht
   toggleBtn?.addEventListener('click', () => {
     chat.classList.toggle('collapsed');
-
-    // 👇 als chat dicht gaat: stickerpaneel ook dicht
-    if (chat.classList.contains('collapsed') && stickerPanel) {
-      stickerPanel.style.display = 'none';
-    }
-
     try {
       localStorage.setItem('chatCollapsed', chat.classList.contains('collapsed') ? '1' : '0');
     } catch(e){}
   });
 
-  const chatInput = document.getElementById('chatInput');
-  if (chatInput) chatInput.setAttribute('maxlength','300');
+  // 🚫 Verwijder alle spatie- of toetsacties voor de chatbox zelf
+  window.addEventListener('keydown', (e) => {
+    // Laat de spatiebalk volledig met rust voor de game
+    if (e.code === 'Space') return;
+
+    // Chat mag WEL typen als input focus heeft
+    if (document.activeElement === chatInput) return;
+
+    // Eventuele andere sneltoetsen (zoals Escape) mogen wel
+    if (e.code === 'Escape') {
+      chat.classList.add('collapsed');
+      localStorage.setItem('chatCollapsed', '1');
+    }
+  });
 })();
+
 
   </script>
 
