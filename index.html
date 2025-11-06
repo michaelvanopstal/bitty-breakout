@@ -291,25 +291,35 @@
 
   // bericht toevoegen -> NU naar Firebase
   function addMessage(name, text, imgData = null){
-    const msg = {
-      name: name,
-      text: text,
-      img: imgData,
-      time: nowTime()
-    };
-    if (window.chatRef) {
-      chatRef.push(msg);
-    } else {
-      // fallback op localStorage
-      let all = getStore();
-      if(all.length >= LIMIT){
-        all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
+  const msg = {
+    name: name,
+    text: text,
+    img: imgData,
+    time: nowTime()
+  };
+
+  // als firebase bestaat: daarheen sturen
+  if (window.chatRef) {
+    console.log('[chat] probeer te pushen naar Firebase:', msg);
+    chatRef.push(msg, (err) => {
+      if (err) {
+        console.error('[chat] Firebase push MISLUKT:', err);
+      } else {
+        console.log('[chat] Firebase push GELUKT ✅');
       }
-      all.push(msg);
-      setStore(all);
-      render(all);
+    });
+  } else {
+    // FALLBACK: localStorage
+    console.warn('[chat] geen chatRef -> gebruik localStorage');
+    let all = getStore();
+    if(all.length >= LIMIT){
+      all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
     }
+    all.push(msg);
+    setStore(all);
+    render(all);
   }
+}
 
   // ✅ luister op Firebase chat
   if (window.chatRef) {
