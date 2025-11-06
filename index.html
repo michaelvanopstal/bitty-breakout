@@ -255,26 +255,25 @@
 
   // versturen (alleen tekst)
   if ($form) {
-  $form.addEventListener('submit', e=>{
+ $form.addEventListener('submit', e=>{
   e.preventDefault();
   const name = detectPlayerName();
   const text = $input.value.trim();
 
-  // niks ingevuld en geen sticker? dan niks
+  // niks en geen sticker? dan niks
   if (!text && !selectedSticker) return;
 
-  // stuur met wat we hebben
   addMessage(name, text, selectedSticker);
 
-  // na versturen alles resetten
+  // reset
   $input.value = '';
   $input.focus();
 
-  // sticker deselecteren in UI
   selectedSticker = null;
   const chosen = document.querySelector('#chat-sticker-panel .sticker-item.selected');
   if (chosen) chosen.classList.remove('selected');
 });
+
 
   }
 
@@ -295,11 +294,10 @@
       }
     });
   }
-
   // ===== STICKER PANEL =====
   const stickerBtn   = document.getElementById('chatStickersBtn');
   const stickerPanel = document.getElementById('chat-sticker-panel');
-  let currentStickerEl = null; // voor highlight
+  let currentStickerEl = null; // om highlight te onthouden
 
   if (stickerBtn && stickerPanel) {
     const grid = document.createElement('div');
@@ -316,9 +314,9 @@
 
       item.appendChild(img);
 
-      // klik = alleen selecteren (niet meteen sturen)
+      // 1x klik: alleen selecteren
       item.addEventListener('click', () => {
-        // als je op dezelfde klikt: deselect
+        // klik op dezelfde -> deselect
         if (selectedSticker === src) {
           selectedSticker = null;
           item.classList.remove('selected');
@@ -328,10 +326,46 @@
 
         selectedSticker = src;
 
-        // highlight wisselen
         if (currentStickerEl) currentStickerEl.classList.remove('selected');
         item.classList.add('selected');
         currentStickerEl = item;
+      });
+
+      // 2x klik: direct sturen (met eventuele tekst)
+     // 2x klik: direct sturen (met eventuele tekst)
+item.addEventListener('dblclick', () => {
+  const name = detectPlayerName();
+  const text = $input ? $input.value.trim() : '';
+
+  addMessage(name, text, src);
+
+  // reset UI
+  if ($input) {
+    $input.value = '';
+    $input.focus();
+  }
+  selectedSticker = null;
+  if (currentStickerEl) {
+    currentStickerEl.classList.remove('selected');
+    currentStickerEl = null;
+  }
+
+  // popup sluiten
+  stickerPanel.style.display = 'none';
+});
+
+        // reset UI
+        if ($input) {
+          $input.value = '';
+          $input.focus();
+        }
+        selectedSticker = null;
+        if (currentStickerEl) {
+          currentStickerEl.classList.remove('selected');
+          currentStickerEl = null;
+        }
+        // paneel dicht
+        stickerPanel.style.display = 'none';
       });
 
       grid.appendChild(item);
@@ -339,12 +373,13 @@
 
     stickerPanel.appendChild(grid);
 
-    // open/dicht
+    // open/dicht via camera-knop
     stickerBtn.addEventListener('click', () => {
       const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
       stickerPanel.style.display = show ? 'block' : 'none';
     });
   }
+
 
 })();
 </script>
