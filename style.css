@@ -494,8 +494,8 @@ body {
   width: 300px;           /* zelfde breedte als chatbox */
   background: #6a0f0f;
   border: 2px solid #b66414;
-  border-top: none;
-  border-radius: 0 0 12px 12px;
+  border-top: 2px solid #b66414;      /* bovenrand weer zichtbaar */
+  border-radius: 12px;                /* alle hoeken afgerond */
   box-shadow: 0 6px 12px rgba(0,0,0,.3);
   padding: 8px;
   display: none;
