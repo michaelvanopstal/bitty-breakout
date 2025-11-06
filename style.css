@@ -483,6 +483,8 @@ body {
 /* Pijltje draait als open */
 #chatbox:not(.collapsed) #chatToggleBtn { transform: rotate(90deg); }
 #chatbox.collapsed #chatToggleBtn { transform: rotate(0deg); }
+
+
 /* === Sticker/GIF panel === */
 #chat-sticker-panel {
   position: absolute;
