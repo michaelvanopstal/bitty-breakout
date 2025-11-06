@@ -301,73 +301,90 @@
       }
     });
   }
+// ===== STICKER PANEL =====
+if (stickerBtn && stickerPanel) {
+  // Twee secties: images en gifs
+  const imageGrid = document.createElement('div');
+  imageGrid.className = 'sticker-grid';
 
-  // ===== STICKER PANEL =====
-  if (stickerBtn && stickerPanel) {
-    const grid = document.createElement('div');
-    grid.className = 'sticker-grid';
+  const gifGrid = document.createElement('div');
+  gifGrid.className = 'sticker-grid';
 
-    const list = Array.isArray(STICKERS) ? STICKERS : [];
-    list.forEach(src => {
-      const item = document.createElement('div');
-      item.className = 'sticker-item';
+  const imgTitle = document.createElement('div');
+  imgTitle.textContent = '📸 Stickers';
+  imgTitle.className = 'sticker-section-title';
 
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = 'sticker';
+  const gifTitle = document.createElement('div');
+  gifTitle.textContent = '🎞️ GIFs';
+  gifTitle.className = 'sticker-section-title';
 
-      item.appendChild(img);
+  // verdeel bestanden op extensie
+  const list = Array.isArray(STICKERS) ? STICKERS : [];
+  list.forEach(src => {
+    const item = document.createElement('div');
+    item.className = 'sticker-item';
 
-      // 1x klik: alleen selecteren
-      item.addEventListener('click', () => {
-        // klik op dezelfde -> deselect
-        if (selectedSticker === src) {
-          selectedSticker = null;
-          item.classList.remove('selected');
-          currentStickerEl = null;
-          return;
-        }
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'sticker';
+    item.appendChild(img);
 
-        selectedSticker = src;
-
-        // andere deselecteren
-        if (currentStickerEl) currentStickerEl.classList.remove('selected');
-        item.classList.add('selected');
-        currentStickerEl = item;
-      });
-
-      // 2x klik: direct sturen (met eventuele tekst)
-      item.addEventListener('dblclick', () => {
-        const name = detectPlayerName();
-        const text = $input ? $input.value.trim() : '';
-
-        addMessage(name, text, src);
-
-        // reset UI
-        if ($input) {
-          $input.value = '';
-          $input.focus();
-        }
+    // 1x klik: selecteren / deselecteren
+    item.addEventListener('click', () => {
+      if (selectedSticker === src) {
         selectedSticker = null;
-        if (currentStickerEl) {
-          currentStickerEl.classList.remove('selected');
-          currentStickerEl = null;
-        }
-        // popup sluiten
-        stickerPanel.style.display = 'none';
-      });
-
-      grid.appendChild(item);
+        item.classList.remove('selected');
+        currentStickerEl = null;
+        return;
+      }
+      selectedSticker = src;
+      if (currentStickerEl) currentStickerEl.classList.remove('selected');
+      item.classList.add('selected');
+      currentStickerEl = item;
     });
 
-    stickerPanel.appendChild(grid);
+    // 2x klik: direct sturen (met evt. tekst)
+    item.addEventListener('dblclick', () => {
+      const name = detectPlayerName();
+      const text = $input ? $input.value.trim() : '';
+      addMessage(name, text, src);
 
-    // open/dicht via camera-knop
-    stickerBtn.addEventListener('click', () => {
-      const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
-      stickerPanel.style.display = show ? 'block' : 'none';
+      // reset UI
+      if ($input) {
+        $input.value = '';
+        $input.focus();
+      }
+      selectedSticker = null;
+      if (currentStickerEl) {
+        currentStickerEl.classList.remove('selected');
+        currentStickerEl = null;
+      }
+      // popup sluiten
+      stickerPanel.style.display = 'none';
     });
-  }
+
+    // check of het een gif is of niet
+    if (src.toLowerCase().endsWith('.gif')) {
+      gifGrid.appendChild(item);
+    } else {
+      imageGrid.appendChild(item);
+    }
+  });
+
+  // paneel opbouwen
+  stickerPanel.innerHTML = '';
+  stickerPanel.appendChild(imgTitle);
+  stickerPanel.appendChild(imageGrid);
+  stickerPanel.appendChild(gifTitle);
+  stickerPanel.appendChild(gifGrid);
+
+  // open/dicht via camera-knop
+  stickerBtn.addEventListener('click', () => {
+    const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
+    stickerPanel.style.display = show ? 'block' : 'none';
+  });
+}
+
 
 })();
 </script>
