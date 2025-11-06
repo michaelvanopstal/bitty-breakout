@@ -76,21 +76,24 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <script>
   const firebaseConfig = {
-  apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
-  authDomain: "bitty-brickshift.firebaseapp.com",
-  databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "bitty-brickshift",
-  storageBucket: "bitty-brickshift.firebasestorage.app",
-  messagingSenderId: "823337012487",
-  appId: "1:823337012487:web:1d217b13195f48809389a2"
-};
+    apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
+    authDomain: "bitty-brickshift.firebaseapp.com",
+    databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "bitty-brickshift",
+    storageBucket: "bitty-brickshift.appspot.com",  // kleine fix
+    messagingSenderId: "823337012487",
+    appId: "1:823337012487:web:1d217b13195f48809389a2"
+  };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+  // ✅ compat manier
+  firebase.initializeApp(firebaseConfig);
 
+  // refs
   const db = firebase.database();
   const chatRef = db.ref("chat");
   const scoresRef = db.ref("scores");
+
+  console.log("✅ Firebase connected!");
 </script>
 
 
