@@ -72,26 +72,33 @@
 
 <!-- 🔥 Firebase (LAAD DIT VOOR JE CHAT-SCRIPT) -->
 <!-- compat-versies zodat we makkelijk in 1 script kunnen blijven -->
+<!-- Firebase compat libraries -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
 <script>
-  // TODO: vul deze config in met jouw gegevens uit Firebase Console
+  // Jouw echte Firebase configuratie
   const firebaseConfig = {
-   const firebaseConfig = {
-    apiKey: "JOUW_API_KEY_HIER",
-    authDomain: "bitty-brickshift.firebaseapp.com",        // meestal zo
+    apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
+    authDomain: "bitty-brickshift.firebaseapp.com",
     databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "bitty-brickshift",
-    storageBucket: "bitty-brickshift.appspot.com",
-    messagingSenderId: "…",
-    appId: "…"
+    storageBucket: "bitty-brickshift.firebasestorage.app",
+    messagingSenderId: "823337012487",
+    appId: "1:823337012487:web:1d217b13195f48809389a2"
   };
+
+  // Firebase starten
   firebase.initializeApp(firebaseConfig);
 
-  const db        = firebase.database();
-  const chatRef   = db.ref("chat");
+  // Database-referenties
+  const db = firebase.database();
+  const chatRef = db.ref("chat");
   const scoresRef = db.ref("scores");
+
+  console.log("✅ Firebase connected!");
 </script>
+
 
 <!-- ===== BONUS POWER los van chat ===== -->
 <div id="bonus-power-panel">
