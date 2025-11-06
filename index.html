@@ -468,6 +468,24 @@
   <script src="login.js"></script>
   <script src="game.js"></script>
 
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const c = document.getElementById('gameCanvas');
+  if (!c) return;
+
+  // alleen op smalle schermen echt verkleinen
+  if (window.innerWidth < 768) {
+    const targetW = window.innerWidth;          // schermbreedte
+    const ratio   = 600 / 645;                  // jouw gameverhouding
+    const targetH = Math.round(targetW * ratio);
+
+    c.width  = targetW;
+    c.height = targetH;
+  }
+});
+</script>
+
+
  
    <script>
   let highscores = JSON.parse(localStorage.getItem("highscores")) || [
