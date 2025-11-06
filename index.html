@@ -77,19 +77,23 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
-  // Jouw echte Firebase configuratie
+ 
   const firebaseConfig = {
-    apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
-    authDomain: "bitty-brickshift.firebaseapp.com",
-    databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "bitty-brickshift",
-    storageBucket: "bitty-brickshift.firebasestorage.app",
-    messagingSenderId: "823337012487",
-    appId: "1:823337012487:web:1d217b13195f48809389a2"
-  };
+  apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
+  authDomain: "bitty-brickshift.firebaseapp.com",
+  databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "bitty-brickshift",
+  storageBucket: "bitty-brickshift.firebasestorage.app",
+  messagingSenderId: "823337012487",
+  appId: "1:823337012487:web:1d217b13195f48809389a2"
+};
 
-  // Firebase starten
-  firebase.initializeApp(firebaseConfig);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+
+ 
+
 
   // Database-referenties
   const db = firebase.database();
