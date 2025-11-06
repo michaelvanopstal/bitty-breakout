@@ -445,14 +445,14 @@ body {
   /* we doen alsof het canvas nog steeds 640x600 is,
      maar tonen het kleiner met scale */
   #gameCanvas {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 640px;     /* originele maat */
-    height: 600px;    /* originele maat */
-    transform: translateX(-50%) scale(0.55);  /* schaal kleiner tonen */
-    transform-origin: top center;
-  }
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);  /* ← scale weg */
+  width: 100vw;                 /* mag ook */
+  height: auto;
+}
+
 
   /* dingen die op mobiel in de weg zitten: uit */
   #bonus-power-panel,
