@@ -483,56 +483,56 @@ body {
 /* Pijltje draait als open */
 #chatbox:not(.collapsed) #chatToggleBtn { transform: rotate(90deg); }
 #chatbox.collapsed #chatToggleBtn { transform: rotate(0deg); }
-
-/* ===== Sticker panel ===== */
+/* === Sticker/GIF panel === */
 #chat-sticker-panel {
-  position: fixed;
-  right: 40px;           /* hetzelfde als chat */
-  top: 520px;            /* onder de chat - pas aan als hij te hoog/laag is */
-  width: 220px;
-  max-height: 180px;
-  background: rgba(106, 15, 15, 0.97);
-  border: 2px solid #ffcf62;
-  border-radius: 12px;
-  padding: 6px;
-  display: none;         /* standaard uit */
+  position: absolute;
+  bottom: 60px;          /* iets boven het invoerveld */
+  left: 0;
+  width: 100%;           /* zelfde breedte als de chatbox */
+  background: #ffcc70;
+  border-top: 2px solid #b66414;
+  border-bottom: 2px solid #b66414;
+  padding: 8px;
+  display: none;
   z-index: 9999;
+  box-shadow: inset 0 0 6px rgba(0,0,0,.2);
   overflow-y: auto;
-  box-shadow: 0 6px 16px rgba(0,0,0,.35);
+  max-height: 160px;
+  border-radius: 0 0 12px 12px;
 }
 
-#chat-sticker-panel .sticker-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+/* Raster met stickers */
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); /* zoveel mogelijk naast elkaar */
+  gap: 8px;
 }
 
-#chat-sticker-panel .sticker-item {
-  width: 58px;
-  height: 58px;
-  background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
+.sticker-item {
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform .1s ease;
-}
-#chat-sticker-panel .sticker-item:hover {
-  transform: scale(1.04);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-#chat-sticker-panel .sticker-item.selected {
+.sticker-item:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 6px rgba(0,0,0,.25);
+}
+
+.sticker-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+}
+
+/* geselecteerde sticker highlight */
+.sticker-item.selected {
   outline: 2px solid #ffcf62;
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
 
-#chat-sticker-panel .sticker-item img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
 
 
 
