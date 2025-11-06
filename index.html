@@ -467,54 +467,71 @@
   <script src="login.js"></script>
   <script src="game.js"></script>
 
-  <script>
-    let highscores = JSON.parse(localStorage.getItem("highscores")) || [
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 }
-    ];
+ 
+   <script>
+  let highscores = JSON.parse(localStorage.getItem("highscores")) || [
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 }
+  ];
 
-    function updateHighscoreBoard() {
-      const highscoreList = document.getElementById("highscore-list");
-      if (!highscoreList) return;
+  function updateHighscoreBoard() {
+    const highscoreList = document.getElementById("highscore-list");
+    if (!highscoreList) return;
 
-      
-      highscoreList.innerHTML = "";
-      highscores.forEach((entry, index) => {
-        const levelText = entry.level ? `— Level ${entry.level}` : "";
-        const li = document.createElement("li");
-        li.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} ${levelText}`;
-        highscoreList.appendChild(li);
-      });
-    }
-
-    
-   function checkAndUpdateHighscores(name, score, time) {
-  const newEntry = { name, score, time };     // nieuwe score aanmaken
-  highscores.push(newEntry);                  // toevoegen aan array
-  highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));  // sorteren
-  highscores = highscores.slice(0, 10);       // top 10 behouden
-  localStorage.setItem("highscores", JSON.stringify(highscores));  // lokaal opslaan
-  updateHighscoreBoard();                     // lijst in beeld verversen
-
-  // 🔥 stuur ook naar Firebase
-  if (window.scoresRef) {
-    window.scoresRef.push({
-      name: name,
-      score: score,
-      time: time,
-      created: Date.now()
+    highscoreList.innerHTML = "";
+    highscores.forEach((entry, index) => {
+      const levelText = entry.level ? `— Level ${entry.level}` : "";
+      const li = document.createElement("li");
+      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} ${levelText}`;
+      highscoreList.appendChild(li);
     });
-    console.log("✅ Score toegevoegd aan Firebase:", name, score, time);
   }
-}
+
+  // 👉 deze wordt door je game aangeroepen
+  function checkAndUpdateHighscores(name, score, time, level = 1) {
+    console.log("🏁 checkAndUpdateHighscores aangeroepen met:", name, score, time, level);
+
+    const newEntry = { name, score, time, level };
+    highscores.push(newEntry);
+    highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
+    highscores = highscores.slice(0, 10);
+    localStorage.setItem("highscores", JSON.stringify(highscores));
+    updateHighscoreBoard();
+
+    // ✨ ook naar Firebase sturen
+    if (window.scoresRef) {
+      console.log("📡 scoresRef gevonden, push naar Firebase...");
+      window.scoresRef.push({
+        name: name,
+        score: score,
+        time: time,
+        level: level,
+        created: Date.now()
+      })
+      .then(() => {
+        console.log("✅ Score toegevoegd aan Firebase");
+      })
+      .catch(err => {
+        console.error("❌ Kon score niet naar Firebase pushen:", err);
+      });
+    } else {
+      console.warn("⚠️ window.scoresRef bestaat niet op dit moment, niets naar Firebase gestuurd.");
+    }
+  }
+
+  window.addEventListener("load", () => {
+    updateHighscoreBoard();
+  });
+</script>
+
 
 // bij laden de bestaande lijst tonen
 window.addEventListener("load", () => {
