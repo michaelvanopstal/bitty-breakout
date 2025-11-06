@@ -505,28 +505,31 @@
 }
 
     
-    function checkAndUpdateHighscores(name, score, time) {
-      const newEntry = { name, score, time };
-      highscores.push(newEntry);
-      highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
-      highscores = highscores.slice(0, 10);
-      localStorage.setItem("highscores", JSON.stringify(highscores));
-      updateHighscoreBoard();
+   function checkAndUpdateHighscores(name, score, time) {
+  const newEntry = { name, score, time };     // nieuwe score aanmaken
+  highscores.push(newEntry);                  // toevoegen aan array
+  highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));  // sorteren
+  highscores = highscores.slice(0, 10);       // top 10 behouden
+  localStorage.setItem("highscores", JSON.stringify(highscores));  // lokaal opslaan
+  updateHighscoreBoard();                     // lijst in beeld verversen
 
-      // ✨ ook naar Firebase sturen
-      if (window.scoresRef) {
-        window.scoresRef.push({
-          name: name,
-          score: score,
-          time: time,
-          created: Date.now()
-        });
-      }
-    }
-
-    window.addEventListener("load", () => {
-      updateHighscoreBoard();
+  // 🔥 stuur ook naar Firebase
+  if (window.scoresRef) {
+    window.scoresRef.push({
+      name: name,
+      score: score,
+      time: time,
+      created: Date.now()
     });
+    console.log("✅ Score toegevoegd aan Firebase:", name, score, time);
+  }
+}
+
+// bij laden de bestaande lijst tonen
+window.addEventListener("load", () => {
+  updateHighscoreBoard();
+});
+
   </script>
 
   <style>
