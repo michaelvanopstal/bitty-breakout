@@ -1,36 +1,52 @@
+/* ===== BASIS / ACHTERGROND ===== */
 body {
   margin: 0;
-  background: url('wandljk_kl_png_V1.jpeg') no-repeat center center;
+  background: url('wandljk_kl_png_V1.jpeg') no-repeat center center fixed;
   background-size: cover;
   overflow: hidden;
+  font-family: Arial, sans-serif;
   position: relative;
 }
 
+/* ===== GAME CONTAINER =====
+   We maken 'm centraal en beperken de max-breedte
+   zodat het op grote schermen niet lelijk uitrekt.
+*/
+#game-container {
+  position: relative;
+  width: min(100vw - 220px, 1280px); /* ruimte laten voor chat rechts */
+  margin: 15px auto 0 auto;          /* centreren */
+  aspect-ratio: 645 / 600;           /* verhouding van je canvas */
+}
+
+/* Canvas zelf vult nu de container en blijft in verhouding */
 #gameCanvas {
   position: absolute;
-  top: 7px;
-  left: 50%;
-  transform: translateX(calc(-50% - 1px)); /* 5px extra naar links */
-  width: 640px;
-  height: 595px;
+  inset: 0;               /* top:0; left:0; right:0; bottom:0; */
+  width: 100%;
+  height: 100%;
   background-color: transparent;
   border: 3px solid transparent;
   z-index: 18;
 }
 
+/* ===== SPEL-OVERLAYS (nu relatief aan game-container) ===== */
+
+/* naam speler */
 #player-display {
   position: absolute;
   top: 50px;
-  left: 100px;
+  left: 20px;
   font-size: 18px;
   color: white;
   z-index: 999;
 }
 
+/* score rechtsboven in het speelveld */
 #scoreDisplay {
   position: absolute;
-  top: 33px;         /* pas aan voor waar jij ’m wilt */
-  left: 1125px;       /* pas aan op je layout */
+  top: 20px;
+  right: 20px;
   color: white;
   font-weight: bold;
   font-size: 18px;
@@ -39,18 +55,43 @@ body {
   user-select: none;
 }
 
+/* time-box */
+#time-box {
+  position: absolute;
+  top: 20px;
+  right: 140px;
+  width: 100px;
+  height: 30px;
+  text-align: center;
+  z-index: 1056;
+  pointer-events: none;
+}
 
-
-body {
-  background-attachment: fixed;
-  background-size: cover;
+#timeDisplay {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
   font-family: Arial, sans-serif;
 }
 
+/* login-paneel rechtsboven van het speelveld */
+#login-overlay {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  text-align: right;
+  z-index: 999;
+}
+
+#login-box {
+  display: inline-block;
+}
+
+/* highscore lijst links van het speelveld */
 #highscore-overlay {
   position: absolute;
-  top: 270px;
-  left: 40px;
+  top: 200px;
+  left: 20px;
   width: 200px;
   border-radius: 10px;
   padding: 10px;
@@ -67,84 +108,21 @@ body {
   padding-left: 20px;
   margin: 0;
 }
-
-#trophy {
-  position: absolute;
-  top: 70px;       /* verplaats verticaal */
-  left: 140px;    /* verplaats horizontaal */
-  width: 100px;    /* grootte aanpassen */
-  z-index: 1000;   /* altijd zichtbaar bovenop */
-}
-
-
-#game-container {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: flex-start;
-  margin-left: 10px;
-  margin-top: 15px;
-}
-
-#login-overlay {
-  position: absolute;
-  top: 90px;
-  right: 30px;
-  left: auto;
-  text-align: right;
-  z-index: 999;
-}
-
-#login-box {
-  display: inline-block;
-}
-
-#playerName {
-  position: absolute;
-  top: 120px;
-  left: 740px;
-  color: #008CFF;
-  font-size: 20px;
-  font-family: Arial, sans-serif;
-  z-index: 800;
-}
-
-#time-box {
-  position: absolute;
-  top: 36px;          /* verticaal afstellen */
-  left: 1275px;       /* horizontaal afstellen zodat hij in het TIME-vakje past */
-  width: 100px;
-  height: 30px;
-  text-align: center;
-  z-index: 1056;
-  pointer-events: none;
-}
-
-#timeDisplay {
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
-  font-family: Arial, sans-serif;
-}
-
-
 #highscore-overlay ol li {
   margin-bottom: 10px;
   white-space: nowrap;
 }
 
-@keyframes scrollText {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(-100%); }
+/* trophy naast highscore */
+#trophy {
+  position: absolute;
+  top: 70px;
+  left: 140px;
+  width: 100px;
+  z-index: 1000;
 }
 
-#bikeFlyby {
-  width: 120px;
-  height: auto;
-  z-index: 1;
-}
-
+/* bike flyer blijft los eroverheen */
 #bikeFlyer {
   position: absolute;
   width: 150px;
@@ -160,6 +138,7 @@ body {
   overflow: hidden;
 }
 
+/* muziekknop onderin links vast op scherm */
 #musicToggle {
   position: fixed;
   left: 40px;
@@ -169,11 +148,11 @@ body {
   z-index: 777;
   transition: transform 0.2s ease;
 }
-
 #musicToggle:hover {
   transform: scale(1.05);
 }
 
+/* rocket flame (je had 'm al) */
 #rocketFlame {
   position: absolute;
   width: 20px;
@@ -185,34 +164,25 @@ body {
   filter: blur(1px);
   animation: flameFlicker 0.15s infinite alternate;
 }
-
 @keyframes flameFlicker {
-  0% {
-    transform: scale(1) rotate(0deg);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(1.2) rotate(5deg);
-    opacity: 0.5;
-  }
+  0% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+  100% { transform: scale(1.2) rotate(5deg); opacity: 0.5; }
 }
-
 
 /* ===== BONUS POWER PANEL ===== */
 #bonus-power-panel {
-  position: absolute;   /* â† zo had jij 'm */
+  position: fixed;
   top: 320px;
-  right: 60px;
+  right: 360px; /* iets naar links zodat chat eroverheen kan */
   width: 230px;
   background: linear-gradient(#ffe066, #ffbb22);
   border: 3px solid rgba(50, 50, 50, 0.4);
   border-radius: 14px;
   padding: 6px 8px 10px;
   font-family: Arial, sans-serif;
-  z-index: 50;         /* lager dan chat (9998), dus chat kan eroverheen */
+  z-index: 50;
   box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
-
 #bonus-power-panel .bp-header {
   background: #ffcc33;
   color: #6b0000;
@@ -223,45 +193,28 @@ body {
   margin-bottom: 6px;
   letter-spacing: 0.5px;
 }
-
 #bonus-power-panel .bp-row {
   display: flex;
   align-items: center;
   gap: 6px;
   margin: 6px 0;
 }
-
-/* ----- ICONS (met rood rond achtergrondje) ----- */
 .bp-icon {
   width: 26px;
   height: 26px;
-  border-radius: 50%;           /* rond bubbeltje */
-  background:rgba(0,0,0,.08);
-  color:#7a2b00;
+  border-radius: 50%;
+  background: rgba(0,0,0,.08);
+  color: #7a2b00;
   background-size: 70%;
   background-repeat: no-repeat;
   background-position: center;
   box-shadow: 0 0 4px rgba(255,255,255,0.35);
 }
+.bp-icon-heart { background-image: url("heart.png"); }
+.bp-icon-star  { background-image: url("stars.png"); }
+.bp-icon-bomb  { background-image: url("bom.png"); }
+.bp-icon-cross { background-image: url("bad_cross.png"); }
 
-/* eigen icoontjes */
-.bp-icon-heart {
-  background-image: url("heart.png");
-}
-
-.bp-icon-star {
-  background-image: url("stars.png");    /* jouw bestand */
-}
-
-.bp-icon-bomb {
-  background-image: url("bom.png");
-}
-
-.bp-icon-cross {
-  background-image: url("bad_cross.png");
-}
-
-/* ----- BUISJES ----- */
 .bp-tube {
   position: relative;
   flex: 1;
@@ -271,7 +224,6 @@ body {
   overflow: hidden;
   border: 1px solid rgba(107,0,0,0.4);
 }
-
 .bp-liquid {
   position: absolute;
   top: 0;
@@ -281,27 +233,10 @@ body {
   border-radius: 999px;
   transition: width 0.25s ease-out;
 }
-
-/* â¤ï¸ hartjes-buisje */
-#bp-hearts-liquid {
-  background: linear-gradient(90deg, #fff 0%, #ff5b6b 25%, #550000 100%);
-}
-
-/* â­ sterren-buisje */
-#bp-stars-liquid { 
-  background: linear-gradient(90deg, #fff 0%, #ffe500 20%, #550000 100%);
-}
-
-/* ðŸ’£ bom-buisje */
-#bp-bombs-liquid {
-  background: linear-gradient(90deg, #fff 0%, #e0e0e0 25%, #550000 100%);
-}
-
-/* âŒ kruis-buisje */
-#bp-cross-liquid {
-  background: linear-gradient(90deg, #fff 0%, #a00000 25%, #400000 100%);
-
-}
+#bp-hearts-liquid { background: linear-gradient(90deg, #fff 0%, #ff5b6b 25%, #550000 100%); }
+#bp-stars-liquid  { background: linear-gradient(90deg, #fff 0%, #ffe500 20%, #550000 100%); }
+#bp-bombs-liquid  { background: linear-gradient(90deg, #fff 0%, #e0e0e0 25%, #550000 100%); }
+#bp-cross-liquid  { background: linear-gradient(90deg, #fff 0%, #a00000 25%, #400000 100%); }
 
 .bp-glass {
   pointer-events: none;
@@ -311,7 +246,6 @@ body {
   mix-blend-mode: screen;
   opacity: 0.35;
 }
-
 .bp-value {
   width: 38px;
   text-align: right;
@@ -319,14 +253,11 @@ body {
   color: #6b0000;
   font-weight: bold;
 }
-
-/* neon flash effect bij vol */
 .bp-row.flash .bp-tube {
   box-shadow: 0 0 10px #fff, 0 0 20px #fff;
 }
 
-/* ===== Chat Box styles ===== */
-/* was: position:absolute;  -> maak 'm fixed */
+/* ===== CHAT BOX ===== */
 #chatbox {
   position: fixed;
   right: 40px;
@@ -336,16 +267,15 @@ body {
   display: flex;
   flex-direction: column;
   z-index: 9998;
-  font-family: system-ui, Arial, sans-serif;
   border-radius: 18px;
   background: linear-gradient(#f6a53b,#e27e22);
   box-shadow: 0 8px 20px rgba(0,0,0,.35),
               inset 0 0 0 4px #c76b12,
               inset 0 0 0 8px #ffc85a;
   overflow: hidden;
-  max-width: 90vw;            /* extra veiligheid op smalle schermen */
+  max-width: 90vw;
+  font-family: system-ui, Arial, sans-serif;
 }
-
 #chatbox .chatbox-header {
   height: 42px;
   display: flex;
@@ -358,8 +288,7 @@ body {
   letter-spacing: .5px;
   border-bottom: 2px solid #b66414;
 }
-
-#chatClearBtn {
+.chat-icon-btn {
   border: none;
   background: rgba(0,0,0,.08);
   color: #7a2b00;
@@ -368,7 +297,7 @@ body {
   border-radius: 8px;
   cursor: pointer;
 }
-#chatClearBtn:hover { background: rgba(0,0,0,.16); }
+.chat-icon-btn:hover { background: rgba(0,0,0,.16); }
 
 #chatMessages {
   flex: 1;
@@ -378,12 +307,11 @@ body {
   border-top: 2px solid #ffcf62;
   border-bottom: 2px solid #b66414;
   overflow-y: auto;
-  overflow-x: auto;      /* horizontale balk alleen hier */
+  overflow-x: auto;
   word-wrap: break-word;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
-
 .chat-msg {
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,200,90,.35);
@@ -401,12 +329,7 @@ body {
 }
 .chat-text {
   font-size: 13px;
-  word-wrap: break-word;
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
-
-/* 📸 Mini-afbeeldingen in chatberichten */
 .chat-thumb {
   display: block;
   max-width: 120px;
@@ -418,7 +341,6 @@ body {
   box-shadow: 0 0 4px rgba(0,0,0,0.4);
 }
 
-/* Onderste invoerbalk */
 #chatForm {
   display: flex;
   align-items: center;
@@ -429,7 +351,7 @@ body {
 }
 #chatForm input {
   flex: 1;
-  min-width: 0;              /* mag krimpen in flex */
+  min-width: 0;
   height: 34px;
   border: none;
   outline: none;
@@ -438,14 +360,13 @@ body {
   background: #fff5e3;
 }
 #chatInput {
-  white-space: nowrap;       /* één regel */
+  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;   /* '...' bij superlang */
+  text-overflow: ellipsis;
 }
 #chatName { flex: 0 0 98px; }
 
-#chatForm button,
-#chatForm label.chat-icon-btn {
+#chatForm button {
   flex: 0 0 46px;
   border: none;
   cursor: pointer;
@@ -453,49 +374,24 @@ body {
   background: #7a2b00;
   color: #ffd56a;
   font-weight: 700;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-#chatForm button:hover,
-#chatForm label.chat-icon-btn:hover {
-  filter: brightness(1.08);
-}
+#chatForm button:hover { filter: brightness(1.08); }
 
-/* Header-knopjes uniform */
-.chat-icon-btn {
-  border: none;
-  background: rgba(0,0,0,.08);
-  color: #7a2b00;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-.chat-icon-btn:hover { background: rgba(0,0,0,.16); }
-
-/* Ingeklapt: alleen header zichtbaar */
 #chatbox.collapsed { height: 42px; overflow: hidden; }
 #chatbox.collapsed #chatMessages,
 #chatbox.collapsed #chatForm { display: none; }
-
-/* Pijltje draait als open */
 #chatbox:not(.collapsed) #chatToggleBtn { transform: rotate(90deg); }
 #chatbox.collapsed #chatToggleBtn { transform: rotate(0deg); }
 
-
-
 /* === Sticker/GIF panel (onder chatbox) === */
 #chat-sticker-panel {
-  position: fixed;        /* buiten de chatbox, dus fixed */
-  top: calc(160px + 360px); /* 160px (chatbox top) + 360px (chatbox height) = direct eronder */
-  right: 30px;            /* zelfde als chatbox */
-  width: 310px;           /* zelfde breedte als chatbox */
+  position: fixed;
+  top: calc(160px + 360px);
+  right: 40px;
+  width: 300px;
   background: #6a0f0f;
   border: 2px solid #b66414;
-  border-top: 2px solid #b66414;      /* bovenrand weer zichtbaar */
-  border-radius: 12px;                /* alle hoeken afgerond */
+  border-radius: 12px;
   box-shadow: 0 6px 12px rgba(0,0,0,.3);
   padding: 8px;
   display: none;
@@ -503,14 +399,20 @@ body {
   overflow-y: auto;
   max-height: 160px;
 }
-
-/* Raster met stickers/gifs */
+.sticker-section-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #ffffff;
+  margin: 6px 0 4px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.4);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  padding-bottom: 2px;
+}
 .sticker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
   gap: 8px;
 }
-
 .sticker-item {
   cursor: pointer;
   border-radius: 8px;
@@ -527,21 +429,9 @@ body {
   display: block;
   border-radius: 6px;
 }
-
-/* geselecteerde sticker highlight */
 .sticker-item.selected {
   outline: 2px solid #ffcf62;
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
 
-/* titels voor secties in het stickerpaneel */
-.sticker-section-title {
-  font-weight: 700;
-  font-size: 13px;
-  color: #ffffff; /* wit */
-  margin: 6px 0 4px;
-  text-shadow: 0 1px 2px rgba(0,0,0,.4);
-  border-bottom: 1px solid rgba(255,255,255,.15);
-  padding-bottom: 2px;
-}
 
