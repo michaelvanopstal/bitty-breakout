@@ -310,13 +310,13 @@ if (stickerBtn && stickerPanel) {
   const gifGrid = document.createElement('div');
   gifGrid.className = 'sticker-grid';
 
-  const imgTitle = document.createElement('div');
-  imgTitle.textContent = '📸 Stickers';
-  imgTitle.className = 'sticker-section-title';
+ const imgTitle = document.createElement('div');
+imgTitle.textContent = 'Stickers';   // alleen tekst, geen emoji
+imgTitle.className = 'sticker-section-title';
 
-  const gifTitle = document.createElement('div');
-  gifTitle.textContent = '🎞️ GIFs';
-  gifTitle.className = 'sticker-section-title';
+const gifTitle = document.createElement('div');
+gifTitle.textContent = 'GIFs';       // alleen tekst, geen emoji
+gifTitle.className = 'sticker-section-title';
 
   // verdeel bestanden op extensie
   const list = Array.isArray(STICKERS) ? STICKERS : [];
