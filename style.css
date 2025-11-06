@@ -515,5 +515,90 @@ body {
   }
 }
 
+/* ============================
+   MOBIEL LAYOUT FIX
+   ============================ */
+@media (max-width: 768px) {
+
+  /* achtergrond mag gewoon blijven, maar we maken 'm vast */
+  body {
+    background: #c94a0a; /* eff oranje/rood vlak, kun je zelf vervangen */
+    background-size: cover;
+    overflow: hidden;
+  }
+
+  /* canvas: volle breedte, gecentreerd */
+  #gameCanvas {
+    position: relative;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;           /* pak hele breedte van telefoon */
+    max-width: 640px;       /* nooit groter dan je game */
+    height: auto;           /* hoogte laat je door canvas zelf bepalen */
+  }
+
+  /* dingen die op mobiel in de weg zitten: weg */
+  #bonus-power-panel,
+  #highscore-overlay,
+  #trophy,
+  #musicToggle,
+  #resetBallBtn {
+    display: none !important;
+  }
+
+  /* login-box iets dichterbij en boven je game */
+  #login-overlay {
+    top: 8px;
+    right: 10px;
+  }
+
+  /* score + tijd dichter naar rechtsboven */
+  #scoreDisplay {
+    top: 8px;
+    right: 10px;
+    left: auto;
+    z-index: 3000;
+  }
+
+  #time-box {
+    top: 8px;
+    right: 80px;
+    left: auto;
+    z-index: 3000;
+  }
+
+  /* chat onderin als brede balk */
+  #chatbox {
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100vw;
+    max-width: none;
+    height: 56px;             /* ingeklapt */
+    border-radius: 18px 18px 0 0;
+  }
+  #chatbox.collapsed {
+    height: 56px;
+  }
+  /* stickerpanel ook onderin */
+  #chat-sticker-panel {
+    top: auto;
+    bottom: 56px;
+    right: 0;
+    width: 100vw;
+    max-height: 160px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  /* als chat open is op mobiel: maak ‘m wat hoger maar niet fullscreen */
+  #chatbox:not(.collapsed) {
+    height: 50vh;
+  }
+
+}
+
+
 
 
