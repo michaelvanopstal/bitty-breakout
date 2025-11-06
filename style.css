@@ -490,8 +490,8 @@ body {
 #chat-sticker-panel {
   position: fixed;        /* buiten de chatbox, dus fixed */
   top: calc(160px + 360px); /* 160px (chatbox top) + 360px (chatbox height) = direct eronder */
-  right: 40px;            /* zelfde als chatbox */
-  width: 300px;           /* zelfde breedte als chatbox */
+  right: 30px;            /* zelfde als chatbox */
+  width: 310px;           /* zelfde breedte als chatbox */
   background: #6a0f0f;
   border: 2px solid #b66414;
   border-top: 2px solid #b66414;      /* bovenrand weer zichtbaar */
