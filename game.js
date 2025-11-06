@@ -5717,7 +5717,7 @@ function triggerPaddleExplosion() {
     machineGunActive = false;
     machineGunCooldownActive = false;
     
-
+    // partikel-explosie
     for (let i = 0; i < 50; i++) {
       paddleExplosionParticles.push({
         x: paddleX + paddleWidth / 2,
@@ -5739,6 +5739,7 @@ function triggerPaddleExplosion() {
       paddleExploding = false;
       paddleExplosionParticles = [];
 
+      // bal resetten
       balls = [{
         x: paddleX + paddleWidth / 2 - ballRadius,
         y: paddleY - ballRadius * 2,
@@ -5749,7 +5750,7 @@ function triggerPaddleExplosion() {
       }];
 
       ballLaunched = false;
-      ballMoving = false;
+      ballMoving  = false;
       paddleFreeMove = false; // ⛓️ paddle weer vergrendeld
 
       resetTriggered = false;
@@ -5757,15 +5758,28 @@ function triggerPaddleExplosion() {
     }, 1000);
 
   } else {
-    // Laatste leven → GAME OVER
+    // 🔴 Laatste leven → GAME OVER
     paddleExploding = true;
 
     machineGunActive = false;
     machineGunCooldownActive = false;
 
     // 🔇 TNT direct stilzetten bij GAME OVER
-    try { if (typeof tntBeepSound !== "undefined" && tntBeepSound) { tntBeepSound.pause(); tntBeepSound.currentTime = 0; } } catch {}
-    try { if (typeof tntExplodeSound !== "undefined" && tntExplodeSound?.pause) { tntExplodeSound.pause(); tntExplodeSound.currentTime = 0; } } catch {}
+    try {
+      if (typeof tntBeepSound !== "undefined" && tntBeepSound) {
+        tntBeepSound.pause();
+        tntBeepSound.currentTime = 0;
+      }
+    } catch {}
+
+    try {
+      if (typeof tntExplodeSound !== "undefined" && tntExplodeSound?.pause) {
+        tntExplodeSound.pause();
+        tntExplodeSound.currentTime = 0;
+      }
+    } catch {}
+
+    // alle TNT bricks “ontwapenen”
     if (typeof bricks !== "undefined" && typeof brickColumnCount !== "undefined" && typeof brickRowCount !== "undefined") {
       for (let c = 0; c < brickColumnCount; c++) {
         for (let r = 0; r < brickRowCount; r++) {
@@ -5780,8 +5794,12 @@ function triggerPaddleExplosion() {
       }
     }
 
-    gameOverSound.currentTime = 0;
-    gameOverSound.play();
+    // 🔊 game over sounds / extra effect
+    if (typeof gameOverSound !== "undefined" && gameOverSound) {
+      gameOverSound.currentTime = 0;
+      gameOverSound.play();
+    }
+
 
     paddleExplosionParticles = [];
 
