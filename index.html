@@ -153,6 +153,8 @@
   const STORE_KEY = 'bb_chat_messages';
   const LIMIT = 100; // na 100 regels schoonmaken
 
+  let selectedSticker = null;
+  
   // 🔸 Functie om spelernaam uit het spel te halen
   function detectPlayerName() {
     let playerName = '';
@@ -253,15 +255,27 @@
 
   // versturen (alleen tekst)
   if ($form) {
-    $form.addEventListener('submit', e=>{
-      e.preventDefault();
-      const name = detectPlayerName();
-      const text = $input.value.trim();
-      if(!text) return;
-      addMessage(name, text);
-      $input.value = '';
-      $input.focus();
-    });
+  $form.addEventListener('submit', e=>{
+  e.preventDefault();
+  const name = detectPlayerName();
+  const text = $input.value.trim();
+
+  // niks ingevuld en geen sticker? dan niks
+  if (!text && !selectedSticker) return;
+
+  // stuur met wat we hebben
+  addMessage(name, text, selectedSticker);
+
+  // na versturen alles resetten
+  $input.value = '';
+  $input.focus();
+
+  // sticker deselecteren in UI
+  selectedSticker = null;
+  const chosen = document.querySelector('#chat-sticker-panel .sticker-item.selected');
+  if (chosen) chosen.classList.remove('selected');
+});
+
   }
 
   // chat leegknop
@@ -285,6 +299,7 @@
   // ===== STICKER PANEL =====
   const stickerBtn   = document.getElementById('chatStickersBtn');
   const stickerPanel = document.getElementById('chat-sticker-panel');
+  let currentStickerEl = null; // voor highlight
 
   if (stickerBtn && stickerPanel) {
     const grid = document.createElement('div');
@@ -301,11 +316,22 @@
 
       item.appendChild(img);
 
-      // klik op sticker -> als bericht plaatsen
+      // klik = alleen selecteren (niet meteen sturen)
       item.addEventListener('click', () => {
-        const name = detectPlayerName();
-        addMessage(name, '', src);
-        stickerPanel.style.display = 'none';
+        // als je op dezelfde klikt: deselect
+        if (selectedSticker === src) {
+          selectedSticker = null;
+          item.classList.remove('selected');
+          currentStickerEl = null;
+          return;
+        }
+
+        selectedSticker = src;
+
+        // highlight wisselen
+        if (currentStickerEl) currentStickerEl.classList.remove('selected');
+        item.classList.add('selected');
+        currentStickerEl = item;
       });
 
       grid.appendChild(item);
@@ -313,7 +339,7 @@
 
     stickerPanel.appendChild(grid);
 
-    // camera-knop opent/sluitt het paneel
+    // open/dicht
     stickerBtn.addEventListener('click', () => {
       const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
       stickerPanel.style.display = show ? 'block' : 'none';
