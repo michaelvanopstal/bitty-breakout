@@ -429,116 +429,38 @@ body {
     right: 20px;
   }
 }
-
 /* =========================================================
-   📱 Telefoon / heel smal
+   📱 MOBIEL / SMALLE SCHERMEN
    ========================================================= */
 @media (max-width: 768px) {
+
+  /* rustige achtergrond op mobiel */
   body {
-    overflow: auto;
-    background-attachment: scroll;
+    background: #c94a0a;      /* effen oranje/rood */
+    background-size: cover;
+    overflow: hidden;
   }
 
+  /* spel = hele breedte, gecentreerd */
   #gameCanvas {
-    position: relative;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 95vw;
-    height: auto;
+    position: relative !important;
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100vw !important;      /* pak hele schermbreedte */
+    max-width: 640px !important;  /* niet groter dan je echte spel */
+    height: auto !important;
+    z-index: 10;
   }
 
+  /* container mag gewoon stapelen */
   #game-container {
     margin: 0 auto;
     flex-direction: column;
     align-items: center;
   }
 
-  #player-display {
-    top: 12px;
-    left: 12px;
-    font-size: 14px;
-  }
-
-  #scoreDisplay {
-    top: 12px;
-    right: 12px;
-    left: auto;
-    font-size: 14px;
-  }
-
-  #time-box {
-    top: 40px;
-    right: 12px;
-    left: auto;
-  }
-
-  #highscore-overlay {
-    position: static;
-    margin-top: 10px;
-  }
-
-  /* chat onderin, volle breedte */
-  #chatbox {
-    top: auto;
-    bottom: 10px;
-    right: 50%;
-    transform: translateX(50%);
-    width: 94vw;
-    max-width: 94vw;
-    height: 45vh;
-  }
-
-  /* stickerpanel volgt de chat en blijft even breed */
-  #chat-sticker-panel {
-    top: auto;
-    bottom: calc(10px + 45vh);
-    right: 50%;
-    transform: translateX(50%);
-    width: 94vw;
-    max-height: 160px;
-  }
-
-  /* bonus panel naar boven rechts kleiner */
-  #bonus-power-panel {
-    position: fixed;
-    top: 70px;
-    right: 10px;
-    width: 180px;
-    z-index: 999;
-  }
-
-  #musicToggle {
-    left: 10px;
-    bottom: 10px;
-    width: 150px;
-  }
-}
-
-/* ============================
-   MOBIEL LAYOUT FIX
-   ============================ */
-@media (max-width: 768px) {
-
-  /* achtergrond mag gewoon blijven, maar we maken 'm vast */
-  body {
-    background: #c94a0a; /* eff oranje/rood vlak, kun je zelf vervangen */
-    background-size: cover;
-    overflow: hidden;
-  }
-
-  /* canvas: volle breedte, gecentreerd */
-  #gameCanvas {
-    position: relative;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100vw;           /* pak hele breedte van telefoon */
-    max-width: 640px;       /* nooit groter dan je game */
-    height: auto;           /* hoogte laat je door canvas zelf bepalen */
-  }
-
-  /* dingen die op mobiel in de weg zitten: weg */
+  /* dingen die in de weg zitten op mobiel: uit */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -547,122 +469,65 @@ body {
     display: none !important;
   }
 
-  /* login-box iets dichterbij en boven je game */
+  /* login / player / score bovenaan */
   #login-overlay {
-    top: 8px;
-    right: 10px;
+    top: 8px !important;
+    right: 10px !important;
+    left: auto !important;
   }
 
-  /* score + tijd dichter naar rechtsboven */
-  #scoreDisplay {
-    top: 8px;
-    right: 10px;
-    left: auto;
+  #player-display {
+    top: 6px !important;
+    left: 10px !important;
+    font-size: 14px !important;
     z-index: 3000;
   }
 
   #time-box {
-    top: 8px;
-    right: 80px;
-    left: auto;
+    top: 6px !important;
+    right: 80px !important;
+    left: auto !important;
     z-index: 3000;
   }
 
-  /* chat onderin als brede balk */
-  #chatbox {
-    top: auto;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    width: 100vw;
-    max-width: none;
-    height: 56px;             /* ingeklapt */
-    border-radius: 18px 18px 0 0;
-  }
-  #chatbox.collapsed {
-    height: 56px;
-  }
-  /* stickerpanel ook onderin */
-  #chat-sticker-panel {
-    top: auto;
-    bottom: 56px;
-    right: 0;
-    width: 100vw;
-    max-height: 160px;
-    border-radius: 12px 12px 0 0;
+  #scoreDisplay {
+    top: 6px !important;
+    right: 10px !important;
+    left: auto !important;
+    font-size: 14px !important;
+    z-index: 3000;
   }
 
-  /* als chat open is op mobiel: maak ‘m wat hoger maar niet fullscreen */
+  /* 🔻 chat onderin over de hele breedte */
+  #chatbox {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 18px 18px 0 0 !important;
+    height: 56px !important;           /* ingeklapt */
+    z-index: 9998 !important;
+  }
+
+  /* wanneer chat open is */
   #chatbox:not(.collapsed) {
-    height: 50vh;
+    height: 50vh !important;           /* half scherm */
   }
 
-}
-/* =========================
-   MOBIEL FIX
-   ========================= */
-@media (max-width: 768px) {
-
-  /* spel mag het hele scherm pakken */
-  #gameCanvas {
-    position: relative;
-    top: 0;
-    left: 0;
-    transform: none;
-    width: 100vw;         /* volle breedte */
-    height: auto;
-  }
-
-  /* dingen die in de weg zitten verbergen */
-  #bonus-power-panel,
-  #highscore-overlay,
-  #trophy,
-  #musicToggle {
-    display: none;
-  }
-
-  /* chat onderin, over de hele breedte */
-  #chatbox {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: auto;
-    width: 100vw;
-    height: 240px;         /* wat lager op mobiel */
-    max-width: 100vw;
-    border-radius: 18px 18px 0 0;
-    z-index: 9998;
-  }
-
-  /* als chat is ingeklapt: alleen header laten zien onderin */
-  #chatbox.collapsed {
-    height: 46px;
-  }
-
-  /* stickerpaneel op mobiel even uit, anders valt hij over het spel */
+  /* stickerpaneel op mobiel liever niet */
   #chat-sticker-panel {
     display: none !important;
   }
 
-  /* naam + input iets smaller maken */
+  /* formpje iets smaller */
   #chatForm {
-    gap: 4px;
+    gap: 4px !important;
   }
   #chatName {
-    flex: 0 0 90px;
-  }
-
-  /* HUD elementjes iets naar binnen */
-  #player-display {
-    top: 6px;
-    left: 10px;
-  }
-  #time-box,
-  #scoreDisplay {
-    top: 6px;
-    right: 10px;
-    left: auto;
+    flex: 0 0 90px !important;
   }
 }
 
