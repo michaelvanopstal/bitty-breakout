@@ -598,6 +598,73 @@ body {
   }
 
 }
+/* =========================
+   MOBIEL FIX
+   ========================= */
+@media (max-width: 768px) {
+
+  /* spel mag het hele scherm pakken */
+  #gameCanvas {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100vw;         /* volle breedte */
+    height: auto;
+  }
+
+  /* dingen die in de weg zitten verbergen */
+  #bonus-power-panel,
+  #highscore-overlay,
+  #trophy,
+  #musicToggle {
+    display: none;
+  }
+
+  /* chat onderin, over de hele breedte */
+  #chatbox {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100vw;
+    height: 240px;         /* wat lager op mobiel */
+    max-width: 100vw;
+    border-radius: 18px 18px 0 0;
+    z-index: 9998;
+  }
+
+  /* als chat is ingeklapt: alleen header laten zien onderin */
+  #chatbox.collapsed {
+    height: 46px;
+  }
+
+  /* stickerpaneel op mobiel even uit, anders valt hij over het spel */
+  #chat-sticker-panel {
+    display: none !important;
+  }
+
+  /* naam + input iets smaller maken */
+  #chatForm {
+    gap: 4px;
+  }
+  #chatName {
+    flex: 0 0 90px;
+  }
+
+  /* HUD elementjes iets naar binnen */
+  #player-display {
+    top: 6px;
+    left: 10px;
+  }
+  #time-box,
+  #scoreDisplay {
+    top: 6px;
+    right: 10px;
+    left: auto;
+  }
+}
 
 
 
