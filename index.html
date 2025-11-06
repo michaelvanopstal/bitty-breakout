@@ -150,16 +150,22 @@
   const $name   = document.getElementById('chatName');
   const $clear  = document.getElementById('chatClearBtn');
 
+  // haal het panel en de knop VROEG op, zodat we ze overal kunnen gebruiken
+  const stickerPanel = document.getElementById('chat-sticker-panel');
+  const stickerBtn   = document.getElementById('chatStickersBtn');
+
   const STORE_KEY = 'bb_chat_messages';
   const LIMIT = 100; // na 100 regels schoonmaken
 
+  // sticker die klaarstaat om mee te sturen
   let selectedSticker = null;
-  
+  // om de geselecteerde DOM te onthouden (voor highlight)
+  let currentStickerEl = null;
+
   // 🔸 Functie om spelernaam uit het spel te halen
   function detectPlayerName() {
     let playerName = '';
 
-    // zoek inlogveld of display-element
     const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
     const display   = document.getElementById('player-display');
 
@@ -182,12 +188,10 @@
     const name = detectPlayerName();
     if ($name) {
       $name.value = name;
-      $name.disabled = true; // vergrendeld
+      $name.disabled = true;
     }
     localStorage.setItem('chatName', name);
   }
-
-  // controleer elke seconde of de naam intussen is ingevuld
   updateChatName();
   setInterval(updateChatName, 1000);
 
@@ -253,28 +257,31 @@
   // eerst de opgeslagen berichten tonen
   render(getStore());
 
-  // versturen (alleen tekst)
+  // versturen (tekst + geselecteerde sticker)
   if ($form) {
- $form.addEventListener('submit', e=>{
-  e.preventDefault();
-  const name = detectPlayerName();
-  const text = $input.value.trim();
+    $form.addEventListener('submit', e=>{
+      e.preventDefault();
+      const name = detectPlayerName();
+      const text = $input.value.trim();
 
-  // niks en geen sticker? dan niks
-  if (!text && !selectedSticker) return;
+      // niks en geen sticker? dan niks
+      if (!text && !selectedSticker) return;
 
-  addMessage(name, text, selectedSticker);
+      addMessage(name, text, selectedSticker);
 
-  // reset
-  $input.value = '';
-  $input.focus();
+      // reset
+      $input.value = '';
+      $input.focus();
 
-  selectedSticker = null;
-  const chosen = document.querySelector('#chat-sticker-panel .sticker-item.selected');
-  if (chosen) chosen.classList.remove('selected');
-});
-
-
+      selectedSticker = null;
+      // highlight weghalen
+      if (currentStickerEl) {
+        currentStickerEl.classList.remove('selected');
+        currentStickerEl = null;
+      }
+      // popup sluiten na verzenden
+      if (stickerPanel) stickerPanel.style.display = 'none';
+    });
   }
 
   // chat leegknop
@@ -294,11 +301,8 @@
       }
     });
   }
-  // ===== STICKER PANEL =====
-  const stickerBtn   = document.getElementById('chatStickersBtn');
-  const stickerPanel = document.getElementById('chat-sticker-panel');
-  let currentStickerEl = null; // om highlight te onthouden
 
+  // ===== STICKER PANEL =====
   if (stickerBtn && stickerPanel) {
     const grid = document.createElement('div');
     grid.className = 'sticker-grid';
@@ -326,33 +330,18 @@
 
         selectedSticker = src;
 
+        // andere deselecteren
         if (currentStickerEl) currentStickerEl.classList.remove('selected');
         item.classList.add('selected');
         currentStickerEl = item;
       });
 
       // 2x klik: direct sturen (met eventuele tekst)
-     // 2x klik: direct sturen (met eventuele tekst)
-item.addEventListener('dblclick', () => {
-  const name = detectPlayerName();
-  const text = $input ? $input.value.trim() : '';
+      item.addEventListener('dblclick', () => {
+        const name = detectPlayerName();
+        const text = $input ? $input.value.trim() : '';
 
-  addMessage(name, text, src);
-
-  // reset UI
-  if ($input) {
-    $input.value = '';
-    $input.focus();
-  }
-  selectedSticker = null;
-  if (currentStickerEl) {
-    currentStickerEl.classList.remove('selected');
-    currentStickerEl = null;
-  }
-
-  // popup sluiten
-  stickerPanel.style.display = 'none';
-});
+        addMessage(name, text, src);
 
         // reset UI
         if ($input) {
@@ -364,7 +353,7 @@ item.addEventListener('dblclick', () => {
           currentStickerEl.classList.remove('selected');
           currentStickerEl = null;
         }
-        // paneel dicht
+        // popup sluiten
         stickerPanel.style.display = 'none';
       });
 
@@ -379,7 +368,6 @@ item.addEventListener('dblclick', () => {
       stickerPanel.style.display = show ? 'block' : 'none';
     });
   }
-
 
 })();
 </script>
