@@ -529,15 +529,14 @@ body {
   #chatName {
     flex: 0 0 90px !important;
   }
-
-}
-/* iPhone: niet inzoomen bij typen in chat */
 #chatForm input,
 #chatForm button,
 #chatForm .chat-icon-btn {
-  font-size: 16px;   /* >=16px = geen auto-zoom */
+  font-size: 16px;
 }
-
+#chatInput, #chatName {
+  font-size: 16px;
+}
 
 
 
