@@ -15,142 +15,112 @@
 </head>
 
 <body>
-<!-- ===== Chat Box (rechts) ===== -->
-<div id="chatbox">
-  <div class="chatbox-header">
-    <button id="chatToggleBtn" class="chat-icon-btn" type="button" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
-    <span>CHAT</span>
-    <button id="chatClearBtn" class="chat-icon-btn" type="button" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
+  <!-- ===== Chat Box (rechts) ===== -->
+  <div id="chatbox">
+    <div class="chatbox-header">
+      <button id="chatToggleBtn" class="chat-icon-btn" type="button" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
+      <span>CHAT</span>
+      <button id="chatClearBtn" class="chat-icon-btn" type="button" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
+    </div>
+
+    <!-- Sticker popup -->
+    <div id="chat-sticker-panel" aria-label="Kies een sticker"></div>
+
+    <!-- berichtenlijst -->
+    <div id="chatMessages" aria-live="polite"></div>
+
+    <!-- invoer onderaan de chat -->
+    <form id="chatForm" autocomplete="off">
+      <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
+      <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
+      <!-- 📷 Camera-icoon opent nu de sticker-popup -->
+      <button id="chatStickersBtn" class="chat-icon-btn" type="button" title="Kies een plaatje">📷</button>
+      <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
+    </form>
   </div>
+  <!-- ===== /Chat Box ===== -->
 
-  <!-- Sticker popup (los, maar wel binnen de chatbox) -->
-  <div id="chat-sticker-panel" aria-label="Kies een sticker"></div>
-
-  <!-- berichtenlijst -->
-  <div id="chatMessages" aria-live="polite"></div>
-
-  <!-- invoer onderaan de chat -->
-  <form id="chatForm" autocomplete="off">
-    <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
-    <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
-    <!-- 📷 Camera-icoon opent nu de sticker-popup -->
-    <button id="chatStickersBtn" class="chat-icon-btn" type="button" title="Kies een plaatje">📷</button>
-    <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
-  </form>
-</div>
-<!-- ===== /Chat Box ===== -->
-
-<!-- 1x STICKERS definieren -->
-<script>
-  const STICKERS = [
-    'grumpy (11).png',        'ittybittybaseball (1).png',  'Itty Bitty Flower GIF by herecomesbitcoin (1).gif',
-    'Sandwich (7).png',        'Graffiti (3).png',
-    'jack-mallers (2).png',    'Satoshi (6).png',
-    'Construction (7).png',    'Cat (4).png',
-     'Astronaut (2).png',      'girls-night-out.png',
-     'Bitcoinbahama (3).png',   
-     'Nostrich (3).png',        
+  <!-- 1x STICKERS definieren -->
+  <script>
+    const STICKERS = [
+      'grumpy (11).png',        'ittybittybaseball (1).png',  'Itty Bitty Flower GIF by herecomesbitcoin (1).gif',
+      'Sandwich (7).png',       'Graffiti (3).png',
+      'jack-mallers (2).png',   'Satoshi (6).png',
+      'Construction (7).png',   'Cat (4).png',
+      'Astronaut (2).png',      'girls-night-out.png',
+      'Bitcoinbahama (3).png',
+      'Nostrich (3).png',
       'Queen (8).png',
-     'UFO (8).png',
-     'Coder.png',                  
-    'Bitcoin Blockchain GIF by herecomesbitcoin.gif',
-'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (1).gif',
-'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (2).gif',
-'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (3).gif',
-'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (4).gif',
-'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (5).gif',
-'Bitcoin Cryptocurrency Sticker by herecomesbitcoin.gif',
-  'Cat Crypto Sticker by herecomesbitcoin.gif',
-  'Crypto Bitcoin GIF by herecomesbitcoin.gif',
-'Crypto Bitcoin Sticker by herecomesbitcoin (3).gif',
-'Crypto Dancing GIF by herecomesbitcoin (3).gif',
-  'Hieronymus Bosch Bitcoin Sticker by herecomesbitcoin.gif',
-  'Jack Dorsey Bitcoin Sticker by herecomesbitcoin.gif',
-  'San Francisco Dancing GIF by herecomesbitcoin.gif',
-  ];
-</script>
+      'UFO (8).png',
+      'Coder.png',
+      'Bitcoin Blockchain GIF by herecomesbitcoin.gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (1).gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (2).gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (3).gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (4).gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (5).gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin.gif',
+      'Cat Crypto Sticker by herecomesbitcoin.gif',
+      'Crypto Bitcoin GIF by herecomesbitcoin.gif',
+      'Crypto Bitcoin Sticker by herecomesbitcoin (3).gif',
+      'Crypto Dancing GIF by herecomesbitcoin (3).gif',
+      'Hieronymus Bosch Bitcoin Sticker by herecomesbitcoin.gif',
+      'Jack Dorsey Bitcoin Sticker by herecomesbitcoin.gif',
+      'San Francisco Dancing GIF by herecomesbitcoin.gif',
+    ];
+  </script>
 
+  <!-- ===== BONUS POWER los van chat ===== -->
+  <div id="bonus-power-panel">
+    <div class="bp-header">BONUS POWER</div>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
-    authDomain: "bitty-brickshift.firebaseapp.com",
-    databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "bitty-brickshift",
-    storageBucket: "bitty-brickshift.appspot.com",
-    messagingSenderId: "823337012487",
-    appId: "1:823337012487:web:1d217b13195f48809389a2"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-
-  const db        = firebase.database();
-  const chatRef   = db.ref("chat");
-  const scoresRef = db.ref("scores");
-
-  // ⬇️ DIT TOEVOEGEN
-  window.chatRef   = chatRef;
-  window.scoresRef = scoresRef;
-
-  console.log("✅ Firebase connected!");
-</script>
-
- 
-
-
-
-
-<!-- ===== BONUS POWER los van chat ===== -->
-<div id="bonus-power-panel">
-  <div class="bp-header">BONUS POWER</div>
-
-  <!-- ❤️ HARTJES METER -->
-  <div class="bp-row" data-type="hearts">
-    <div class="bp-icon bp-icon-heart"></div>
-    <div class="bp-tube">
-      <div class="bp-liquid" id="bp-hearts-liquid"></div>
-      <div class="bp-glass"></div>
+    <!-- ❤️ HARTJES METER -->
+    <div class="bp-row" data-type="hearts">
+      <div class="bp-icon bp-icon-heart"></div>
+      <div class="bp-tube">
+        <div class="bp-liquid" id="bp-hearts-liquid"></div>
+        <div class="bp-glass"></div>
+      </div>
+      <div class="bp-value" id="bp-hearts-value">0/10</div>
     </div>
-    <div class="bp-value" id="bp-hearts-value">0/10</div>
+
+    <!-- ⭐ STERREN METER -->
+    <div class="bp-row" data-type="stars">
+      <div class="bp-icon bp-icon-star"></div>
+      <div class="bp-tube">
+        <div class="bp-liquid" id="bp-stars-liquid"></div>
+        <div class="bp-glass"></div>
+      </div>
+      <div class="bp-value" id="bp-stars-value">0/10</div>
+    </div>
+
+    <!-- 💣 BOM METER -->
+    <div class="bp-row" data-type="bombs">
+      <div class="bp-icon bp-icon-bomb"></div>
+      <div class="bp-tube">
+        <div class="bp-liquid" id="bp-bombs-liquid"></div>
+        <div class="bp-glass"></div>
+      </div>
+      <div class="bp-value" id="bp-bombs-value">0/10</div>
+    </div>
+
+    <!-- ❌ KRUIS METER -->
+    <div class="bp-row" data-type="cross">
+      <div class="bp-icon bp-icon-cross"></div>
+      <div class="bp-tube">
+        <div class="bp-liquid" id="bp-cross-liquid"></div>
+        <div class="bp-glass"></div>
+      </div>
+      <div class="bp-value" id="bp-cross-value">0/3</div>
+    </div>
   </div>
 
-  <!-- ⭐ STERREN METER -->
-  <div class="bp-row" data-type="stars">
-    <div class="bp-icon bp-icon-star"></div>
-    <div class="bp-tube">
-      <div class="bp-liquid" id="bp-stars-liquid"></div>
-      <div class="bp-glass"></div>
-    </div>
-    <div class="bp-value" id="bp-stars-value">0/10</div>
-  </div>
+  <!-- andere elementen die je al had -->
+  <span id="player-display">Player</span>
+  <span id="scoreDisplay">0</span>
 
-  <!-- 💣 BOM METER -->
-  <div class="bp-row" data-type="bombs">
-    <div class="bp-icon bp-icon-bomb"></div>
-    <div class="bp-tube">
-      <div class="bp-liquid" id="bp-bombs-liquid"></div>
-      <div class="bp-glass"></div>
-    </div>
-    <div class="bp-value" id="bp-bombs-value">0/10</div>
-  </div>
-
-  <!-- ❌ KRUIS METER -->
-  <div class="bp-row" data-type="cross">
-    <div class="bp-icon bp-icon-cross"></div>
-    <div class="bp-tube">
-      <div class="bp-liquid" id="bp-cross-liquid"></div>
-      <div class="bp-glass"></div>
-    </div>
-    <div class="bp-value" id="bp-cross-value">0/3</div>
-  </div>
-</div>
-
-<!-- andere elementen die je al had -->
-<span id="player-display">Player</span>
-<span id="scoreDisplay">0</span>
-
-<!-- Tooltip -->
-<div id="resetTooltip" style="
+  <!-- Tooltip -->
+  <div id="resetTooltip" style="
     display: none;
     position: fixed;
     bottom: 100px;
@@ -166,308 +136,308 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   ">Use when the ball is stuck — no lives will be lost.</div>
 
-<!-- Reset-knop -->
-<img id="resetBallBtn" 
-     src="resetball.png" 
-     alt="Reset Ball" 
-     style="
-       position: fixed;
-       bottom: 40px;
-       right: 30px;
-       width: 100px;
-       height: 100px;
-       cursor: pointer;
-       z-index: 300;
-       transition: transform 0.2s ease;
-     "
-     onmouseover="this.style.transform='scale(1.1)'"
-     onmouseout="this.style.transform='scale(1)'"
->
-</body>
+  <!-- Reset-knop -->
+  <img id="resetBallBtn" 
+      src="resetball.png" 
+      alt="Reset Ball" 
+      style="
+        position: fixed;
+        bottom: 40px;
+        right: 30px;
+        width: 100px;
+        height: 100px;
+        cursor: pointer;
+        z-index: 300;
+        transition: transform 0.2s ease;
+      "
+      onmouseover="this.style.transform='scale(1.1)'"
+      onmouseout="this.style.transform='scale(1)'"
+  >
 
-<!-- ✅ CHAT SCRIPT (nu met Firebase) -->
-<script>
-(() => {
-  const $msgs   = document.getElementById('chatMessages');
-  const $form   = document.getElementById('chatForm');
-  const $input  = document.getElementById('chatInput');
-  const $name   = document.getElementById('chatName');
-  const $clear  = document.getElementById('chatClearBtn');
+  <!-- 🔹 1. Firebase libs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
-  // haal het panel en de knop VROEG op, zodat we ze overal kunnen gebruiken
-  const stickerPanel = document.getElementById('chat-sticker-panel');
-  const stickerBtn   = document.getElementById('chatStickersBtn');
+  <!-- 🔹 2. Firebase init + globale refs -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
+      authDomain: "bitty-brickshift.firebaseapp.com",
+      databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "bitty-brickshift",
+      storageBucket: "bitty-brickshift.appspot.com",
+      messagingSenderId: "823337012487",
+      appId: "1:823337012487:web:1d217b13195f48809389a2"
+    };
 
-  const STORE_KEY = 'bb_chat_messages';
-  const LIMIT = 100; // oude lokale limit – laten we als fallback staan
+    firebase.initializeApp(firebaseConfig);
 
-  // sticker die klaarstaat om mee te sturen
-  let selectedSticker = null;
-  // om de geselecteerde DOM te onthouden (voor highlight)
-  let currentStickerEl = null;
+    const db        = firebase.database();
+    const chatRef   = db.ref("chat");
+    const scoresRef = db.ref("scores");
 
-  // 🔸 Functie om spelernaam uit het spel te halen
-  function detectPlayerName() {
-    let playerName = '';
+    // globaal maken zodat andere scripts 'm zien
+    window.chatRef   = chatRef;
+    window.scoresRef = scoresRef;
 
-    const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
-    const display   = document.getElementById('player-display');
+    console.log("✅ Firebase connected!");
+  </script>
 
-    if (nameInput && nameInput.value.trim() !== '') {
-      playerName = nameInput.value.trim();
-    } else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player') {
-      playerName = display.textContent.trim();
-    }
+  <!-- ✅ CHAT SCRIPT (nu met Firebase) -->
+  <script>
+  (() => {
+    const $msgs   = document.getElementById('chatMessages');
+    const $form   = document.getElementById('chatForm');
+    const $input  = document.getElementById('chatInput');
+    const $name   = document.getElementById('chatName');
+    const $clear  = document.getElementById('chatClearBtn');
 
-    // fallback: bewaar oude naam
-    if (!playerName && localStorage.getItem('chatName')) {
-      playerName = localStorage.getItem('chatName');
-    }
+    const stickerPanel = document.getElementById('chat-sticker-panel');
+    const stickerBtn   = document.getElementById('chatStickersBtn');
 
-    return playerName || 'Anon';
-  }
+    const STORE_KEY = 'bb_chat_messages';
+    const LIMIT = 100;
 
-  // automatische naamdetectie
-  function updateChatName() {
-    const name = detectPlayerName();
-    if ($name) {
-      $name.value = name;
-      $name.disabled = true;
-    }
-    localStorage.setItem('chatName', name);
-  }
-  updateChatName();
-  setInterval(updateChatName, 1000);
+    let selectedSticker = null;
+    let currentStickerEl = null;
 
-  // lokale opslag helpers (houden we als fallback / voor leegknop)
-  function getStore(){
-    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
-    catch(e){ return []; }
-  }
-  function setStore(arr){
-    try{ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }catch(e){}
-  }
+    function detectPlayerName() {
+      let playerName = '';
 
-  function pad(n){ return String(n).padStart(2,'0'); }
-  function nowTime(){
-    const d = new Date();
-    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
+      const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
+      const display   = document.getElementById('player-display');
 
-  function escapeHTML(s){
-    return s.replace(/[&<>"']/g, c => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-    }[c]));
-  }
-  function linkify(s){
-    return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-  }
-
-  // 1 bericht tekenen (voor Firebase child_added)
-  function appendChatMessage(m){
-    if (!$msgs) return;
-    const wrap = document.createElement('div');
-    wrap.className = 'chat-msg';
-
-    let html = `<div class="chat-meta">${m.time || '--:--'} — <b>${escapeHTML(m.name || 'Anon')}</b></div>`;
-    if (m.text) {
-      html += `<div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
-    }
-    if (m.img) {
-      html += `<img src="${m.img}" class="chat-thumb" alt="image">`;
-    }
-
-    wrap.innerHTML = html;
-    $msgs.appendChild(wrap);
-    $msgs.scrollTop = $msgs.scrollHeight;
-  }
-
-  // oude render (gebruiken we alleen nog bij clear)
-  function render(all){
-    if (!$msgs) return;
-    $msgs.innerHTML = '';
-    all.forEach(appendChatMessage);
-  }
-
-  // bericht toevoegen -> NU naar Firebase
-  function addMessage(name, text, imgData = null){
-  const msg = {
-    name: name,
-    text: text,
-    img: imgData,
-    time: nowTime()
-  };
-
-  // als firebase bestaat: daarheen sturen
-  if (window.chatRef) {
-    console.log('[chat] probeer te pushen naar Firebase:', msg);
-    chatRef.push(msg, (err) => {
-      if (err) {
-        console.error('[chat] Firebase push MISLUKT:', err);
-      } else {
-        console.log('[chat] Firebase push GELUKT ✅');
+      if (nameInput && nameInput.value.trim() !== '') {
+        playerName = nameInput.value.trim();
+      } else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player') {
+        playerName = display.textContent.trim();
       }
-    });
-  } else {
-    // FALLBACK: localStorage
-    console.warn('[chat] geen chatRef -> gebruik localStorage');
-    let all = getStore();
-    if(all.length >= LIMIT){
-      all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
+
+      if (!playerName && localStorage.getItem('chatName')) {
+        playerName = localStorage.getItem('chatName');
+      }
+
+      return playerName || 'Anon';
     }
-    all.push(msg);
-    setStore(all);
-    render(all);
-  }
-}
 
-  // ✅ luister op Firebase chat
-  if (window.chatRef) {
-    chatRef.limitToLast(200).on('child_added', snap => {
-      const m = snap.val();
-      appendChatMessage(m);
-    });
-  } else {
-    // fallback: lokale berichten tonen
-    render(getStore());
-  }
-
-  // versturen (tekst + geselecteerde sticker)
-  if ($form) {
-    $form.addEventListener('submit', e=>{
-      e.preventDefault();
+    function updateChatName() {
       const name = detectPlayerName();
-      const text = $input.value.trim();
-
-      // niks en geen sticker? dan niks
-      if (!text && !selectedSticker) return;
-
-      addMessage(name, text, selectedSticker);
-
-      // reset
-      $input.value = '';
-      $input.focus();
-
-      selectedSticker = null;
-      // highlight weghalen
-      if (currentStickerEl) {
-        currentStickerEl.classList.remove('selected');
-        currentStickerEl = null;
+      if ($name) {
+        $name.value = name;
+        $name.disabled = true;
       }
-      // popup sluiten na verzenden
-      if (stickerPanel) stickerPanel.style.display = 'none';
-    });
-  }
+      localStorage.setItem('chatName', name);
+    }
+    updateChatName();
+    setInterval(updateChatName, 1000);
 
-  // chat leegknop (alleen lokaal leeg)
-  if ($clear) {
-    $clear.addEventListener('click', ()=>{
-      setStore([]);
-      render([]);
-      // let op: Firebase-berichten blijven gewoon staan – dat is oké voor nu
-    });
-  }
+    function getStore(){
+      try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+      catch(e){ return []; }
+    }
+    function setStore(arr){
+      try{ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }catch(e){}
+    }
 
-  // enter = versturen
-  if ($input) {
-    $input.addEventListener('keydown', e=>{
-      if(e.key === 'Enter' && !e.shiftKey){
-        e.preventDefault();
-        $form.requestSubmit();
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function nowTime(){
+      const d = new Date();
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function escapeHTML(s){
+      return s.replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      }[c]));
+    }
+    function linkify(s){
+      return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
+
+    function appendChatMessage(m){
+      if (!$msgs) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'chat-msg';
+
+      let html = `<div class="chat-meta">${m.time || '--:--'} — <b>${escapeHTML(m.name || 'Anon')}</b></div>`;
+      if (m.text) {
+        html += `<div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
       }
-    });
-  }
+      if (m.img) {
+        html += `<img src="${m.img}" class="chat-thumb" alt="image">`;
+      }
 
-  // ===== STICKER PANEL =====
-  if (stickerBtn && stickerPanel) {
-    // Twee secties: images en gifs
-    const imageGrid = document.createElement('div');
-    imageGrid.className = 'sticker-grid';
+      wrap.innerHTML = html;
+      $msgs.appendChild(wrap);
+      $msgs.scrollTop = $msgs.scrollHeight;
+    }
 
-    const gifGrid = document.createElement('div');
-    gifGrid.className = 'sticker-grid';
+    function render(all){
+      if (!$msgs) return;
+      $msgs.innerHTML = '';
+      all.forEach(appendChatMessage);
+    }
 
-    const imgTitle = document.createElement('div');
-    imgTitle.textContent = 'Stickers';
-    imgTitle.className = 'sticker-section-title';
+    // bericht toevoegen -> naar Firebase
+    function addMessage(name, text, imgData = null){
+      const msg = {
+        name: name,
+        text: text,
+        img: imgData,
+        time: nowTime()
+      };
 
-    const gifTitle = document.createElement('div');
-    gifTitle.textContent = 'GIFs';
-    gifTitle.className = 'sticker-section-title';
-
-    // verdeel bestanden op extensie
-    const list = Array.isArray(STICKERS) ? STICKERS : [];
-    list.forEach(src => {
-      const item = document.createElement('div');
-      item.className = 'sticker-item';
-
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = 'sticker';
-      item.appendChild(img);
-
-      // 1x klik: selecteren / deselecteren
-      item.addEventListener('click', () => {
-        if (selectedSticker === src) {
-          selectedSticker = null;
-          item.classList.remove('selected');
-          currentStickerEl = null;
-          return;
+      if (window.chatRef) {
+        console.log('[chat] probeer te pushen naar Firebase:', msg);
+        window.chatRef.push(msg, (err) => {
+          if (err) {
+            console.error('[chat] Firebase push MISLUKT:', err);
+          } else {
+            console.log('[chat] Firebase push GELUKT ✅');
+          }
+        });
+      } else {
+        console.warn('[chat] geen chatRef -> gebruik localStorage');
+        let all = getStore();
+        if(all.length >= LIMIT){
+          all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
         }
-        selectedSticker = src;
-        if (currentStickerEl) currentStickerEl.classList.remove('selected');
-        item.classList.add('selected');
-        currentStickerEl = item;
+        all.push(msg);
+        setStore(all);
+        render(all);
+      }
+    }
+
+    // Firebase luisteraar
+    if (window.chatRef) {
+      window.chatRef.limitToLast(200).on('child_added', snap => {
+        const m = snap.val();
+        console.log('[chat] nieuw bericht uit Firebase:', m);
+        appendChatMessage(m);
       });
+    } else {
+      render(getStore());
+    }
 
-      // 2x klik: direct sturen (met evt. tekst)
-      item.addEventListener('dblclick', () => {
+    if ($form) {
+      $form.addEventListener('submit', e=>{
+        e.preventDefault();
         const name = detectPlayerName();
-        const text = $input ? $input.value.trim() : '';
-        addMessage(name, text, src);
+        const text = $input.value.trim();
 
-        // reset UI
-        if ($input) {
-          $input.value = '';
-          $input.focus();
-        }
+        if (!text && !selectedSticker) return;
+
+        addMessage(name, text, selectedSticker);
+
+        $input.value = '';
+        $input.focus();
+
         selectedSticker = null;
         if (currentStickerEl) {
           currentStickerEl.classList.remove('selected');
           currentStickerEl = null;
         }
-        // popup sluiten
-        stickerPanel.style.display = 'none';
+        if (stickerPanel) stickerPanel.style.display = 'none';
+      });
+    }
+
+    if ($clear) {
+      $clear.addEventListener('click', ()=>{
+        setStore([]);
+        render([]);
+      });
+    }
+
+    if ($input) {
+      $input.addEventListener('keydown', e=>{
+        if(e.key === 'Enter' && !e.shiftKey){
+          e.preventDefault();
+          $form.requestSubmit();
+        }
+      });
+    }
+
+    // STICKER PANEL
+    if (stickerBtn && stickerPanel) {
+      const imageGrid = document.createElement('div');
+      imageGrid.className = 'sticker-grid';
+
+      const gifGrid = document.createElement('div');
+      gifGrid.className = 'sticker-grid';
+
+      const imgTitle = document.createElement('div');
+      imgTitle.textContent = 'Stickers';
+      imgTitle.className = 'sticker-section-title';
+
+      const gifTitle = document.createElement('div');
+      gifTitle.textContent = 'GIFs';
+      gifTitle.className = 'sticker-section-title';
+
+      const list = Array.isArray(STICKERS) ? STICKERS : [];
+      list.forEach(src => {
+        const item = document.createElement('div');
+        item.className = 'sticker-item';
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'sticker';
+        item.appendChild(img);
+
+        item.addEventListener('click', () => {
+          if (selectedSticker === src) {
+            selectedSticker = null;
+            item.classList.remove('selected');
+            currentStickerEl = null;
+            return;
+          }
+          selectedSticker = src;
+          if (currentStickerEl) currentStickerEl.classList.remove('selected');
+          item.classList.add('selected');
+          currentStickerEl = item;
+        });
+
+        item.addEventListener('dblclick', () => {
+          const name = detectPlayerName();
+          const text = $input ? $input.value.trim() : '';
+          addMessage(name, text, src);
+
+          if ($input) {
+            $input.value = '';
+            $input.focus();
+          }
+          selectedSticker = null;
+          if (currentStickerEl) {
+            currentStickerEl.classList.remove('selected');
+            currentStickerEl = null;
+          }
+          stickerPanel.style.display = 'none';
+        });
+
+        if (src.toLowerCase().endsWith('.gif')) {
+          gifGrid.appendChild(item);
+        } else {
+          imageGrid.appendChild(item);
+        }
       });
 
-      // check of het een gif is of niet
-      if (src.toLowerCase().endsWith('.gif')) {
-        gifGrid.appendChild(item);
-      } else {
-        imageGrid.appendChild(item);
-      }
-    });
+      stickerPanel.innerHTML = '';
+      stickerPanel.appendChild(imgTitle);
+      stickerPanel.appendChild(imageGrid);
+      stickerPanel.appendChild(gifTitle);
+      stickerPanel.appendChild(gifGrid);
 
-    // paneel opbouwen
-    stickerPanel.innerHTML = '';
-    stickerPanel.appendChild(imgTitle);
-    stickerPanel.appendChild(imageGrid);
-    stickerPanel.appendChild(gifTitle);
-    stickerPanel.appendChild(gifGrid);
+      stickerBtn.addEventListener('click', () => {
+        const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
+        stickerPanel.style.display = show ? 'block' : 'none';
+      });
+    }
 
-    // open/dicht via camera-knop
-    stickerBtn.addEventListener('click', () => {
-      const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
-      stickerPanel.style.display = show ? 'block' : 'none';
-    });
-  }
-
-})();
-</script>
+  })();
+  </script>
 
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="600"></canvas>
-   
+  
     <div id="time-box">
       <span id="timeDisplay">00:00</span>
     </div>
@@ -497,221 +467,218 @@
   <script src="login.js"></script>
   <script src="game.js"></script>
 
-<script>
-  let highscores = JSON.parse(localStorage.getItem("highscores")) || [
-    { name: "—", score: 0, time: "00:00", level: 1 },
-    { name: "—", score: 0, time: "00:00", level: 1 },
-    { name: "—", score: 0, time: "00:00", level: 1 },
-    { name: "—", score: 0, time: "00:00", level: 1 },
-    { name: "—", score: 0, time: "00:00", level: 1 },
-    { name: "—", score: 0, time: "00:00", level: 1 },
-    { name: "—", score: 0, time: "00:00", level: 1 },
-    { name: "—", score: 0, time: "00:00", level: 1 },
-    { name: "—", score: 0, time: "00:00", level: 1 },
-    { name: "—", score: 0, time: "00:00", level: 1 }
-  ];
+  <script>
+    let highscores = JSON.parse(localStorage.getItem("highscores")) || [
+      { name: "—", score: 0, time: "00:00", level: 1 },
+      { name: "—", score: 0, time: "00:00", level: 1 },
+      { name: "—", score: 0, time: "00:00", level: 1 },
+      { name: "—", score: 0, time: "00:00", level: 1 },
+      { name: "—", score: 0, time: "00:00", level: 1 },
+      { name: "—", score: 0, time: "00:00", level: 1 },
+      { name: "—", score: 0, time: "00:00", level: 1 },
+      { name: "—", score: 0, time: "00:00", level: 1 },
+      { name: "—", score: 0, time: "00:00", level: 1 },
+      { name: "—", score: 0, time: "00:00", level: 1 }
+    ];
 
-  function updateHighscoreBoard() {
-    const highscoreList = document.getElementById("highscore-list");
-    if (!highscoreList) return;
+    function updateHighscoreBoard() {
+      const highscoreList = document.getElementById("highscore-list");
+      if (!highscoreList) return;
 
-    highscoreList.innerHTML = "";
-    highscores.forEach((entry, index) => {
-      const levelText = entry.level ? `— Level ${entry.level}` : "";
-      const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} ${levelText}`;
-      highscoreList.appendChild(li);
-    });
-  }
-
-  function checkAndUpdateHighscores(name, score, time) {
-    const newEntry = { name, score, time };
-    highscores.push(newEntry);
-    highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
-    highscores = highscores.slice(0, 10);
-    localStorage.setItem("highscores", JSON.stringify(highscores));
-    updateHighscoreBoard();
-
-    // ✨ NIEUW: ook naar Firebase sturen
-    if (window.scoresRef) {
-      scoresRef.push({
-        name: name,
-        score: score,
-        time: time,
-        created: Date.now()
+      highscoreList.innerHTML = "";
+      highscores.forEach((entry, index) => {
+        const levelText = entry.level ? `— Level ${entry.level}` : "";
+        const li = document.createElement("li");
+        li.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} ${levelText}`;
+        highscoreList.appendChild(li);
       });
     }
-  }
 
-  window.addEventListener("load", () => {
-    updateHighscoreBoard();
-  });
-</script>
+    function checkAndUpdateHighscores(name, score, time) {
+      const newEntry = { name, score, time };
+      highscores.push(newEntry);
+      highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
+      highscores = highscores.slice(0, 10);
+      localStorage.setItem("highscores", JSON.stringify(highscores));
+      updateHighscoreBoard();
 
-<style>
-  #game-container {
-    position: relative; /* nodig voor absolute positionering binnenin */
-  }
+      // ✨ ook naar Firebase sturen
+      if (window.scoresRef) {
+        window.scoresRef.push({
+          name: name,
+          score: score,
+          time: time,
+          created: Date.now()
+        });
+      }
+    }
 
-  #gameCanvas {
-    position: relative;
-    z-index: 99;
-  }
+    window.addEventListener("load", () => {
+      updateHighscoreBoard();
+    });
+  </script>
 
-  #bikeFlyer {
-    position: absolute;
-    left: 100%;  /* buiten scherm starten */
-    top: 100%;   /* buiten onderkant starten */
-    width: 180px;
-    display: none;
-    z-index: 1; /* boven canvas, onder blokken */
-    pointer-events: none; /* niet klikbaar */
-  }
-</style>
+  <style>
+    #game-container {
+      position: relative;
+    }
+
+    #gameCanvas {
+      position: relative;
+      z-index: 99;
+    }
+
+    #bikeFlyer {
+      position: absolute;
+      left: 100%;
+      top: 100%;
+      width: 180px;
+      display: none;
+      z-index: 1;
+      pointer-events: none;
+    }
+  </style>
   
-<img id="bikeFlyer" src="pointpay-bike.png" style="position:absolute; display:none; width:180px;" />
+  <img id="bikeFlyer" src="pointpay-bike.png" style="position:absolute; display:none; width:180px;" />
 
-<script>
-  function animateFlyer(flyerId, duration, delay) {
-    setTimeout(() => {
-      const flyer = document.getElementById(flyerId);
-      flyer.style.display = "block";
+  <script>
+    function animateFlyer(flyerId, duration, delay) {
+      setTimeout(() => {
+        const flyer = document.getElementById(flyerId);
+        flyer.style.display = "block";
 
-      const startX = window.innerWidth + 100;
-      const endX = -200;
-      const startY = window.innerHeight + 100;
-      const endY = -150;
-      let startTime = null;
+        const startX = window.innerWidth + 100;
+        const endX = -200;
+        const startY = window.innerHeight + 100;
+        const endY = -150;
+        let startTime = null;
 
-      function animate(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const step = elapsed / 16;
+        function animate(timestamp) {
+          if (!startTime) startTime = timestamp;
+          const elapsed = timestamp - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const step = elapsed / 16;
 
-        const baseX = startX + (endX - startX) * progress;
-        const baseY = startY + (endY - startY) * progress;
+          const baseX = startX + (endX - startX) * progress;
+          const baseY = startY + (endY - startY) * progress;
 
-        const wobbleX = Math.sin(step / 10) * 3;
-        const wobbleY = Math.cos(step / 15) * 3;
+          const wobbleX = Math.sin(step / 10) * 3;
+          const wobbleY = Math.cos(step / 15) * 3;
 
-        const x = baseX + wobbleX;
-        const y = baseY + wobbleY;
+          const x = baseX + wobbleX;
+          const y = baseY + wobbleY;
 
-        flyer.style.left = `${x}px`;
-        flyer.style.top = `${y}px`;
+          flyer.style.left = `${x}px`;
+          flyer.style.top = `${y}px`;
 
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          flyer.style.display = "none";
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            flyer.style.display = "none";
+          }
         }
-      }
 
-      requestAnimationFrame(animate);
-    }, delay);
-  }
-
-  // Start eerste run
-  animateFlyer("bikeFlyer", 20000, 1000);     // fiets na 1 sec, 20 sec lang
-  // Herhaal elke 30 sec
-  setInterval(() => animateFlyer("bikeFlyer", 20000, 1000), 30000);
-</script>
-
-<!-- Externe scripts -->
-<script src="login.js"></script>
-
-<!-- Muziekalbumscript -->
-<script>
-  const albumTracks = [
-    new Audio("track1.mp3"),
-    new Audio("track2.mp3"),
-    new Audio("track3.mp3"),
-    new Audio("track4.mp3"),
-    new Audio("track5.mp3"),
-    new Audio("track6.mp3"),
-  ];
-
-  let currentTrackIndex = 0;
-  let musicPlaying = false;
-
-  // 🔁 Zorg dat elke track zichzelf pas reset als die eindigt
-  albumTracks.forEach((track, index) => {
-    track.loop = false;
-
-    track.addEventListener("ended", () => {
-      currentTrackIndex = (currentTrackIndex + 1) % albumTracks.length;
-
-      // Stop alle andere tracks (zekerheid)
-      albumTracks.forEach(t => {
-        t.pause();
-        t.currentTime = 0;
-      });
-
-      // Speel de volgende track als muziek nog aanstaat
-      if (musicPlaying) {
-        albumTracks[currentTrackIndex].play();
-      }
-    });
-  });
-</script>  
-  
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const musicBtn = document.getElementById('musicToggle');
-  if (!musicBtn) return;
-
-  function updateBtnUI(playing){
-    musicBtn.title = playing ? 'Stop Music' : 'Play Music';
-    musicBtn.alt   = playing ? 'Stop Music' : 'Play Music';
-    musicBtn.src   = playing ? 'playmusic button.png' : 'playmusic button.png';
-  }
-  updateBtnUI(musicPlaying);
-
-  musicBtn.addEventListener('click', () => {
-    musicPlaying = !musicPlaying;
-
-    // stop/clear alle tracks
-    albumTracks.forEach(t => { t.pause(); t.currentTime = 0; });
-
-    if (musicPlaying) {
-      const p = albumTracks[currentTrackIndex].play();
-      if (p && typeof p.catch === 'function') {
-        p.catch(() => { musicPlaying = false; updateBtnUI(false); });
-      }
-    } else {
-      currentTrackIndex = 0;
+        requestAnimationFrame(animate);
+      }, delay);
     }
 
+    // Start eerste run
+    animateFlyer("bikeFlyer", 20000, 1000);
+    // Herhaal elke 30 sec
+    setInterval(() => animateFlyer("bikeFlyer", 20000, 1000), 30000);
+  </script>
+
+  <!-- Externe scripts -->
+  <script src="login.js"></script>
+
+  <!-- Muziekalbumscript -->
+  <script>
+    const albumTracks = [
+      new Audio("track1.mp3"),
+      new Audio("track2.mp3"),
+      new Audio("track3.mp3"),
+      new Audio("track4.mp3"),
+      new Audio("track5.mp3"),
+      new Audio("track6.mp3"),
+    ];
+
+    let currentTrackIndex = 0;
+    let musicPlaying = false;
+
+    albumTracks.forEach((track, index) => {
+      track.loop = false;
+
+      track.addEventListener("ended", () => {
+        currentTrackIndex = (currentTrackIndex + 1) % albumTracks.length;
+
+        albumTracks.forEach(t => {
+          t.pause();
+          t.currentTime = 0;
+        });
+
+        if (musicPlaying) {
+          albumTracks[currentTrackIndex].play();
+        }
+      });
+    });
+  </script>  
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const musicBtn = document.getElementById('musicToggle');
+    if (!musicBtn) return;
+
+    function updateBtnUI(playing){
+      musicBtn.title = playing ? 'Stop Music' : 'Play Music';
+      musicBtn.alt   = playing ? 'Stop Music' : 'Play Music';
+      musicBtn.src   = playing ? 'playmusic button.png' : 'playmusic button.png';
+    }
     updateBtnUI(musicPlaying);
-    musicBtn.blur();
+
+    musicBtn.addEventListener('click', () => {
+      musicPlaying = !musicPlaying;
+
+      albumTracks.forEach(t => { t.pause(); t.currentTime = 0; });
+
+      if (musicPlaying) {
+        const p = albumTracks[currentTrackIndex].play();
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => { musicPlaying = false; updateBtnUI(false); });
+        }
+      } else {
+        currentTrackIndex = 0;
+      }
+
+      updateBtnUI(musicPlaying);
+      musicBtn.blur();
+    });
   });
-});
-</script>
+  </script>
 
-<!-- 💬 Chat open/dicht -->
-<script>
-(()=> {
-  const chat = document.getElementById('chatbox');
-  const toggleBtn = document.getElementById('chatToggleBtn');
+  <!-- 💬 Chat open/dicht -->
+  <script>
+  (() => {
+    const chat = document.getElementById('chatbox');
+    const toggleBtn = document.getElementById('chatToggleBtn');
 
-  try {
-    if (localStorage.getItem('chatCollapsed') === '1') chat.classList.add('collapsed');
-  } catch(e){}
-
-  toggleBtn?.addEventListener('click', () => {
-    chat.classList.toggle('collapsed');
     try {
-      localStorage.setItem('chatCollapsed', chat.classList.contains('collapsed') ? '1' : '0');
+      if (localStorage.getItem('chatCollapsed') === '1') chat.classList.add('collapsed');
     } catch(e){}
-  });
 
-  const chatInput = document.getElementById('chatInput');
-  if (chatInput) chatInput.setAttribute('maxlength','300');
-})();
-</script>
+    toggleBtn?.addEventListener('click', () => {
+      chat.classList.toggle('collapsed');
+      try {
+        localStorage.setItem('chatCollapsed', chat.classList.contains('collapsed') ? '1' : '0');
+      } catch(e){}
+    });
+
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) chatInput.setAttribute('maxlength','300');
+  })();
+  </script>
 
 </body>
 </html>
+
 
 
