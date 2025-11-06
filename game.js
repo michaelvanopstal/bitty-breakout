@@ -2330,8 +2330,10 @@ resetBtn.addEventListener("mouseleave", () => {
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
-  // 🛡️ Voorkom acties als gebruiker in een inputveld of knop zit
-  if (["INPUT", "TEXTAREA", "BUTTON"].includes(document.activeElement.tagName)) return;
+  // 🛡️ niets doen als je in een input/textarea/button zit (bv. chat)
+  if (["INPUT", "TEXTAREA", "BUTTON"].includes(document.activeElement.tagName)) {
+    return;
+  }
 
   // 🚗 Bewegingstoetsen
   if (
@@ -2344,23 +2346,19 @@ function keyDownHandler(e) {
   ) {
     leftPressed = true;
 
-  } else if (
-    e.key === "Up" || e.key === "ArrowUp"
-  ) {
-    // ↑ alleen voor balkje omhoog
+  } else if (e.key === "Up" || e.key === "ArrowUp") {
+    // ↑ alleen voor wat jij al deed
     upPressed = true;
 
-  } else if (
-    e.key === "Down" || e.key === "ArrowDown"
-  ) {
+  } else if (e.key === "Down" || e.key === "ArrowDown") {
     downPressed = true;
   }
 
-  // 🎯 Actie: bal afschieten (alleen met spatie) als bal nog niet gelanceerd is
+  // 🎯 BAL AFVUREN (spatie) als de bal nog niet gelanceerd is
   if (e.code === "Space" && !ballLaunched) {
-    ballLaunched = true;
-    ballMoving = true;
-    paddleFreeMove = true; // ✅ Laat paddle vrij bewegen na eerste schot
+    ballLaunched   = true;
+    ballMoving     = true;
+    paddleFreeMove = true; // ✅ jouw gedrag
 
     // sound
     if (typeof shootSound !== "undefined") {
@@ -2368,17 +2366,19 @@ function keyDownHandler(e) {
       shootSound.play();
     }
 
-    // 🔥 snelheid uit huidige level halen
+    // 🔥 snelheid uit level pakken
     const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
     const lvl = LEVELS[lvlIndex];
     const launchSpeed =
       (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
         ? lvl.params.ballSpeed
-        : 6; // fallback als er niks staat
+        : 6;
 
-    // bal omhoog schieten met level-snelheid
-    balls[0].dx = 0;
-    balls[0].dy = -launchSpeed;
+    // bal omhoog met die snelheid
+    if (balls && balls[0]) {
+      balls[0].dx = 0;
+      balls[0].dy = -launchSpeed;
+    }
 
     // timer starten
     if (!timerRunning && typeof startTimer === "function") {
@@ -2386,7 +2386,7 @@ function keyDownHandler(e) {
     }
   }
 
-  // 🔫 Raket afvuren (ook spatie, maar alleen als raket actief is)
+  // 🔫 RAKET afvuren (ook spatie) als die actief is
   if (e.code === "Space" && rocketActive && rocketAmmo > 0 && !rocketFired) {
     rocketFired = true;
     rocketAmmo--;
@@ -2396,14 +2396,14 @@ function keyDownHandler(e) {
     }
   }
 
-  // 🎯 Schieten met vlaggetjes (spatie)
+  // 🎯 vlaggetjes-schot
   if (flagsOnPaddle && e.code === "Space") {
     if (typeof shootFromFlags === "function") {
       shootFromFlags();
     }
   }
 
-  // 🧪 Extra beveiliging bij opnieuw starten na Game Over (spatie)
+  // 🧪 reset na game over met spatie
   if (!ballMoving && e.code === "Space") {
     if (lives <= 0) {
       lives = 3;
@@ -2423,12 +2423,81 @@ function keyDownHandler(e) {
       if (timeEl) timeEl.textContent = "00:00";
 
       flagsOnPaddle = false;
-      flyingCoins = [];
+      flyingCoins   = [];
     }
 
     ballMoving = true;
   }
 }
+
+/* ==============================
+   📱 TOUCH CONTROLS (mobiel/tablet)
+   ============================== */
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+  let touchActive = false;
+
+  window.addEventListener('touchstart', (e) => {
+    if (!canvas) return;
+    if (e.touches.length > 0) {
+      touchActive = true;
+      const touch = e.touches[0];
+      const rect  = canvas.getBoundingClientRect();
+      const x     = touch.clientX - rect.left;
+
+      // paddle onder vinger
+      paddleX = x - paddleWidth / 2;
+
+      // begrenzen
+      if (paddleX < 0) paddleX = 0;
+      if (paddleX + paddleWidth > canvas.width) {
+        paddleX = canvas.width - paddleWidth;
+      }
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!touchActive || !canvas) return;
+    const touch = e.touches[0];
+    const rect  = canvas.getBoundingClientRect();
+    const x     = touch.clientX - rect.left;
+
+    paddleX = x - paddleWidth / 2;
+
+    // begrenzen
+    if (paddleX < 0) paddleX = 0;
+    if (paddleX + paddleWidth > canvas.width) {
+      paddleX = canvas.width - paddleWidth;
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchend', (e) => {
+    // tik = bal starten als hij nog stil ligt
+    if (!ballLaunched && balls && balls[0]) {
+      if (typeof launchBall === 'function') {
+        launchBall();
+      } else {
+        // zelfde launch als bij spatie
+        ballLaunched   = true;
+        ballMoving     = true;
+        paddleFreeMove = true;
+        const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+        const lvl = LEVELS[lvlIndex];
+        const launchSpeed =
+          (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
+            ? lvl.params.ballSpeed
+            : 6;
+        balls[0].dx = 0;
+        balls[0].dy = -launchSpeed;
+        if (!timerRunning && typeof startTimer === "function") {
+          startTimer();
+        }
+      }
+    }
+
+    touchActive = false;
+  });
+}
+
 
 
 function keyUpHandler(e) {
