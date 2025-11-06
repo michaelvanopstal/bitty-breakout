@@ -1,52 +1,39 @@
-/* ===== BASIS / ACHTERGROND ===== */
+/* ===== jouw originele / laptop-stijl ===== */
 body {
   margin: 0;
-  background: url('wandljk_kl_png_V1.jpeg') no-repeat center center fixed;
+  background: url('wandljk_kl_png_V1.jpeg') no-repeat center center;
   background-size: cover;
   overflow: hidden;
+  position: relative;
+  background-attachment: fixed;
   font-family: Arial, sans-serif;
-  position: relative;
 }
 
-/* ===== GAME CONTAINER =====
-   We maken 'm centraal en beperken de max-breedte
-   zodat het op grote schermen niet lelijk uitrekt.
-*/
-#game-container {
-  position: relative;
-  width: min(100vw - 220px, 1280px); /* ruimte laten voor chat rechts */
-  margin: 15px auto 0 auto;          /* centreren */
-  aspect-ratio: 645 / 600;           /* verhouding van je canvas */
-}
-
-/* Canvas zelf vult nu de container en blijft in verhouding */
 #gameCanvas {
   position: absolute;
-  inset: 0;               /* top:0; left:0; right:0; bottom:0; */
-  width: 100%;
-  height: 100%;
+  top: 7px;
+  left: 50%;
+  transform: translateX(calc(-50% - 1px)); /* jouw kleine correctie */
+  width: 640px;
+  height: 595px;
   background-color: transparent;
   border: 3px solid transparent;
   z-index: 18;
 }
 
-/* ===== SPEL-OVERLAYS (nu relatief aan game-container) ===== */
-
-/* naam speler */
 #player-display {
   position: absolute;
   top: 50px;
-  left: 20px;
+  left: 100px;
   font-size: 18px;
   color: white;
   z-index: 999;
 }
 
-/* score rechtsboven in het speelveld */
 #scoreDisplay {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 33px;
+  left: 1125px;
   color: white;
   font-weight: bold;
   font-size: 18px;
@@ -55,43 +42,10 @@ body {
   user-select: none;
 }
 
-/* time-box */
-#time-box {
-  position: absolute;
-  top: 20px;
-  right: 140px;
-  width: 100px;
-  height: 30px;
-  text-align: center;
-  z-index: 1056;
-  pointer-events: none;
-}
-
-#timeDisplay {
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
-  font-family: Arial, sans-serif;
-}
-
-/* login-paneel rechtsboven van het speelveld */
-#login-overlay {
-  position: absolute;
-  top: 70px;
-  right: 20px;
-  text-align: right;
-  z-index: 999;
-}
-
-#login-box {
-  display: inline-block;
-}
-
-/* highscore lijst links van het speelveld */
 #highscore-overlay {
   position: absolute;
-  top: 200px;
-  left: 20px;
+  top: 270px;
+  left: 40px;
   width: 200px;
   border-radius: 10px;
   padding: 10px;
@@ -113,7 +67,6 @@ body {
   white-space: nowrap;
 }
 
-/* trophy naast highscore */
 #trophy {
   position: absolute;
   top: 70px;
@@ -122,7 +75,44 @@ body {
   z-index: 1000;
 }
 
-/* bike flyer blijft los eroverheen */
+#game-container {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-left: 10px;
+  margin-top: 15px;
+}
+
+#login-overlay {
+  position: absolute;
+  top: 90px;
+  right: 30px;
+  left: auto;
+  text-align: right;
+  z-index: 999;
+}
+
+#login-box { display: inline-block; }
+
+#time-box {
+  position: absolute;
+  top: 36px;
+  left: 1275px;
+  width: 100px;
+  height: 30px;
+  text-align: center;
+  z-index: 1056;
+  pointer-events: none;
+}
+#timeDisplay {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+}
+
 #bikeFlyer {
   position: absolute;
   width: 150px;
@@ -133,12 +123,6 @@ body {
   pointer-events: none;
 }
 
-#bike-layer {
-  pointer-events: none;
-  overflow: hidden;
-}
-
-/* muziekknop onderin links vast op scherm */
 #musicToggle {
   position: fixed;
   left: 40px;
@@ -148,38 +132,18 @@ body {
   z-index: 777;
   transition: transform 0.2s ease;
 }
-#musicToggle:hover {
-  transform: scale(1.05);
-}
-
-/* rocket flame (je had 'm al) */
-#rocketFlame {
-  position: absolute;
-  width: 20px;
-  height: 40px;
-  background: radial-gradient(ellipse at center, orange 0%, red 60%, transparent 100%);
-  border-radius: 50%;
-  display: none;
-  z-index: 1;
-  filter: blur(1px);
-  animation: flameFlicker 0.15s infinite alternate;
-}
-@keyframes flameFlicker {
-  0% { transform: scale(1) rotate(0deg); opacity: 0.9; }
-  100% { transform: scale(1.2) rotate(5deg); opacity: 0.5; }
-}
+#musicToggle:hover { transform: scale(1.05); }
 
 /* ===== BONUS POWER PANEL ===== */
 #bonus-power-panel {
-  position: fixed;
+  position: absolute;
   top: 320px;
-  right: 360px; /* iets naar links zodat chat eroverheen kan */
+  right: 60px;
   width: 230px;
   background: linear-gradient(#ffe066, #ffbb22);
   border: 3px solid rgba(50, 50, 50, 0.4);
   border-radius: 14px;
   padding: 6px 8px 10px;
-  font-family: Arial, sans-serif;
   z-index: 50;
   box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
@@ -203,8 +167,8 @@ body {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: rgba(0,0,0,.08);
-  color: #7a2b00;
+  background:rgba(0,0,0,.08);
+  color:#7a2b00;
   background-size: 70%;
   background-repeat: no-repeat;
   background-position: center;
@@ -214,7 +178,6 @@ body {
 .bp-icon-star  { background-image: url("stars.png"); }
 .bp-icon-bomb  { background-image: url("bom.png"); }
 .bp-icon-cross { background-image: url("bad_cross.png"); }
-
 .bp-tube {
   position: relative;
   flex: 1;
@@ -224,20 +187,11 @@ body {
   overflow: hidden;
   border: 1px solid rgba(107,0,0,0.4);
 }
-.bp-liquid {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 0%;
-  border-radius: 999px;
-  transition: width 0.25s ease-out;
-}
+.bp-liquid { position:absolute; top:0; left:0; height:100%; width:0%; border-radius:999px; transition:width .25s ease-out; }
 #bp-hearts-liquid { background: linear-gradient(90deg, #fff 0%, #ff5b6b 25%, #550000 100%); }
 #bp-stars-liquid  { background: linear-gradient(90deg, #fff 0%, #ffe500 20%, #550000 100%); }
 #bp-bombs-liquid  { background: linear-gradient(90deg, #fff 0%, #e0e0e0 25%, #550000 100%); }
 #bp-cross-liquid  { background: linear-gradient(90deg, #fff 0%, #a00000 25%, #400000 100%); }
-
 .bp-glass {
   pointer-events: none;
   position: absolute;
@@ -253,12 +207,9 @@ body {
   color: #6b0000;
   font-weight: bold;
 }
-.bp-row.flash .bp-tube {
-  box-shadow: 0 0 10px #fff, 0 0 20px #fff;
-}
 
-/* ===== CHAT BOX ===== */
-#chatbox {
+/* ===== Chat Box styles ===== */
+#chatbox{
   position: fixed;
   right: 40px;
   top: 160px;
@@ -267,39 +218,34 @@ body {
   display: flex;
   flex-direction: column;
   z-index: 9998;
+  font-family: system-ui, Arial, sans-serif;
   border-radius: 18px;
   background: linear-gradient(#f6a53b,#e27e22);
-  box-shadow: 0 8px 20px rgba(0,0,0,.35),
-              inset 0 0 0 4px #c76b12,
-              inset 0 0 0 8px #ffc85a;
+  box-shadow: 0 8px 20px rgba(0,0,0,.35), inset 0 0 0 4px #c76b12, inset 0 0 0 8px #ffc85a;
   overflow: hidden;
   max-width: 90vw;
-  font-family: system-ui, Arial, sans-serif;
 }
-#chatbox .chatbox-header {
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px 0 16px;
+#chatbox .chatbox-header{
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 12px 0 16px;
   background: linear-gradient(#ffd56a,#ffb12b);
-  color: #7a2b00;
-  font-weight: 800;
-  letter-spacing: .5px;
-  border-bottom: 2px solid #b66414;
+  color:#7a2b00;
+  font-weight:800;
+  letter-spacing:.5px;
+  border-bottom:2px solid #b66414;
 }
-.chat-icon-btn {
-  border: none;
-  background: rgba(0,0,0,.08);
-  color: #7a2b00;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  cursor: pointer;
+#chatClearBtn{
+  border:none;
+  background:rgba(0,0,0,.08);
+  color:#7a2b00;
+  width:28px;height:28px; border-radius:8px; cursor:pointer;
 }
-.chat-icon-btn:hover { background: rgba(0,0,0,.16); }
+#chatClearBtn:hover{ background:rgba(0,0,0,.16); }
 
-#chatMessages {
+#chatMessages{
   flex: 1;
   padding: 10px 10px 6px 10px;
   background: #6a0f0f;
@@ -312,24 +258,17 @@ body {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
-.chat-msg {
+.chat-msg{
   background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,200,90,.35);
-  padding: 6px 8px;
-  margin-bottom: 6px;
-  border-radius: 10px;
-  line-height: 1.2;
+  border:1px solid rgba(255,200,90,.35);
+  padding:6px 8px;
+  margin-bottom:6px;
+  border-radius:10px;
+  line-height:1.2;
   box-shadow: inset 0 0 8px rgba(0,0,0,.15);
 }
-.chat-meta {
-  font-size: 11px;
-  opacity: .8;
-  margin-bottom: 2px;
-  color: #ffdfa0;
-}
-.chat-text {
-  font-size: 13px;
-}
+.chat-meta{ font-size:11px; opacity:.8; margin-bottom:2px; color:#ffdfa0; }
+.chat-text{ font-size:13px; }
 .chat-thumb {
   display: block;
   max-width: 120px;
@@ -340,55 +279,46 @@ body {
   object-fit: cover;
   box-shadow: 0 0 4px rgba(0,0,0,0.4);
 }
-
-#chatForm {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px;
-  background: linear-gradient(#ffb545,#f08a25);
-  border-top: 2px solid #b66414;
-}
-#chatForm input {
+#chatForm { display:flex; gap:6px; padding:8px; background: linear-gradient(#ffb545,#f08a25); border-top:2px solid #b66414; }
+#chatForm input{
   flex: 1;
   min-width: 0;
   height: 34px;
-  border: none;
-  outline: none;
+  border: none; outline: none;
   border-radius: 10px;
   padding: 0 10px;
   background: #fff5e3;
 }
-#chatInput {
+#chatInput{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-#chatName { flex: 0 0 98px; }
-
-#chatForm button {
-  flex: 0 0 46px;
-  border: none;
-  cursor: pointer;
-  border-radius: 10px;
-  background: #7a2b00;
-  color: #ffd56a;
-  font-weight: 700;
+#chatName{ flex:0 0 98px; }
+#chatForm button{
+  flex:0 0 46px;
+  border:none; cursor:pointer;
+  border-radius:10px;
+  background:#7a2b00; color:#ffd56a; font-weight:700;
 }
-#chatForm button:hover { filter: brightness(1.08); }
-
-#chatbox.collapsed { height: 42px; overflow: hidden; }
+#chatForm button:hover{ filter:brightness(1.08); }
+.chat-icon-btn{
+  border:none; background:rgba(0,0,0,.08); color:#7a2b00;
+  width:28px; height:28px; border-radius:8px; cursor:pointer;
+}
+.chat-icon-btn:hover{ background:rgba(0,0,0,.16); }
+#chatbox.collapsed{ height:42px; overflow:hidden; }
 #chatbox.collapsed #chatMessages,
-#chatbox.collapsed #chatForm { display: none; }
-#chatbox:not(.collapsed) #chatToggleBtn { transform: rotate(90deg); }
-#chatbox.collapsed #chatToggleBtn { transform: rotate(0deg); }
+#chatbox.collapsed #chatForm{ display:none; }
+#chatbox:not(.collapsed) #chatToggleBtn{ transform: rotate(90deg); }
+#chatbox.collapsed #chatToggleBtn{ transform: rotate(0deg); }
 
-/* === Sticker/GIF panel (onder chatbox) === */
+/* Sticker panel */
 #chat-sticker-panel {
   position: fixed;
   top: calc(160px + 360px);
-  right: 40px;
-  width: 300px;
+  right: 30px;
+  width: 310px;
   background: #6a0f0f;
   border: 2px solid #b66414;
   border-radius: 12px;
@@ -433,5 +363,60 @@ body {
   outline: 2px solid #ffcf62;
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
+
+/* =========================================================
+   ✅ PC-MODE (grote schermen) – hier doen we de correctie
+   ========================================================= */
+@media (min-width: 1500px) {
+  /* centreren van het hele spel */
+  #game-container {
+    position: relative;
+    width: 1200px;          /* vaste mooie breedte */
+    margin: 15px auto 0 auto;
+  }
+
+  /* canvas niet meer absolute in het midden duwen,
+     maar gewoon binnen de container */
+  #gameCanvas {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 645 / 600;
+  }
+
+  /* overlays opnieuw positioneren t.o.v. container */
+  #player-display {
+    top: 40px;
+    left: 20px;
+  }
+
+  #scoreDisplay {
+    top: 20px;
+    left: auto;
+    right: 20px;
+  }
+
+  #time-box {
+    top: 20px;
+    left: auto;
+    right: 140px;
+  }
+
+  #highscore-overlay {
+    top: 120px;
+    left: 20px;
+  }
+
+  /* bonus panel iets meer naar links omdat er meer ruimte is */
+  #bonus-power-panel {
+    position: fixed;
+    top: 320px;
+    right: 360px;
+  }
+}
+
 
 
