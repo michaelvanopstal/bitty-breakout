@@ -96,13 +96,6 @@
 </script>
 
  
-  <script>
-  // test direct schrijven naar firebase
-  const testRef = firebase.database().ref("test");
-  testRef.push({ hello: "world", time: new Date().toLocaleTimeString() })
-    .then(() => console.log("✅ Testbericht verstuurd!"))
-    .catch(err => console.error("❌ Fout bij test:", err));
-</script>
 
 
 
