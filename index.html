@@ -689,7 +689,9 @@
   </script>
 
   <!-- 💬 Chat open/dicht -->
- (()=> {
+<!-- 💬 Chat open/dicht -->
+<script>
+(() => {
   const chat = document.getElementById('chatbox');
   const toggleBtn = document.getElementById('chatToggleBtn');
   const chatInput = document.getElementById('chatInput');
@@ -699,14 +701,17 @@
     if (localStorage.getItem('chatCollapsed') === '1') {
       chat.classList.add('collapsed');
     }
-  } catch(e){}
+  } catch (e) {}
 
   // Alleen met muisklik open/dicht
   toggleBtn?.addEventListener('click', () => {
     chat.classList.toggle('collapsed');
     try {
-      localStorage.setItem('chatCollapsed', chat.classList.contains('collapsed') ? '1' : '0');
-    } catch(e){}
+      localStorage.setItem(
+        'chatCollapsed',
+        chat.classList.contains('collapsed') ? '1' : '0'
+      );
+    } catch (e) {}
   });
 
   // 🚫 Verwijder alle spatie- of toetsacties voor de chatbox zelf
@@ -720,13 +725,14 @@
     // Eventuele andere sneltoetsen (zoals Escape) mogen wel
     if (e.code === 'Escape') {
       chat.classList.add('collapsed');
-      localStorage.setItem('chatCollapsed', '1');
+      try {
+        localStorage.setItem('chatCollapsed', '1');
+      } catch (e) {}
     }
   });
 })();
+</script>
 
-
-  </script>
 
 </body>
 </html>
