@@ -495,15 +495,6 @@
       });
     }
 
-      if (window.scoresRef) {
-  window.scoresRef.push({
-    name: name,
-    score: score,
-    time: time,
-    created: Date.now()
-  });
-}
-
     
    function checkAndUpdateHighscores(name, score, time) {
   const newEntry = { name, score, time };     // nieuwe score aanmaken
