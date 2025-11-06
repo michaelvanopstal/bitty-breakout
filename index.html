@@ -468,6 +468,24 @@
   <script src="login.js"></script>
   <script src="game.js"></script>
 
+  <script>
+  // alleen op smalle schermen de echte canvas-grootte verkleinen
+  document.addEventListener('DOMContentLoaded', () => {
+    const c = document.getElementById('gameCanvas');
+    if (!c) return;
+
+    if (window.innerWidth < 768) {
+      // verhouding van jouw canvas: 645 x 600 ongeveer
+      const targetW = window.innerWidth;
+      const targetH = Math.round(targetW * (600 / 645));
+
+      c.width  = targetW;
+      c.height = targetH;
+    }
+  });
+</script>
+
+
  
    <script>
   let highscores = JSON.parse(localStorage.getItem("highscores")) || [
