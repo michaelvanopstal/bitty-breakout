@@ -3521,20 +3521,23 @@ function checkFlyingCoinHits() {
 function saveHighscore() {
   const playerName = window.currentPlayer || "Unknown";
 
+  // tijd uit je timer omzetten naar mm:ss
   const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
   const seconds = String(elapsedTime % 60).padStart(2, '0');
   const timeFormatted = `${minutes}:${seconds}`;
 
+  // score-object zoals jij ’m al had
   const newScore = {
     name: playerName,
     score: score,
     time: timeFormatted,
-    level: level || 1  // fallback naar level 1 als het niet gedefinieerd is
+    level: level || 1  // fallback naar level 1
   };
 
+  // ===== 1) LOKAAL (zoals je al deed) =====
   let highscores = JSON.parse(localStorage.getItem("highscores")) || [];
 
-  // 🔒 Voeg alleen toe als deze combinatie nog niet bestaat
+  // dubbel voorkomen
   const isDuplicate = highscores.some(h =>
     h.name === newScore.name &&
     h.score === newScore.score &&
@@ -3546,7 +3549,7 @@ function saveHighscore() {
     highscores.push(newScore);
   }
 
-  // 🏆 Sorteer op score, daarna op snelste tijd
+  // sorteren
   highscores.sort((a, b) => {
     if (b.score === a.score) {
       const [amin, asec] = a.time.split(":").map(Number);
@@ -3556,11 +3559,11 @@ function saveHighscore() {
     return b.score - a.score;
   });
 
-  // ✂️ Beperk tot top 10
+  // top 10 bewaren
   highscores = highscores.slice(0, 10);
   localStorage.setItem("highscores", JSON.stringify(highscores));
 
-  // 📋 Toon in de highscorelijst
+  // op je pagina tonen
   const list = document.getElementById("highscore-list");
   if (list) {
     list.innerHTML = "";
@@ -3571,7 +3574,26 @@ function saveHighscore() {
       list.appendChild(li);
     });
   }
+
+  // ===== 2) FIREBASE (nieuw) =====
+  // in index.html heb je al:
+  //   window.scoresRef = db.ref("scores");
+  // dus hier kunnen we die gebruiken
+  if (window.scoresRef) {
+    window.scoresRef.push({
+      name: newScore.name,
+      score: newScore.score,
+      time: newScore.time,
+      level: newScore.level,
+      created: Date.now()
+    })
+    .then(() => console.log("[score] naar Firebase gestuurd ✅"))
+    .catch(err => console.error("[score] Firebase fout:", err));
+  } else {
+    console.warn("[score] geen window.scoresRef gevonden – alleen lokaal opgeslagen");
+  }
 }
+
 
 const coinImg = new Image();
 coinImg.src = "pxp coin perfect_clipped_rev_1.png";
