@@ -672,24 +672,32 @@
 
   <!-- 💬 Chat open/dicht -->
   <script>
-  (() => {
-    const chat = document.getElementById('chatbox');
-    const toggleBtn = document.getElementById('chatToggleBtn');
+ (()=> {
+  const chat = document.getElementById('chatbox');
+  const toggleBtn = document.getElementById('chatToggleBtn');
+  const stickerPanel = document.getElementById('chat-sticker-panel'); // 👈 erbij
+
+  try {
+    if (localStorage.getItem('chatCollapsed') === '1') chat.classList.add('collapsed');
+  } catch(e){}
+
+  toggleBtn?.addEventListener('click', () => {
+    chat.classList.toggle('collapsed');
+
+    // 👇 als chat dicht gaat: stickerpaneel ook dicht
+    if (chat.classList.contains('collapsed') && stickerPanel) {
+      stickerPanel.style.display = 'none';
+    }
 
     try {
-      if (localStorage.getItem('chatCollapsed') === '1') chat.classList.add('collapsed');
+      localStorage.setItem('chatCollapsed', chat.classList.contains('collapsed') ? '1' : '0');
     } catch(e){}
+  });
 
-    toggleBtn?.addEventListener('click', () => {
-      chat.classList.toggle('collapsed');
-      try {
-        localStorage.setItem('chatCollapsed', chat.classList.contains('collapsed') ? '1' : '0');
-      } catch(e){}
-    });
+  const chatInput = document.getElementById('chatInput');
+  if (chatInput) chatInput.setAttribute('maxlength','300');
+})();
 
-    const chatInput = document.getElementById('chatInput');
-    if (chatInput) chatInput.setAttribute('maxlength','300');
-  })();
   </script>
 
 </body>
