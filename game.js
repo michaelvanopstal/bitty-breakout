@@ -5092,7 +5092,7 @@ if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
     wallSound.play();
   }
 
- // 1) Eerst broad-phase met bal-middelpunt
+
 // 1) Eerst broad-phase met bal-middelpunt
 const { cx, cy } = getBallCenter(ball);
 
