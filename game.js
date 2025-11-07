@@ -208,6 +208,9 @@ let stonefallHitsThisGame = 0;
 let rockWarnPlayed = false;
 let rockWarnTriggerIndex = Math.random() < 0.5 ? 1 : 3; // 1e of 3e keer
 
+const DEFAULT_BALL_SPEED = 8;
+
+
 balls.push({
   x: canvas.width / 2,
   y: canvas.height - paddleHeight - 10,
@@ -232,7 +235,7 @@ let paddleBaseWidth = 100;   // actuele 'basis' breedte voor dit level (zonder t
 const PADDLE_LONG_DURATION  = 30000;
 const PADDLE_SMALL_DURATION = 30000;
 
-const DEFAULT_BALL_SPEED = 8;
+
 
 // ==========================================================
 // 🎙️ VOICE-OVER: single-channel + cooldown
