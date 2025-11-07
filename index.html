@@ -729,24 +729,23 @@
     const c = document.getElementById('gameCanvas');
     if (!c) return;
 
-    const ratio = 600 / 645; // jouw game-verhouding
-
+    const ratio = 600 / 645;
     const vw = window.innerWidth;
     const canvasWidth = Math.min(vw * 0.84, 550);
     const canvasHeight = canvasWidth * ratio;
 
-    // echte canvas-afmeting aanpassen
     c.width = canvasWidth;
     c.height = canvasHeight;
 
     const vh = window.innerHeight;
-    const minTop = 140;
+    const minTop = 180;                 // ← zelfde waarde als in CSS
     const centeredTop = (vh - canvasHeight) / 2;
     const finalTop = Math.max(minTop, centeredTop);
 
     c.style.top = finalTop + 'px';
   }
 </script>
+
 
 </body>
 </html>
