@@ -413,7 +413,7 @@ body {
 }
 
 /* =========================================================
-   📏 Tablet / kleine laptops (tot 1200px)
+   💻 Tablet / kleinere laptops (tot 1200px)
    ========================================================= */
 @media (max-width: 1200px) {
   #scoreDisplay {
@@ -430,95 +430,35 @@ body {
 }
 
 /* =========================================================
-   📱 Mobiel (tot 768px)
-   ========================================================= */
-@media (max-width: 768px) {
-  body {
-    margin: 0;
-    background: url('mobile.png') no-repeat center top;
-    background-size: 100% 100%;
-    background-color: #c94a0a;
-    overflow: hidden;
-  }
-
-  #gameCanvas {
-    position: absolute;
-    top: 90px;         /* evt. tunen */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90vw;
-    max-width: 600px;
-    height: auto;
-  }
-
-  #bonus-power-panel,
-  #highscore-overlay,
-  #trophy,
-  #musicToggle,
-  #resetBallBtn,
-  #chatbox,
-  #chat-sticker-panel,
-  #bikeFlyer {
-    display: none !important;
-  }
-
-  #login-overlay {
-    top: 10px;
-    right: 10px;
-  }
-
-  #player-display {
-    top: 14px;
-    left: 10px;
-    font-size: 14px;
-  }
-
-  #scoreDisplay {
-    top: 14px;
-    right: 10px;
-    left: auto;
-    font-size: 14px;
-    z-index: 3000;
-  }
-
-  #time-box {
-    top: 14px;
-    right: 90px;
-    left: auto;
-    font-size: 14px;
-    z-index: 3000;
-  }
-}
-
-/* =========================================================
-   📱 HARD MOBILE FIX (tot 768px)
+   📱 Mobiele versie (tot 768px)
    ========================================================= */
 @media (max-width: 768px) {
 
-  /* Volledige achtergrond vervangen */
+  /* 🎨 Achtergrond: gebruik enkel mobile.png */
   body {
     margin: 0 !important;
     padding: 0 !important;
     background: url('mobile.png') no-repeat center top !important;
-    background-size: cover !important;       /* gebruik cover voor vulling */
+    background-size: cover !important;       /* vult volledig scherm */
     background-attachment: fixed !important;
-    background-color: black !important;      /* geen oranje vlakken */
+    background-color: #000 !important;       /* voorkomt oranje vlakken */
     overflow: hidden !important;
   }
 
-  /* Canvas exact centreren in beeld */
+  /* 🕹️ Canvas in het midden van het rode vlak */
   #gameCanvas {
     position: absolute !important;
-    top: 50% !important;
+    top: 110px !important;                   /* fine-tune: pas aan als nodig */
     left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: 95vw !important;        /* vul bijna het hele scherm */
+    transform: translateX(-50%) !important;
+    width: 90vw !important;
+    max-width: 600px !important;
     height: auto !important;
-    max-width: 640px !important;
     border: none !important;
+    z-index: 10 !important;                  /* boven de achtergrond */
   }
 
-  /* Alle rand- en bonus-elementen verbergen */
+  /* ❌ Overbodige elementen uitschakelen op mobiel */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -530,53 +470,33 @@ body {
     display: none !important;
   }
 
-  /* Kleine overlay-aanpassingen */
-  #player-display,
-  #scoreDisplay,
-  #time-box {
+  /* 🔢 HUD / kleine overlay-elementen */
+  #login-overlay {
+    top: 10px !important;
+    right: 10px !important;
+  }
+
+  #player-display {
     position: absolute !important;
+    top: 12px !important;
+    left: 10px !important;
     font-size: 14px !important;
     z-index: 3000 !important;
   }
 
-  #player-display {
-    top: 8px !important;
-    left: 10px !important;
-  }
-
   #scoreDisplay {
-    top: 8px !important;
+    position: absolute !important;
+    top: 12px !important;
     right: 10px !important;
-    left: auto !important;
+    font-size: 14px !important;
+    z-index: 3000 !important;
   }
 
   #time-box {
-    top: 8px !important;
-    right: 80px !important;
-    left: auto !important;
+    position: absolute !important;
+    top: 12px !important;
+    right: 90px !important;
+    font-size: 14px !important;
+    z-index: 3000 !important;
   }
 }
-
-/* mobiel fine-tune */
-@media (max-width: 768px) {
-  #gameCanvas {
-    position: absolute;
-    top: 110px;              /* speel met 100 / 120 / 130 tot hij mooi zit */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90vw;
-    max-width: 600px;
-    height: auto;
-    z-index: 10;             /* boven de achtergrond */
-  }
-}
-
-
-
-
-
-
-
-
-
-
