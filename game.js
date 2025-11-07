@@ -5782,6 +5782,9 @@ function triggerPaddleExplosion() {
     paddleExploding = true;
     paddleExplosionParticles = [];
 
+    // ✅ nieuw: alle vallende stenen van vóór je dood opruimen
+    stoneClearRequested = true;
+
     machineGunActive = false;
     machineGunCooldownActive = false;
     
@@ -5861,6 +5864,9 @@ function triggerPaddleExplosion() {
         }
       }
     }
+  }
+}
+
 
     // 🔊 game over sounds / extra effect
     if (typeof gameOverSound !== "undefined" && gameOverSound) {
