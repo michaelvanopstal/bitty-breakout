@@ -5092,49 +5092,33 @@ if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
     wallSound.play();
   }
 
-  // 1) broad-phase paddle
-  const { cx, cy } = getBallCenter(ball);
+ // 1) Eerst broad-phase met bal-middelpunt
+const { cx, cy } = getBallCenter(ball);
 
-  if (
-    cy + ball.radius > paddleY &&
-    cy - ball.radius < paddleY + paddleHeight &&
-    cx + ball.radius > paddleX &&
-    cx - ball.radius < paddleX + paddleWidth
-  ) {
-    // 2) pixel check
-    const localX = Math.round(cx - paddleX);
-    const sampleHalf = Math.max(1, Math.floor(ball.radius));
-    let opaqueHit = false;
+if (
+  cy + ball.radius > paddleY &&
+  cy - ball.radius < paddleY + paddleHeight &&
+  cx + ball.radius > paddleX &&
+  cx - ball.radius < paddleX + paddleWidth
+) {
+  // we doen wél nog even die localX-bepaling, kan later handig zijn
+  const localX = Math.round(cx - paddleX);
+  const px = Math.max(0, Math.min(paddleWidth - 1, localX));
 
-    const edgeMargin = 0;
-    const px = Math.max(0, Math.min(paddleWidth - 1, localX));
+  // 👉 hier: ALTIJD bouncen
+  const hitPos = (cx - paddleX) / paddleWidth;      // 0..1
+  const angle  = (hitPos - 0.5) * Math.PI / 2;      // spreiding
+  const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
 
-    for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
-      const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
-      const a = paddleCtx.getImageData(px, localY, 1, 1).data[3];
-      if (a > 10) {
-        opaqueHit = true;
-        break;
-      }
-    }
+  ball.dx = speed * Math.sin(angle);
+  ball.dy = -Math.abs(speed * Math.cos(angle));     // altijd omhoog
+  ball.y  = paddleY - (ball.radius * 2) - 1;        // bal nét boven paddle zetten
 
-    if (opaqueHit) {
-      // hier blijft jouw bestaande bounce-code
-      // bv. bal.dy = -Math.abs(ball.dy);
-    } else {
-      // fallback bounce
-      const hitPos = (cx - paddleX) / paddleWidth;
-      const angle  = (hitPos - 0.5) * Math.PI / 2;
-      const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+  // geluid
+  wallSound.currentTime = 0;
+  wallSound.play();
+}
 
-      ball.dx = speed * Math.sin(angle);
-      ball.dy = -Math.abs(speed * Math.cos(angle));
-      ball.y  = paddleY - (ball.radius * 2) - 1;
-
-      wallSound.currentTime = 0;
-      wallSound.play();
-    }
-  }
 
   // bal weg onderaan
   if (ball.y + ball.dy > canvas.height) {
