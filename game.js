@@ -3989,19 +3989,13 @@ function drawFallingStones() {
       && !cornerRejectV;
 
     // ========= Side-hit pad (SOFT) =========
-    // voorwaarden:
-    // - directe of swept overlap
-    // - vallend
-    // - steen-centrum y ongeveer binnen verticale band van paddle (met marge)
-    // - wat strenger op overlap in X om echte “side contact” te waarborgen
     const sideBandTol = Math.min(12, Math.max(6, r * 0.25)); // verticale marge boven/onder paddle
     const centerInVerticalBand =
       (s.y >= paddleTop - sideBandTol) && (s.y <= paddleBottom + sideBandTol);
 
-    const minOverlapSide = Math.max(8, Math.min(r * 0.45, paddleW * 0.6)); // iets strenger dan vertical
+    const minOverlapSide = Math.max(8, Math.min(r * 0.45, paddleW * 0.6));
     const wideEnoughSide = overlapX >= minOverlapSide;
 
-    // corner-reject voor side: alleen reject als overlap echt klein is
     const cornerRejectS = (intersects || sweptHit) && (overlapX < Math.min(r * 0.22, paddleW * 0.20));
 
     const sideHit = (intersects || sweptHit)
@@ -4013,43 +4007,49 @@ function drawFallingStones() {
     // ✅ Echte hit als één van beide paden waar is
     const contactNow = verticalHit || sideHit;
 
-    if (contactNow) s.framesInside++;
-    else s.framesInside = 0;
+    // ← HIER is de aanpassing zodat hij niet te vroeg triggert
+    if (contactNow) {
+      const stoneBottom = s.y + r;
+      // pas counts als de steen echt bij de paddle is
+      if (stoneBottom >= paddleTop - 2) {
+        s.framesInside++;
+      } else {
+        s.framesInside = 0;
+      }
+    } else {
+      s.framesInside = 0;
+    }
 
     // Botsing telt na drempel-frames
-   if (s.framesInside >= debounceFrames) {
-  if (invincibleActive) {
-    // 🛡️ Tijdens sterren-bonus: NIET exploderen — gewoon reflecteren en doorgaan
-    // eenvoudige bounce omhoog + lichte zij-afwijking obv contactpunt
-    const paddleLeft  = paddleX;
-    const paddleRight = paddleX + paddleWidth;
-    const rel = ((s.x - paddleLeft) / (paddleRight - paddleLeft)) - 0.5; // -0.5..+0.5
+    if (s.framesInside >= debounceFrames) {
+      if (invincibleActive) {
+        // 🛡️ Tijdens sterren-bonus: NIET exploderen — gewoon reflecteren en doorgaan
+        const paddleLeft  = paddleX;
+        const paddleRight = paddleX + paddleWidth;
+        const rel = ((s.x - paddleLeft) / (paddleRight - paddleLeft)) - 0.5; // -0.5..+0.5
 
-    s.vy = -Math.max(6, Math.abs(s.vy || 6));
-    s.vx = (s.vx || 0) + rel * 2;
+        s.vy = -Math.max(6, Math.abs(s.vy || 6));
+        s.vx = (s.vx || 0) + rel * 2;
 
-    // zet steen net boven de paddle om “plakken” te voorkomen
-    const r = s.size / 2;
-    s.y = paddleY - r - 1;
+        const r = s.size / 2;
+        s.y = paddleY - r - 1;
 
-    // klein visueel tikje
-    stoneHitOverlayTimer = 10;
-  } else {
-    // normaal gedrag (zoals je had)
-    spawnStoneDebris(s.x, s.y);
-    s.active = false;
-    stoneHitOverlayTimer = 18;
+        stoneHitOverlayTimer = 10;
+      } else {
+        // normaal gedrag
+        spawnStoneDebris(s.x, s.y);
+        s.active = false;
+        stoneHitOverlayTimer = 18;
 
-    if (!stoneHitLock) {
-      stoneHitLock = true;
-      if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
-      stoneClearRequested = true;
-      setTimeout(() => { stoneHitLock = false; }, 1200);
+        if (!stoneHitLock) {
+          stoneHitLock = true;
+          if (typeof triggerPaddleExplosion === "function") triggerPaddleExplosion();
+          stoneClearRequested = true;
+          setTimeout(() => { stoneHitLock = false; }, 1200);
+        }
+      }
+      continue;
     }
-  }
-  continue;
-}
-
 
     // onder uit beeld → vergruizen
     if (s.y - s.size / 2 > canvas.height) {
