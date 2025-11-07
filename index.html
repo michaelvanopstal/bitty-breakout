@@ -680,14 +680,14 @@
   const toggleBtn = document.getElementById('chatToggleBtn');
   const chatInput = document.getElementById('chatInput');
 
-  // Herstel laatst opgeslagen status
+  // laatste status terugzetten
   try {
     if (localStorage.getItem('chatCollapsed') === '1') {
       chat.classList.add('collapsed');
     }
   } catch (e) {}
 
-  // Alleen met muisklik open/dicht
+  // alleen met de knop open/dicht
   toggleBtn?.addEventListener('click', () => {
     chat.classList.toggle('collapsed');
     try {
@@ -698,15 +698,15 @@
     } catch (e) {}
   });
 
-  // 🚫 Verwijder alle spatie- of toetsacties voor de chatbox zelf
+  // ⛔ spatie mag chat NIET meer openen/sluiten
   window.addEventListener('keydown', (e) => {
-    // Laat de spatiebalk volledig met rust voor de game
+    // laat spatie met rust voor het spel
     if (e.code === 'Space') return;
 
-    // Chat mag WEL typen als input focus heeft
+    // als je in het chat-inputje zit, gewoon typen
     if (document.activeElement === chatInput) return;
 
-    // Eventuele andere sneltoetsen (zoals Escape) mogen wel
+    // escape mag chat wél dicht gooien
     if (e.code === 'Escape') {
       chat.classList.add('collapsed');
       try {
@@ -717,9 +717,38 @@
 })();
 </script>
 
+<!-- 📱 auto-fix voor mobiele schermen -->
+<script>
+  document.addEventListener('DOMContentLoaded', autoPlaceCanvas);
+  window.addEventListener('resize', autoPlaceCanvas);
+
+  function autoPlaceCanvas() {
+    // alleen op mobiel
+    if (window.innerWidth > 768) return;
+
+    const c = document.getElementById('gameCanvas');
+    if (!c) return;
+
+    const ratio = 600 / 645; // jouw game-verhouding
+
+    const vw = window.innerWidth;
+    const canvasWidth = Math.min(vw * 0.84, 550);
+    const canvasHeight = canvasWidth * ratio;
+
+    // echte canvas-afmeting aanpassen
+    c.width = canvasWidth;
+    c.height = canvasHeight;
+
+    const vh = window.innerHeight;
+    const minTop = 140;
+    const centeredTop = (vh - canvasHeight) / 2;
+    const finalTop = Math.max(minTop, centeredTop);
+
+    c.style.top = finalTop + 'px';
+  }
+</script>
 
 </body>
 </html>
-
 
 
