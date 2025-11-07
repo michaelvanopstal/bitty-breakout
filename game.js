@@ -5049,149 +5049,141 @@ if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
   }
 
   balls.forEach((ball, index) => {
-    if (ballLaunched) {
-      let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
-        ? speedBoostMultiplier : 1;
-      ball.x += ball.dx * speedMultiplier;
-      ball.y += ball.dy * speedMultiplier;
-    } else {
-       ball.x = paddleX + paddleWidth / 2 - ballRadius;
-       ball.y = paddleY - ballRadius * 2;
+  if (ballLaunched) {
+    let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
+      ? speedBoostMultiplier : 1;
+    ball.x += ball.dx * speedMultiplier;
+    ball.y += ball.dy * speedMultiplier;
+  } else {
+    ball.x = paddleX + paddleWidth / 2 - ballRadius;
+    ball.y = paddleY - ballRadius * 2;
+  }
 
-    }
-    
-    if (!ball.trail) ball.trail = [];
+  if (!ball.trail) ball.trail = [];
 
-    let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
-    let steps = 3; // hoe meer hoe vloeiender
-    for (let i = 1; i <= steps; i++) {
+  let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
+  let steps = 3;
+  for (let i = 1; i <= steps; i++) {
     let px = last.x + (ball.x - last.x) * (i / steps);
     let py = last.y + (ball.y - last.y) * (i / steps);
     ball.trail.push({ x: px, y: py });
   }
-
-    while (ball.trail.length > 20) {
+  while (ball.trail.length > 20) {
     ball.trail.shift();
- }
-
-
-    // Veiliger links/rechts
-    if (ball.x <= ball.radius + 1 && ball.dx < 0) {
-      ball.x = ball.radius + 1;
-      ball.dx *= -1;
-      wallSound.currentTime = 0;
-      wallSound.play();
-    }
-    if (ball.x >= canvas.width - ball.radius - 1 && ball.dx > 0) {
-      ball.x = canvas.width - ball.radius - 1;
-      ball.dx *= -1;
-      wallSound.currentTime = 0;
-      wallSound.play();
-    }
-
-    // Veiliger bovenkant
-    if (ball.y <= ball.radius + 1 && ball.dy < 0) {
-      ball.y = ball.radius + 1;
-      ball.dy *= -1;
-      wallSound.currentTime = 0;
-      wallSound.play();
-    }
-// 1) Eerst broad-phase met bal-middelpunt
-const { cx, cy } = getBallCenter(ball);
-
-if (
-  cy + ball.radius > paddleY &&
-  cy - ball.radius < paddleY + paddleHeight &&
-  cx + ball.radius > paddleX &&
-  cx - ball.radius < paddleX + paddleWidth
-) {
-  // 2) Pixel-precies check op paddleCanvas alpha
-  const localX = Math.round(cx - paddleX);                 // in paddleCanvas-coördinaten
-  const sampleHalf = Math.max(1, Math.floor(ball.radius)); // aantal pixels boven/onder om te testen
-  let opaqueHit = false;
-
-  const edgeMargin = 0; // was 2
-  const px = Math.max(0, Math.min(paddleWidth - 1, localX));
-
-  for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
-    const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
-    const a = paddleCtx.getImageData(px, localY, 1, 1).data[3]; // alpha kanaal
-    if (a > 10) { // >10 om randen/transparantie te ontzien
-      opaqueHit = true;
-      break;
-    }
   }
 
-  if (opaqueHit) {
-    // 3) Reflectie zoals je al had, maar gebruik middelpunt
-    // laat hier jouw bestaande bounce-code staan
-  } else {
-    // fallback: als we wél in de paddle-rect zaten, toch maar stuiteren
-    const hitPos = (cx - paddleX) / paddleWidth; // 0..1
-    const angle  = (hitPos - 0.5) * Math.PI / 2;
-    const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-
-    ball.dx = speed * Math.sin(angle);
-    ball.dy = -Math.abs(speed * Math.cos(angle));
-    ball.y  = paddleY - (ball.radius * 2) - 1;
-
+  // muren
+  if (ball.x <= ball.radius + 1 && ball.dx < 0) {
+    ball.x = ball.radius + 1;
+    ball.dx *= -1;
     wallSound.currentTime = 0;
     wallSound.play();
   }
-} // ✅ dit sluit de hele paddle-collision af
+  if (ball.x >= canvas.width - ball.radius - 1 && ball.dx > 0) {
+    ball.x = canvas.width - ball.radius - 1;
+    ball.dx *= -1;
+    wallSound.currentTime = 0;
+    wallSound.play();
+  }
+  if (ball.y <= ball.radius + 1 && ball.dy < 0) {
+    ball.y = ball.radius + 1;
+    ball.dy *= -1;
+    wallSound.currentTime = 0;
+    wallSound.play();
+  }
 
-// vanaf hier ga je verder met de rest van de ball-logica
-if (ball.y + ball.dy > canvas.height) {
-  balls.splice(index, 1); // verwijder bal zonder actie
-}
+  // 1) broad-phase paddle
+  const { cx, cy } = getBallCenter(ball);
 
-// ✨ Gouden smalle energie-staart ...
-if (ball.trail.length >= 2) {
-  const head = ball.trail[ball.trail.length - 1];
-  const tail = ball.trail[0];
+  if (
+    cy + ball.radius > paddleY &&
+    cy - ball.radius < paddleY + paddleHeight &&
+    cx + ball.radius > paddleX &&
+    cx - ball.radius < paddleX + paddleWidth
+  ) {
+    // 2) pixel check
+    const localX = Math.round(cx - paddleX);
+    const sampleHalf = Math.max(1, Math.floor(ball.radius));
+    let opaqueHit = false;
 
-  ctx.save();
-  const gradient = ctx.createLinearGradient(
-    head.x + ball.radius, head.y + ball.radius,
-    tail.x + ball.radius, tail.y + ball.radius
-  );
+    const edgeMargin = 0;
+    const px = Math.max(0, Math.min(paddleWidth - 1, localX));
 
-  ctx.lineWidth = ball.radius * 2.0;
-  gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
-  gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
+    for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
+      const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
+      const a = paddleCtx.getImageData(px, localY, 1, 1).data[3];
+      if (a > 10) {
+        opaqueHit = true;
+        break;
+      }
+    }
 
-  ctx.beginPath();
-  ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
-  ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
-  ctx.strokeStyle = gradient;
-  ctx.lineWidth = ball.radius * 2.2;
-  ctx.lineCap = "round";
-  ctx.stroke();
-  ctx.restore();
-}
+    if (opaqueHit) {
+      // hier blijft jouw bestaande bounce-code
+      // bv. bal.dy = -Math.abs(ball.dy);
+    } else {
+      // fallback bounce
+      const hitPos = (cx - paddleX) / paddleWidth;
+      const angle  = (hitPos - 0.5) * Math.PI / 2;
+      const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
 
-ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
+      ball.dx = speed * Math.sin(angle);
+      ball.dy = -Math.abs(speed * Math.cos(angle));
+      ball.y  = paddleY - (ball.radius * 2) - 1;
 
-
-  if (resetOverlayActive) {
-    if (Date.now() % 1000 < 500) {
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      wallSound.currentTime = 0;
+      wallSound.play();
     }
   }
 
-  // 🔴 Korte hit-flash bij steen op paddle
+  // bal weg onderaan
+  if (ball.y + ball.dy > canvas.height) {
+    balls.splice(index, 1);
+  }
+
+  // trail tekenen
+  if (ball.trail.length >= 2) {
+    const head = ball.trail[ball.trail.length - 1];
+    const tail = ball.trail[0];
+
+    ctx.save();
+    const gradient = ctx.createLinearGradient(
+      head.x + ball.radius, head.y + ball.radius,
+      tail.x + ball.radius, tail.y + ball.radius
+    );
+    gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
+    gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
+    ctx.beginPath();
+    ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
+    ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = ball.radius * 2.2;
+    ctx.lineCap = "round";
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
+}); // ← ✅ einde balls.forEach
+
+// ↓↓↓ deze stukken horen BUITEN de forEach ↓↓↓
+
+if (resetOverlayActive) {
+  if (Date.now() % 1000 < 500) {
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
 if (stoneHitOverlayTimer > 0) {
   ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   stoneHitOverlayTimer--;
 }
 
-
-  // ✅ Na de loop: check of alle ballen weg zijn
-  if (balls.length === 0 && !paddleExploding) {
-    triggerPaddleExplosion(); // pas nu verlies van leven
-  }
+if (balls.length === 0 && !paddleExploding) {
+  triggerPaddleExplosion();
+}
 
 drawBricks();
 updateTNTs();
