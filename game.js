@@ -5111,38 +5111,33 @@ if (
   const localX = Math.round(cx - paddleX);                 // in paddleCanvas-coördinaten
   const sampleHalf = Math.max(1, Math.floor(ball.radius)); // aantal pixels boven/onder om te testen
   let opaqueHit = false;
+const edgeMargin = 0; // was 2
+const px = Math.max(0, Math.min(paddleWidth - 1, localX));
 
- const edgeMargin = 2;
- const px = Math.max(edgeMargin, Math.min(paddleWidth - 1 - edgeMargin, localX));
-
-
-  for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
-    const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
-    const a = paddleCtx.getImageData(px, localY, 1, 1).data[3]; // alpha kanaal
-    if (a > 10) { // >10 om randen/transparantie te ontzien
-      opaqueHit = true;
-      break;
-    }
+for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
+  const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
+  const a = paddleCtx.getImageData(px, localY, 1, 1).data[3]; // alpha kanaal
+  if (a > 10) { // >10 om randen/transparantie te ontzien
+    opaqueHit = true;
+    break;
   }
+}
 
-  if (opaqueHit) {
-    // 3) Reflectie zoals je al had, maar gebruik middelpunt
-    const hitPos = (cx - paddleX) / paddleWidth; // 0..1
-    const angle  = (hitPos - 0.5) * Math.PI / 2;
-    const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+if (opaqueHit) {
+  // 3) Reflectie zoals je al had, maar gebruik middelpunt
+  // hier blijft jouw bestaande bounce-code staan
+} else {
+  // fallback: als we wél in de paddle-rect zaten, toch maar stuiteren
+  const hitPos = (cx - paddleX) / paddleWidth; // 0..1
+  const angle  = (hitPos - 0.5) * Math.PI / 2;
+  const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
 
-    ball.dx = speed * Math.sin(angle);
-    ball.dy = -Math.abs(speed * Math.cos(angle));
+  ball.dx = speed * Math.sin(angle);
+  ball.dy = -Math.abs(speed * Math.cos(angle));
+  ball.y  = paddleY - (ball.radius * 2) - 1;
 
-    // Zet de bal net boven de paddle met linkerboven-positie
-    ball.y = paddleY - (ball.radius * 2) - 1;
-
-    wallSound.currentTime = 0;
-    wallSound.play();
-  } else {
-    // 4) Pure "gat": géén reflectie → bal valt erdoorheen
-    // (niets doen hier; de standaard logica laat ‘m door)
-  }
+  wallSound.currentTime = 0;
+  wallSound.play();
 }
 
 
