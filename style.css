@@ -448,8 +448,8 @@ body {
   #gameCanvas {
     position: absolute;
     /* hoe ver onder het gele vlak je wilt beginnen: ff tunen */
-    top: 90px;               /* als het niet precies past: 80 / 100 proberen */
-    left: 50%;
+    top: 10px;               /* als het niet precies past: 80 / 100 proberen */
+    left: 10%;
     transform: translateX(-50%);
     width: 90vw;             /* ietsje marge links/rechts */
     max-width: 600px;        /* niet groter dan je spel */
