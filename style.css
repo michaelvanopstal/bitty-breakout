@@ -430,40 +430,47 @@ body {
   }
 }
 
-/* =========================
-   📱 MOBIEL FIX (max 768px)
-   ========================= */
+/* =========================================================
+   📱 MOBIEL (max 768px)
+   ========================================================= */
 @media (max-width: 768px) {
 
-  /* vaste achtergrond, niet scrollen */
+  /* 1) desktop-achtergrond uit, mobiele aan */
   body {
     margin: 0;
-    background: #c94a0a;
+    background: none;
+    background-image: url('mobile.png');
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: cover;       /* vul het scherm met mobile.png */
+    background-color: #c94a0a;    /* zelfde oranje voor onder/onderkant */
     overflow: hidden;
   }
 
-  /* we doen alsof het canvas nog steeds 640x600 is,
-     maar tonen het kleiner met scale */
+  /* 2) canvas kleiner én gecentreerd */
   #gameCanvas {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);  /* ← scale weg */
-  width: 100vw;                 /* mag ook */
-  height: auto;
-}
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 94vw;          /* bijna hele breedte van telefoon */
+    max-width: 640px;     /* niet groter dan jouw originele spel */
+    height: auto;
+  }
 
-
-  /* dingen die op mobiel in de weg zitten: uit */
+  /* 3) dingen die op mobiel in de weg zitten uit */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
   #musicToggle,
-  #resetBallBtn {
+  #resetBallBtn,
+  #chatbox,
+  #chat-sticker-panel,
+  #bikeFlyer {
     display: none !important;
   }
 
-  /* login + score + time wat dichter bij elkaar */
+  /* 4) overlays compacter rechtsboven */
   #login-overlay {
     top: 8px;
     right: 8px;
@@ -480,76 +487,18 @@ body {
     right: 10px;
     left: auto;
     font-size: 14px;
-    z-index: 9999;
+    z-index: 3000;
   }
 
   #time-box {
     top: 12px;
     right: 90px;
     left: auto;
-    z-index: 9999;
-  }
-
-  /* chat: op mobiel niet tonen tijdens spelen */
-  #chatbox,
-  #chat-sticker-panel {
-    display: none !important;
-  }
-}
-/* =========================================================
-   📱 Mobiele layout met eigen achtergrond
-   ========================================================= */
-@media (max-width: 768px) {
-  body {
-    margin: 0;
-    background: url('mobile.png') no-repeat center top;
-    background-size: contain;     /* afbeelding blijft netjes */
-    background-color: #c94a0a;    /* vult de rest van het scherm met dezelfde oranje kleur */
-    overflow: hidden;
-    background-attachment: fixed;
-  }
-
-  /* canvas perfect centreren in het rode vlak */
-  #gameCanvas {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 94vw;      /* iets marge aan de zijkanten */
-    height: auto;
-  }
-
-  /* elementen die overbodig zijn in mobiel */
-  #bonus-power-panel,
-  #highscore-overlay,
-  #trophy,
-  #musicToggle,
-  #resetBallBtn,
-  #chatbox,
-  #chat-sticker-panel {
-    display: none !important;
-  }
-
-  #player-display {
-    top: 12px;
-    left: 10px;
-    font-size: 14px;
-  }
-
-  #scoreDisplay {
-    top: 12px;
-    right: 10px;
-    font-size: 14px;
-    z-index: 3000;
-  }
-
-  #time-box {
-    top: 12px;
-    right: 90px;
     font-size: 14px;
     z-index: 3000;
   }
 }
+
 
 
 
