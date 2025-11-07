@@ -363,9 +363,8 @@ body {
   outline: 2px solid #ffcf62;
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
-
 /* =========================================================
-   ✅ PC-MODE (grote schermen) – hier doen we de correctie
+   ✅ PC (hele brede schermen)
    ========================================================= */
 @media (min-width: 1500px) {
   #game-container {
@@ -391,14 +390,14 @@ body {
 
   #scoreDisplay {
     top: 20px;
-    left: auto;
     right: 20px;
+    left: auto;
   }
 
   #time-box {
     top: 20px;
-    left: auto;
     right: 140px;
+    left: auto;
   }
 
   #highscore-overlay {
@@ -414,50 +413,44 @@ body {
 }
 
 /* =========================================================
-   📏 Tablet / kleinere brede schermen (bv. 1200px)
+   📏 Tablet / kleine laptops (tot 1200px)
    ========================================================= */
 @media (max-width: 1200px) {
   #scoreDisplay {
-    left: auto;
     right: 20px;
+    left: auto;
   }
   #time-box {
-    left: auto;
     right: 140px;
+    left: auto;
   }
   #bonus-power-panel {
     right: 20px;
   }
 }
+
 /* =========================================================
-   📱 MOBIEL (max 768px)
+   📱 Mobiel (tot 768px)
    ========================================================= */
 @media (max-width: 768px) {
-
-  /* 1. alleen het mobiele plaatje gebruiken */
   body {
     margin: 0;
-    /* vul héél het scherm met mobile.png */
     background: url('mobile.png') no-repeat center top;
-    background-size: 100% 100%;      /* rek het zodat het hele scherm vol is */
-    background-color: #c94a0a;       /* safety-kleur, maar zou je niet meer zien */
+    background-size: 100% 100%;
+    background-color: #c94a0a;
     overflow: hidden;
   }
 
-  /* 2. canvas in het frame zetten */
   #gameCanvas {
     position: absolute;
-    /* hoe ver onder het gele vlak je wilt beginnen: ff tunen */
-    top: 10px;               /* als het niet precies past: 80 / 100 proberen */
-    left: 10%;
-   
-    width: 90vw;             /* ietsje marge links/rechts */
-    max-width: 600px;        /* niet groter dan je spel */
+    top: 90px;         /* evt. tunen */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 600px;
     height: auto;
-    z-index: 200;
   }
 
-  /* 3. alle overlay-dingen die ruimte pakken uit */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -469,7 +462,6 @@ body {
     display: none !important;
   }
 
-  /* 4. kleine HUD rechtsboven */
   #login-overlay {
     top: 10px;
     right: 10px;
@@ -497,6 +489,7 @@ body {
     z-index: 3000;
   }
 }
+
 
 
 
