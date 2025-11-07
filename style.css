@@ -474,6 +474,7 @@ body {
   #login-overlay {
     top: 10px !important;
     right: 10px !important;
+    z-index: 4000 !important;
   }
 
   #player-display {
