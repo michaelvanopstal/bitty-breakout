@@ -432,16 +432,15 @@ body {
    📱 Mobiele versie (tot 768px)
    ========================================================= */
 @media (max-width: 768px) {
-
-  /* achtergrond alleen voor mobiel */
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: url('mobile.png') no-repeat center top !important;
-    background-size: cover !important;       /* vult scherm */
-    background-attachment: fixed !important;
-    background-color: #000 !important;       /* geen oranje randen */
-    overflow: hidden !important;
+  #gameCanvas {
+    position: absolute !important;
+    top: 180px !important;          /* ← was 110, nu lager */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 90vw !important;
+    max-width: 600px !important;
+    height: auto !important;
+    z-index: 10 !important;
   }
 
   /* canvas komt ongeveer goed te staan,
