@@ -468,22 +468,22 @@
   <script src="login.js"></script>
   <script src="game.js"></script>
 
-  <script>
+ <script>
 document.addEventListener('DOMContentLoaded', () => {
   const c = document.getElementById('gameCanvas');
   if (!c) return;
 
-  // alleen op smalle schermen echt verkleinen
+  // Alleen op mobiel de canvas-grootte dynamisch aanpassen
   if (window.innerWidth < 768) {
-    const targetW = window.innerWidth;          // schermbreedte
-    const ratio   = 600 / 645;                  // jouw gameverhouding
-    const targetH = Math.round(targetW * ratio);
+    const targetW = window.innerWidth * 0.94; // iets marge (6%)
+    const targetH = targetW * (600 / 645);    // behoud de juiste verhouding
 
     c.width  = targetW;
     c.height = targetH;
   }
 });
 </script>
+
 
 
  
