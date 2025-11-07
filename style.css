@@ -411,7 +411,6 @@ body {
     right: 360px;
   }
 }
-
 /* =========================================================
    💻 Tablet / kleinere laptops (tot 1200px)
    ========================================================= */
@@ -434,31 +433,32 @@ body {
    ========================================================= */
 @media (max-width: 768px) {
 
-  /* 🎨 Achtergrond: gebruik enkel mobile.png */
+  /* achtergrond alleen voor mobiel */
   body {
     margin: 0 !important;
     padding: 0 !important;
     background: url('mobile.png') no-repeat center top !important;
-    background-size: cover !important;       /* vult volledig scherm */
+    background-size: cover !important;       /* vult scherm */
     background-attachment: fixed !important;
-    background-color: #000 !important;       /* voorkomt oranje vlakken */
+    background-color: #000 !important;       /* geen oranje randen */
     overflow: hidden !important;
   }
 
-  /* 🕹️ Canvas in het midden van het rode vlak */
+  /* canvas komt ongeveer goed te staan,
+     script onderaan gaat ’m nog preciezer zetten */
   #gameCanvas {
     position: absolute !important;
-    top: 110px !important;                   /* fine-tune: pas aan als nodig */
+    top: 150px !important;             /* startwaarde, script corrigeert dit nog */
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 90vw !important;
-    max-width: 600px !important;
+    width: 84vw !important;            /* iets kleiner zodat hij in het rode vlak past */
+    max-width: 550px !important;
     height: auto !important;
     border: none !important;
-    z-index: 10 !important;                  /* boven de achtergrond */
+    z-index: 10 !important;
   }
 
-  /* ❌ Overbodige elementen uitschakelen op mobiel */
+  /* dingen die op mobiel in de weg zitten → uit */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -470,7 +470,7 @@ body {
     display: none !important;
   }
 
-  /* 🔢 HUD / kleine overlay-elementen */
+  /* HUD rechtsboven */
   #login-overlay {
     top: 10px !important;
     right: 10px !important;
@@ -490,6 +490,7 @@ body {
     right: 10px !important;
     font-size: 14px !important;
     z-index: 3000 !important;
+    left: auto !important;
   }
 
   #time-box {
@@ -498,5 +499,7 @@ body {
     right: 90px !important;
     font-size: 14px !important;
     z-index: 3000 !important;
+    left: auto !important;
   }
 }
+
