@@ -2372,9 +2372,10 @@ function keyDownHandler(e) {
     const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
     const lvl = LEVELS[lvlIndex];
     const launchSpeed =
-      (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
-        ? lvl.params.ballSpeed
-        : 6;
+  (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
+    ? lvl.params.ballSpeed
+    : DEFAULT_BALL_SPEED;
+
 
     // bal omhoog met die snelheid
     if (balls && balls[0]) {
