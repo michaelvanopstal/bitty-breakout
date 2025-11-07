@@ -490,6 +490,73 @@ body {
   }
 }
 
+/* =========================================================
+   📱 HARD MOBILE FIX (tot 768px)
+   ========================================================= */
+@media (max-width: 768px) {
+
+  /* Volledige achtergrond vervangen */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: url('mobile.png') no-repeat center top !important;
+    background-size: cover !important;       /* gebruik cover voor vulling */
+    background-attachment: fixed !important;
+    background-color: black !important;      /* geen oranje vlakken */
+    overflow: hidden !important;
+  }
+
+  /* Canvas exact centreren in beeld */
+  #gameCanvas {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 95vw !important;        /* vul bijna het hele scherm */
+    height: auto !important;
+    max-width: 640px !important;
+    border: none !important;
+  }
+
+  /* Alle rand- en bonus-elementen verbergen */
+  #bonus-power-panel,
+  #highscore-overlay,
+  #trophy,
+  #musicToggle,
+  #resetBallBtn,
+  #chatbox,
+  #chat-sticker-panel,
+  #bikeFlyer {
+    display: none !important;
+  }
+
+  /* Kleine overlay-aanpassingen */
+  #player-display,
+  #scoreDisplay,
+  #time-box {
+    position: absolute !important;
+    font-size: 14px !important;
+    z-index: 3000 !important;
+  }
+
+  #player-display {
+    top: 8px !important;
+    left: 10px !important;
+  }
+
+  #scoreDisplay {
+    top: 8px !important;
+    right: 10px !important;
+    left: auto !important;
+  }
+
+  #time-box {
+    top: 8px !important;
+    right: 80px !important;
+    left: auto !important;
+  }
+}
+
 
 
 
