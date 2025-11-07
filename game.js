@@ -232,6 +232,8 @@ let paddleBaseWidth = 100;   // actuele 'basis' breedte voor dit level (zonder t
 const PADDLE_LONG_DURATION  = 30000;
 const PADDLE_SMALL_DURATION = 30000;
 
+const DEFAULT_BALL_SPEED = 8;
+
 // ==========================================================
 // 🎙️ VOICE-OVER: single-channel + cooldown
 // ==========================================================
@@ -1862,7 +1864,7 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
-const DEFAULT_BALL_SPEED = 6;
+
 
 // === GEBALANCEERDE DROP-BAG ===
 const DROP_BOMB  = "bomb_token";
