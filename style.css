@@ -557,6 +557,20 @@ body {
   }
 }
 
+/* mobiel fine-tune */
+@media (max-width: 768px) {
+  #gameCanvas {
+    position: absolute;
+    top: 110px;              /* speel met 100 / 120 / 130 tot hij mooi zit */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 600px;
+    height: auto;
+    z-index: 10;             /* boven de achtergrond */
+  }
+}
+
 
 
 
