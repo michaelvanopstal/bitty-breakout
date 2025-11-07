@@ -3260,9 +3260,11 @@ function resetBall() {
   // 🎯 huidige level ophalen
   const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
   const lvl = LEVELS[lvlIndex];
-  const speed = (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
+  const speed =
+  (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
     ? lvl.params.ballSpeed
-    : 6; // fallback
+    : DEFAULT_BALL_SPEED;
+
 
   // 🏐 bal opnieuw op de paddle parkeren
   balls = [{
