@@ -5106,60 +5106,57 @@ if (
   cx - ball.radius < paddleX + paddleWidth
 ) {
   // 2) Pixel-precies check op paddleCanvas alpha
-  //    We testen een klein verticaal kolommetje rond de raaklijn,
-  //    zodat de bal niet per ongeluk door mag als een gat nét naast het midden zit.
   const localX = Math.round(cx - paddleX);                 // in paddleCanvas-coördinaten
   const sampleHalf = Math.max(1, Math.floor(ball.radius)); // aantal pixels boven/onder om te testen
   let opaqueHit = false;
-const edgeMargin = 0; // was 2
-const px = Math.max(0, Math.min(paddleWidth - 1, localX));
 
-for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
-  const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
-  const a = paddleCtx.getImageData(px, localY, 1, 1).data[3]; // alpha kanaal
-  if (a > 10) { // >10 om randen/transparantie te ontzien
-    opaqueHit = true;
-    break;
-  }
-}
+  const edgeMargin = 0; // was 2
+  const px = Math.max(0, Math.min(paddleWidth - 1, localX));
 
-if (opaqueHit) {
-  // 3) Reflectie zoals je al had, maar gebruik middelpunt
-  // hier blijft jouw bestaande bounce-code staan
-} else {
-  // fallback: als we wél in de paddle-rect zaten, toch maar stuiteren
-  const hitPos = (cx - paddleX) / paddleWidth; // 0..1
-  const angle  = (hitPos - 0.5) * Math.PI / 2;
-  const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-
-  ball.dx = speed * Math.sin(angle);
-  ball.dy = -Math.abs(speed * Math.cos(angle));
-  ball.y  = paddleY - (ball.radius * 2) - 1;
-
-  wallSound.currentTime = 0;
-  wallSound.play();
-}
-
-
-
-
-    if (ball.y + ball.dy > canvas.height) {
-      balls.splice(index, 1); // verwijder bal zonder actie
+  for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
+    const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
+    const a = paddleCtx.getImageData(px, localY, 1, 1).data[3]; // alpha kanaal
+    if (a > 10) { // >10 om randen/transparantie te ontzien
+      opaqueHit = true;
+      break;
     }
-// ✨ Gouden smalle energie-staart (taps en iets smaller dan bal)
-// ✨ Rechte gouden energie-staart — iets groter dan de bal en 2x zo lang
+  }
+
+  if (opaqueHit) {
+    // 3) Reflectie zoals je al had, maar gebruik middelpunt
+    // laat hier jouw bestaande bounce-code staan
+  } else {
+    // fallback: als we wél in de paddle-rect zaten, toch maar stuiteren
+    const hitPos = (cx - paddleX) / paddleWidth; // 0..1
+    const angle  = (hitPos - 0.5) * Math.PI / 2;
+    const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+
+    ball.dx = speed * Math.sin(angle);
+    ball.dy = -Math.abs(speed * Math.cos(angle));
+    ball.y  = paddleY - (ball.radius * 2) - 1;
+
+    wallSound.currentTime = 0;
+    wallSound.play();
+  }
+} // ✅ dit sluit de hele paddle-collision af
+
+// vanaf hier ga je verder met de rest van de ball-logica
+if (ball.y + ball.dy > canvas.height) {
+  balls.splice(index, 1); // verwijder bal zonder actie
+}
+
+// ✨ Gouden smalle energie-staart ...
 if (ball.trail.length >= 2) {
-  const head = ball.trail[ball.trail.length - 1]; // meest recente positie
-  const tail = ball.trail[0]; // oudste positie (ver weg van bal)
+  const head = ball.trail[ball.trail.length - 1];
+  const tail = ball.trail[0];
 
   ctx.save();
-
   const gradient = ctx.createLinearGradient(
     head.x + ball.radius, head.y + ball.radius,
     tail.x + ball.radius, tail.y + ball.radius
   );
 
-  ctx.lineWidth = ball.radius * 2.0; // iets kleiner dan 2.2
+  ctx.lineWidth = ball.radius * 2.0;
   gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
   gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
 
@@ -5167,15 +5164,13 @@ if (ball.trail.length >= 2) {
   ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
   ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
   ctx.strokeStyle = gradient;
-  ctx.lineWidth = ball.radius * 2.2; // net iets groter dan de bal
+  ctx.lineWidth = ball.radius * 2.2;
   ctx.lineCap = "round";
   ctx.stroke();
-
   ctx.restore();
 }
 
-    ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
-  });
+ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
 
 
   if (resetOverlayActive) {
