@@ -5093,6 +5093,7 @@ if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
   }
 
  // 1) Eerst broad-phase met bal-middelpunt
+// 1) Eerst broad-phase met bal-middelpunt
 const { cx, cy } = getBallCenter(ball);
 
 if (
@@ -5101,23 +5102,55 @@ if (
   cx + ball.radius > paddleX &&
   cx - ball.radius < paddleX + paddleWidth
 ) {
-  // we doen wél nog even die localX-bepaling, kan later handig zijn
-  const localX = Math.round(cx - paddleX);
-  const px = Math.max(0, Math.min(paddleWidth - 1, localX));
+  const localX = Math.round(cx - paddleX);  // positie op paddle
+  const sampleHalf = Math.max(1, Math.floor(ball.radius));
 
-  // 👉 hier: ALTIJD bouncen
-  const hitPos = (cx - paddleX) / paddleWidth;      // 0..1
-  const angle  = (hitPos - 0.5) * Math.PI / 2;      // spreiding
-  const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+  // veilige randen: hier mag bal NOOIT doorheen
+  const safeEdge = 10; // px aan beide kanten
 
-  ball.dx = speed * Math.sin(angle);
-  ball.dy = -Math.abs(speed * Math.cos(angle));     // altijd omhoog
-  ball.y  = paddleY - (ball.radius * 2) - 1;        // bal nét boven paddle zetten
+  let shouldBounce = false;
 
-  // geluid
-  wallSound.currentTime = 0;
-  wallSound.play();
+  // altijd bouncen aan de zijkanten
+  if (localX < safeEdge || localX > paddleWidth - safeEdge) {
+    shouldBounce = true;
+  } else {
+    // middenstuk: hier mag je schiet-gaten hebben
+    let opaqueHit = false;
+    const px = Math.max(0, Math.min(paddleWidth - 1, localX));
+
+    for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
+      const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
+      const a = paddleCtx.getImageData(px, localY, 1, 1).data[3];
+      if (a > 10) {
+        opaqueHit = true;
+        break;
+      }
+    }
+
+    // in het midden: alleen bouncen als pixel echt bestaat
+    if (opaqueHit) {
+      shouldBounce = true;
+    } else {
+      shouldBounce = false; // echt gat → bal mag erdoor
+    }
+  }
+
+  if (shouldBounce) {
+    // standaard bounce met hoek op basis van raakpunt
+    const hitPos = (cx - paddleX) / paddleWidth;      // 0..1
+    const angle  = (hitPos - 0.5) * Math.PI / 2;
+    const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+
+    ball.dx = speed * Math.sin(angle);
+    ball.dy = -Math.abs(speed * Math.cos(angle));
+    ball.y  = paddleY - (ball.radius * 2) - 1;
+
+    wallSound.currentTime = 0;
+    wallSound.play();
+  }
+  // else: echt gat in het midden → niks doen, bal valt door
 }
+
 
 
   // bal weg onderaan
