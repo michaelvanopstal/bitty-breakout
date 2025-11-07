@@ -212,10 +212,11 @@ balls.push({
   x: canvas.width / 2,
   y: canvas.height - paddleHeight - 10,
   dx: 0,
-  dy: -6,
+  dy: -DEFAULT_BALL_SPEED,
   radius: 8,
   isMain: true
 });
+
 
 // 🎉 Level overlay + confetti/vuurwerk (ENKEL HIER de levelMessage-variabelen)
 let confetti = [];
