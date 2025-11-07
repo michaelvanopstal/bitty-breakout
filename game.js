@@ -5864,9 +5864,6 @@ function triggerPaddleExplosion() {
         }
       }
     }
-  }
-}
-
 
     // 🔊 game over sounds / extra effect
     if (typeof gameOverSound !== "undefined" && gameOverSound) {
@@ -5874,9 +5871,8 @@ function triggerPaddleExplosion() {
       gameOverSound.play();
     }
 
-
+    // nog een explosie voor het einde
     paddleExplosionParticles = [];
-
     for (let i = 0; i < 50; i++) {
       paddleExplosionParticles.push({
         x: paddleX + paddleWidth / 2,
@@ -5903,11 +5899,9 @@ function triggerPaddleExplosion() {
       bombsCollected = 0;
       badCrossesCaught = 0;
 
-      // als het oude element nog bestaat, leegzetten (kan straks weg)
       const hc = document.getElementById("heartCount");
       if (hc) hc.textContent = heartsCollected;
 
-      // display meteen mee laten gaan
       if (typeof updateBonusPowerPanel === "function") {
         updateBonusPowerPanel(
           starsCollected,
@@ -5954,7 +5948,7 @@ function triggerPaddleExplosion() {
       updateScoreDisplay();
       document.getElementById("timeDisplay").textContent = "00:00";
 
-      // 🎙️ Reset Bitty-waarschuwing voor nieuwe game (1× per game, random op 1e/3e hit)
+      // 🎙️ Reset Bitty-waarschuwing voor nieuwe game
       if (window.rockWarnState) {
         window.rockWarnState.played = false;
         window.rockWarnState.hits = 0;
@@ -5965,7 +5959,6 @@ function triggerPaddleExplosion() {
     }, 1000);
   }
 }
-
 
 function startLevelTransition() {
   // ✅ Wincheck vóór level++ (we zitten aan het einde van het laatste level)
