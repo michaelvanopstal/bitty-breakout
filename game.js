@@ -208,7 +208,7 @@ let stonefallHitsThisGame = 0;
 let rockWarnPlayed = false;
 let rockWarnTriggerIndex = Math.random() < 0.5 ? 1 : 3; // 1e of 3e keer
 
-const DEFAULT_BALL_SPEED = 8;
+const DEFAULT_BALL_SPEED = 9;
 
 
 balls.push({
