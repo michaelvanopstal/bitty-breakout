@@ -3310,9 +3310,10 @@ function resetBall() {
       // maar opnieuw de level-snelheid ophalen
       const lvlIndex2 = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
       const lvl2 = LEVELS[lvlIndex2];
-      const launchSpeed = (lvl2 && lvl2.params && typeof lvl2.params.ballSpeed === "number")
-        ? lvl2.params.ballSpeed
-        : 6;
+      const launchSpeed =
+  (lvl2 && lvl2.params && typeof lvl2.params.ballSpeed === "number")
+    ? lvl2.params.ballSpeed
+    : DEFAULT_BALL_SPEED;
 
       b.dy = -launchSpeed;   // altijd met volle level-snelheid omhoog
 
