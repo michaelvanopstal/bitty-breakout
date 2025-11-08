@@ -2340,7 +2340,6 @@ resetBtn.addEventListener("mouseenter", () => {
 resetBtn.addEventListener("mouseleave", () => {
   tooltip.style.display = "none";
 });
-
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
@@ -2361,7 +2360,6 @@ function keyDownHandler(e) {
     leftPressed = true;
 
   } else if (e.key === "Up" || e.key === "ArrowUp") {
-    // ↑ alleen voor wat jij al deed
     upPressed = true;
 
   } else if (e.key === "Down" || e.key === "ArrowDown") {
@@ -2374,32 +2372,37 @@ function keyDownHandler(e) {
     ballMoving     = true;
     paddleFreeMove = true; // ✅ jouw gedrag
 
-    // sound
+    // 🔊 geluid
     if (typeof shootSound !== "undefined") {
       shootSound.currentTime = 0;
       shootSound.play();
     }
 
-    // 🔥 snelheid uit level pakken
+    // 🔥 snelheid berekenen uit DEFAULT_BALL_SPEED + level boost
     const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
     const lvl = LEVELS[lvlIndex];
-    const launchSpeed =
-  (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
-    ? lvl.params.ballSpeed
-    : DEFAULT_BALL_SPEED;
 
+    const baseSpeed = DEFAULT_BALL_SPEED;
+    const boost =
+      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+        ? lvl.params.ballSpeedBoost
+        : 0;
 
-    // bal omhoog met die snelheid
+    const launchSpeed = baseSpeed + boost;
+
+    // 🚀 bal omhoog met die snelheid
     if (balls && balls[0]) {
       balls[0].dx = 0;
       balls[0].dy = -launchSpeed;
     }
 
-    // timer starten
+    // ⏱️ timer starten
     if (!timerRunning && typeof startTimer === "function") {
       startTimer();
     }
   }
+}
+
 
   // 🔫 RAKET afvuren (ook spatie) als die actief is
   if (e.code === "Space" && rocketActive && rocketAmmo > 0 && !rocketFired) {
