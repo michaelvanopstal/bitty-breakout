@@ -5730,20 +5730,28 @@ document.addEventListener("mousedown", function (e) {
     rocketLaunchSound.play();
   }
 
-  // 🎯 Bal afschieten met muisklik (trackpad)
-  if (!ballLaunched && !ballMoving) {
-    ballLaunched = true;
-    ballMoving = true;
-    paddleFreeMove = true; // ✅ Na eerste schot mag paddle omhoog bewegen
+// 🎯 Bal afschieten met muisklik (trackpad)
+if (!ballLaunched && !ballMoving) {
+  ballLaunched = true;
+  ballMoving = true;
+  paddleFreeMove = true; // ✅ Na eerste schot mag paddle omhoog bewegen
 
-    shootSound.currentTime = 0;
-    shootSound.play();
+  shootSound.currentTime = 0;
+  shootSound.play();
 
-    balls[0].dx = 0;
-   : DEFAULT_BALL_SPEED;
+  // snelheid bepalen zoals bij spatie
+  const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+  const lvl = LEVELS[lvlIndex];
+  const launchSpeed =
+    (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
+      ? lvl.params.ballSpeed
+      : DEFAULT_BALL_SPEED;
 
-    if (!timerRunning) startTimer(); // ✅ Start timer bij eerste schot
-  }
+  balls[0].dx = 0;
+  balls[0].dy = -launchSpeed;
+
+  if (!timerRunning) startTimer(); // ✅ Start timer bij eerste schot
+}
 });
 
 
