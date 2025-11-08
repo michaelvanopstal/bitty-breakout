@@ -40,7 +40,6 @@ let gameOverAlpha = 0;
 let gameOverTimer = 0;
 let resetTriggered = false;
 let previousBallPos = {};
-const paddleSpeed = 8;
 let downPressed = false;
 let upPressed = false;
 let paddleFreeMove = false;
@@ -115,8 +114,6 @@ let paddleHeight = 20 * scaleFactor;
 let ballRadius = 10 * scaleFactor;
 
 // ⚡ Optioneel: snelheden schalen
-const DEFAULT_BALL_SPEED = 12 * scaleFactor;
-const paddleSpeed = 7 * scaleFactor;
 
 
 const AURA_HEX       = "#FFD700";           // jouw paddle aura hoofdkleur
