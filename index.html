@@ -475,34 +475,6 @@
 
   <img src="beker_clipped_rev_2.png" id="trophy" alt="Trophy">
 
-  <!-- 📱 mobiel canvas kleiner maken zonder je layout te slopen -->
-<script>
-  function autoPlaceCanvasSafe() {
-    // alleen op mobiel
-    if (window.innerWidth > 768) return;
-
-    const c = document.getElementById('gameCanvas');
-    if (!c) return;
-
-    // zelfde verhouding als jouw canvas
-    const ratio = 600 / 645;
-    const vw = window.innerWidth;
-    const canvasWidth = Math.min(vw * 0.84, 550);
-    const canvasHeight = canvasWidth * ratio;
-
-    // alleen de echte canvas-pixels aanpassen
-    c.width = canvasWidth;
-    c.height = canvasHeight;
-
-    // zeg tegen game.js dat hij mag herschalen
-    if (window.applyGameScale) {
-      window.applyGameScale();
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', autoPlaceCanvasSafe);
-  window.addEventListener('resize', autoPlaceCanvasSafe);
-</script>
 
 <!-- daarna pas je game-bestanden -->
 <script src="login.js"></script>
@@ -755,7 +727,33 @@
 </script>
 
 
+<!-- 📱 auto-fix voor mobiele schermen (MAG ONDERAAN) -->
+<script>
+  function autoPlaceCanvas() {
+    // alleen op mobiel
+    if (window.innerWidth > 768) return;
+
+    const c = document.getElementById('gameCanvas');
+    if (!c) return;
+
+    // verhouding van jouw canvas
+    const ratio = 600 / 645;
+    const vw = window.innerWidth;
+    const canvasWidth = Math.min(vw * 0.84, 550);
+    const canvasHeight = canvasWidth * ratio;
+
+    // alleen echte canvasgrootte aanpassen
+    c.width = canvasWidth;
+    c.height = canvasHeight;
+
+    // als game.js een rescale-functie heeft, laat 'm meeschalen
+    if (window.applyGameScale) {
+      window.applyGameScale();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', autoPlaceCanvas);
+  window.addEventListener('resize', autoPlaceCanvas);
+</script>
 </body>
 </html>
-
-
