@@ -3275,11 +3275,14 @@ function resetBall() {
   // 🎯 huidige level ophalen
   const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
   const lvl = LEVELS[lvlIndex];
-  const speed =
-  (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
-    ? lvl.params.ballSpeed
-    : DEFAULT_BALL_SPEED;
 
+  // 🌡️ basis + level-boost
+  const baseSpeed = DEFAULT_BALL_SPEED;
+  const boost =
+    (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+      ? lvl.params.ballSpeedBoost
+      : 0;
+  const speed = baseSpeed + boost;
 
   // 🏐 bal opnieuw op de paddle parkeren
   balls = [{
@@ -3321,14 +3324,15 @@ function resetBall() {
         b.dx = (Math.random() < 0.5 ? -1 : 1) * 2;
       }
 
-      // ⚠️ hier NIET de oude dy pakken (die kan 0 zijn door resetPaddle),
-      // maar opnieuw de level-snelheid ophalen
+      // 🚀 opnieuw snelheid op dezelfde manier berekenen
       const lvlIndex2 = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
       const lvl2 = LEVELS[lvlIndex2];
-      const launchSpeed =
-  (lvl2 && lvl2.params && typeof lvl2.params.ballSpeed === "number")
-    ? lvl2.params.ballSpeed
-    : DEFAULT_BALL_SPEED;
+      const base2 = DEFAULT_BALL_SPEED;
+      const boost2 =
+        (lvl2 && lvl2.params && typeof lvl2.params.ballSpeedBoost === "number")
+          ? lvl2.params.ballSpeedBoost
+          : 0;
+      const launchSpeed = base2 + boost2;
 
       b.dy = -launchSpeed;   // altijd met volle level-snelheid omhoog
 
@@ -3338,6 +3342,7 @@ function resetBall() {
     }, 200);
   }
 }
+
 
 
 function resetPaddle(skipBallReset = false, skipCentering = false) {
