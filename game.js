@@ -4939,20 +4939,29 @@ function updateAndDrawBombVisuals(ctx) {
 
 
 function spawnExtraBall(originBall) {
-  // Huidige bal krijgt een lichte afwijking
-  originBall.dx = -1;
-  originBall.dy = -6;
+  // 🔹 Bepaal de huidige basissnelheid
+  const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+  const lvl = LEVELS[lvlIndex];
+  const baseSpeed =
+    (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
+      ? lvl.params.ballSpeed
+      : DEFAULT_BALL_SPEED;
 
-  // Tweede bal gaat recht omhoog met vaste snelheid
+  // 🔸 Geef de bestaande bal een kleine afwijking
+  originBall.dx = -1;
+  originBall.dy = -baseSpeed;
+
+  // 🔸 Voeg een tweede bal toe die recht omhoog gaat
   balls.push({
     x: originBall.x,
     y: originBall.y,
     dx: 0,
-    dy: -6,
+    dy: -baseSpeed,
     radius: ballRadius,
     isMain: false
   });
 }
+
 
 function spawnPxpBag(x, y) {
   pxpBags.push({
