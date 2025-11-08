@@ -2343,66 +2343,21 @@ resetBtn.addEventListener("mouseleave", () => {
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
-  // 🛡️ niets doen als je in een input/textarea/button zit (bv. chat)
+  // niks doen als je in input zit
   if (["INPUT", "TEXTAREA", "BUTTON"].includes(document.activeElement.tagName)) {
     return;
   }
 
-  // 🚗 Bewegingstoetsen
-  if (
-    e.key === "Right" || e.key === "ArrowRight" || e.key === ">" || e.key === "."
-  ) {
+  // 🚗 bewegen
+  if (e.key === "Right" || e.key === "ArrowRight" || e.key === ">" || e.key === ".") {
     rightPressed = true;
-
-  } else if (
-    e.key === "Left" || e.key === "ArrowLeft" || e.key === "<" || e.key === ","
-  ) {
+  } else if (e.key === "Left" || e.key === "ArrowLeft" || e.key === "<" || e.key === ",") {
     leftPressed = true;
-
   } else if (e.key === "Up" || e.key === "ArrowUp") {
     upPressed = true;
-
   } else if (e.key === "Down" || e.key === "ArrowDown") {
     downPressed = true;
   }
-
-  // 🎯 BAL AFVUREN (spatie) als de bal nog niet gelanceerd is
-  if (e.code === "Space" && !ballLaunched) {
-    ballLaunched   = true;
-    ballMoving     = true;
-    paddleFreeMove = true; // ✅ jouw gedrag
-
-    // 🔊 geluid
-    if (typeof shootSound !== "undefined") {
-      shootSound.currentTime = 0;
-      shootSound.play();
-    }
-
-    // 🔥 snelheid berekenen uit DEFAULT_BALL_SPEED + level boost
-    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
-    const lvl = LEVELS[lvlIndex];
-
-    const baseSpeed = DEFAULT_BALL_SPEED;
-    const boost =
-      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
-        ? lvl.params.ballSpeedBoost
-        : 0;
-
-    const launchSpeed = baseSpeed + boost;
-
-    // 🚀 bal omhoog met die snelheid
-    if (balls && balls[0]) {
-      balls[0].dx = 0;
-      balls[0].dy = -launchSpeed;
-    }
-
-    // ⏱️ timer starten
-    if (!timerRunning && typeof startTimer === "function") {
-      startTimer();
-    }
-  }
-}
-
 
   // 🔫 RAKET afvuren (ook spatie) als die actief is
   if (e.code === "Space" && rocketActive && rocketAmmo > 0 && !rocketFired) {
@@ -2444,9 +2399,11 @@ function keyDownHandler(e) {
       flyingCoins   = [];
     }
 
+    // 👇 dit mag hier blijven, dit sluit alleen het if-blok
     ballMoving = true;
   }
-}
+} // 👈 hiermee is keyDownHandler echt klaar
+
 
 /* ==============================
    📱 TOUCH CONTROLS (mobiel/tablet)
@@ -2454,7 +2411,6 @@ function keyDownHandler(e) {
 if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
   let touchActive = false;
 
-  // 🟢 1. Paddle starten onder vinger
   window.addEventListener('touchstart', (e) => {
     if (!canvas) return;
     if (e.touches.length > 0) {
@@ -2463,10 +2419,8 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
       const rect  = canvas.getBoundingClientRect();
       const x     = touch.clientX - rect.left;
 
-      // paddle onder vinger
       paddleX = x - paddleWidth / 2;
 
-      // begrenzen
       if (paddleX < 0) paddleX = 0;
       if (paddleX + paddleWidth > canvas.width) {
         paddleX = canvas.width - paddleWidth;
@@ -2474,7 +2428,6 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     }
   }, { passive: true });
 
-  // 🟢 2. Paddle meebewegen
   window.addEventListener('touchmove', (e) => {
     if (!touchActive || !canvas) return;
     const touch = e.touches[0];
@@ -2483,18 +2436,16 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
 
     paddleX = x - paddleWidth / 2;
 
-    // begrenzen
     if (paddleX < 0) paddleX = 0;
     if (paddleX + paddleWidth > canvas.width) {
       paddleX = canvas.width - paddleWidth;
     }
   }, { passive: true });
 
-  // 🟢 3. Bal afvuren bij loslaten
   window.addEventListener("touchend", (e) => {
     if (e.target.tagName !== "CANVAS") return;
 
-    // 🔥 snelheid berekenen met default + boost
+    // 🔥 snelheid berekenen uit DEFAULT_BALL_SPEED + level boost
     const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
     const lvl = LEVELS[lvlIndex];
 
@@ -2506,7 +2457,6 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
 
     const launchSpeed = baseSpeed + boost;
 
-    // 🎯 bal omhoog schieten
     if (!ballLaunched && !ballMoving) {
       ballLaunched = true;
       ballMoving = true;
@@ -2525,7 +2475,6 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
       }
     }
 
-    // reset touchstatus
     touchActive = false;
   });
 
