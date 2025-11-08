@@ -5740,7 +5740,7 @@ document.addEventListener("mousedown", function (e) {
     shootSound.play();
 
     balls[0].dx = 0;
-    balls[0].dy = -6;
+   : DEFAULT_BALL_SPEED;
 
     if (!timerRunning) startTimer(); // ✅ Start timer bij eerste schot
   }
