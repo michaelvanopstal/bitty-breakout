@@ -27,7 +27,6 @@ let rocketAmmo = 0;             // aantal raketten
 let balls = [];                 // actieve ballen
 let doublePointsActive = false;
 let doublePointsStartTime = 0;
-const doublePointsDuration = 60000; // 1 minuut in milliseconden
 let imagesLoaded = 0;               // ← eigen regel
 let pointPopups = [];
 let pxpBags = [];
@@ -49,16 +48,6 @@ let fallingStones = [];
 let stoneHitOverlayTimer = 0;
 let stoneHitLock = false;
 let stoneClearRequested = false;
-// 🎯 Stone–paddle botsing (SOFT-stand, centrale waarden)
-const STONE_COLLISION = {
-  hitboxScaleLarge: 0.90,
-  hitboxScaleSmall: 0.84,
-  minPenLargeFrac: 0.30,
-  minPenSmallFrac: 0.35,
-  debounceLarge: 1,
-  debounceSmall: 2,
-  minHorizOverlapFrac: 0.30
-};
 
 // 🌟 Levelovergang
 let levelTransitionActive = false;
@@ -66,7 +55,6 @@ let transitionOffsetY = -300;
 
 let resetOverlayActive = false;
 let ballTrail = [];
-const maxTrailLength = 10;
 
 let machineGunActive = false;
 let machineGunGunX = 0;
@@ -123,8 +111,6 @@ let lastDropAt = 0;
 // Goed verspreide X-posities (zonder clusteren)
 let dropSeed = Math.random();
 let dropIndex = 0;
-const GOLDEN_RATIO_CONJUGATE = 0.61803398875;
-const recentSpawnXs = [];
 let gridColIndex = 0;
 
 // Handige helper: paddle-bounds per frame
@@ -138,7 +124,6 @@ function getPaddleBounds() {
 }
 
 // ⭐ SFX: ster gepakt
-const starCatchSfx = new Audio("starbutton.mp3");
 starCatchSfx.preload = "auto";
 starCatchSfx.loop = false;
 starCatchSfx.volume = 0.85; // pas aan naar smaak
@@ -146,8 +131,7 @@ starCatchSfx.volume = 0.85; // pas aan naar smaak
 // === Bomb Token & Rain ===
 let bombsCollected = 0;
 let bombRain = []; // actieve vallende bommen tijdens de regen
-const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
-const BOMB_RAIN_COUNT  = 12;    // dan 20 laten vallen
+
 
 // === BOMB / BITTY SFX ===
 const SFX = (() => {
@@ -1693,7 +1677,24 @@ bittyLevelUpSfx.volume = 1.0; // mag je aanpasse
 const stonefallVoiceEvery = 5;
 const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
 
+const BOMB_TOKEN_TARGET = 10;   // 10 verzamelen
+const BOMB_RAIN_COUNT  = 12;    // dan 20 laten vallen
+const doublePointsDuration = 60000; // 1 minuut in milliseconden
 
+const GOLDEN_RATIO_CONJUGATE = 0.61803398875;
+const recentSpawnXs = [];
+const starCatchSfx = new Audio("starbutton.mp3");
+const maxTrailLength = 10;
+
+const STONE_COLLISION = {
+  hitboxScaleLarge: 0.90,
+  hitboxScaleSmall: 0.84,
+  minPenLargeFrac: 0.30,
+  minPenSmallFrac: 0.35,
+  debounceLarge: 1,
+  debounceSmall: 2,
+  minHorizOverlapFrac: 0.30
+};
 
 
 rockWarning.volume = 0.85;
