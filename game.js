@@ -9,7 +9,6 @@ let timerRunning = false;
 let score = 0;
 let ballRadius = 8;
 let ballLaunched = false;
-let paddleY = canvas.height - paddleHeight - 8; // beginpositie onderaan
 let paddleHeight = 20;
 let paddleWidth = 120;
 let paddleX = (canvas.width - paddleWidth) / 2;
@@ -48,7 +47,7 @@ const paddleSpeed = 8;
 let downPressed = false;
 let upPressed = false;
 let paddleFreeMove = false;
-
+let paddleY = canvas.height - paddleHeight - 8; // beginpositie onderaan
 // 🪨 Stonefall
 let fallingStones = [];
 let stoneHitOverlayTimer = 0;
