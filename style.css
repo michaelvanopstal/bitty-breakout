@@ -434,14 +434,18 @@ body {
 @media (max-width: 768px) {
   #gameCanvas {
     position: absolute !important;
-    top: 180px !important;          /* ← was 110, nu lager */
+    top: 150px !important;
     left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 90vw !important;
-    max-width: 600px !important;
-    height: auto !important;
+    /* 👇 we verplaatsen én schalen */
+    transform: translateX(-50%) scale(0.7) !important;
+    transform-origin: top center !important;
+
+    width: 645px;        /* laat ‘m op originele maat tekenen */
+    height: 650px;
+    border: none !important;
     z-index: 10 !important;
   }
+
 
   /* canvas komt ongeveer goed te staan,
      script onderaan gaat ’m nog preciezer zetten */
