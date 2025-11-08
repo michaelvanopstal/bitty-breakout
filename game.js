@@ -2454,6 +2454,7 @@ function keyDownHandler(e) {
 if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
   let touchActive = false;
 
+  // 🟢 1. Paddle starten onder vinger
   window.addEventListener('touchstart', (e) => {
     if (!canvas) return;
     if (e.touches.length > 0) {
@@ -2473,6 +2474,7 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     }
   }, { passive: true });
 
+  // 🟢 2. Paddle meebewegen
   window.addEventListener('touchmove', (e) => {
     if (!touchActive || !canvas) return;
     const touch = e.touches[0];
@@ -2488,32 +2490,46 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     }
   }, { passive: true });
 
-  window.addEventListener('touchend', (e) => {
-    // tik = bal starten als hij nog stil ligt
-    if (!ballLaunched && balls && balls[0]) {
-      if (typeof launchBall === 'function') {
-        launchBall();
-      } else {
-        // zelfde launch als bij spatie
-        ballLaunched   = true;
-        ballMoving     = true;
-        paddleFreeMove = true;
-        const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
-        const lvl = LEVELS[lvlIndex];
-        const launchSpeed =
-          (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
-            ? lvl.params.ballSpeed
-            : 6;
-        balls[0].dx = 0;
-        balls[0].dy = -launchSpeed;
-        if (!timerRunning && typeof startTimer === "function") {
-          startTimer();
-        }
+  // 🟢 3. Bal afvuren bij loslaten
+  window.addEventListener("touchend", (e) => {
+    if (e.target.tagName !== "CANVAS") return;
+
+    // 🔥 snelheid berekenen met default + boost
+    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+    const lvl = LEVELS[lvlIndex];
+
+    const baseSpeed = DEFAULT_BALL_SPEED;
+    const boost =
+      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+        ? lvl.params.ballSpeedBoost
+        : 0;
+
+    const launchSpeed = baseSpeed + boost;
+
+    // 🎯 bal omhoog schieten
+    if (!ballLaunched && !ballMoving) {
+      ballLaunched = true;
+      ballMoving = true;
+      paddleFreeMove = true;
+
+      if (typeof shootSound !== "undefined") {
+        shootSound.currentTime = 0;
+        shootSound.play();
+      }
+
+      balls[0].dx = 0;
+      balls[0].dy = -launchSpeed;
+
+      if (!timerRunning && typeof startTimer === "function") {
+        startTimer();
       }
     }
 
+    // reset touchstatus
     touchActive = false;
   });
+
+  console.log("✅ Touch controls geactiveerd");
 }
 
 
