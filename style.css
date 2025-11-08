@@ -15,7 +15,7 @@ body {
   left: 50%;
   transform: translateX(calc(-50% - 1px)); /* jouw kleine correctie */
   width: 640px;
-  height: 595px;
+  height: 650px;
   background-color: transparent;
   border: 3px solid transparent;
   z-index: 18;
