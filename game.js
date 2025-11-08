@@ -99,8 +99,7 @@ let invincibleActive = false; // schild aan/uit
 let invincibleEndTime = 0;    // ms timestamp einde
 
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+
 
 // 📏 Basiswaarde (jouw originele ontwerpbreedte)
 const baseCanvasWidth = 645;
@@ -113,7 +112,8 @@ let paddleWidth = 120 * scaleFactor;
 let paddleHeight = 20 * scaleFactor;
 let ballRadius = 10 * scaleFactor;
 
-// ⚡ Optioneel: snelheden schalen
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
 
 const AURA_HEX       = "#FFD700";           // jouw paddle aura hoofdkleur
