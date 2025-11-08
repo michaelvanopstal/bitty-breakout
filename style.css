@@ -431,7 +431,8 @@ body {
 /* =========================================================
    📱 Mobiele versie (tot 768px)
 @media (max-width: 768px) {
-  #gameCanvas {
+  
+#gameCanvas {
     position: absolute !important;
     top: 150px !important;
     left: 50% !important;
