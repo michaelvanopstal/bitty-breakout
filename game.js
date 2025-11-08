@@ -1708,12 +1708,22 @@ const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
 
 rockWarning.volume = 0.85;
 
-const customBrickWidth = 70 * scaleFactor;   // pas aan zoals jij wilt
-const customBrickHeight = 25 * scaleFactor;  // pas aan zoals jij wilt
-const brickRowCount = 15;
-const brickColumnCount = 9;
-const brickWidth = customBrickWidth;
-const brickHeight = customBrickHeight;
+const customBrickBaseWidth = 70;
+const customBrickBaseHeight = 25;
+
+let brickRowCount = 15;
+let brickColumnCount = 9;
+
+// 👉 eerst op basis van huidige canvas
+let brickWidth  = customBrickBaseWidth  * scaleFactor;
+let brickHeight = customBrickBaseHeight * scaleFactor;
+
+// 👉 helper om later opnieuw te schalen
+function applyScaleToBricks(newScale) {
+  brickWidth  = customBrickBaseWidth  * newScale;
+  brickHeight = customBrickBaseHeight * newScale;
+}
+
 
 
 const starAuraSound = new Audio("starsound.mp3");
@@ -2899,23 +2909,43 @@ function drawPointPopups() {
   ctx.globalAlpha = 1; // Transparantie resetten
 }
 function resetBricks() {
+  // 1. schaal opnieuw bepalen op het moment dat we resetten
+  const currentScale = canvas.width / baseCanvasWidth;
+
+  // 2. bricks-meeschaling (alleen als je eerder applyScaleToBricks hebt gemaakt)
+  if (typeof applyScaleToBricks === "function") {
+    applyScaleToBricks(currentScale);
+  }
+
+  // 3. level-def ophalen
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
   const p = def?.params || {};
-  const targetPaddleWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
+
+  // 4. paddle-breedte uit level, maar nu ook schalen
+  //    jouw originele range was 60..140, die houden we aan maar in "basis-px"
+  const targetPaddleBaseWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
+  // schaal toepassen
+  const targetPaddleWidth = targetPaddleBaseWidth * currentScale;
   paddleBaseWidth = targetPaddleWidth;
 
-  // event. size-effect opruimen
+  // 5. event. size-effect opruimen
   if (paddleSizeEffect) {
     stopPaddleSizeEffect();
   } else {
+    // paddle gecentreerd houden bij veranderde breedte
     const centerX = paddleX + paddleWidth / 2;
     paddleWidth = paddleBaseWidth;
+    // canvas.width kan door schaal veranderd zijn, dus hier ook clampen
     paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
-    if (typeof redrawPaddleCanvas === 'function') redrawPaddleCanvas();
+
+    // paddleCanvas opnieuw tekenen als die bestaat
+    if (typeof redrawPaddleCanvas === 'function') {
+      redrawPaddleCanvas();
+    }
   }
 
-  // alle bricks resetten
+  // 6. alle bricks resetten volgens de level-map
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
@@ -2936,10 +2966,9 @@ function resetBricks() {
         b.hitsNeeded = 2;
         b.hasDroppedBag = false;
       } else if (brickType === "tenhit") {
-        // 👈 jouw nieuwe blok
+        // jouw 10x-blok
         b.hits = 0;
         b.hitsNeeded = 10;
-        // meestal geen bag hier, dus:
         delete b.hasDroppedBag;
       } else {
         // gewone blokken: rommel opruimen
@@ -2965,34 +2994,29 @@ function resetBricks() {
     }
   }
 
-  // bommenregen opruimen bij levelstart (voortgang teller behouden)
+  // 7. bommenregen opruimen bij levelstart (voortgang teller behouden)
   if (typeof bombRain !== 'undefined') bombRain = [];
 
-  // drops resetten
+  // 8. drops resetten
   if (typeof fallingDrops !== 'undefined') fallingDrops = [];
   if (typeof dropsSpawned !== 'undefined') dropsSpawned = 0;
   if (typeof lastDropAt !== 'undefined') lastDropAt = performance.now();
 
   const lvl = level || 1;
 
-  // ======= ÉÉN enkele startDrops per level =======
+  // 9. start drops voor dit level
   startDrops({
     continuous: true,
     minIntervalMs: (lvl <= 3) ? 1200 : (lvl <= 10) ? 900 : 800,
     maxIntervalMs: (lvl <= 3) ? 2600 : (lvl <= 10) ? 2200 : 1800,
     speed:        (lvl <= 3) ? 2.5  : (lvl <= 10) ? 3.0  : 3.4,
-
-    // ✅ hier aangepast: nu ook bad_cross inbegrepen
     types: ["heart", "star", "bomb_token", "bad_cross"],
-
-    // ✅ typeWeights als object in plaats van array
     typeWeights: {
       heart: 3,
       star: 2,
       bomb_token: 1,
       bad_cross: 1
     },
-
     xMargin: 40,
     startDelayMs: (lvl <= 3) ? 800 : (lvl <= 10) ? 600 : 500,
     mode: (lvl > 10) ? "grid" : "well",
@@ -3003,7 +3027,7 @@ function resetBricks() {
     minSpacing: 70
   });
 
-  // ✅ HTML / display in sync brengen na level reset
+  // 10. panel in sync
   if (typeof updateBonusPowerPanel === "function") {
     updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
   }
@@ -5737,6 +5761,29 @@ bombTokenImg.onload = onImageLoad;
 badCrossImg.onload = onImageLoad;
 heartLevelupImg.onload = onImageLoad;
 tenHitImg.onload = onImageLoad;
+
+window.addEventListener('resize', () => {
+  // huidige schaal opnieuw bepalen uit het canvas
+  const newScale = canvas.width / baseCanvasWidth;
+
+  // paddle + bal opnieuw schalen
+  ballRadius   = 8 * newScale;
+  paddleHeight = 20 * newScale;
+  paddleWidth  = 120 * newScale;
+  paddleY      = canvas.height - paddleHeight - (8 * newScale);
+
+  // bricks opnieuw schalen
+  applyScaleToBricks(newScale);
+
+  // alles wat van maat afhangt opnieuw neerzetten
+  resetBricks();
+  resetBall();
+  if (typeof redrawPaddleCanvas === 'function') {
+    redrawPaddleCanvas();
+  }
+});
+
+
 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
