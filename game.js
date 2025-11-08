@@ -3194,12 +3194,27 @@ function drawMagnetHUD(ctx) {
 function resetAllBonuses(opts = {}) {
   const { keepStar = false } = opts;
 
+  // 🎯 actuele level-snelheid bepalen
+  const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+  const lvl = LEVELS[lvlIndex];
+
+  // 1) als je levels nog 'ballSpeed' gebruiken:
+  let launchSpeed =
+    (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
+      ? lvl.params.ballSpeed
+      : DEFAULT_BALL_SPEED;
+
+  // 2) als je bent overgestapt op 'ballSpeedBoost', telt die er netjes bij
+  if (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number") {
+    launchSpeed = DEFAULT_BALL_SPEED + lvl.params.ballSpeedBoost;
+  }
+
   // 🔁 Ballen en bonussen resetten
   balls = [{
     x: paddleX + paddleWidth / 2 - ballRadius,
     y: paddleY - ballRadius * 2,
     dx: 0,
-    dy: -6,
+    dy: -launchSpeed,      // ✅ niet meer hardcoded -6
     radius: ballRadius,
     isMain: true
   }];
@@ -3249,42 +3264,34 @@ function resetAllBonuses(opts = {}) {
 
   // ⭐️ STER / INVINCIBLE alleen uitzetten als we 'm níet willen houden
   if (!keepStar) {
-    // (dit voorkomt dat autolance in het nieuwe level nog afgaat)
     invincibleActive = false;
     invincibleEndTime = 0;
-    // aura/geluid meteen stoppen als functie bestaat
     if (typeof stopStarAura === "function") {
       stopStarAura(true);
     }
-    // ook eventuel fullscreen star FX uit
     if (typeof starPowerFX !== "undefined" && starPowerFX) {
       starPowerFX.active = false;
     }
   }
 
   // 💣 BITTY BOMB / BOMB RAIN resetten
-  // zo komt er geen regen meer in het volgende level als hij net bezig was
   if (typeof bittyBomb !== "undefined") {
     bittyBomb.active = false;
     bittyBomb.phase = "idle";
     bittyBomb.queuedRain = 0;
   }
   if (typeof bombRain !== "undefined") {
-    bombRain = []; // regen stoppen
+    bombRain = [];
   }
   if (typeof _bittyActivationLock !== "undefined") {
     _bittyActivationLock = false;
   }
-
-  // 🚫 heel belangrijk: ook de visuals killen, anders kan er later tóch nog een rain starten
   if (typeof bombVisuals !== "undefined") {
     bombVisuals = null;
   }
 
-  // (belangrijk:) we laten bombsCollected / starsCollected met rust,
-  // zodat je “punten/tokens” wél meeneemt, maar de ACTIE niet.
+  // (belangrijk:) tokens/collectables laten we staan
 }
-
 
 
 function resetBall() {
