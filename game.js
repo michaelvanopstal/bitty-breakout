@@ -4,9 +4,9 @@ const ctx = canvas.getContext("2d");
 const paddleCanvas = document.createElement("canvas");
 const paddleCtx = paddleCanvas.getContext("2d");
 
-// === schaalbasis ===
-const baseCanvasWidth = 645;                     // dit is de maat waarop je het ontworpen hebt
-const scaleFactor = canvas.width / baseCanvasWidth;
+const baseCanvasWidth = 645;
+let currentScale = canvas.width / baseCanvasWidth; // 👈 nieuwe globale
+const scaleFactor = currentScale; // als je ‘scaleFactor’ nog overal gebruikt
 
 let elapsedTime = 0;
 let timerInterval = null;
@@ -1894,6 +1894,11 @@ const DROP_STAR  = "star";
 const DROP_HEART = "heart";
 const DROP_CROSS = "bad_cross";
 
+// kleine helper voor veilig schalen
+function getDropScale() {
+  return (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+}
+
 function shuffleArray(a) {
   const arr = a.slice();
   for (let i = arr.length - 1; i > 0; i--) {
@@ -1940,7 +1945,8 @@ const dropManager = {
 const DROP_TYPES = {
   coin: {
     draw(drop, ctx) {
-      ctx.drawImage(coinImg, drop.x - 12, drop.y - 12, 24, 24);
+      const s = 24 * getDropScale();
+      ctx.drawImage(coinImg, drop.x - s / 2, drop.y - s / 2, s, s);
     },
     onCatch(drop) {
       const earned = doublePointsActive ? 20 : 10;
@@ -1957,7 +1963,9 @@ const DROP_TYPES = {
 
   heart: {
     draw(drop, ctx) {
-      const size = 24 + Math.sin(drop.t) * 2;
+      const base = 24 * getDropScale();
+      const pulse = 2 * getDropScale();
+      const size = base + Math.sin(drop.t) * pulse;
       ctx.globalAlpha = 0.95;
       ctx.drawImage(heartImg, drop.x - size / 2, drop.y - size / 2, size, size);
       ctx.globalAlpha = 1;
@@ -1965,43 +1973,43 @@ const DROP_TYPES = {
     onTick(drop, dt) {
       drop.t += 0.2;
     },
-   onCatch(drop) {
-  heartsCollected++;
+    onCatch(drop) {
+      heartsCollected++;
 
-  // NIEUW: display-balk updaten
-  if (typeof updateBonusPowerPanel === "function") {
-    updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught, heartsCollected);
-  }
+      // NIEUW: display-balk updaten
+      if (typeof updateBonusPowerPanel === "function") {
+        updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught, heartsCollected);
+      }
 
-  // eventueel nog je oude geluid
-  try {
-    if (typeof heartPickupSfx !== "undefined" && heartPickupSfx) {
-      heartPickupSfx.currentTime = 0;
-      heartPickupSfx.play();
-    }
-  } catch (e) {}
+      // eventueel nog je oude geluid
+      try {
+        if (typeof heartPickupSfx !== "undefined" && heartPickupSfx) {
+          heartPickupSfx.currentTime = 0;
+          heartPickupSfx.play();
+        }
+      } catch (e) {}
 
-  // bij 10 hartjes -> 1 leven + reset meter
-  if (heartsCollected >= 10) {
-    heartsCollected = 0;
-    lives++;
-    updateLivesDisplay?.();
+      // bij 10 hartjes -> 1 leven + reset meter
+      if (heartsCollected >= 10) {
+        heartsCollected = 0;
+        lives++;
+        updateLivesDisplay?.();
 
-    // display opnieuw met 0 hartjes
-    if (typeof updateBonusPowerPanel === "function") {
-      updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught, heartsCollected);
-    }
+        // display opnieuw met 0 hartjes
+        if (typeof updateBonusPowerPanel === "function") {
+          updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught, heartsCollected);
+        }
 
-    triggerHeartCelebration?.();
-  }
-},
-
+        triggerHeartCelebration?.();
+      }
+    },
     onMiss(drop) {},
   },
 
   bag: {
     draw(drop, ctx) {
-      ctx.drawImage(pxpBagImg, drop.x - 20, drop.y - 20, 40, 40);
+      const s = 40 * getDropScale();
+      ctx.drawImage(pxpBagImg, drop.x - s / 2, drop.y - s / 2, s, s);
     },
     onCatch(drop) {
       const earned = doublePointsActive ? 160 : 80;
@@ -2016,7 +2024,7 @@ const DROP_TYPES = {
 
   bomb: {
     draw(drop, ctx) {
-      const s = 26;
+      const s = 26 * getDropScale();
       const blink = (Math.floor(performance.now() / 200) % 2 === 0);
       const img = blink ? tntBlinkImg : tntImg;
       ctx.drawImage(img, drop.x - s / 2, drop.y - s / 2, s, s);
@@ -2057,71 +2065,74 @@ const DROP_TYPES = {
     onMiss(drop) {},
   },
 
- // ⬇️ jouw nieuwe kruis komt hierbinnen, niet als nieuwe const
-bad_cross: {
-  draw(drop, ctx) {
-    const s = 40;
-    if (badCrossImg && badCrossImg.complete) {
-      ctx.drawImage(badCrossImg, drop.x - s / 2, drop.y - s / 2, s, s);
-    } else {
-      ctx.save();
-      ctx.translate(drop.x, drop.y);
-      ctx.strokeStyle = "#ff3300";
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.moveTo(-14, -14);
-      ctx.lineTo(14, 14);
-      ctx.moveTo(14, -14);
-      ctx.lineTo(-14, 14);
-      ctx.stroke();
-      ctx.restore();
-    }
-    drop.noMagnet = true;
-  },
-  onCatch(drop) {
-    try {
-      wrongSfx.currentTime = 0;
-      wrongSfx.play();
-    } catch {}
-    badCrossesCaught++;
-    pointPopups.push({
-      x: drop.x,
-      y: drop.y,
-      value: `❌ ${badCrossesCaught}/3`,
-      alpha: 1,
-    });
-
-    // ✅ meteen de display laten meegaan
-    if (typeof updateBonusPowerPanel === "function") {
-      updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
-    }
-
-    if (badCrossesCaught >= 3) {
-      badCrossesCaught = 0;
-      heartsCollected = 0;
-      starsCollected = 0;
-      bombsCollected = 0;
+  // ⬇️ jouw kruis, nu ook geschaald
+  bad_cross: {
+    draw(drop, ctx) {
+      const s = 40 * getDropScale();
+      if (badCrossImg && badCrossImg.complete) {
+        ctx.drawImage(badCrossImg, drop.x - s / 2, drop.y - s / 2, s, s);
+      } else {
+        const sc = getDropScale();
+        ctx.save();
+        ctx.translate(drop.x, drop.y);
+        ctx.strokeStyle = "#ff3300";
+        ctx.lineWidth = 8 * sc;
+        ctx.beginPath();
+        ctx.moveTo(-14 * sc, -14 * sc);
+        ctx.lineTo(14 * sc, 14 * sc);
+        ctx.moveTo(14 * sc, -14 * sc);
+        ctx.lineTo(-14 * sc, 14 * sc);
+        ctx.stroke();
+        ctx.restore();
+      }
+      drop.noMagnet = true;
+    },
+    onCatch(drop) {
+      try {
+        wrongSfx.currentTime = 0;
+        wrongSfx.play();
+      } catch {}
+      badCrossesCaught++;
       pointPopups.push({
-        x: canvas.width / 2,
-        y: 90,
-        value: "BONUS VAL SYSTEEM GERESSET!",
+        x: drop.x,
+        y: drop.y,
+        value: `❌ ${badCrossesCaught}/3`,
         alpha: 1,
       });
-      const hcEl = document.getElementById("heartCount");
-      if (hcEl) hcEl.textContent = heartsCollected;
 
-      // ✅ na reset ook de display terug naar 0/0/0
+      // ✅ meteen de display laten meegaan
       if (typeof updateBonusPowerPanel === "function") {
         updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
       }
-    }
+
+      if (badCrossesCaught >= 3) {
+        badCrossesCaught = 0;
+        heartsCollected = 0;
+        starsCollected = 0;
+        bombsCollected = 0;
+        pointPopups.push({
+          x: canvas.width / 2,
+          y: 90,
+          value: "BONUS VAL SYSTEEM GERESSET!",
+          alpha: 1,
+        });
+        const hcEl = document.getElementById("heartCount");
+        if (hcEl) hcEl.textContent = heartsCollected;
+
+        // ✅ na reset ook de display terug naar 0/0/0
+        if (typeof updateBonusPowerPanel === "function") {
+          updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+        }
+      }
+    },
+    onMiss(drop) {},
   },
-  onMiss(drop) {},
-},
 
   paddle_long: {
     draw(drop, ctx) {
-      ctx.drawImage(paddleLongBlockImg, drop.x - 35, drop.y - 12, 70, 24);
+      const w = 70 * getDropScale();
+      const h = 24 * getDropScale();
+      ctx.drawImage(paddleLongBlockImg, drop.x - w / 2, drop.y - h / 2, w, h);
     },
     onCatch(drop) {
       startPaddleSizeEffect?.("long");
@@ -2131,7 +2142,9 @@ bad_cross: {
 
   paddle_small: {
     draw(drop, ctx) {
-      ctx.drawImage(paddleSmallBlockImg, drop.x - 35, drop.y - 12, 70, 24);
+      const w = 70 * getDropScale();
+      const h = 24 * getDropScale();
+      ctx.drawImage(paddleSmallBlockImg, drop.x - w / 2, drop.y - h / 2, w, h);
     },
     onCatch(drop) {
       startPaddleSizeEffect?.("small");
@@ -2141,7 +2154,9 @@ bad_cross: {
 
   speed: {
     draw(drop, ctx) {
-      ctx.drawImage(speedImg, drop.x - 35, drop.y - 12, 70, 24);
+      const w = 70 * getDropScale();
+      const h = 24 * getDropScale();
+      ctx.drawImage(speedImg, drop.x - w / 2, drop.y - h / 2, w, h);
     },
     onCatch(drop) {
       speedBoostActive = true;
@@ -2154,7 +2169,9 @@ bad_cross: {
 
   magnet: {
     draw(drop, ctx) {
-      ctx.drawImage(magnetImg, drop.x - 35, drop.y - 12, 70, 24);
+      const w = 70 * getDropScale();
+      const h = 24 * getDropScale();
+      ctx.drawImage(magnetImg, drop.x - w / 2, drop.y - h / 2, w, h);
     },
     onCatch(drop) {
       activateMagnet?.(20000);
@@ -2162,91 +2179,89 @@ bad_cross: {
     onMiss(drop) {},
   },
 
-bomb_token: {
-  draw(drop, ctx) {
-    const s = 28;
-    const img =
-      bombTokenImg && bombTokenImg.complete ? bombTokenImg : tntImg;
-    drop.t = (drop.t || 0) + 0.16;
-    const k = 1 + 0.08 * Math.sin(drop.t * 6);
-    const size = s * k;
-    ctx.save();
-    ctx.globalAlpha = 0.95;
-    ctx.drawImage(img, drop.x - size / 2, drop.y - size / 2, size, size);
-    ctx.restore();
-  },
-  onCatch(drop) {
-    SFX.play("bombPickup");
-    bombsCollected++;
-    pointPopups.push({
-      x: drop.x,
-      y: drop.y,
-      value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`,
-      alpha: 1,
-    });
+  bomb_token: {
+    draw(drop, ctx) {
+      const base = 28 * getDropScale();
+      const img =
+        bombTokenImg && bombTokenImg.complete ? bombTokenImg : tntImg;
+      drop.t = (drop.t || 0) + 0.16;
+      const k = 1 + 0.08 * Math.sin(drop.t * 6);
+      const size = base * k;
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      ctx.drawImage(img, drop.x - size / 2, drop.y - size / 2, size, size);
+      ctx.restore();
+    },
+    onCatch(drop) {
+      SFX.play("bombPickup");
+      bombsCollected++;
+      pointPopups.push({
+        x: drop.x,
+        y: drop.y,
+        value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`,
+        alpha: 1,
+      });
 
-    // ✅ update HTML-display
-    updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
-
-    if (bombsCollected >= BOMB_TOKEN_TARGET) {
-      bombsCollected = 0;
-
-      // ✅ opnieuw updaten na reset
+      // ✅ update HTML-display
       updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
 
-      triggerBittyBombIntro(BOMB_RAIN_COUNT);
-    }
-  },
-  onMiss(drop) {},
-},
+      if (bombsCollected >= BOMB_TOKEN_TARGET) {
+        bombsCollected = 0;
 
-star: {
-  draw(drop, ctx) {
-    drop.t = (drop.t || 0) + 0.016;
-    const base = 28;
-    const pulse = 1 + 0.12 * Math.sin(drop.t * 8);
-    const size = base * pulse;
-    ctx.save();
-    ctx.globalAlpha = 0.9 + 0.1 * Math.sin(drop.t * 8);
-    ctx.drawImage(starImg, drop.x - size / 2, drop.y - size / 2, size, size);
-    ctx.restore();
-  },
-  onCatch(drop) {
-    try {
-      if (typeof playOnceSafe === "function") {
-        playOnceSafe(starCatchSfx);
-      } else {
-        starCatchSfx.pause();
-        starCatchSfx.currentTime = 0;
-        starCatchSfx.play();
+        // ✅ opnieuw updaten na reset
+        updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+
+        triggerBittyBombIntro(BOMB_RAIN_COUNT);
       }
-    } catch (e) {}
-    starsCollected++;
-    pointPopups.push({
-      x: drop.x,
-      y: drop.y,
-      value: "⭐+1",
-      alpha: 1,
-    });
+    },
+    onMiss(drop) {},
+  },
 
-    // ✅ update HTML-display
-    updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+  star: {
+    draw(drop, ctx) {
+      drop.t = (drop.t || 0) + 0.016;
+      const base = 28 * getDropScale();
+      const pulse = 1 + 0.12 * Math.sin(drop.t * 8);
+      const size = base * pulse;
+      ctx.save();
+      ctx.globalAlpha = 0.9 + 0.1 * Math.sin(drop.t * 8);
+      ctx.drawImage(starImg, drop.x - size / 2, drop.y - size / 2, size, size);
+      ctx.restore();
+    },
+    onCatch(drop) {
+      try {
+        if (typeof playOnceSafe === "function") {
+          playOnceSafe(starCatchSfx);
+        } else {
+          starCatchSfx.pause();
+          starCatchSfx.currentTime = 0;
+          starCatchSfx.play();
+        }
+      } catch (e) {}
+      starsCollected++;
+      pointPopups.push({
+        x: drop.x,
+        y: drop.y,
+        value: "⭐+1",
+        alpha: 1,
+      });
 
-    if (starsCollected >= 10) {
-      starsCollected = 0;
-
-      // ✅ opnieuw updaten na reset
+      // ✅ update HTML-display
       updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
 
-      startStarPowerCelebration();
-      activateInvincibleShield(30000);
-    }
+      if (starsCollected >= 10) {
+        starsCollected = 0;
+
+        // ✅ opnieuw updaten na reset
+        updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+
+        startStarPowerCelebration();
+        activateInvincibleShield(30000);
+      }
+    },
+    onMiss(drop) {},
   },
-  onMiss(drop) {},
-},
 }; // ✅ sluit het hele const DROP_TYPES object correct af
-
-
 
 
 function updateAndDrawDrops() {
@@ -2691,6 +2706,10 @@ function drawBricks() {
 }
 
 function startDrops(config) {
+  // veilige schaal ophalen
+  const s = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+
+  // basisconfig + user config
   dropConfig = Object.assign({
     // timing
     continuous: true,          // blijf spawnen zolang timer/limieten het toestaan
@@ -2722,6 +2741,13 @@ function startDrops(config) {
     typeQuota: null,           // { heart: 5, bomb: 2 } → exact zoveel keer in totaal
     typeWeights: null          // { coin:5, heart:2, bomb:1 } → gewogen random
   }, config || {});
+
+  // --- schaalgevoelige velden direct omzetten ---
+  dropConfig.xMargin       = (dropConfig.xMargin ?? 40) * s;
+  dropConfig.gridJitterPx  = (dropConfig.gridJitterPx ?? 18) * s;
+  dropConfig.avoidMarginPx = (dropConfig.avoidMarginPx ?? 40) * s;
+  dropConfig.minSpacing    = (dropConfig.minSpacing ?? 70) * s;
+  dropConfig.speed         = (dropConfig.speed ?? 3.0) * s;   // 👈 snelheid schaalt nu mee!
 
   // normaliseer arrays
   if (!Array.isArray(dropConfig.gridColumns))
@@ -2909,13 +2935,11 @@ function drawPointPopups() {
   ctx.globalAlpha = 1; // Transparantie resetten
 }
 function resetBricks() {
-  // 1. schaal opnieuw bepalen op het moment dat we resetten
-  const currentScale = canvas.width / baseCanvasWidth;
-
-  // 2. bricks-meeschaling (alleen als je eerder applyScaleToBricks hebt gemaakt)
+  currentScale = canvas.width / baseCanvasWidth;   // 👈 global bijwerken
   if (typeof applyScaleToBricks === "function") {
     applyScaleToBricks(currentScale);
   }
+  // ... rest zoals je al had ...
 
   // 3. level-def ophalen
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
@@ -5383,7 +5407,9 @@ for (let i = pxpBags.length - 1; i >= 0; i--) {
   let bag = pxpBags[i];
   bag.y += bag.dy;
 
-  ctx.drawImage(pxpBagImg, bag.x - 20, bag.y, 40, 40);
+  const s = 40 * currentScale;
+  ctx.drawImage(pxpBagImg, bag.x - s / 2, bag.y, s, s);
+
 
   // Bounding box van zakje
   const bagLeft = bag.x - 20;
@@ -5447,8 +5473,13 @@ if (machineGunActive && !machineGunCooldownActive) {
   if (machineGunGunY < targetY) machineGunGunY += followSpeed;
   else if (machineGunGunY > targetY) machineGunGunY -= followSpeed;
 
-  // 🔫 Teken geweer
-  ctx.drawImage(machinegunGunImg, machineGunGunX, machineGunGunY, 60, 60);
+ // 🔫 Teken geweer (geschaald)
+const gunSize = 60 * (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1);
+ctx.drawImage(machinegunGunImg, machineGunGunX, machineGunGunY, gunSize, gunSize);
+
+// 🔥 Vuur kogels (geschaald)
+const bulletSpeed = 6 * (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1);
+const bulletRadius = 4 * (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1);
 
   // 🔥 Vuur kogels
   if (Date.now() - machineGunLastShot > machineGunBulletInterval && machineGunShotsFired < 30) {
@@ -5762,26 +5793,45 @@ badCrossImg.onload = onImageLoad;
 heartLevelupImg.onload = onImageLoad;
 tenHitImg.onload = onImageLoad;
 
+
+// ✅ Dynamische schaal bij schermverandering
 window.addEventListener('resize', () => {
-  // huidige schaal opnieuw bepalen uit het canvas
-  const newScale = canvas.width / baseCanvasWidth;
+  // 1️⃣ Canvas zelf aanpassen aan nieuwe schermgrootte
+  if (typeof updateCanvasSize === 'function') {
+    updateCanvasSize();
+  }
 
-  // paddle + bal opnieuw schalen
-  ballRadius   = 8 * newScale;
-  paddleHeight = 20 * newScale;
-  paddleWidth  = 120 * newScale;
-  paddleY      = canvas.height - paddleHeight - (8 * newScale);
+  // 2️⃣ Nieuwe schaal berekenen en opslaan
+  currentScale = canvas.width / baseCanvasWidth;
 
-  // bricks opnieuw schalen
-  applyScaleToBricks(newScale);
+  // 3️⃣ Basisobjecten (bal & paddle) opnieuw schalen
+  ballRadius   = 8 * currentScale;
+  paddleHeight = 20 * currentScale;
+  paddleWidth  = 120 * currentScale;
+  paddleY      = canvas.height - paddleHeight - (8 * currentScale);
 
-  // alles wat van maat afhangt opnieuw neerzetten
-  resetBricks();
-  resetBall();
+  // 4️⃣ Bricks opnieuw schalen
+  if (typeof applyScaleToBricks === 'function') {
+    applyScaleToBricks(currentScale);
+  }
+
+  // 5️⃣ Alle vallende bonusobjecten en effecten opnieuw afstemmen
+  // (machinegun, drops, hearts, bombs, stars, bags, etc.)
+  // Deze gebruiken currentScale intern, dus hoeven alleen gereset.
+  if (typeof resetBricks === 'function') resetBricks();
+  if (typeof resetBall === 'function') resetBall();
+
+  // 6️⃣ Paddle opnieuw tekenen met nieuwe breedte
   if (typeof redrawPaddleCanvas === 'function') {
     redrawPaddleCanvas();
   }
+
+  // 7️⃣ Optioneel: update UI-panel of bonusdisplay als dat bestaat
+  if (typeof updateBonusPowerPanel === 'function') {
+    updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+  }
 });
+
 
 
 
