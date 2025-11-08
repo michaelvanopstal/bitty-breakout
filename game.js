@@ -3365,7 +3365,7 @@ function resetPaddle(skipBallReset = false, skipCentering = false) {
     paddleX = (canvas.width - paddleWidth) / 2;
 
     // bottom Y (met fallback marge van 12 px als constante niet bestaat)
-    const margin = (typeof PADDLE_MARGIN_BOTTOM !== "undefined") ? PADDLE_MARGIN_BOTTOM : 8;
+    const margin = (typeof PADDLE_MARGIN_BOTTOM !== "undefined") ? PADDLE_MARGIN_BOTTOM : 40;
     paddleY = canvas.height - paddleHeight - margin;
 
     // besturing netjes resetten
