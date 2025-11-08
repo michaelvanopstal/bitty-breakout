@@ -475,39 +475,38 @@
 
   <img src="beker_clipped_rev_2.png" id="trophy" alt="Trophy">
 
-  <script>
-    document.addEventListener('DOMContentLoaded', autoPlaceCanvas);
-    window.addEventListener('resize', autoPlaceCanvas);
+  <!-- 📱 mobiel canvas kleiner maken zonder je layout te slopen -->
+<script>
+  function autoPlaceCanvasSafe() {
+    // alleen op mobiel
+    if (window.innerWidth > 768) return;
 
-    function autoPlaceCanvas() {
-      // alleen op mobiel
-      if (window.innerWidth > 768) return;
+    const c = document.getElementById('gameCanvas');
+    if (!c) return;
 
-      const c = document.getElementById('gameCanvas');
-      if (!c) return;
+    // zelfde verhouding als jouw canvas
+    const ratio = 600 / 645;
+    const vw = window.innerWidth;
+    const canvasWidth = Math.min(vw * 0.84, 550);
+    const canvasHeight = canvasWidth * ratio;
 
-      const ratio = 600 / 645;           // zelfde verhouding als jouw canvas
-      const vw = window.innerWidth;
-      const canvasWidth = Math.min(vw * 0.84, 550);
-      const canvasHeight = canvasWidth * ratio;
+    // alleen de echte canvas-pixels aanpassen
+    c.width = canvasWidth;
+    c.height = canvasHeight;
 
-      // echte pixelgrootte van het canvas aanpassen
-      c.width = canvasWidth;
-      c.height = canvasHeight;
-
-      // canvas ook een beetje netjes naar beneden
-      const vh = window.innerHeight;
-      const minTop = 180;
-      const centeredTop = (vh - canvasHeight) / 2;
-      const finalTop = Math.max(minTop, centeredTop);
-      c.style.top = finalTop + 'px';
+    // zeg tegen game.js dat hij mag herschalen
+    if (window.applyGameScale) {
+      window.applyGameScale();
     }
-  </script>
+  }
 
-  <!-- daarna pas je game-bestanden -->
-  <script src="login.js"></script>
-  <script src="game.js"></script>
+  document.addEventListener('DOMContentLoaded', autoPlaceCanvasSafe);
+  window.addEventListener('resize', autoPlaceCanvasSafe);
+</script>
 
+<!-- daarna pas je game-bestanden -->
+<script src="login.js"></script>
+<script src="game.js"></script>
 
  
    <script>
