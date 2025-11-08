@@ -98,25 +98,10 @@ let starsCollected = 0;       // 0..10
 let invincibleActive = false; // schild aan/uit
 let invincibleEndTime = 0;    // ms timestamp einde
 
-
-
-
-
-
 // 🎯 Afmetingen meeschalen met canvas
-const brickWidth = 75 * scaleFactor;
-const brickHeight = 25 * scaleFactor;
 let paddleWidth = 120 * scaleFactor;
 let paddleHeight = 20 * scaleFactor;
 let ballRadius = 10 * scaleFactor;
-
-
-
-const AURA_HEX       = "#FFD700";           // jouw paddle aura hoofdkleur
-const AURA_RGB       = "255,215,0";         // zelfde in RGB
-const AURA_EDGE_HEX  = "rgba(255,140,0,0.9)"; // warme rand voor tekststroke
-const AURA_SOFT_GLOW = "rgba(255,215,0,0.20)";
-const AURA_SPARK_RGB = "255,240,150";       // lichtere vonkjes (warm wit/goud)
 
 let starPowerFX = { active: false, t0: 0, duration: 3000, stars: [], particles: [] };
 let fxCanvas = null, fxCtx = null;
@@ -1885,7 +1870,14 @@ const scaleFactor = canvas.width / baseCanvasWidth;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const brickWidth = 75 * scaleFactor;
+const brickHeight = 25 * scaleFactor;
 
+const AURA_HEX       = "#FFD700";           // jouw paddle aura hoofdkleur
+const AURA_RGB       = "255,215,0";         // zelfde in RGB
+const AURA_EDGE_HEX  = "rgba(255,140,0,0.9)"; // warme rand voor tekststroke
+const AURA_SOFT_GLOW = "rgba(255,215,0,0.20)";
+const AURA_SPARK_RGB = "255,240,150";       // lichtere vonkjes (warm wit/goud)
 // === GEBALANCEERDE DROP-BAG ===
 const DROP_BOMB  = "bomb_token";
 const DROP_STAR  = "star";
