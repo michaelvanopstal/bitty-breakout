@@ -5836,8 +5836,8 @@ function triggerPaddleExplosion() {
         x: paddleX + paddleWidth / 2 - ballRadius,
         y: paddleY - ballRadius * 2,
         dx: 0,
-        dy: -6,
-        radius: ballRadius,
+       dy: -DEFAULT_BALL_SPEED,
+       radius: ballRadius,
         isMain: true
       }];
 
