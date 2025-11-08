@@ -430,14 +430,27 @@ body {
 
 /* =========================================================
    📱 Mobiele versie (tot 768px)
+   ========================================================= */
 @media (max-width: 768px) {
-  
-#gameCanvas {
+  #gameCanvas {
     position: absolute !important;
-    top: 150px !important;
+    top: 180px !important;          /* ← was 110, nu lager */
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 84vw !important;
+    width: 90vw !important;
+    max-width: 600px !important;
+    height: auto !important;
+    z-index: 10 !important;
+  }
+
+  /* canvas komt ongeveer goed te staan,
+     script onderaan gaat ’m nog preciezer zetten */
+  #gameCanvas {
+    position: absolute !important;
+    top: 150px !important;             /* startwaarde, script corrigeert dit nog */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 84vw !important;            /* iets kleiner zodat hij in het rode vlak past */
     max-width: 550px !important;
     height: auto !important;
     border: none !important;
