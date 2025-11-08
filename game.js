@@ -1170,12 +1170,18 @@ function createEmptyMap() { return []; }
 const LEVELS = Array.from({ length: TOTAL_LEVELS }, (_, i) => ({
   map: createEmptyMap(),
   params: {
-    // basis-schaal: elke 5 levels mini-stapjes, pas vrij aan
-    ballSpeed: 7 + 0.2 * i,                 // start snelheid
-    paddleWidth: 100 - Math.floor(i / 4) * 4, // per 4 levels -4px, min later clampen
-    machineGunDifficulty: Math.min(1 + Math.floor(i / 7), 3) // 1..3
+    // i = 0 → +0, i = 1 → +0.2, i = 2 → +0.4, ...
+    // pas die 0.2 gerust aan als je sneller wilt laten oplopen
+    ballSpeedBoost: 0.2 * i,
+
+    // paddle wordt langzaam smaller per 4 levels
+    paddleWidth: Math.max(50, 100 - Math.floor(i / 4) * 4),
+
+    // machinegun blijft zoals je had
+    machineGunDifficulty: Math.min(1 + Math.floor(i / 7), 3)
   }
 }));
+
 
 // Zet jouw bestaande 1–3 in de centrale tabel (behoud huidig gedrag)
 LEVELS[0].map = level1Map;
