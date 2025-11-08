@@ -1,16 +1,21 @@
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const paddleCanvas = document.createElement("canvas");
 const paddleCtx = paddleCanvas.getContext("2d");
 
+// === schaalbasis ===
+const baseCanvasWidth = 645;                     // dit is de maat waarop je het ontworpen hebt
+const scaleFactor = canvas.width / baseCanvasWidth;
+
 let elapsedTime = 0;
 let timerInterval = null;
 let timerRunning = false;
 let score = 0;
-let ballRadius = 8;
+let ballRadius = 8 * scaleFactor;
 let ballLaunched = false;
-let paddleHeight = 20;
-let paddleWidth = 120;
+let paddleHeight = 20 * scaleFactor;
+let paddleWidth = 120 * scaleFactor;
 let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
@@ -22,7 +27,7 @@ let level = 1;
 let gameOver = false;
 let ballMoving = false;
 let rocketFired = false;
-let rocketSpeed = 10;
+let rocketSpeed = 10; // mag gewoon vast blijven
 let smokeParticles = [];
 let explosions = [];
 let secondBallDuration = 60000; // 1 minuut in ms
@@ -43,11 +48,11 @@ let gameOverAlpha = 0;
 let gameOverTimer = 0;
 let resetTriggered = false;
 let previousBallPos = {};
-const paddleSpeed = 8;
+const paddleSpeed = 8 * scaleFactor;
 let downPressed = false;
 let upPressed = false;
 let paddleFreeMove = false;
-let paddleY = canvas.height - paddleHeight - 8; // beginpositie onderaan
+let paddleY = canvas.height - paddleHeight - (8 * scaleFactor); // beginpositie onderaan
 // 🪨 Stonefall
 let fallingStones = [];
 let stoneHitOverlayTimer = 0;
@@ -66,7 +71,7 @@ const STONE_COLLISION = {
 
 // 🌟 Levelovergang
 let levelTransitionActive = false;
-let transitionOffsetY = -300;
+let transitionOffsetY = -300 * scaleFactor;
 
 let resetOverlayActive = false;
 let ballTrail = [];
@@ -84,7 +89,7 @@ let machineGunCooldownTime = 30000;
 let machineGunBulletInterval = 500;
 let machineGunLastShot = 0;
 let paddleDamageZones = [];
-let machineGunYOffset = 140;
+let machineGunYOffset = 140 * scaleFactor;
 let minMachineGunY = 0;
 
 // 🧲 Magnet bonus
@@ -210,12 +215,16 @@ let rockWarnTriggerIndex = Math.random() < 0.5 ? 1 : 3; // 1e of 3e keer
 const DEFAULT_BALL_SPEED = 9;
 
 
+// eerste bal nu ook met scale-afmetingen
+const currentLevelIndex = level - 1;
+const initialSpeedBoost = 0; // als je later uit LEVELS wilt halen kun je dat hier doen
+
 balls.push({
   x: canvas.width / 2,
-  y: canvas.height - paddleHeight - 10,
+  y: canvas.height - paddleHeight - (10 * scaleFactor),
   dx: 0,
-  dy: -DEFAULT_BALL_SPEED,
-  radius: 8,
+  dy: -(DEFAULT_BALL_SPEED + initialSpeedBoost),
+  radius: ballRadius,
   isMain: true
 });
 
@@ -230,7 +239,7 @@ const LEVEL_MESSAGE_DURATION = 180;
 
 // 🧱 Paddle-size bonus
 let paddleSizeEffect = null; // { type: "long"|"small", end: timestamp, multiplier: number }
-let paddleBaseWidth = 100;   // actuele 'basis' breedte voor dit level (zonder tijdelijke bonus)
+let paddleBaseWidth = 100 * scaleFactor;   // actuele 'basis' breedte voor dit level (zonder tijdelijke bonus)
 const PADDLE_LONG_DURATION  = 30000;
 const PADDLE_SMALL_DURATION = 30000;
 
@@ -536,6 +545,9 @@ function renderStarPowerFX() {
   fxCtx.fillStyle = "rgba(0,0,0,0.12)";
   fxCtx.fillRect(0, 0, W, H);
 
+  // ... 👇 vanaf hier blijft alles hetzelfde als jouw versie ...
+  // ik laat de rest van je code hieronder staan, ongewijzigd:
+
   // Sterren + stardust
   for (const s of starPowerFX.stars) {
     s.t += dt * 0.001;
@@ -544,13 +556,11 @@ function renderStarPowerFX() {
     s.y += yOffset * 0.02;
     s.r += s.vr * dt;
 
-    // Ster tekenen met neon-glow (zelfde aura-kleur)
     fxCtx.save();
     fxCtx.translate(s.x, s.y);
     fxCtx.rotate(s.r);
     const size = 56 * s.scale;
 
-    // zachte glow ring onder de ster
     const grd = fxCtx.createRadialGradient(0, 0, size * 0.15, 0, 0, size * 0.9);
     grd.addColorStop(0.00, `rgba(${AURA_RGB},0.30)`);
     grd.addColorStop(0.50, `rgba(${AURA_RGB},0.12)`);
@@ -561,12 +571,10 @@ function renderStarPowerFX() {
     fxCtx.arc(0, 0, size * 0.9, 0, Math.PI * 2);
     fxCtx.fill();
 
-    // ster zelf
     fxCtx.globalAlpha = 0.96;
     fxCtx.drawImage(starImg, -size/2, -size/2, size, size);
     fxCtx.restore();
 
-    // Stardust (zelfde neon goud, iets lichter voor sparkle)
     for (let k = 0; k < 3; k++) {
       starPowerFX.particles.push({
         x: s.x,
@@ -593,8 +601,8 @@ function renderStarPowerFX() {
     fxCtx.globalAlpha = a * 0.95;
 
     const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2);
-    grd.addColorStop(0, `rgba(${AURA_SPARK_RGB},1)`);       // kern (licht)
-    grd.addColorStop(1, `rgba(${AURA_RGB},0)`);             // uitwaaien
+    grd.addColorStop(0, `rgba(${AURA_SPARK_RGB},1)`);
+    grd.addColorStop(1, `rgba(${AURA_RGB},0)`);
     fxCtx.fillStyle = grd;
     fxCtx.beginPath();
     fxCtx.arc(p.x, p.y, p.r * 3.2, 0, Math.PI * 2);
@@ -602,7 +610,6 @@ function renderStarPowerFX() {
     fxCtx.restore();
   }
 
-  // Titel “Bitty STAR POWER!” met identieke neon-styling
   const fadeIn = Math.min(1, tElapsed / 300);
   const fadeOut = Math.min(1, Math.max(0, (starPowerFX.duration - tElapsed) / 300));
   const alpha = Math.min(fadeIn, fadeOut);
@@ -614,13 +621,11 @@ function renderStarPowerFX() {
   fxCtx.textAlign = "center";
   fxCtx.textBaseline = "middle";
 
-  // multi-pass glow in AURA-kleur
   fxCtx.fillStyle = `rgba(${AURA_RGB},0.22)`;
   for (let g = 0; g < 5; g++) {
     fxCtx.fillText(title, W / 2, H * 0.25);
   }
 
-  // kern + warme rand (zoals je aura-edge)
   fxCtx.fillStyle = AURA_HEX;
   fxCtx.strokeStyle = AURA_EDGE_HEX;
   fxCtx.lineWidth = 4;
@@ -629,7 +634,6 @@ function renderStarPowerFX() {
 
   fxCtx.restore();
 
-  // einde
   if (tElapsed >= starPowerFX.duration) {
     starPowerFX.active = false;
     fxCtx.clearRect(0, 0, W, H);
@@ -1704,8 +1708,8 @@ const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
 
 rockWarning.volume = 0.85;
 
-const customBrickWidth = 70;   // pas aan zoals jij wilt
-const customBrickHeight = 25;  // pas aan zoals jij wilt
+const customBrickWidth = 70 * scaleFactor;   // pas aan zoals jij wilt
+const customBrickHeight = 25 * scaleFactor;  // pas aan zoals jij wilt
 const brickRowCount = 15;
 const brickColumnCount = 9;
 const brickWidth = customBrickWidth;
