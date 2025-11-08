@@ -1715,7 +1715,7 @@ starPowerSfx.preload = "auto";
 starPowerSfx.loop = false;
 starPowerSfx.volume = 0.85;   // pas aan naar smaak
 
-// kleine helpers
+
 function playOnceSafe(audio) {
   try { audio.currentTime = 0; audio.play(); } catch (e) {}
 }
