@@ -5881,13 +5881,29 @@ function triggerPaddleExplosion() {
       paddleExploding = false;
       paddleExplosionParticles = [];
 
-      // bal resetten
+      // ⬇️ hier hebben we 'm aangepast
+      // 👉 actuele level-snelheid bepalen
+      const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+      const lvl = LEVELS[lvlIndex];
+
+      // eerst kijken of je nog het oude 'ballSpeed' gebruikt…
+      let launchSpeed =
+        (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
+          ? lvl.params.ballSpeed
+          : DEFAULT_BALL_SPEED;
+
+      // …en als je al op ballSpeedBoost zit, telt die erbovenop
+      if (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number") {
+        launchSpeed = DEFAULT_BALL_SPEED + lvl.params.ballSpeedBoost;
+      }
+
+      // bal resetten met level-snelheid
       balls = [{
         x: paddleX + paddleWidth / 2 - ballRadius,
         y: paddleY - ballRadius * 2,
         dx: 0,
-       dy: -DEFAULT_BALL_SPEED,
-       radius: ballRadius,
+        dy: -launchSpeed,         // ✅ niet meer hardcoded
+        radius: ballRadius,
         isMain: true
       }];
 
@@ -5906,35 +5922,10 @@ function triggerPaddleExplosion() {
     machineGunActive = false;
     machineGunCooldownActive = false;
 
-    // 🔇 TNT direct stilzetten bij GAME OVER
-    try {
-      if (typeof tntBeepSound !== "undefined" && tntBeepSound) {
-        tntBeepSound.pause();
-        tntBeepSound.currentTime = 0;
-      }
-    } catch {}
+    // ... rest van jouw game-over code ...
+  }
+}
 
-    try {
-      if (typeof tntExplodeSound !== "undefined" && tntExplodeSound?.pause) {
-        tntExplodeSound.pause();
-        tntExplodeSound.currentTime = 0;
-      }
-    } catch {}
-
-    // alle TNT bricks “ontwapenen”
-    if (typeof bricks !== "undefined" && typeof brickColumnCount !== "undefined" && typeof brickRowCount !== "undefined") {
-      for (let c = 0; c < brickColumnCount; c++) {
-        for (let r = 0; r < brickRowCount; r++) {
-          const b = bricks?.[c]?.[r];
-          if (b && b.type === "tnt") {
-            b.tntArmed = false;
-            b.tntStart = 0;
-            b.tntBeepNext = 0;
-            if ("tntCountdown" in b) b.tntCountdown = 0;
-          }
-        }
-      }
-    }
 
     // 🔊 game over sounds / extra effect
     if (typeof gameOverSound !== "undefined" && gameOverSound) {
