@@ -6277,7 +6277,7 @@ function triggerBallReset() {
       x: paddleX + paddleWidth / 2 - ballRadius,
       y: paddleY - ballRadius * 2,
       dx: 0,
-      dy: -6,
+      dy: -DEFAULT_BALL_SPEED,
       radius: ballRadius,
       isMain: true
     }];
