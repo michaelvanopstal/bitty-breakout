@@ -5783,6 +5783,7 @@ function spawnStoneDebris(x, y) {
   }
 }
 
+
 function triggerPaddleExplosion() {
   // 🛡️ STAR-bonus actief: geen life loss, geen pauze, alleen bal terug op paddle
   if (invincibleActive) {
@@ -5790,6 +5791,7 @@ function triggerPaddleExplosion() {
     return;
   }
 
+  // ✅ er zijn nog levens over
   if (lives > 1) {
     if (!resetTriggered) {
       lives--;
@@ -5830,7 +5832,6 @@ function triggerPaddleExplosion() {
       paddleExploding = false;
       paddleExplosionParticles = [];
 
-      // ⬇️ hier hebben we 'm aangepast
       // 👉 actuele level-snelheid bepalen
       const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
       const lvl = LEVELS[lvlIndex];
@@ -5851,7 +5852,7 @@ function triggerPaddleExplosion() {
         x: paddleX + paddleWidth / 2 - ballRadius,
         y: paddleY - ballRadius * 2,
         dx: 0,
-        dy: -launchSpeed,         // ✅ niet meer hardcoded
+        dy: -launchSpeed,
         radius: ballRadius,
         isMain: true
       }];
@@ -5871,10 +5872,35 @@ function triggerPaddleExplosion() {
     machineGunActive = false;
     machineGunCooldownActive = false;
 
-    // ... rest van jouw game-over code ...
-  }
-}
+    // 🔇 TNT direct stilzetten bij GAME OVER
+    try {
+      if (typeof tntBeepSound !== "undefined" && tntBeepSound) {
+        tntBeepSound.pause();
+        tntBeepSound.currentTime = 0;
+      }
+    } catch {}
 
+    try {
+      if (typeof tntExplodeSound !== "undefined" && tntExplodeSound?.pause) {
+        tntExplodeSound.pause();
+        tntExplodeSound.currentTime = 0;
+      }
+    } catch {}
+
+    // alle TNT bricks “ontwapenen”
+    if (typeof bricks !== "undefined" && typeof brickColumnCount !== "undefined" && typeof brickRowCount !== "undefined") {
+      for (let c = 0; c < brickColumnCount; c++) {
+        for (let r = 0; r < brickRowCount; r++) {
+          const b = bricks?.[c]?.[r];
+          if (b && b.type === "tnt") {
+            b.tntArmed = false;
+            b.tntStart = 0;
+            b.tntBeepNext = 0;
+            if ("tntCountdown" in b) b.tntCountdown = 0;
+          }
+        }
+      }
+    }
 
     // 🔊 game over sounds / extra effect
     if (typeof gameOverSound !== "undefined" && gameOverSound) {
@@ -5970,6 +5996,7 @@ function triggerPaddleExplosion() {
     }, 1000);
   }
 }
+
 
 function startLevelTransition() {
   // ✅ Wincheck vóór level++ (we zitten aan het einde van het laatste level)
