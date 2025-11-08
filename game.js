@@ -7,10 +7,7 @@ let elapsedTime = 0;
 let timerInterval = null;
 let timerRunning = false;
 let score = 0;
-let ballRadius = 8;
 let ballLaunched = false;
-let paddleHeight = 20;
-let paddleWidth = 120;
 let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
@@ -101,6 +98,25 @@ let fallingBags = [];
 let starsCollected = 0;       // 0..10
 let invincibleActive = false; // schild aan/uit
 let invincibleEndTime = 0;    // ms timestamp einde
+
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// 📏 Basiswaarde (jouw originele ontwerpbreedte)
+const baseCanvasWidth = 645;
+const scaleFactor = canvas.width / baseCanvasWidth;
+
+// 🎯 Afmetingen meeschalen met canvas
+const brickWidth = 75 * scaleFactor;
+const brickHeight = 25 * scaleFactor;
+let paddleWidth = 120 * scaleFactor;
+let paddleHeight = 20 * scaleFactor;
+let ballRadius = 10 * scaleFactor;
+
+// ⚡ Optioneel: snelheden schalen
+const DEFAULT_BALL_SPEED = 12 * scaleFactor;
+const paddleSpeed = 7 * scaleFactor;
 
 
 const AURA_HEX       = "#FFD700";           // jouw paddle aura hoofdkleur
@@ -1704,8 +1720,6 @@ const rockWarning = new Audio("bitty_watch_out.mp3"); // jouw MP3-bestand
 
 rockWarning.volume = 0.85;
 
-const customBrickWidth = 70;   // pas aan zoals jij wilt
-const customBrickHeight = 25;  // pas aan zoals jij wilt
 const brickRowCount = 15;
 const brickColumnCount = 9;
 const brickWidth = customBrickWidth;
