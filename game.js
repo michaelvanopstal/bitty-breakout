@@ -101,9 +101,7 @@ let invincibleEndTime = 0;    // ms timestamp einde
 
 
 
-// 📏 Basiswaarde (jouw originele ontwerpbreedte)
-const baseCanvasWidth = 645;
-const scaleFactor = canvas.width / baseCanvasWidth;
+
 
 // 🎯 Afmetingen meeschalen met canvas
 const brickWidth = 75 * scaleFactor;
@@ -112,8 +110,6 @@ let paddleWidth = 120 * scaleFactor;
 let paddleHeight = 20 * scaleFactor;
 let ballRadius = 10 * scaleFactor;
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
 
 
 const AURA_HEX       = "#FFD700";           // jouw paddle aura hoofdkleur
@@ -1883,6 +1879,11 @@ paddleSmallBlockImg.src = "paddlesmall.png"; // jouw upload
 const magnetImg = new Image();
 magnetImg.src = "magnet.png"; // voeg dit plaatje toe aan je project
 
+// 📏 Basiswaarde (jouw originele ontwerpbreedte)
+const baseCanvasWidth = 645;
+const scaleFactor = canvas.width / baseCanvasWidth;
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
 
 // === GEBALANCEERDE DROP-BAG ===
