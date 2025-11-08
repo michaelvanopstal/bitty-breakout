@@ -2340,10 +2340,12 @@ resetBtn.addEventListener("mouseenter", () => {
 resetBtn.addEventListener("mouseleave", () => {
   tooltip.style.display = "none";
 });
+
+
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
-  // niks doen als je in input zit
+  // niet schieten als je in een input zit
   if (["INPUT", "TEXTAREA", "BUTTON"].includes(document.activeElement.tagName)) {
     return;
   }
@@ -2359,7 +2361,44 @@ function keyDownHandler(e) {
     downPressed = true;
   }
 
-  // 🔫 RAKET afvuren (ook spatie) als die actief is
+  // 🎯 1. EERST: bal afvuren met spatie als hij nog niet gelanceerd is
+  if (e.code === "Space" && !ballLaunched) {
+    ballLaunched   = true;
+    ballMoving     = true;
+    paddleFreeMove = true;
+
+    // geluid
+    if (typeof shootSound !== "undefined") {
+      shootSound.currentTime = 0;
+      shootSound.play();
+    }
+
+    // snelheid: default + level boost
+    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+    const lvl = LEVELS[lvlIndex];
+
+    const baseSpeed = DEFAULT_BALL_SPEED;
+    const boost =
+      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+        ? lvl.params.ballSpeedBoost
+        : 0;
+
+    const launchSpeed = baseSpeed + boost;
+
+    if (balls && balls[0]) {
+      balls[0].dx = 0;
+      balls[0].dy = -launchSpeed;
+    }
+
+    if (!timerRunning && typeof startTimer === "function") {
+      startTimer();
+    }
+
+    // heel belangrijk: hier returnen zodat de rest van de spatie-code (raket/reset) niet óók afgaat
+    return;
+  }
+
+  // 🔫 2. RAKET afvuren met spatie (alleen als er al een bal is)
   if (e.code === "Space" && rocketActive && rocketAmmo > 0 && !rocketFired) {
     rocketFired = true;
     rocketAmmo--;
@@ -2369,14 +2408,14 @@ function keyDownHandler(e) {
     }
   }
 
-  // 🎯 vlaggetjes-schot
+  // 🎯 3. vlaggetjes-schot
   if (flagsOnPaddle && e.code === "Space") {
     if (typeof shootFromFlags === "function") {
       shootFromFlags();
     }
   }
 
-  // 🧪 reset na game over met spatie
+  // 🧪 4. reset na game over met spatie
   if (!ballMoving && e.code === "Space") {
     if (lives <= 0) {
       lives = 3;
@@ -2399,11 +2438,9 @@ function keyDownHandler(e) {
       flyingCoins   = [];
     }
 
-    // 👇 dit mag hier blijven, dit sluit alleen het if-blok
     ballMoving = true;
   }
-} // 👈 hiermee is keyDownHandler echt klaar
-
+}
 
 /* ==============================
    📱 TOUCH CONTROLS (mobiel/tablet)
