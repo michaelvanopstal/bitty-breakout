@@ -2909,13 +2909,14 @@ function triggerBittyBombIntro(n) {
 
 
 
-
 function startBombRain(n = 13) {
   // — stap 4: speel 'bittyActivation' alleen als er géén intro net speelde
   if (!_bittyActivationLock) {
     SFX.play('bittyActivation');
   }
   _bittyActivationLock = false;
+
+  const es = (typeof getEffectScale === "function") ? getEffectScale() : 1;
 
   // verzamel alle actieve bricks
   const pool = [];
@@ -2936,27 +2937,41 @@ function startBombRain(n = 13) {
   const count = Math.min(n, pool.length);
   for (let i = 0; i < count; i++) {
     const t = pool[i];
-    const delay   = 150 + Math.random() * 1400;   // door elkaar
-    const startX  = t.x + brickWidth/2 + (Math.random()*80 - 40);
-    const startY  = -40 - Math.random() * 200;    // verschillende hoogtes
-    const targetY = t.y - 14;                      // nét voor de steen
-    const speed   = 3.2 + Math.random() * 1.8;
+
+    // timings mogen vaste ms blijven
+    const delay   = 150 + Math.random() * 1400;
+
+    // x iets random links/rechts van brick, maar nu geschaald
+    const startX  = t.x + brickWidth / 2 + (Math.random() * (80 * es) - (40 * es));
+
+    // vanaf boven scherm, maar mee met schaal
+    const startY  = -40 * es - Math.random() * (200 * es);
+
+    // nét voor de steen landen
+    const targetY = t.y - 14 * es;
+
+    // valsnelheid ook mee
+    const speed   = (3.2 + Math.random() * 1.8) * es;
 
     bombRain.push({
-      x: startX, y: startY, vx: 0, vy: speed,
-      targetY, col: t.c, row: t.r,
+      x: startX,
+      y: startY,
+      vx: 0,
+      vy: speed,
+      targetY,
+      col: t.c,
+      row: t.r,
       startAt: performance.now() + delay,
       exploded: false
     });
   }
 
   // leuk: voice of sfx kan hier
-  try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
+  try {
+    tntBeepSound.currentTime = 0;
+    tntBeepSound.play();
+  } catch {}
 }
-
-
-
-
 
 function drawPointPopups() {
   pointPopups.forEach((p, index) => {
