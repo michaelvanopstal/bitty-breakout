@@ -151,10 +151,6 @@ function getPaddleBounds() {
 const sc = (typeof getScale === "function") ? getScale() : 1;
 rescaleBombSystems?.(sc);
 rescaleStarsSystems?.(sc);
-
-const sc = (typeof getScale === "function") ? getScale() : 1;
-rescaleBombSystems?.(sc);
-rescaleStarsSystems?.(sc);
 rescaleHeartCelebration?.(sc); // 👈 deze erbij
 
 
