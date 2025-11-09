@@ -6072,17 +6072,20 @@ function pauseTimer() {
 }
 
 function spawnStoneDebris(x, y) {
+  const es = (typeof getEffectScale === "function") ? getEffectScale() : 1;
+
   for (let i = 0; i < 8; i++) {
     stoneDebris.push({
       x: x,
       y: y,
-      dx: (Math.random() - 0.5) * 6,
-      dy: (Math.random() - 0.5) * 6,
-      radius: Math.random() * 2 + 1,
+      dx: (Math.random() - 0.5) * 6 * es,   // horizontale snelheid mee schalen
+      dy: (Math.random() - 0.5) * 6 * es,   // verticale snelheid mee schalen
+      radius: (Math.random() * 2 + 1) * es, // grootte van steentjes mee schalen
       alpha: 1
     });
   }
 }
+
 
 
 function triggerPaddleExplosion() {
