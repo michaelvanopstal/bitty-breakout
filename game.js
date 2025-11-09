@@ -3138,11 +3138,13 @@ function drawHeartPopup() {
 function drawPaddle() {
   if (paddleExploding) return;
 
-  // basis
+  // basis - paddleCanvas is al op juiste breedte/hoogte getekend
   ctx.drawImage(paddleCanvas, paddleX, paddleY);
 
   // 🛡️ Ronde, pulserende gouden energie-aura
   if (invincibleActive) {
+    const s = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+
     const cx = paddleX + paddleWidth / 2;
     const cy = paddleY + paddleHeight / 2;
 
@@ -3165,22 +3167,22 @@ function drawPaddle() {
     ctx.fill();
 
     // 2) buitenrand met lichte flikkering
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 2.5 * s;
     ctx.strokeStyle = "rgba(255,215,0,0.9)";
     ctx.shadowColor = "rgba(255,215,0,0.7)";
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = 18 * s;
     ctx.beginPath();
     ctx.arc(cx, cy, rPulse * (0.92 + 0.02 * Math.sin(t * 10)), 0, Math.PI * 2);
     ctx.stroke();
 
-    // 3) twee roterende energie-bogen (geeft “plasma” gevoel)
+    // 3) twee roterende energie-bogen
     const arcR = rPulse * 0.92;
     const arcLen = Math.PI * 0.6; // 108°
-    ctx.shadowBlur = 22;
+    ctx.shadowBlur = 22 * s;
     for (let k = 0; k < 2; k++) {
       const phase = t * (k ? 1.2 : -1.3) + k * Math.PI * 0.5;
       ctx.beginPath();
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3 * s;
       ctx.globalAlpha = 0.75;
       ctx.strokeStyle = "rgba(255,223,0,0.95)";
       ctx.arc(cx, cy, arcR, phase, phase + arcLen);
@@ -3196,7 +3198,7 @@ function drawPaddle() {
       const sx = cx + Math.cos(ang) * r;
       const sy = cy + Math.sin(ang) * r;
       ctx.beginPath();
-      ctx.arc(sx, sy, 1.8, 0, Math.PI * 2);
+      ctx.arc(sx, sy, 1.8 * s, 0, Math.PI * 2);
       ctx.fillStyle = "rgba(255,240,150,0.95)";
       ctx.fill();
     }
