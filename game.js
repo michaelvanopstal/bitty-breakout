@@ -6116,41 +6116,40 @@ function triggerPaddleExplosion() {
     stopMagnet();
 
     setTimeout(() => {
-      paddleExploding = false;
-      paddleExplosionParticles = [];
+  paddleExploding = false;
+  paddleExplosionParticles = [];
 
-      // 👉 actuele level-snelheid bepalen
-      const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
-      const lvl = LEVELS[lvlIndex];
+  // 👉 actuele level-snelheid bepalen
+  const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+  const lvl = LEVELS[lvlIndex];
 
-      // eerst kijken of je nog het oude 'ballSpeed' gebruikt…
-      let launchSpeed =
-        (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
-          ? lvl.params.ballSpeed
-          : DEFAULT_BALL_SPEED;
+  const boost =
+    (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+      ? lvl.params.ballSpeedBoost
+      : 0;
 
-      // …en als je al op ballSpeedBoost zit, telt die erbovenop
-      if (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number") {
-        launchSpeed = DEFAULT_BALL_SPEED + lvl.params.ballSpeedBoost;
-      }
+  // ✅ altijd via de geschaalde snelheid
+  const launchSpeed = (typeof getScaledBallSpeed === "function")
+    ? getScaledBallSpeed(boost)
+    : (DEFAULT_BALL_SPEED + boost);
 
-      // bal resetten met level-snelheid
-      balls = [{
-        x: paddleX + paddleWidth / 2 - ballRadius,
-        y: paddleY - ballRadius * 2,
-        dx: 0,
-        dy: -launchSpeed,
-        radius: ballRadius,
-        isMain: true
-      }];
+  // ✅ bal resetten (center-based!)
+  balls = [{
+    x: paddleX + paddleWidth / 2,
+    y: paddleY - ballRadius,
+    dx: 0,
+    dy: -launchSpeed,
+    radius: ballRadius,
+    isMain: true
+  }];
 
-      ballLaunched = false;
-      ballMoving  = false;
-      paddleFreeMove = false; // ⛓️ paddle weer vergrendeld
+  ballLaunched   = false;
+  ballMoving     = false;
+  paddleFreeMove = false; // ⛓️ paddle weer vergrendeld
 
-      resetTriggered = false;
-      resetPaddle();
-    }, 1000);
+  resetTriggered = false;
+  resetPaddle();
+}, 1000);
 
   } else {
     // 🔴 Laatste leven → GAME OVER
