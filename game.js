@@ -3363,70 +3363,57 @@ function resetAllBonuses(opts = {}) {
 
   // (belangrijk:) tokens/collectables laten we staan
 }
+
 function resetBall() {
-  // 🎯 huidige level ophalen
   const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
   const lvl = LEVELS[lvlIndex];
 
-  // 🌡️ basis + level-boost
-  const baseSpeed = DEFAULT_BALL_SPEED;
   const boost =
     (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
       ? lvl.params.ballSpeedBoost
       : 0;
-  const speed = baseSpeed + boost;
 
-  // 🏐 bal opnieuw op de paddle parkeren (CENTER-BASED!)
+  const speed = getScaledBallSpeed(boost);   // 👈 hier
+
   balls = [{
-    x: paddleX + paddleWidth / 2,   // midden van paddle
-    y: paddleY - ballRadius,        // net boven de paddle
+    x: paddleX + paddleWidth / 2,
+    y: paddleY - ballRadius,
     dx: 0,
-    dy: -speed,                     // 🔥 startsnelheid van dit level
+    dy: -speed,                              // 👈 hier
     radius: ballRadius,
     isMain: true
   }];
 
-  // standaard reset-stand
   ballLaunched = false;
   ballMoving = false;
-
-  // 🔒 Paddle weer vergrendeld tot hernieuwde afschot
   paddleFreeMove = false;
 
-  // 🧱 Zorg dat bij level 1 blokken direct zichtbaar zijn
   if (level === 1) {
     levelTransitionActive = false;
     transitionOffsetY = 0;
   }
 
-  // 🛡️ Tijdens STAR-bonus: bal meteen weer de lucht in (spel loopt door)
+  // autolance tijdens invincible
   if (invincibleActive) {
     setTimeout(() => {
-      // alleen autolancen als de bonus nog actief is en de bal nog geparkeerd staat
       if (!invincibleActive || balls.length === 0) return;
-
       const b = balls[0];
-
-      // zekerheid: exact boven paddle leggen (CENTER-BASED)
       b.x = paddleX + paddleWidth / 2;
       b.y = paddleY - ballRadius;
 
-      // klein horizontaal zetje voor natuurlijk gevoel
       if (Math.abs(b.dx) < 0.5) {
         b.dx = (Math.random() < 0.5 ? -1 : 1) * 2;
       }
 
-      // 🚀 opnieuw snelheid op dezelfde manier berekenen
       const lvlIndex2 = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
       const lvl2 = LEVELS[lvlIndex2];
-      const base2 = DEFAULT_BALL_SPEED;
       const boost2 =
         (lvl2 && lvl2.params && typeof lvl2.params.ballSpeedBoost === "number")
           ? lvl2.params.ballSpeedBoost
           : 0;
-      const launchSpeed = base2 + boost2;
 
-      b.dy = -launchSpeed;   // altijd met volle level-snelheid omhoog
+      const launchSpeed = getScaledBallSpeed(boost2);   // 👈 hier ook
+      b.dy = -launchSpeed;
 
       ballLaunched   = true;
       ballMoving     = true;
@@ -3434,8 +3421,6 @@ function resetBall() {
     }, 200);
   }
 }
-
-
 
 
 function resetPaddle(skipBallReset = false, skipCentering = false) {
