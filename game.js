@@ -1966,6 +1966,21 @@ const dropManager = {
 };
 
 
+// ✅ schaalbare helper voor alle gele popups
+function pushPointPopup(x, y, text) {
+  // probeer jouw bestaande schaal te pakken, anders 1
+  const s = typeof getScale === "function" ? getScale() : 1;
+  pointPopups.push({
+    x,
+    y,
+    value: text,
+    alpha: 1,
+    fontSize: 18 * s,
+    vy: 0.5 * s
+  });
+}
+
+
 // === DROPS SYSTEM: item type registry ===
 // Elk type definieert hoe het eruit ziet + wat er gebeurt bij catch/miss
 const DROP_TYPES = {
@@ -1980,7 +1995,8 @@ const DROP_TYPES = {
       updateScoreDisplay?.();
       coinSound.currentTime = 0;
       coinSound.play();
-      pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
+      // was: pointPopups.push(...)
+      pushPointPopup(drop.x, drop.y, "+" + earned);
     },
     onMiss(drop) {
       // niks; gewoon weg
@@ -2043,7 +2059,8 @@ const DROP_TYPES = {
       updateScoreDisplay?.();
       pxpBagSound.currentTime = 0;
       pxpBagSound.play();
-      pointPopups.push({ x: drop.x, y: drop.y, value: "+" + earned, alpha: 1 });
+      // was: pointPopups.push(...)
+      pushPointPopup(drop.x, drop.y, "+" + earned);
     },
     onMiss(drop) {},
   },
@@ -2058,28 +2075,23 @@ const DROP_TYPES = {
     onCatch(drop) {
       SFX.play("bombPickup");
       bombsCollected++;
-      pointPopups.push({
-        x: drop.x,
-        y: drop.y,
-        value: `Bomb ${bombsCollected}/10`,
-        alpha: 1,
-      });
+
+      // popup voor teller
+      pushPointPopup(drop.x, drop.y, `Bomb ${bombsCollected}/10`);
 
       if (bombsCollected >= 10) {
         bombsCollected = 0;
         triggerBittyBombIntro(20);
       }
 
+      // leven aftrekken
       if (lives > 1) {
         lives--;
         updateLivesDisplay?.();
-        pointPopups.push({
-          x: drop.x,
-          y: drop.y,
-          value: "−1 life",
-          alpha: 1,
-        });
+        // extra popup voor -1 life
+        pushPointPopup(drop.x, drop.y, "−1 life");
       } else {
+        // paddle ontploft
         triggerPaddleExplosion?.();
       }
 
@@ -2119,12 +2131,9 @@ const DROP_TYPES = {
         wrongSfx.play();
       } catch {}
       badCrossesCaught++;
-      pointPopups.push({
-        x: drop.x,
-        y: drop.y,
-        value: `❌ ${badCrossesCaught}/3`,
-        alpha: 1,
-      });
+
+      // popup voor teller
+      pushPointPopup(drop.x, drop.y, `❌ ${badCrossesCaught}/3`);
 
       // ✅ meteen de display laten meegaan
       if (typeof updateBonusPowerPanel === "function") {
@@ -2136,12 +2145,12 @@ const DROP_TYPES = {
         heartsCollected = 0;
         starsCollected = 0;
         bombsCollected = 0;
-        pointPopups.push({
-          x: canvas.width / 2,
-          y: 90,
-          value: "BONUS VAL SYSTEEM GERESSET!",
-          alpha: 1,
-        });
+
+        // centrale melding — ook via helper
+        if (typeof canvas !== "undefined") {
+          pushPointPopup(canvas.width / 2, 90, "BONUS VAL SYSTEEM GERESSET!");
+        }
+
         const hcEl = document.getElementById("heartCount");
         if (hcEl) hcEl.textContent = heartsCollected;
 
@@ -2221,12 +2230,9 @@ const DROP_TYPES = {
     onCatch(drop) {
       SFX.play("bombPickup");
       bombsCollected++;
-      pointPopups.push({
-        x: drop.x,
-        y: drop.y,
-        value: `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`,
-        alpha: 1,
-      });
+
+      // was: pointPopups.push(...)
+      pushPointPopup(drop.x, drop.y, `Bomb ${bombsCollected}/${BOMB_TOKEN_TARGET}`);
 
       // ✅ update HTML-display
       updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
@@ -2265,12 +2271,9 @@ const DROP_TYPES = {
         }
       } catch (e) {}
       starsCollected++;
-      pointPopups.push({
-        x: drop.x,
-        y: drop.y,
-        value: "⭐+1",
-        alpha: 1,
-      });
+
+      // was: pointPopups.push(...)
+      pushPointPopup(drop.x, drop.y, "⭐+1");
 
       // ✅ update HTML-display
       updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
@@ -2288,7 +2291,6 @@ const DROP_TYPES = {
     onMiss(drop) {},
   },
 }; // ✅ sluit het hele const DROP_TYPES object correct af
-
 
 // maakt balsnelheid afhankelijk van schermgrootte
 function getScaledBallSpeed(levelBoost = 0) {
@@ -2966,29 +2968,38 @@ function startBombRain(n = 13) {
   try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
 }
 
-
-
-
-
 function drawPointPopups() {
-  pointPopups.forEach((p, index) => {
+  const s = getScale(); // haal actuele schaalfactor op
+
+  for (let i = pointPopups.length - 1; i >= 0; i--) {
+    const p = pointPopups[i];
+
+    // Basisinstellingen
     ctx.globalAlpha = p.alpha;
-    ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`; // ✅ goudkleurig
-    ctx.font = "bold 18px Arial";
+    ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`; // goudkleurig
+
+    // Schaalbaar lettertype
+    const size = p.fontSize || (18 * s);
+    ctx.font = `bold ${size}px Arial`;
     ctx.textAlign = "center";
+
+    // Tekst tekenen
     ctx.fillText(p.value, p.x, p.y);
 
-    // Animeren
-    p.y -= 0.5;
+    // Animatie met schaalbare snelheid
+    p.y -= p.vy || (0.5 * s);
     p.alpha -= 0.01;
 
+    // Verwijderen zodra onzichtbaar
     if (p.alpha <= 0) {
-      pointPopups.splice(index, 1);
+      pointPopups.splice(i, 1);
     }
-  });
+  }
 
-  ctx.globalAlpha = 1; // Transparantie resetten
+  // Transparantie herstellen
+  ctx.globalAlpha = 1;
 }
+
 
 function resetBricks() {
   // 1) schaal updaten op basis van huidige canvas
