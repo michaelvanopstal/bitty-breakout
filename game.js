@@ -5410,32 +5410,46 @@ if (downPressed) {
   updateAndDrawDrops();
   updateAndDrawBombRain();
 
-  if (rocketActive && !rocketFired && rocketAmmo > 0) {
-    rocketX = paddleX + paddleWidth / 2 - 12;
-    rocketY = paddleY - 48; // ✅ boven de paddle, waar die zich ook bevindt
-    ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
-  }
+ if (rocketActive && !rocketFired && rocketAmmo > 0) {
+  const s = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
 
-  if (rocketFired) {
-    rocketY -= rocketSpeed;
+  const rocketW = 30 * s;
+  const rocketH = 65 * s;
 
-    smokeParticles.push({
-      x: rocketX + 15,
-      y: rocketY + 65,
-      radius: Math.random() * 6 + 4,
-      alpha: 1
-    });
+  // gecentreerd op paddle
+  rocketX = paddleX + paddleWidth / 2 - rocketW / 2;
+  rocketY = paddleY - rocketH;  // boven de paddle
 
-    if (rocketY < -48) {
-      rocketFired = false;
-      if (rocketAmmo <= 0) {
-        rocketActive = false;
-      }
-    } else {
-      ctx.drawImage(rocketImg, rocketX, rocketY, 30, 65);
-      checkRocketCollision();
+  ctx.drawImage(rocketImg, rocketX, rocketY, rocketW, rocketH);
+}
+
+if (rocketFired) {
+  const s = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+
+  // raket omhoog
+  rocketY -= rocketSpeed * s;   // snelheid ook mee schalen als je wilt
+
+  // rook onder raket
+  smokeParticles.push({
+    x: rocketX + (15 * s),          // midden onder raket
+    y: rocketY + (65 * s),
+    radius: Math.random() * (6 * s) + (4 * s),
+    alpha: 1
+  });
+
+  // uit beeld?
+  if (rocketY < -65 * s) {
+    rocketFired = false;
+    if (rocketAmmo <= 0) {
+      rocketActive = false;
     }
-  } // ✅ DIT is de juiste afsluitende accolade voor rocketFired-block
+  } else {
+    const rocketW = 30 * s;
+    const rocketH = 65 * s;
+    ctx.drawImage(rocketImg, rocketX, rocketY, rocketW, rocketH);
+    checkRocketCollision();
+  }
+} // ✅ einde rocketFired-blok
 
   // 🔁 Start level 2 zodra alle blokjes weg zijn
   if (bricks.every(col => col.every(b => b.status === 0)) && !levelTransitionActive) {
