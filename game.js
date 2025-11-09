@@ -1047,10 +1047,6 @@ function stopMagnet() {
   magnetActive = false;
 }
 
-// Zet dit bovenin bij je helpers
-function getBallCenter(ball) {
-  return { cx: ball.x + ball.radius, cy: ball.y + ball.radius };
-}
 function activateInvincibleShield(ms = 30000) {
   invincibleActive = true;
   invincibleEndTime = performance.now() + ms;
