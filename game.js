@@ -2931,6 +2931,9 @@ function startBombRain(n = 13) {
   }
   _bittyActivationLock = false;
 
+  // haal schaal
+  const s = (typeof getScale === 'function') ? getScale() : (typeof currentScale !== 'undefined' ? currentScale : 1);
+
   // verzamel alle actieve bricks
   const pool = [];
   for (let c = 0; c < brickColumnCount; c++) {
@@ -2950,15 +2953,34 @@ function startBombRain(n = 13) {
   const count = Math.min(n, pool.length);
   for (let i = 0; i < count; i++) {
     const t = pool[i];
-    const delay   = 150 + Math.random() * 1400;   // door elkaar
-    const startX  = t.x + brickWidth/2 + (Math.random()*80 - 40);
-    const startY  = -40 - Math.random() * 200;    // verschillende hoogtes
-    const targetY = t.y - 14;                      // nét voor de steen
-    const speed   = 3.2 + Math.random() * 1.8;
+
+    // delays in ms (houdt tempo hetzelfde, independent van schaal)
+    const delay = 150 + Math.random() * 1400;
+
+    // startX: centreer op brick + random offset, offset schaalt
+    const offsetX = (Math.random() * 80 - 40) * s;
+    const startX  = t.x + (brickWidth / 2) + offsetX;
+
+    // startY: boven het scherm, schaal toegepast
+    const startY  = (-40 - Math.random() * 200) * s;
+
+    // targetY: nét voor de steen, menjaga dezelfde relatieve afstand
+    const targetY = t.y - (14 * s);
+
+    // speed: base speed * schaal (zodat het tempo/afstand consistent voelt)
+    const speed   = (3.2 + Math.random() * 1.8) * s;
 
     bombRain.push({
-      x: startX, y: startY, vx: 0, vy: speed,
-      targetY, col: t.c, row: t.r,
+      x: startX,
+      y: startY,
+      vx: 0,
+      vy: speed,
+      _baseVy: speed,        // bewaren voor later rescale
+      _baseStartY: startY,
+      _baseOffsetX: offsetX,
+      targetY,
+      col: t.c,
+      row: t.r,
       startAt: performance.now() + delay,
       exploded: false
     });
@@ -2967,39 +2989,6 @@ function startBombRain(n = 13) {
   // leuk: voice of sfx kan hier
   try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
 }
-
-function drawPointPopups() {
-  const s = getScale(); // haal actuele schaalfactor op
-
-  for (let i = pointPopups.length - 1; i >= 0; i--) {
-    const p = pointPopups[i];
-
-    // Basisinstellingen
-    ctx.globalAlpha = p.alpha;
-    ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`; // goudkleurig
-
-    // Schaalbaar lettertype
-    const size = p.fontSize || (18 * s);
-    ctx.font = `bold ${size}px Arial`;
-    ctx.textAlign = "center";
-
-    // Tekst tekenen
-    ctx.fillText(p.value, p.x, p.y);
-
-    // Animatie met schaalbare snelheid
-    p.y -= p.vy || (0.5 * s);
-    p.alpha -= 0.01;
-
-    // Verwijderen zodra onzichtbaar
-    if (p.alpha <= 0) {
-      pointPopups.splice(i, 1);
-    }
-  }
-
-  // Transparantie herstellen
-  ctx.globalAlpha = 1;
-}
-
 
 function resetBricks() {
   // 1) schaal updaten op basis van huidige canvas
