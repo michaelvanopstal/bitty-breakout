@@ -5986,9 +5986,11 @@ window.addEventListener('resize', () => {
     applyScaleToBricks(currentScale);
   }
 
-  // 5️⃣ Alle vallende bonusobjecten en effecten opnieuw afstemmen
-  // (machinegun, drops, hearts, bombs, stars, bags, etc.)
-  // Deze gebruiken currentScale intern, dus hoeven alleen gereset.
+  // 5️⃣ Eventuele actieve visuele effecten opnieuw schalen
+if (typeof rescaleActiveVFX === 'function') {
+  rescaleActiveVFX(currentScale);
+}
+
   if (typeof resetBricks === 'function') resetBricks();
   if (typeof resetBall === 'function') resetBall();
 
