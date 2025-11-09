@@ -3758,22 +3758,49 @@ function saveHighscore() {
 }
 
 
+// === Coin afbeelding ===
 const coinImg = new Image();
 coinImg.src = "pxp coin perfect_clipped_rev_1.png";
+
+// === Array voor actieve coins ===
 let coins = [];
 
+// === Coin spawnen (uit brick bijv.) ===
 function spawnCoin(x, y) {
-  coins.push({ x: x + brickWidth / 2 - 12, y: y, radius: 12, active: true });
-}
-
-function drawCoins() {
-  coins.forEach(coin => {
-    if (coin.active) {
-      ctx.drawImage(coinImg, coin.x, coin.y, 24, 24);
-      coin.y += 2;
-    }
+  const s = 24 * (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1);
+  const half = s / 2;
+  coins.push({
+    x: x + brickWidth / 2 - half,
+    y: y,
+    size: s,
+    dy: 2 * (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1),
+    active: true,
   });
 }
+
+// === Coins tekenen ===
+function drawCoins() {
+  const scale = (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1);
+  for (let i = 0; i < coins.length; i++) {
+    const coin = coins[i];
+    if (!coin.active) continue;
+
+    // Tekenen op geschaalde grootte
+    ctx.drawImage(coinImg, coin.x, coin.y, coin.size, coin.size);
+
+    // Val met geschaalde snelheid
+    coin.y += coin.dy;
+
+    // Onderkant van canvas -> inactief maken
+    if (coin.y > canvas.height + coin.size) {
+      coin.active = false;
+    }
+  }
+
+  // Ruim inactieve coins op
+  coins = coins.filter(c => c.active);
+}
+
 function drawFallingHearts() {
   // we lopen achteruit zodat we veilig kunnen splicen
   for (let i = fallingHearts.length - 1; i >= 0; i--) {
