@@ -5129,29 +5129,30 @@ function updateAndDrawBombVisuals(ctx) {
 
 
 function spawnExtraBall(originBall) {
-  // 🔹 Bepaal de huidige basissnelheid
   const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
   const lvl = LEVELS[lvlIndex];
-  const baseSpeed =
+  const boost =
     (lvl && lvl.params && typeof lvl.params.ballSpeed === "number")
       ? lvl.params.ballSpeed
-      : DEFAULT_BALL_SPEED;
+      : 0;
 
-  // 🔸 Geef de bestaande bal een kleine afwijking naar links
+  const speed = getScaledBallSpeed(boost);   // 👈
+
+  // bestaande bal iets links
   originBall.dx = -1 * (Math.random() * 1.5 + 0.5);
-  originBall.dy = -baseSpeed;
+  originBall.dy = -speed;                    // 👈
 
-  // 🔸 Voeg een tweede bal toe met lichte afwijking naar rechts
+  // nieuwe bal iets rechts
   balls.push({
-    // CENTER-BASED: gebruik exact dezelfde x/y (het middelpunt)
     x: originBall.x,
     y: originBall.y,
     dx: Math.random() * 1.5 + 0.5,
-    dy: -baseSpeed,
+    dy: -speed,                              // 👈
     radius: ballRadius,
     isMain: false
   });
 }
+
 
 
 
