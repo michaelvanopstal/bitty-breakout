@@ -5067,7 +5067,7 @@ function updateAndDrawBombVisuals(ctx) {
   // FLASH (0.5–0.8s)
   if (t >= BOMB_VFX.FLASH_START && t <= BOMB_VFX.FLASH_END) {
     const k = (t - BOMB_VFX.FLASH_START) / (BOMB_VFX.FLASH_END - BOMB_VFX.FLASH_START);
-    const r = (0.2 + 0.8 * k) * Math.hypot(W, H) * 0.55;  // dit was al relatief aan scherm
+    const r = (0.2 + 0.8 * k) * Math.hypot(W, H) * 0.55;
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
     g.addColorStop(0.00, "rgba(255,255,255,0.95)");
     g.addColorStop(0.35, "rgba(255,245,200,0.45)");
@@ -5081,14 +5081,14 @@ function updateAndDrawBombVisuals(ctx) {
 
   // SHOCKWAVE-RING
   if (bombVisuals.ringAlpha > 0) {
-    bombVisuals.ringR += (10 * s) + bombVisuals.ringR * 0.015; // 👈 groeistep schalen
+    bombVisuals.ringR += (10 * s) + bombVisuals.ringR * 0.015;
     bombVisuals.ringAlpha *= 0.94;
     ctx.save(); ctx.globalCompositeOperation = "lighter";
     ctx.strokeStyle = `rgba(255,255,255,${bombVisuals.ringAlpha})`;
-    ctx.lineWidth = 6 * s; // 👈 geschaald
+    ctx.lineWidth = 6 * s;
     ctx.beginPath(); ctx.arc(cx, cy, bombVisuals.ringR, 0, Math.PI * 2); ctx.stroke();
     ctx.strokeStyle = `rgba(255,200,120,${bombVisuals.ringAlpha * 0.6})`;
-    ctx.lineWidth = 2.5 * s; // 👈 geschaald
+    ctx.lineWidth = 2.5 * s;
     ctx.beginPath(); ctx.arc(cx, cy, bombVisuals.ringR, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
   }
@@ -5097,12 +5097,12 @@ function updateAndDrawBombVisuals(ctx) {
   if (t >= BOMB_VFX.FLAME_START && t <= BOMB_VFX.FLAME_END) {
     for (let i = 0; i < 24; i++) {
       const ang = Math.random() * Math.PI * 2;
-      const spd = randRange(2.0, 5.0) * s; // 👈 snelheid mee schalen
+      const spd = randRange(2.0, 5.0) * s;
       bombVisuals.flames.push({
         x: cx, y: cy,
         vx: Math.cos(ang) * spd * randRange(0.7, 1.3),
         vy: Math.sin(ang) * spd * randRange(0.7, 1.3),
-        r: randRange(2.0, 4.0) * s,              // 👈 grootte mee
+        r: randRange(2.0, 4.0) * s,
         life: randRange(500, 900),
         born: now
       });
@@ -5112,7 +5112,7 @@ function updateAndDrawBombVisuals(ctx) {
     const p = bombVisuals.flames[i];
     const age = now - p.born, k = Math.max(0, 1 - age / p.life);
     p.x += p.vx; p.y += p.vy;
-    p.vx *= 0.992; p.vy = p.vy * 0.992 + 0.025 * s;  // lichte zwaartekracht × s
+    p.vx *= 0.992; p.vy = p.vy * 0.992 + 0.025 * s;
     const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
     grad.addColorStop(0.00, `rgba(255,235,170,${0.90 * k})`);
     grad.addColorStop(0.35, `rgba(255,160, 60,${0.60 * k})`);
@@ -5127,7 +5127,7 @@ function updateAndDrawBombVisuals(ctx) {
   if (t >= 750 && t <= 1200) {
     for (let i = 0; i < 16; i++) {
       const ang = Math.random() * Math.PI * 2;
-      const spd = randRange(4.0, 8.0) * s; // 👈
+      const spd = randRange(4.0, 8.0) * s;
       bombVisuals.sparks.push({
         x: cx, y: cy,
         vx: Math.cos(ang) * spd,
@@ -5144,7 +5144,7 @@ function updateAndDrawBombVisuals(ctx) {
     sp.vx *= 0.985; sp.vy = sp.vy * 0.985 + 0.015 * s;
     ctx.save(); ctx.globalCompositeOperation = "lighter";
     ctx.strokeStyle = `rgba(255,255,180,${0.9 * k})`;
-    ctx.lineWidth = 2 * s; // 👈
+    ctx.lineWidth = 2 * s;
     ctx.beginPath();
     ctx.moveTo(sp.x, sp.y);
     ctx.lineTo(sp.x - sp.vx * 1.8, sp.y - sp.vy * 1.8);
@@ -5182,7 +5182,27 @@ function updateAndDrawBombVisuals(ctx) {
     if (m.alpha < 0.03) bombVisuals.smoke.splice(i, 1);
   }
 
-  // BOLTS laten we zoals ze zijn, want die gebruiken al schermcoords + je drawBolt() heeft zelf scaling opties. :contentReference[oaicite:1]{index=1}
+  // ⚡ BOLTS (centrum → randen)
+  if (t >= BOMB_VFX.BOLT_START && t <= BOMB_VFX.BOLT_END) {
+    const count = 5 + Math.floor(Math.random() * 6);
+    for (let i = 0; i < count; i++) {
+      const edge = Math.floor(Math.random() * 4);
+      let tx, ty;
+      if (edge === 0) { tx = Math.random() * W;   ty = -20; }
+      else if (edge === 1) { tx = W + 20;         ty = Math.random() * H; }
+      else if (edge === 2) { tx = Math.random() * W; ty = H + 20; }
+      else { tx = -20; ty = Math.random() * H; }
+
+      drawBolt(ctx, cx, cy, tx, ty, {
+        depth: 4,
+        roughness: 16,
+        forks: 2,
+        forkChance: 0.5,
+        forkAngle: Math.PI / 5,
+        shrink: 0.65
+      });
+    }
+  }
 
   // Einde → start regen
   if (t >= BOMB_VFX.END) {
@@ -5192,6 +5212,7 @@ function updateAndDrawBombVisuals(ctx) {
     if (cb) cb();
   }
 }
+
 
 
 function spawnExtraBall(originBall) {
