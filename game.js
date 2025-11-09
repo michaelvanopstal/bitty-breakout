@@ -5684,13 +5684,17 @@ const bulletRadius = 4 * (typeof currentScale === "number" && currentScale > 0 ?
 for (let i = machineGunBullets.length - 1; i >= 0; i--) {
   const bullet = machineGunBullets[i];
 
-  // pos update (val terug op vy als dy niet bestaat)
-  const dy = (typeof bullet.dy === "number") ? bullet.dy : (bullet.vy ?? 0);
-  bullet.y += dy;
+  // schaalfactor ophalen
+  const s = (typeof getScale === "function") ? getScale() : 1;
 
-  // teken kogel
+  // snelheid updaten (val terug op vy als dy niet bestaat)
+  const dy = (typeof bullet.dy === "number") ? bullet.dy : (bullet.vy ?? 0);
+  bullet.y += dy * s; // 🔸 snelheid ook schaalbaar
+
+  // teken kogel (straal schaalt mee)
+  const radius = 4 * s; // 🔸 standaard 4, nu met schaal
   ctx.beginPath();
-  ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2);
+  ctx.arc(bullet.x, bullet.y, radius, 0, Math.PI * 2);
   ctx.fillStyle = "red";
   ctx.fill();
 
@@ -5702,11 +5706,19 @@ for (let i = machineGunBullets.length - 1; i >= 0; i--) {
   ) {
     if (invincibleActive) {
       // 🛡️ tijdens sterren-bonus: geen schade — kogel weg (of reflecteer)
-      // Reflect-optie (i.p.v. verwijderen):
-      // bullet.vy = -Math.abs(dy || 6); continue;
       machineGunBullets.splice(i, 1);
       continue;
     }
+
+    // ... jouw bestaande paddle-schade of hit-logica hieronder ...
+  }
+
+  // ⬇️ Verwijderen als kogel buiten beeld is
+  if (bullet.y > canvas.height + radius || bullet.y < -radius) {
+    machineGunBullets.splice(i, 1);
+  }
+}
+
 
     const hitX = bullet.x - paddleX;
     const radius = 6;
@@ -5839,14 +5851,21 @@ drawConfetti();
 renderStarPowerFX(); // 🌟 full-screen star celebration overlay
 
 if (showGameOver) {
+  const s = (typeof getScale === "function") ? getScale() : 1;
+
   ctx.save();
   ctx.globalAlpha = gameOverAlpha;
   ctx.fillStyle = "#B0B0B0";
-  ctx.font = "bold 48px Arial";
+
+  // schaalbaar font
+  const fontSize = 48 * s;
+  ctx.font = "bold " + fontSize + "px Arial";
   ctx.textAlign = "center";
+
   ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
   ctx.restore();
 
+  // fade-in / fade-out logica
   if (gameOverTimer < 60) {
     gameOverAlpha += 0.05; // fade-in
   } else if (gameOverTimer >= 60 && gameOverTimer < 120) {
