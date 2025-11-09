@@ -5986,20 +5986,25 @@ window.addEventListener('resize', () => {
     applyScaleToBricks(currentScale);
   }
 
-  // 5️⃣ Eventuele actieve visuele effecten opnieuw schalen
-if (typeof rescaleActiveVFX === 'function') {
-  rescaleActiveVFX(currentScale);
-}
+  // 5️⃣ Eventuele actieve visuele effecten opnieuw schalen (explosies, silver FX)
+  if (typeof rescaleActiveVFX === 'function') {
+    rescaleActiveVFX(currentScale);
+  }
 
-  if (typeof resetBricks === 'function') resetBricks();
-  if (typeof resetBall === 'function') resetBall();
+  // 6️⃣ Bricks/bal opnieuw opbouwen indien jouw game dat zo doet
+  if (typeof resetBricks === 'function') {
+    resetBricks();
+  }
+  if (typeof resetBall === 'function') {
+    resetBall();
+  }
 
-  // 6️⃣ Paddle opnieuw tekenen met nieuwe breedte
+  // 7️⃣ Paddle opnieuw tekenen met nieuwe breedte / damage-laag
   if (typeof redrawPaddleCanvas === 'function') {
     redrawPaddleCanvas();
   }
 
-  // 7️⃣ Optioneel: update UI-panel of bonusdisplay als dat bestaat
+  // 8️⃣ Bonus / UI panel ook updaten met huidige waardes
   if (typeof updateBonusPowerPanel === 'function') {
     updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
   }
