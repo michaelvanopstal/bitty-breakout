@@ -3063,6 +3063,9 @@ function resetBricks() {
   if (typeof rescaleBombSystems === "function") {
   rescaleBombSystems(currentScale);
 }
+  if (typeof rescaleStarsSystems === "function") {
+  rescaleStarsSystems(currentScale);
+}
 
   // ✨ extra: ook bal- en paddle-maten opnieuw zetten
   ballRadius   = 8  * currentScale;
