@@ -5772,11 +5772,124 @@ if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCoo
   resetPaddle(true, true); // ✅ geen ball reset, geen centrering
 }
 
-// 💀 Paddle “vernietigd” tijdens machinegun? → stop kogels, laat 30s-timer/cooldown doorlopen
-if ((machineGunActive || machineGunCooldownActive) && paddleDamageZones.length >= 10) {
-  machineGunBullets = []; // stop vuren
+if (machineGunActive && !machineGunCooldownActive) {
+  // 📍 Instelbare offset tussen paddle en gun
+  const verticalOffset = machineGunYOffset;
+  const minY = 0;
+  const maxY = paddleY - 10;
+
+  // Targetposities voor X en Y
+  const targetX = paddleX + paddleWidth / 2 - 30;
+  let targetY = Math.max(minY, Math.min(paddleY - verticalOffset, maxY));
+
+  const followSpeed =
+    machineGunDifficulty === 1 ? 1 :
+    machineGunDifficulty === 2 ? 2 : 3;
+
+  // 🟢 Volg paddle
+  if (machineGunGunX < targetX) machineGunGunX += followSpeed;
+  else if (machineGunGunX > targetX) machineGunGunX -= followSpeed;
+
+  if (machineGunGunY < targetY) machineGunGunY += followSpeed;
+  else if (machineGunGunY > targetY) machineGunGunY -= followSpeed;
+
+  // 🔫 Teken geweer (geschaald)
+  const s = (typeof getScale === "function") ? getScale() : 1;
+  const gunSize = 60 * s;
+  ctx.drawImage(machinegunGunImg, machineGunGunX, machineGunGunY, gunSize, gunSize);
+
+  // 🔥 Vuur kogels (geschaald)
+  const bulletSpeed = 6 * s;
+  const bulletRadius = 4 * s;
+
+  if (Date.now() - machineGunLastShot > machineGunBulletInterval && machineGunShotsFired < 30) {
+    machineGunBullets.push({
+      x: machineGunGunX + gunSize / 2,
+      y: machineGunGunY + gunSize,
+      dy: bulletSpeed
+    });
+    machineGunShotsFired++;
+    machineGunLastShot = Date.now();
+    shootSound.currentTime = 0;
+    shootSound.play();
+  }
+
+  // 💥 Verwerk kogels
+  for (let i = machineGunBullets.length - 1; i >= 0; i--) {
+    const bullet = machineGunBullets[i];
+
+    // positie updaten (geschaald)
+    const dy = (typeof bullet.dy === "number") ? bullet.dy : (bullet.vy ?? 0);
+    bullet.y += dy * s;
+
+    // teken kogel (straal schaalt mee)
+    const radius = bulletRadius;
+    ctx.beginPath();
+    ctx.arc(bullet.x, bullet.y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = "red";
+    ctx.fill();
+
+    // 🎯 Check botsing met paddle
+    if (
+      bullet.y >= paddleY &&
+      bullet.x >= paddleX &&
+      bullet.x <= paddleX + paddleWidth
+    ) {
+      if (invincibleActive) {
+        // 🛡️ Sterrenbonus actief → geen schade
+        machineGunBullets.splice(i, 1);
+        continue;
+      }
+
+      // Gat tekenen in paddle (geschaald)
+      const hitX = bullet.x - paddleX;
+      const damageRadius = 6 * s;
+
+      if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
+        paddleDamageZones.push(bullet.x);
+
+        paddleCtx.globalCompositeOperation = 'destination-out';
+        paddleCtx.beginPath();
+        paddleCtx.arc(hitX, paddleHeight / 2, damageRadius, 0, Math.PI * 2);
+        paddleCtx.fill();
+        paddleCtx.globalCompositeOperation = 'source-over';
+      }
+
+      machineGunBullets.splice(i, 1);
+      continue;
+    }
+
+    // buiten beeld → verwijderen
+    if (bullet.y > canvas.height + radius || bullet.y < -radius) {
+      machineGunBullets.splice(i, 1);
+    }
+  }
+
+  // ⏳ Start cooldown als alle kogels weg zijn
+  if (machineGunShotsFired >= 30 && machineGunBullets.length === 0 && !machineGunCooldownActive) {
+    machineGunCooldownActive = true;
+    machineGunStartTime = Date.now();
+  }
 }
 
+// 🕓 Cooldown afhandeling
+if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCooldownTime) {
+  machineGunCooldownActive = false;
+  machineGunActive = false;
+  paddleDamageZones = [];
+
+  // ✅ +500 punten en popup
+  score += 500;
+  if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
+  pushPointPopup(paddleX + paddleWidth / 2, canvas.height - 30, "+500");
+
+  resetPaddle(true, true); // geen ball reset, geen centrering
+}
+
+// 💀 Paddle “vernietigd” tijdens machinegun? → stop kogels
+if ((machineGunActive || machineGunCooldownActive) && paddleDamageZones.length >= 10) {
+  machineGunBullets = [];
+}
 
 
 // ✨ Levelbanner + fade-out
@@ -5784,7 +5897,8 @@ if (levelMessageVisible) {
   ctx.save();
   ctx.globalAlpha = levelMessageAlpha;
   ctx.fillStyle = "#00ffff";
-  ctx.font = "bold 36px Arial";
+  const s = (typeof getScale === "function") ? getScale() : 1;
+  ctx.font = `bold ${36 * s}px Arial`;
   ctx.textAlign = "center";
   ctx.fillText(
     levelMessageText || `Bitty Bitcoin Mascot — Level ${level}`,
@@ -5793,11 +5907,9 @@ if (levelMessageVisible) {
   );
   ctx.restore();
 
-  // ⏱️ 3s volledig zichtbaar, daarna ~2s fade-out
   levelMessageTimer++;
-
-  const visibleTime = 180; // 3s @ 60 FPS
-  const fadeTime    = 120; // ~2s fade
+  const visibleTime = 180;
+  const fadeTime = 120;
 
   if (levelMessageTimer <= visibleTime) {
     levelMessageAlpha = 1;
@@ -5811,7 +5923,7 @@ if (levelMessageVisible) {
   }
 }
 
-// 🎬 Overgangstimer & animatie
+// 🎬 Level overgang
 if (levelTransitionActive) {
   if (transitionOffsetY < 0) {
     transitionOffsetY += 2;
@@ -5821,13 +5933,11 @@ if (levelTransitionActive) {
   }
 }
 
-// 🛡️ Check of STAR-bonus afgelopen is
+// 🛡️ Check STAR-bonus
 if (invincibleActive && performance.now() >= invincibleEndTime) {
   invincibleActive = false;
-  stopStarAura(false);   // fade-out
+  stopStarAura(false);
 }
-
-// ✅ ZOLANG de ster actief is, moet het geluid gewoon aanstaan
 if (invincibleActive) {
   try {
     if (starAuraSound.paused) {
@@ -5836,40 +5946,30 @@ if (invincibleActive) {
     }
   } catch (e) {}
 }
-
-// 🔒 Fail-safe: als er om welke reden dan ook géén shield is, mag de aura-sound niet spelen
 if (!invincibleActive && !starAuraSound.paused) {
-  stopStarAura(false);   // fade-out (of true voor instant)
+  stopStarAura(false);
 }
 
-
-// 🎆 Fireworks (raketten + vonken)
+// 🎆 Fireworks + overlays
 drawFireworks();
-
-// 🎊 Confetti bovenop de scene tekenen
 drawConfetti();
-renderStarPowerFX(); // 🌟 full-screen star celebration overlay
+renderStarPowerFX();
 
+// 💀 GAME OVER (geschaald)
 if (showGameOver) {
   const s = (typeof getScale === "function") ? getScale() : 1;
-
   ctx.save();
   ctx.globalAlpha = gameOverAlpha;
   ctx.fillStyle = "#B0B0B0";
-
-  // schaalbaar font
-  const fontSize = 48 * s;
-  ctx.font = "bold " + fontSize + "px Arial";
+  ctx.font = `bold ${48 * s}px Arial`;
   ctx.textAlign = "center";
-
   ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
   ctx.restore();
 
-  // fade-in / fade-out logica
   if (gameOverTimer < 60) {
-    gameOverAlpha += 0.05; // fade-in
+    gameOverAlpha += 0.05;
   } else if (gameOverTimer >= 60 && gameOverTimer < 120) {
-    gameOverAlpha -= 0.05; // fade-out
+    gameOverAlpha -= 0.05;
   }
 
   gameOverTimer++;
@@ -5878,9 +5978,9 @@ if (showGameOver) {
     showGameOver = false;
   }
 
-  // 🛑 Extra safety: stop aura-geluid bij game over of hard reset
   try { fadeOutAndStop(starAuraSound, 200); } catch (e) {}
 }
+
 
 
 
