@@ -2497,7 +2497,6 @@ function keyDownHandler(e) {
     ballMoving = true;
   }
 }
-
 /* ==============================
    📱 TOUCH CONTROLS (mobiel/tablet)
    ============================== */
@@ -2538,19 +2537,20 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
   window.addEventListener("touchend", (e) => {
     if (e.target.tagName !== "CANVAS") return;
 
-    // 🔥 snelheid berekenen uit DEFAULT_BALL_SPEED + level boost
+    // 🔥 snelheid halen via schaal
     const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
     const lvl = LEVELS[lvlIndex];
-
-    const baseSpeed = DEFAULT_BALL_SPEED;
     const boost =
       (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
         ? lvl.params.ballSpeedBoost
         : 0;
 
-    const launchSpeed = baseSpeed + boost;
+    // 👇 dit is de enige echte wijziging
+    const launchSpeed = typeof getScaledBallSpeed === "function"
+      ? getScaledBallSpeed(boost)
+      : (DEFAULT_BALL_SPEED + boost);
 
-    if (!ballLaunched && !ballMoving) {
+    if (!ballLaunched && !ballMoving && balls.length > 0) {
       ballLaunched = true;
       ballMoving = true;
       paddleFreeMove = true;
@@ -2560,6 +2560,7 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
         shootSound.play();
       }
 
+      // center-launch, alleen snelheid anders
       balls[0].dx = 0;
       balls[0].dy = -launchSpeed;
 
