@@ -909,11 +909,11 @@ function drawHeartCelebration() {
   }
 }
 
-const rescaleHeartCelebration = (scale) => {
+function rescaleHeartCelebration(scale) {
   if (heartCelebration && heartCelebration.active) {
     heartCelebration.scale = scale;
   }
-};
+}
 
 
 function rescaleActiveVFX(scale) {
