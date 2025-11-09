@@ -1077,6 +1077,17 @@ function activateInvincibleShield(ms = 30000) {
   } catch (e) {}
 }
 
+function pushPointPopup(x, y, text) {
+  const s = getScale();           // gebruikt jouw bestaande helper
+  pointPopups.push({
+    x,
+    y,
+    value: text,
+    alpha: 1,
+    fontSize: 18 * s,             // font schaalt mee
+    vy: 0.5 * s                   // omhoog-snelheid schaalt mee
+  });
+}
 
 
 
