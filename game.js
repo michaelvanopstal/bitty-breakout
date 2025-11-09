@@ -5983,7 +5983,7 @@ heartLevelupImg.onload = onImageLoad;
 tenHitImg.onload = onImageLoad;
 
 
-// ✅ Dynamische schaal bij schermverandering
+// ✅ Dynamische schaal bij schermverandering (geconsolideerde, correcte versie)
 window.addEventListener('resize', () => {
   // 1️⃣ Canvas zelf aanpassen aan nieuwe schermgrootte
   if (typeof updateCanvasSize === 'function') {
@@ -5993,23 +5993,40 @@ window.addEventListener('resize', () => {
   // 2️⃣ Nieuwe schaal berekenen en opslaan
   currentScale = canvas.width / baseCanvasWidth;
 
-  // 3️⃣ Basisobjecten (bal & paddle) opnieuw schalen
+  // 3️⃣ Schaal opnieuw toepassen op alle hoofdelementen (helpers)
+  if (typeof applyScaleToBricks === 'function') applyScaleToBricks(currentScale);
+  if (typeof applyScaleToPaddle === 'function') applyScaleToPaddle(currentScale);
+  if (typeof applyScaleToBall === 'function') applyScaleToBall(currentScale);
+
+  // 4️⃣ Extra: effecten en bonus-intro’s (hearts, stars, bomb intro)
+  if (typeof rescaleActiveVFX === 'function') {
+    // geef voorkeur aan getScale() als aanwezig, anders currentScale
+    rescaleActiveVFX(typeof getScale === 'function' ? getScale() : currentScale);
+  }
+
+  // 5️⃣ Optioneel: FX-canvas (zoals sterren- en hartjes-intro’s)
+  if (typeof ensureFxCanvas === 'function') {
+    // ensureFxCanvas heeft intern zijn eigen resize; forceren voor zekerheid
+    ensureFxCanvas();
+  }
+
+  // 6️⃣ Basisobjecten (bal & paddle) opnieuw schalen
   ballRadius   = 8 * currentScale;
   paddleHeight = 20 * currentScale;
   paddleWidth  = 120 * currentScale;
   paddleY      = canvas.height - paddleHeight - (8 * currentScale);
 
-  // 4️⃣ Bricks opnieuw schalen
+  // 7️⃣ Bricks opnieuw schalen (nogmaals, in geval applyScaleToBricks nodig is voor state)
   if (typeof applyScaleToBricks === 'function') {
     applyScaleToBricks(currentScale);
   }
 
-  // 5️⃣ Eventuele actieve visuele effecten opnieuw schalen (explosies, silver FX)
+  // 8️⃣ Eventuele actieve visuele effecten opnieuw schalen (explosies, silver FX)
   if (typeof rescaleActiveVFX === 'function') {
-    rescaleActiveVFX(currentScale);
+    rescaleActiveVFX(typeof getScale === 'function' ? getScale() : currentScale);
   }
 
-  // 6️⃣ Bricks/bal opnieuw opbouwen indien jouw game dat zo doet
+  // 9️⃣ Bricks/bal opnieuw opbouwen indien jouw game dat zo doet
   if (typeof resetBricks === 'function') {
     resetBricks();
   }
@@ -6017,25 +6034,24 @@ window.addEventListener('resize', () => {
     resetBall();
   }
 
-  // 7️⃣ Paddle opnieuw tekenen met nieuwe breedte / damage-laag
+  // 10️⃣ Paddle opnieuw tekenen met nieuwe breedte / damage-laag
   if (typeof redrawPaddleCanvas === 'function') {
     redrawPaddleCanvas();
   }
 
-  // 8️⃣ Bonus / UI panel ook updaten met huidige waardes
+  // 11️⃣ Bonus / UI panel ook updaten met huidige waardes
   if (typeof updateBonusPowerPanel === 'function') {
-    updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
+    // zorg dat de variabelen (starsCollected, bombsCollected, badCrossesCaught) bestaan in scope
+    updateBonusPowerPanel(typeof starsCollected !== 'undefined' ? starsCollected : 0,
+                          typeof bombsCollected !== 'undefined' ? bombsCollected : 0,
+                          typeof badCrossesCaught !== 'undefined' ? badCrossesCaught : 0);
   }
-});
-
-
-
-
+}); // einde window.addEventListener('resize', ...)
+ 
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
   loadStonefallImages();
 }
-
 
 document.addEventListener("mousedown", function (e) {
   // 🛡️ Alleen reageren als er op het canvas geklikt wordt
