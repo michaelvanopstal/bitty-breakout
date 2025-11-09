@@ -662,52 +662,42 @@ function renderBittyBombIntro() {
 
   const now = performance.now();
   const W = canvas.width, H = canvas.height;
-  const cx = W/2, cy = H/2;
+  const cx = W / 2, cy = H / 2;
+  const s = getBombScale(); // 👈 schaal pakken
 
   if (bittyBomb.phase === "countdown") {
     const elapsed = now - bittyBomb.start;
     const secs = Math.floor(elapsed / 1000);
     const remain = Math.max(0, bittyBomb.countdownFrom - secs);
-    const blinkOn = (Math.floor(elapsed/500) % 2) === 0;
+    const blinkOn = (Math.floor(elapsed / 500) % 2) === 0;
 
-    // 👇 overlay weggehaald
-
-    // tekst + nummer in cirkel
     const title = "BITTY BOMB  ACTIVATED !";
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    ctx.font = "bold 40px Arial";
+    ctx.font = `bold ${40 * s}px Arial`;
     ctx.fillStyle = blinkOn ? "rgba(180,180,180,1)" : "rgba(120,120,120,1)";
     ctx.strokeStyle = "rgba(50,50,50,0.7)";
-    ctx.lineWidth = 3;
-    ctx.strokeText(title, cx, cy - 60);
-    ctx.fillText(title,  cx, cy - 60);
+    ctx.lineWidth = 3 * s;
+    ctx.strokeText(title, cx, cy - 60 * s);
+    ctx.fillText(title,  cx, cy - 60 * s);
 
+    // cirkel rond het cijfer
     ctx.beginPath();
-    ctx.arc(cx, cy + 10, 28, 0, Math.PI*2);
-    ctx.lineWidth = 6;
+    ctx.arc(cx, cy + 10 * s, 28 * s, 0, Math.PI * 2);
+    ctx.lineWidth = 6 * s;
     ctx.strokeStyle = blinkOn ? "rgba(200,200,200,0.9)" : "rgba(160,160,160,0.9)";
     ctx.stroke();
 
-    ctx.font = "bold 34px Arial";
+    ctx.font = `bold ${34 * s}px Arial`;
     ctx.fillStyle = "rgba(220,220,220,1)";
-    ctx.fillText(String(Math.max(1, remain)), cx, cy + 10);
+    ctx.fillText(String(Math.max(1, remain)), cx, cy + 10 * s);
 
-    ctx.font = "bold 22px Arial";
+    ctx.font = `bold ${22 * s}px Arial`;
     ctx.fillStyle = "rgba(170,170,170,1)";
-    ctx.fillText(`${title} ${Math.max(1, remain)}.`, cx, cy + 60);
+    ctx.fillText(`${title} ${Math.max(1, remain)}.`, cx, cy + 60 * s);
     ctx.restore();
-
-    if (remain <= 0) {
-      bittyBomb.phase = "done";
-      bittyBomb.active = false;
-      startBombVisuals(() => startBombRain(bittyBomb.queuedRain));
-      try {
-        (thunderSounds?.[Math.floor(Math.random()*thunderSounds.length)] || thunder1).play();
-      } catch {}
-    }
   }
 }
 
