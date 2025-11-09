@@ -5249,132 +5249,142 @@ if (paddleSizeEffect && Date.now() > paddleSizeEffect.end) {
   if (doublePointsActive && Date.now() - doublePointsStartTime > doublePointsDuration) {
     doublePointsActive = false;
   }
-
-  balls.forEach((ball, index) => {
+balls.forEach((ball, index) => {
+  // 1. positie updaten
   if (ballLaunched) {
-    let speedMultiplier = (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
-      ? speedBoostMultiplier : 1;
+    const speedMultiplier =
+      (speedBoostActive && Date.now() - speedBoostStart < speedBoostDuration)
+        ? speedBoostMultiplier
+        : 1;
+
     ball.x += ball.dx * speedMultiplier;
     ball.y += ball.dy * speedMultiplier;
   } else {
-    ball.x = paddleX + paddleWidth / 2 - ballRadius;
-    ball.y = paddleY - ballRadius * 2;
+    // bal aan paddle vast, maar nu met center-coords
+    ball.x = paddleX + paddleWidth / 2;
+    ball.y = paddleY - ballRadius;
   }
 
+  // 2. trail opbouwen op basis van center (ball.x, ball.y)
   if (!ball.trail) ball.trail = [];
 
-  let last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
-  let steps = 3;
+  const last = ball.trail[ball.trail.length - 1] || { x: ball.x, y: ball.y };
+  const steps = 3;
   for (let i = 1; i <= steps; i++) {
-    let px = last.x + (ball.x - last.x) * (i / steps);
-    let py = last.y + (ball.y - last.y) * (i / steps);
+    const px = last.x + (ball.x - last.x) * (i / steps);
+    const py = last.y + (ball.y - last.y) * (i / steps);
     ball.trail.push({ x: px, y: py });
   }
   while (ball.trail.length > 20) {
     ball.trail.shift();
   }
 
-  // muren
-  if (ball.x <= ball.radius + 1 && ball.dx < 0) {
+  // 3. muren (nu ook center-based)
+  // links
+  if (ball.x - ball.radius <= 1 && ball.dx < 0) {
     ball.x = ball.radius + 1;
     ball.dx *= -1;
     wallSound.currentTime = 0;
     wallSound.play();
   }
-  if (ball.x >= canvas.width - ball.radius - 1 && ball.dx > 0) {
+  // rechts
+  if (ball.x + ball.radius >= canvas.width - 1 && ball.dx > 0) {
     ball.x = canvas.width - ball.radius - 1;
     ball.dx *= -1;
     wallSound.currentTime = 0;
     wallSound.play();
   }
-  if (ball.y <= ball.radius + 1 && ball.dy < 0) {
+  // boven
+  if (ball.y - ball.radius <= 1 && ball.dy < 0) {
     ball.y = ball.radius + 1;
     ball.dy *= -1;
     wallSound.currentTime = 0;
     wallSound.play();
   }
 
+  // 4. paddle-collision (nu zonder getBallCenter, want x,y is al center)
+  const cx = ball.x;
+  const cy = ball.y;
 
-// 1) Eerst broad-phase met bal-middelpunt
-const { cx, cy } = getBallCenter(ball);
+  if (
+    cy + ball.radius > paddleY &&
+    cy - ball.radius < paddleY + paddleHeight &&
+    cx + ball.radius > paddleX &&
+    cx - ball.radius < paddleX + paddleWidth
+  ) {
+    const localX = Math.round(cx - paddleX);  // positie op paddle
+    const sampleHalf = Math.max(1, Math.floor(ball.radius));
 
-if (
-  cy + ball.radius > paddleY &&
-  cy - ball.radius < paddleY + paddleHeight &&
-  cx + ball.radius > paddleX &&
-  cx - ball.radius < paddleX + paddleWidth
-) {
-  const localX = Math.round(cx - paddleX);  // positie op paddle
-  const sampleHalf = Math.max(1, Math.floor(ball.radius));
+    // veilige randen
+    const safeEdge = 10;
 
-  // veilige randen: hier mag bal NOOIT doorheen
-  const safeEdge = 10; // px aan beide kanten
+    let shouldBounce = false;
 
-  let shouldBounce = false;
-
-  // altijd bouncen aan de zijkanten
-  if (localX < safeEdge || localX > paddleWidth - safeEdge) {
-    shouldBounce = true;
-  } else {
-    // middenstuk: hier mag je schiet-gaten hebben
-    let opaqueHit = false;
-    const px = Math.max(0, Math.min(paddleWidth - 1, localX));
-
-    for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
-      const localY = Math.max(0, Math.min(paddleHeight - 1, Math.round((cy - paddleY) + dy)));
-      const a = paddleCtx.getImageData(px, localY, 1, 1).data[3];
-      if (a > 10) {
-        opaqueHit = true;
-        break;
-      }
-    }
-
-    // in het midden: alleen bouncen als pixel echt bestaat
-    if (opaqueHit) {
+    // altijd bouncen aan de zijkanten
+    if (localX < safeEdge || localX > paddleWidth - safeEdge) {
       shouldBounce = true;
     } else {
-      shouldBounce = false; // echt gat → bal mag erdoor
+      // middenstuk: pixel-check op paddleCanvas
+      let opaqueHit = false;
+      const px = Math.max(0, Math.min(paddleWidth - 1, localX));
+
+      for (let dy = -sampleHalf; dy <= sampleHalf; dy++) {
+        const localY = Math.max(
+          0,
+          Math.min(
+            paddleHeight - 1,
+            Math.round((cy - paddleY) + dy)
+          )
+        );
+        const a = paddleCtx.getImageData(px, localY, 1, 1).data[3];
+        if (a > 10) {
+          opaqueHit = true;
+          break;
+        }
+      }
+
+      shouldBounce = opaqueHit;
     }
+
+    if (shouldBounce) {
+      // bounce met hoek
+      const hitPos = (cx - paddleX) / paddleWidth;      // 0..1
+      const angle  = (hitPos - 0.5) * Math.PI / 2;
+      const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+
+      ball.dx = speed * Math.sin(angle);
+      ball.dy = -Math.abs(speed * Math.cos(angle));
+      ball.y  = paddleY - ball.radius - 1;
+
+      wallSound.currentTime = 0;
+      wallSound.play();
+    }
+    // anders: gat → laten vallen
   }
 
-  if (shouldBounce) {
-    // standaard bounce met hoek op basis van raakpunt
-    const hitPos = (cx - paddleX) / paddleWidth;      // 0..1
-    const angle  = (hitPos - 0.5) * Math.PI / 2;
-    const speed  = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-
-    ball.dx = speed * Math.sin(angle);
-    ball.dy = -Math.abs(speed * Math.cos(angle));
-    ball.y  = paddleY - (ball.radius * 2) - 1;
-
-    wallSound.currentTime = 0;
-    wallSound.play();
-  }
-  // else: echt gat in het midden → niks doen, bal valt door
-}
-
-
-
-  // bal weg onderaan
-  if (ball.y + ball.dy > canvas.height) {
+  // 5. bal weg onderaan
+  if (ball.y - ball.radius > canvas.height) {
     balls.splice(index, 1);
+    return;
   }
 
-  // trail tekenen
+  // 6. trail tekenen (center-based)
   if (ball.trail.length >= 2) {
     const head = ball.trail[ball.trail.length - 1];
     const tail = ball.trail[0];
 
     ctx.save();
     const gradient = ctx.createLinearGradient(
-      head.x + ball.radius, head.y + ball.radius,
-      tail.x + ball.radius, tail.y + ball.radius
+      head.x,
+      head.y,
+      tail.x,
+      tail.y
     );
     gradient.addColorStop(0, "rgba(255, 215, 0, 0.6)");
     gradient.addColorStop(1, "rgba(255, 215, 0, 0)");
     ctx.beginPath();
-    ctx.moveTo(head.x + ball.radius, head.y + ball.radius);
-    ctx.lineTo(tail.x + ball.radius, tail.y + ball.radius);
+    ctx.moveTo(head.x, head.y);
+    ctx.lineTo(tail.x, tail.y);
     ctx.strokeStyle = gradient;
     ctx.lineWidth = ball.radius * 2.2;
     ctx.lineCap = "round";
@@ -5382,10 +5392,17 @@ if (
     ctx.restore();
   }
 
-  ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
-}); // ← ✅ einde balls.forEach
+  // 7. bal tekenen (image gecentreerd)
+  ctx.drawImage(
+    ballImg,
+    ball.x - ball.radius,
+    ball.y - ball.radius,
+    ball.radius * 2,
+    ball.radius * 2
+  );
+}); // einde balls.forEach
 
-// ↓↓↓ deze stukken horen BUITEN de forEach ↓↓↓
+
 
 if (resetOverlayActive) {
   if (Date.now() % 1000 < 500) {
