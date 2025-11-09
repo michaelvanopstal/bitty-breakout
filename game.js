@@ -5856,18 +5856,34 @@ if (showGameOver) {
   }
 }
 
-  // 🧱 Steenpuin tekenen
-  stoneDebris.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(140, 120, 100, ${p.alpha})`;
-    ctx.fill();
-    p.x += p.dx;
-    p.y += p.dy;
-    p.alpha -= 0.02;
-  });
+// 🧱 Steenpuin tekenen
+const s = getScale(); // 👈 schaal ophalen
 
-  stoneDebris = stoneDebris.filter(p => p.alpha > 0);
+stoneDebris.forEach(p => {
+  ctx.beginPath();
+
+  // Als het zilver-debris is → iets lichtere kleur
+  const color = p.type === "silver"
+    ? `rgba(200, 220, 255, ${p.alpha})`
+    : `rgba(140, 120, 100, ${p.alpha})`;
+
+  // Radius geschaald voor alle debris
+  const r = p.radius * s;
+
+  ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  // Beweging schalen (alleen merkbaar bij hogere resoluties)
+  p.x += p.dx * s;
+  p.y += p.dy * s;
+
+  // Alpha langzaam laten verdwijnen
+  p.alpha -= 0.02;
+});
+
+// Verwijder dode steensplinters
+stoneDebris = stoneDebris.filter(p => p.alpha > 0);
 
   renderBittyBombIntro();
   updateAndDrawBombVisuals(ctx);
@@ -6063,13 +6079,18 @@ function pauseTimer() {
 }
 
 function spawnStoneDebris(x, y) {
+  const s = getScale(); // 👈 huidige schaal pakken
+
   for (let i = 0; i < 8; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = (Math.random() * 6 - 3) * s; // snelheid schalen
+
     stoneDebris.push({
       x: x,
       y: y,
-      dx: (Math.random() - 0.5) * 6,
-      dy: (Math.random() - 0.5) * 6,
-      radius: Math.random() * 2 + 1,
+      dx: Math.cos(angle) * (Math.random() * 3 + 1) * s, // richting × schaal
+      dy: Math.sin(angle) * (Math.random() * 3 + 1) * s,
+      radius: (Math.random() * 2 + 1) * s,               // grootte × schaal
       alpha: 1
     });
   }
@@ -6445,28 +6466,29 @@ function getRandomElectricColor() {
 
 
 function triggerSilverExplosion(x, y) {
+  const s = getScale(); // 👈 pak de huidige schaal
+
   // Zilveren steensplinters vanuit middelpunt
   for (let i = 0; i < 20; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 5 + 2;
+    const speed = (Math.random() * 5 + 2) * s;       // snelheid schalen
 
     stoneDebris.push({
       x: x,
       y: y,
       dx: Math.cos(angle) * speed,
       dy: Math.sin(angle) * speed,
-      radius: Math.random() * 3 + 2,
+      radius: (Math.random() * 3 + 2) * s,           // grootte schalen
       alpha: 1,
       type: "silver"
     });
   }
 
   // 🎧 Dondergeluid direct bij start van de explosie
- const sound = thunderSounds[Math.floor(Math.random() * thunderSounds.length)];
- sound.currentTime = 0;
- sound.volume = 0.8;
- sound.play();
-
+  const sound = thunderSounds[Math.floor(Math.random() * thunderSounds.length)];
+  sound.currentTime = 0;
+  sound.volume = 0.8;
+  sound.play();
 
   // Witte flitsen + elektriciteit over canvas
   for (let i = 0; i < 15; i++) {
@@ -6477,7 +6499,7 @@ function triggerSilverExplosion(x, y) {
     explosions.push({
       x: burstX,
       y: burstY,
-      radius: Math.random() * 30 + 10,
+      radius: (Math.random() * 30 + 10) * s,         // radius schalen
       alpha: 1,
       color: "white"
     });
@@ -6485,7 +6507,7 @@ function triggerSilverExplosion(x, y) {
     // 6 stralen per flits
     for (let j = 0; j < 6; j++) {
       const angle = Math.random() * Math.PI * 2;
-      const length = 40 + Math.random() * 60;
+      const length = (40 + Math.random() * 60) * s;  // lengte schalen
       const segments = 5 + Math.floor(Math.random() * 5);
       const color = getRandomElectricColor();
       const flickerSpeed = 0.02 + Math.random() * 0.05;
@@ -6494,9 +6516,9 @@ function triggerSilverExplosion(x, y) {
       let prevX = burstX;
       let prevY = burstY;
 
-      for (let s = 0; s < segments; s++) {
+      for (let seg = 0; seg < segments; seg++) {
         const segLen = length / segments;
-        const deviation = (Math.random() - 0.5) * 20;
+        const deviation = (Math.random() - 0.5) * 20 * s; // zij-afwijking schalen
         const nextX = prevX + Math.cos(angle) * segLen + Math.cos(angle + Math.PI / 2) * deviation;
         const nextY = prevY + Math.sin(angle) * segLen + Math.sin(angle + Math.PI / 2) * deviation;
 
@@ -6514,8 +6536,8 @@ function triggerSilverExplosion(x, y) {
         let forkX = forkStart.x;
         let forkY = forkStart.y;
         for (let f = 0; f < 3; f++) {
-          const segLen = length / 6;
-          const dev = (Math.random() - 0.5) * 20;
+          const segLen = (length / 6);
+          const dev = (Math.random() - 0.5) * 20 * s;     // ook hier schalen
           const nx = forkX + Math.cos(forkAngle) * segLen + Math.cos(forkAngle + Math.PI / 2) * dev;
           const ny = forkY + Math.sin(forkAngle) * segLen + Math.sin(forkAngle + Math.PI / 2) * dev;
           forkPoints.push({ x: nx, y: ny });
@@ -6528,7 +6550,7 @@ function triggerSilverExplosion(x, y) {
       electricBursts.push({
         points: points,
         forks: forks,
-        width: 1 + Math.random() * 1.5,
+        width: (1 + Math.random() * 1.5) * s,        // lijndikte schalen
         alpha: 1,
         flickerSpeed: flickerSpeed,
         flickerPhase: Math.random(),
@@ -6537,7 +6559,6 @@ function triggerSilverExplosion(x, y) {
     }
   }
 }
-
 
 
 function triggerBallReset() {
@@ -6563,18 +6584,23 @@ function triggerBallReset() {
     paddleExplodeSound.currentTime = 0;
     paddleExplodeSound.play();
 
-    balls.forEach(ball => {
-      for (let i = 0; i < 30; i++) {
-        stoneDebris.push({
-          x: ball.x + ball.radius,
-          y: ball.y + ball.radius,
-          dx: (Math.random() - 0.5) * 8,
-          dy: (Math.random() - 0.5) * 8,
-          radius: Math.random() * 4 + 2,
-          alpha: 1
-        });
-      }
+   const s = getScale(); // 👈 voeg dit toe boven de loop
+
+balls.forEach(ball => {
+  for (let i = 0; i < 30; i++) {
+    const speed = ((Math.random() - 0.5) * 8) * s; // 👈 snelheid schalen
+    const angle = Math.random() * Math.PI * 2;
+
+    stoneDebris.push({
+      x: ball.x + ball.radius,
+      y: ball.y + ball.radius,
+      dx: Math.cos(angle) * (Math.random() * 4 + 2) * s, // 👈 richting & snelheid
+      dy: Math.sin(angle) * (Math.random() * 4 + 2) * s,
+      radius: (Math.random() * 4 + 2) * s,               // 👈 grootte schalen
+      alpha: 1
     });
+  }
+});
 
     balls = [];
   }, 6500);
