@@ -2264,6 +2264,26 @@ const DROP_TYPES = {
 }; // ✅ sluit het hele const DROP_TYPES object correct af
 
 
+// maakt balsnelheid afhankelijk van schermgrootte
+function getScaledBallSpeed(levelBoost = 0) {
+  // huidige schaal t.o.v. jouw basis-canvas
+  const baseW = baseCanvasWidth || 645;
+  const scaleFromWidth = canvas.width / baseW;
+
+  // gebruik de globale currentScale als die er is
+  const s = (typeof currentScale === "number" && currentScale > 0)
+    ? currentScale
+    : scaleFromWidth;
+
+  // ✋ niet té traag maken op hele kleine schermen
+  const clamped = Math.max(0.55, Math.min(1.2, s));
+  const base = (typeof DEFAULT_BALL_SPEED === "number" ? DEFAULT_BALL_SPEED : 9);
+
+  // level-boost ook mee schalen
+  return base * clamped + levelBoost * clamped;
+}
+
+
 function updateAndDrawDrops() {
   // ——— Scheduler ———
   const now = performance.now();
