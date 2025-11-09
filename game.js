@@ -6562,8 +6562,10 @@ function triggerSilverExplosion(x, y) {
   }
 }
 
-// ⚡ dit stuk moet in een functie
+// ⚡ donder + flits + elektrische stralen
 function triggerThunderAndLightning() {
+  const es = (typeof getEffectScale === "function") ? getEffectScale() : 1;
+
   // 🎧 Dondergeluid direct bij start van de explosie
   const sound = thunderSounds[Math.floor(Math.random() * thunderSounds.length)];
   sound.currentTime = 0;
@@ -6579,7 +6581,7 @@ function triggerThunderAndLightning() {
     explosions.push({
       x: burstX,
       y: burstY,
-      radius: Math.random() * 30 + 10,
+      radius: (Math.random() * 30 + 10) * es,
       alpha: 1,
       color: "white"
     });
@@ -6587,7 +6589,7 @@ function triggerThunderAndLightning() {
     // 6 stralen per flits
     for (let j = 0; j < 6; j++) {
       const angle = Math.random() * Math.PI * 2;
-      const length = 40 + Math.random() * 60;
+      const length = (40 + Math.random() * 60) * es;
       const segments = 5 + Math.floor(Math.random() * 5);
       const color = getRandomElectricColor();
       const flickerSpeed = 0.02 + Math.random() * 0.05;
@@ -6598,7 +6600,7 @@ function triggerThunderAndLightning() {
 
       for (let s = 0; s < segments; s++) {
         const segLen = length / segments;
-        const deviation = (Math.random() - 0.5) * 20;
+        const deviation = (Math.random() - 0.5) * 20 * es;
         const nextX = prevX + Math.cos(angle) * segLen + Math.cos(angle + Math.PI / 2) * deviation;
         const nextY = prevY + Math.sin(angle) * segLen + Math.sin(angle + Math.PI / 2) * deviation;
 
@@ -6617,7 +6619,7 @@ function triggerThunderAndLightning() {
         let forkY = forkStart.y;
         for (let f = 0; f < 3; f++) {
           const segLen = length / 6;
-          const dev = (Math.random() - 0.5) * 20;
+          const dev = (Math.random() - 0.5) * 20 * es;
           const nx = forkX + Math.cos(forkAngle) * segLen + Math.cos(forkAngle + Math.PI / 2) * dev;
           const ny = forkY + Math.sin(forkAngle) * segLen + Math.sin(forkAngle + Math.PI / 2) * dev;
           forkPoints.push({ x: nx, y: ny });
@@ -6628,13 +6630,13 @@ function triggerThunderAndLightning() {
       }
 
       electricBursts.push({
-        points: points,
-        forks: forks,
-        width: 1 + Math.random() * 1.5,
+        points,
+        forks,
+        width: (1 + Math.random() * 1.5) * es,
         alpha: 1,
-        flickerSpeed: flickerSpeed,
+        flickerSpeed,
         flickerPhase: Math.random(),
-        color: color
+        color
       });
     }
   }
