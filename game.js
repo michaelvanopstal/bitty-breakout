@@ -517,104 +517,75 @@ function getScale() {
 }
 
 
-function startStarPowerCelebration() {
+// === PATCH star init inside startStarPowerCelebration() ===
+function startStarPowerCelebration(x,y) {
   ensureFxCanvas();
+  const s = getScale();
+  if (!window.starPowerFX) starPowerFX = { stars: [], active: true, t0: performance.now() };
 
-  // 🔊 One-shot SFX bij start van de celebration (letters + sterren)
-  try {
-    if (typeof playOnceSafe === "function") {
-      playOnceSafe(starPowerSfx);
-    } else {
-      starPowerSfx?.pause?.();
-      if (starPowerSfx) starPowerSfx.currentTime = 0;
-      starPowerSfx?.play?.();
-    }
-  } catch (e) {}
-
-  starPowerFX.active = true;
-  starPowerFX.t0 = performance.now();
-  starPowerFX.stars = [];
-  starPowerFX.particles = [];
-
-  const W = fxCanvas.width, H = fxCanvas.height;
-  const N = 10;
-
+  const N = 40;
   for (let i = 0; i < N; i++) {
-    const dir = (i % 2 === 0) ? 1 : -1;
-    const y = (H * 0.15) + (i / (N - 1)) * (H * 0.7);
-    const speed = (W / 2.2) + Math.random() * (W / 1.8);
-    const amp   = 18 + Math.random() * 24;
-    const freq  = 1.5 + Math.random() * 1.5;
-    const startX = dir === 1 ? -80 : W + 80;
-    const vx = dir * speed;
-
+    const baseScale = 0.6 + Math.random() * 0.8; // relatieve grootte
+    const baseSize = 56; // basis px
     starPowerFX.stars.push({
-      x: startX, y, vx, vy: 0,
-      r: 0, vr: (Math.random() * 2 - 1) * 0.015,
-      scale: 0.7 + Math.random() * 0.6,
-      amp, freq, t: Math.random() * 1000, dir
+      x: x + (Math.random() - 0.5) * 200,
+      y: y + (Math.random() - 0.5) * 80,
+      vx: (Math.random() - 0.5) * 1.8,
+      vy: -1 - Math.random() * 2,
+      scale: baseScale,            // bewaar base scale
+      _baseSize: baseSize,         // basis px voor deze soort
+      t: Math.random() * 1000
     });
   }
+  starPowerFX.active = true;
 }
 
 
-function renderStarPowerFX() {
-  if (!starPowerFX.active || !fxCtx) return;
+// === PATCH parts of renderStarPowerFX() where size/text computed ===
+function renderStarPowerFX(now) {
+  if (!window.starPowerFX || !starPowerFX.active) return;
+  ensureFxCanvas();
+  const DPR = Math.max(1, window.devicePixelRatio || 1);
+  const W = fxCanvas.width / DPR;
+  const H = fxCanvas.height / DPR;
+  const gScale = getScale();
 
-  const now = performance.now();
-  const dt = Math.min(33, now - (renderStarPowerFX._prev || now));
-  renderStarPowerFX._prev = now;
+  // clear with some translucency if needed
+  fxCtx.clearRect(0,0,W,H);
 
-  const tElapsed = now - starPowerFX.t0;
-  const W = fxCanvas.width, H = fxCanvas.height;
+  for (let i = starPowerFX.stars.length - 1; i >= 0; i--) {
+    const st = starPowerFX.stars[i];
+    st.x += st.vx * gScale;
+    st.y += st.vy * gScale;
+    st.t += 16;
 
-  // Clear + subtiele donkerte zodat neon beter "pop"t (heel licht!)
-  fxCtx.clearRect(0, 0, W, H);
-  fxCtx.fillStyle = "rgba(0,0,0,0.12)";
-  fxCtx.fillRect(0, 0, W, H);
-
-  // ... 👇 vanaf hier blijft alles hetzelfde als jouw versie ...
-  // ik laat de rest van je code hieronder staan, ongewijzigd:
-
-  // Sterren + stardust
-  for (const s of starPowerFX.stars) {
-    s.t += dt * 0.001;
-    const yOffset = Math.sin(s.t * s.freq * 2 * Math.PI) * s.amp;
-    s.x += s.vx * (dt / 1000);
-    s.y += yOffset * 0.02;
-    s.r += s.vr * dt;
-
+    const size = Math.round(st._baseSize * st.scale * gScale); // schaal toegepast
+    // teken ster (voorbeeld: eenvoudige filled circle of sprite)
     fxCtx.save();
-    fxCtx.translate(s.x, s.y);
-    fxCtx.rotate(s.r);
-    const size = 56 * s.scale;
-
-    const grd = fxCtx.createRadialGradient(0, 0, size * 0.15, 0, 0, size * 0.9);
-    grd.addColorStop(0.00, `rgba(${AURA_RGB},0.30)`);
-    grd.addColorStop(0.50, `rgba(${AURA_RGB},0.12)`);
-    grd.addColorStop(1.00, `rgba(${AURA_RGB},0.00)`);
-    fxCtx.globalCompositeOperation = 'lighter';
-    fxCtx.fillStyle = grd;
+    fxCtx.translate(st.x, st.y);
+    fxCtx.rotate((st.t * 0.002) % (Math.PI * 2));
     fxCtx.beginPath();
-    fxCtx.arc(0, 0, size * 0.9, 0, Math.PI * 2);
+    fxCtx.globalAlpha = Math.max(0, 1 - (st.t / 1200));
+    fxCtx.arc(0, 0, size / 2, 0, Math.PI * 2);
+    fxCtx.fillStyle = "#fff";
     fxCtx.fill();
-
-    fxCtx.globalAlpha = 0.96;
-    fxCtx.drawImage(starImg, -size/2, -size/2, size, size);
     fxCtx.restore();
 
-    for (let k = 0; k < 3; k++) {
-      starPowerFX.particles.push({
-        x: s.x,
-        y: s.y,
-        vx: (Math.random() - 0.5) * 80,
-        vy: (Math.random() - 0.5) * 80 + 20,
-        life: 600,
-        age: 0,
-        r: 1.5 + Math.random() * 2.5
-      });
+    // remove when off-screen / faded
+    if (st.y < -100 || st.y > H + 100 || st.t > 2400) {
+      starPowerFX.stars.splice(i, 1);
     }
   }
+
+  // Tekst/titel (bijv. "Stars!") - maak fontgrootte schaalbaar
+  if (starPowerFX.showTitle) {
+    const baseFont = Math.round(Math.min(W, H) * 0.06); // 6% van min-dim
+    fxCtx.font = `bold ${Math.max(14, Math.round(baseFont * gScale))}px Arial`;
+    fxCtx.textAlign = 'center';
+    fxCtx.fillStyle = 'white';
+    fxCtx.fillText(starPowerFX.titleText || 'Stars!', W / 2, H * 0.15);
+  }
+}
 
   for (let i = starPowerFX.particles.length - 1; i >= 0; i--) {
     const p = starPowerFX.particles[i];
