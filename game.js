@@ -516,12 +516,19 @@ function getScale() {
   return Math.max(0.5, Math.min(2.0, base / 800));
 }
 
-// ✅ STAR POWER START
 function startStarPowerCelebration(x, y) {
   ensureFxCanvas();
   const s = (typeof getScale === 'function') ? getScale() : 1;
 
-  // maak globale container als die er nog niet is
+  // pak viewport-afmetingen
+  const DPR = Math.max(1, window.devicePixelRatio || 1);
+  const W = fxCanvas.width / DPR;
+  const H = fxCanvas.height / DPR;
+
+  // 👉 fallback naar midden van scherm
+  const cx = (typeof x === "number") ? x : W / 2;
+  const cy = (typeof y === "number") ? y : H / 2;
+
   if (!window.starPowerFX) {
     window.starPowerFX = {
       active: true,
@@ -533,21 +540,19 @@ function startStarPowerCelebration(x, y) {
       titleText: "Bitty STAR POWER!"
     };
   } else {
-    // reset basis
     starPowerFX.active = true;
     starPowerFX.t0 = performance.now();
     starPowerFX.stars = [];
-    // laat eventueel particles staan of leeg ze ook:
     starPowerFX.particles = [];
   }
 
   const N = 40;
   for (let i = 0; i < N; i++) {
-    const baseScale = 0.6 + Math.random() * 0.8; // relatieve grootte
-    const baseSize = 56; // basis px
+    const baseScale = 0.6 + Math.random() * 0.8;
+    const baseSize = 56;
     starPowerFX.stars.push({
-      x: x + (Math.random() - 0.5) * 200,
-      y: y + (Math.random() - 0.5) * 80,
+      x: cx + (Math.random() - 0.5) * 200,
+      y: cy + (Math.random() - 0.5) * 80,
       vx: (Math.random() - 0.5) * 1.8,
       vy: -1 - Math.random() * 2,
       scale: baseScale,
@@ -556,6 +561,7 @@ function startStarPowerCelebration(x, y) {
     });
   }
 }
+
 
 // ✅ STAR POWER RENDER
 function renderStarPowerFX(now) {
