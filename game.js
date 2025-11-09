@@ -475,12 +475,9 @@ function chooseSpawnX(cfg) {
 }
 
 
-// === REPLACE ensureFxCanvas() WITH THIS BLOCK ===
 function ensureFxCanvas() {
-  if (typeof document === 'undefined') return;
-  if (window.fxCanvas && window.fxCtx) return;
-
-  window.fxCanvas = document.createElement('canvas');
+  if (fxCanvas) return;
+  fxCanvas = document.createElement('canvas');
   fxCanvas.style.position = 'fixed';
   fxCanvas.style.top = '0';
   fxCanvas.style.left = '0';
@@ -489,228 +486,222 @@ function ensureFxCanvas() {
   fxCanvas.style.pointerEvents = 'none';
   fxCanvas.style.zIndex = '9999';
   document.body.appendChild(fxCanvas);
+  fxCtx = fxCanvas.getContext('2d');
 
-  window.fxCtx = fxCanvas.getContext('2d');
-
-  const resizeFx = () => {
-    const DPR = Math.max(1, window.devicePixelRatio || 1);
-    // set canvas internal pixel size to DPR * css pixels
-    fxCanvas.width  = Math.round(window.innerWidth * DPR);
-    fxCanvas.height = Math.round(window.innerHeight * DPR);
-    // Keep CSS pixel size (style.width/height) intact; scale context so drawing code can use CSS pixels
-    fxCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  };
-
-  // initial size and on-resize handling
+  const resizeFx = () => { fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; };
   addEventListener('resize', resizeFx);
   resizeFx();
 }
 
-// === ADD IF MISSING: getScale() helper ===
 function getScale() {
-  // Als je currentScale al ergens set (resize-handler), return dat; anders fallback
-  if (typeof currentScale !== 'undefined' && currentScale) return currentScale;
-  // fallback op basis van schermgrootte (je kunt dit aanpassen)
-  const base = Math.min(window.innerWidth, window.innerHeight);
-  // base 800px => scale 1.0; smaller => smaller; larger => proportioneel
-  return Math.max(0.5, Math.min(2.0, base / 800));
+  return (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
 }
 
-function startStarPowerCelebration(x, y) {
+
+function startStarPowerCelebration() {
   ensureFxCanvas();
-  const s = (typeof getScale === 'function') ? getScale() : 1;
 
-  // pak viewport-afmetingen
-  const DPR = Math.max(1, window.devicePixelRatio || 1);
-  const W = fxCanvas.width / DPR;
-  const H = fxCanvas.height / DPR;
+  // 🔊 One-shot SFX bij start van de celebration (letters + sterren)
+  try {
+    if (typeof playOnceSafe === "function") {
+      playOnceSafe(starPowerSfx);
+    } else {
+      starPowerSfx?.pause?.();
+      if (starPowerSfx) starPowerSfx.currentTime = 0;
+      starPowerSfx?.play?.();
+    }
+  } catch (e) {}
 
-  // 👉 fallback naar midden van scherm
-  const cx = (typeof x === "number") ? x : W / 2;
-  const cy = (typeof y === "number") ? y : H / 2;
+  starPowerFX.active = true;
+  starPowerFX.t0 = performance.now();
+  starPowerFX.stars = [];
+  starPowerFX.particles = [];
 
-  if (!window.starPowerFX) {
-    window.starPowerFX = {
-      active: true,
-      t0: performance.now(),
-      duration: 2000,
-      stars: [],
-      particles: [],
-      showTitle: true,
-      titleText: "Bitty STAR POWER!"
-    };
-  } else {
-    starPowerFX.active = true;
-    starPowerFX.t0 = performance.now();
-    starPowerFX.stars = [];
-    starPowerFX.particles = [];
-  }
+  const W = fxCanvas.width, H = fxCanvas.height;
+  const N = 10;
 
-  const N = 40;
   for (let i = 0; i < N; i++) {
-    const baseScale = 0.6 + Math.random() * 0.8;
-    const baseSize = 56;
+    const dir = (i % 2 === 0) ? 1 : -1;
+    const y = (H * 0.15) + (i / (N - 1)) * (H * 0.7);
+    const speed = (W / 2.2) + Math.random() * (W / 1.8);
+    const amp   = 18 + Math.random() * 24;
+    const freq  = 1.5 + Math.random() * 1.5;
+    const startX = dir === 1 ? -80 : W + 80;
+    const vx = dir * speed;
+
     starPowerFX.stars.push({
-      x: cx + (Math.random() - 0.5) * 200,
-      y: cy + (Math.random() - 0.5) * 80,
-      vx: (Math.random() - 0.5) * 1.8,
-      vy: -1 - Math.random() * 2,
-      scale: baseScale,
-      _baseSize: baseSize,
-      t: Math.random() * 1000
+      x: startX, y, vx, vy: 0,
+      r: 0, vr: (Math.random() * 2 - 1) * 0.015,
+      scale: 0.7 + Math.random() * 0.6,
+      amp, freq, t: Math.random() * 1000, dir
     });
   }
 }
 
 
-// ✅ STAR POWER RENDER
-function renderStarPowerFX(now) {
-  if (!window.starPowerFX || !starPowerFX.active) return;
-  ensureFxCanvas();
+function renderStarPowerFX() {
+  if (!starPowerFX.active || !fxCtx) return;
 
-  const DPR = Math.max(1, window.devicePixelRatio || 1);
-  const W = fxCanvas.width / DPR;
-  const H = fxCanvas.height / DPR;
-  const gScale = (typeof getScale === 'function') ? getScale() : 1;
+  const now = performance.now();
+  const dt = Math.min(33, now - (renderStarPowerFX._prev || now));
+  renderStarPowerFX._prev = now;
 
   const tElapsed = now - starPowerFX.t0;
-  const duration = starPowerFX.duration || 2000;
+  const W = fxCanvas.width, H = fxCanvas.height;
 
-  // achtergrond leegmaken voor deze overlay
+  // Clear + subtiele donkerte zodat neon beter "pop"t (heel licht!)
   fxCtx.clearRect(0, 0, W, H);
+  fxCtx.fillStyle = "rgba(0,0,0,0.12)";
+  fxCtx.fillRect(0, 0, W, H);
 
-  // 1) de “grote” sterren
-  for (let i = starPowerFX.stars.length - 1; i >= 0; i--) {
-    const st = starPowerFX.stars[i];
-    st.x += st.vx * gScale;
-    st.y += st.vy * gScale;
-    st.t += 16;
+  // ... 👇 vanaf hier blijft alles hetzelfde als jouw versie ...
+  // ik laat de rest van je code hieronder staan, ongewijzigd:
 
-    const size = Math.round(st._baseSize * st.scale * gScale);
+  // Sterren + stardust
+  for (const s of starPowerFX.stars) {
+    s.t += dt * 0.001;
+    const yOffset = Math.sin(s.t * s.freq * 2 * Math.PI) * s.amp;
+    s.x += s.vx * (dt / 1000);
+    s.y += yOffset * 0.02;
+    s.r += s.vr * dt;
 
     fxCtx.save();
-    fxCtx.translate(st.x, st.y);
-    fxCtx.rotate((st.t * 0.002) % (Math.PI * 2));
-    fxCtx.globalAlpha = Math.max(0, 1 - (st.t / 1200));
+    fxCtx.translate(s.x, s.y);
+    fxCtx.rotate(s.r);
+    const size = 56 * s.scale;
+
+    const grd = fxCtx.createRadialGradient(0, 0, size * 0.15, 0, 0, size * 0.9);
+    grd.addColorStop(0.00, `rgba(${AURA_RGB},0.30)`);
+    grd.addColorStop(0.50, `rgba(${AURA_RGB},0.12)`);
+    grd.addColorStop(1.00, `rgba(${AURA_RGB},0.00)`);
+    fxCtx.globalCompositeOperation = 'lighter';
+    fxCtx.fillStyle = grd;
     fxCtx.beginPath();
-    fxCtx.arc(0, 0, size / 2, 0, Math.PI * 2);
-    fxCtx.fillStyle = "#fff";
+    fxCtx.arc(0, 0, size * 0.9, 0, Math.PI * 2);
+    fxCtx.fill();
+
+    fxCtx.globalAlpha = 0.96;
+    fxCtx.drawImage(starImg, -size/2, -size/2, size, size);
+    fxCtx.restore();
+
+    for (let k = 0; k < 3; k++) {
+      starPowerFX.particles.push({
+        x: s.x,
+        y: s.y,
+        vx: (Math.random() - 0.5) * 80,
+        vy: (Math.random() - 0.5) * 80 + 20,
+        life: 600,
+        age: 0,
+        r: 1.5 + Math.random() * 2.5
+      });
+    }
+  }
+
+  for (let i = starPowerFX.particles.length - 1; i >= 0; i--) {
+    const p = starPowerFX.particles[i];
+    p.age += dt;
+    if (p.age >= p.life) { starPowerFX.particles.splice(i, 1); continue; }
+    const a = 1 - (p.age / p.life);
+    p.x += p.vx * (dt / 1000);
+    p.y += p.vy * (dt / 1000);
+
+    fxCtx.save();
+    fxCtx.globalCompositeOperation = 'lighter';
+    fxCtx.globalAlpha = a * 0.95;
+
+    const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2);
+    grd.addColorStop(0, `rgba(${AURA_SPARK_RGB},1)`);
+    grd.addColorStop(1, `rgba(${AURA_RGB},0)`);
+    fxCtx.fillStyle = grd;
+    fxCtx.beginPath();
+    fxCtx.arc(p.x, p.y, p.r * 3.2, 0, Math.PI * 2);
     fxCtx.fill();
     fxCtx.restore();
-
-    // opruimen
-    if (st.y < -100 || st.y > H + 100 || st.t > 2400) {
-      starPowerFX.stars.splice(i, 1);
-    }
   }
 
-  // 2) optionele “particles”-laag — alleen tekenen als die bestaat
-  if (Array.isArray(starPowerFX.particles) && starPowerFX.particles.length) {
-    // we hebben in jouw snippet geen dt, dus we maken een simpele:
-    const dt = 16; // ~1 frame
-    for (let i = starPowerFX.particles.length - 1; i >= 0; i--) {
-      const p = starPowerFX.particles[i];
-      p.age += dt;
-      if (p.age >= p.life) {
-        starPowerFX.particles.splice(i, 1);
-        continue;
-      }
-      const a = 1 - (p.age / p.life);
-      p.x += p.vx * (dt / 1000);
-      p.y += p.vy * (dt / 1000);
+  const fadeIn = Math.min(1, tElapsed / 300);
+  const fadeOut = Math.min(1, Math.max(0, (starPowerFX.duration - tElapsed) / 300));
+  const alpha = Math.min(fadeIn, fadeOut);
 
-      fxCtx.save();
-      fxCtx.globalCompositeOperation = 'lighter';
-      fxCtx.globalAlpha = a * 0.95;
+  fxCtx.save();
+  fxCtx.globalAlpha = alpha;
+  const title = "Bitty STAR POWER!";
+  fxCtx.font = `bold ${Math.round(Math.min(W, H) * 0.08)}px Arial`;
+  fxCtx.textAlign = "center";
+  fxCtx.textBaseline = "middle";
 
-      // als je AURA_* constants hebt, gebruik die; anders fallback
-      const AURA_SPARK_RGB = window.AURA_SPARK_RGB || "255,255,255";
-      const AURA_RGB = window.AURA_RGB || "255,255,255";
-
-      const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2 * gScale);
-      grd.addColorStop(0, `rgba(${AURA_SPARK_RGB},1)`);
-      grd.addColorStop(1, `rgba(${AURA_RGB},0)`);
-      fxCtx.fillStyle = grd;
-      fxCtx.beginPath();
-      fxCtx.arc(p.x, p.y, p.r * 3.2 * gScale, 0, Math.PI * 2);
-      fxCtx.fill();
-      fxCtx.restore();
-    }
-  }
-
-  // 3) titel / tekst met fade in/out
-  const fadeIn  = Math.min(1, tElapsed / 300);
-  const fadeOut = Math.min(1, Math.max(0, (duration - tElapsed) / 300));
-  const alpha   = Math.min(fadeIn, fadeOut);
-
-  if (starPowerFX.showTitle && alpha > 0) {
-    fxCtx.save();
-    fxCtx.globalAlpha = alpha;
-    const title = starPowerFX.titleText || "Bitty STAR POWER!";
-    const fontSize = Math.round(Math.min(W, H) * 0.08 * gScale);
-    fxCtx.font = `bold ${fontSize}px Arial`;
-    fxCtx.textAlign = "center";
-    fxCtx.textBaseline = "middle";
-
-    const AURA_RGB = window.AURA_RGB || "255,255,255";
-    const AURA_HEX = window.AURA_HEX || "#ffffff";
-    const AURA_EDGE_HEX = window.AURA_EDGE_HEX || "#ffdd88";
-
-    // glow-laag
-    fxCtx.fillStyle = `rgba(${AURA_RGB},0.22)`;
-    for (let g = 0; g < 5; g++) {
-      fxCtx.fillText(title, W / 2, H * 0.25);
-    }
-
-    fxCtx.fillStyle = AURA_HEX;
-    fxCtx.strokeStyle = AURA_EDGE_HEX;
-    fxCtx.lineWidth = 4;
-    fxCtx.strokeText(title, W / 2, H * 0.25);
+  fxCtx.fillStyle = `rgba(${AURA_RGB},0.22)`;
+  for (let g = 0; g < 5; g++) {
     fxCtx.fillText(title, W / 2, H * 0.25);
-    fxCtx.restore();
   }
 
-  // 4) einde effect
-  if (tElapsed >= duration) {
+  fxCtx.fillStyle = AURA_HEX;
+  fxCtx.strokeStyle = AURA_EDGE_HEX;
+  fxCtx.lineWidth = 4;
+  fxCtx.strokeText(title, W / 2, H * 0.25);
+  fxCtx.fillText(title, W / 2, H * 0.25);
+
+  fxCtx.restore();
+
+  if (tElapsed >= starPowerFX.duration) {
     starPowerFX.active = false;
     fxCtx.clearRect(0, 0, W, H);
   }
 }
 
+function renderBittyBombIntro() {
+  if (!bittyBomb.active) return;
 
-// === PATCH renderBittyBombIntro() font/size usage ===
-function renderBittyBombIntro(now) {
-  // assume game canvas 'canvas' en context 'ctx' bestaan
-  const W = canvas.width;
-  const H = canvas.height;
-  const CSSW = W / (window.devicePixelRatio || 1);
-  const CSSH = H / (window.devicePixelRatio || 1);
-  const s = getScale();
+  const now = performance.now();
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
 
-  // Voor countdown tekst
-  const baseFont = Math.round(Math.min(CSSW, CSSH) * 0.05); // 5% van kleinste dimensie
-  const fontSize = Math.max(14, Math.round(baseFont * s));
-  ctx.font = `bold ${fontSize}px Arial`;
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#fff';
-  ctx.fillText(bittyBombIntro.text || 'Ready?', CSSW/2, CSSH/2 - (40 * s));
+  if (bittyBomb.phase === "countdown") {
+    const elapsed = now - bittyBomb.start;
+    const secs = Math.floor(elapsed / 1000);
+    const remain = Math.max(0, bittyBomb.countdownFrom - secs);
+    const blinkOn = (Math.floor(elapsed/500) % 2) === 0;
 
-  // ronde indicator
-  const radius = Math.round(28 * s);
-  const cx = CSSW/2;
-  const cy = CSSH/2 + (20 * s);
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(255,255,255,0.08)';
-  ctx.fill();
-  // inner ring (progress)
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius - Math.max(4, Math.round(4 * s)), -Math.PI/2, -Math.PI/2 + (Math.PI*2 * bittyBombIntro.progress));
-  ctx.lineWidth = Math.max(3, Math.round(3 * s));
-  ctx.strokeStyle = '#fff';
-  ctx.stroke();
+    // 👇 overlay weggehaald
+
+    // tekst + nummer in cirkel
+    const title = "BITTY BOMB  ACTIVATED !";
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.font = "bold 40px Arial";
+    ctx.fillStyle = blinkOn ? "rgba(180,180,180,1)" : "rgba(120,120,120,1)";
+    ctx.strokeStyle = "rgba(50,50,50,0.7)";
+    ctx.lineWidth = 3;
+    ctx.strokeText(title, cx, cy - 60);
+    ctx.fillText(title,  cx, cy - 60);
+
+    ctx.beginPath();
+    ctx.arc(cx, cy + 10, 28, 0, Math.PI*2);
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = blinkOn ? "rgba(200,200,200,0.9)" : "rgba(160,160,160,0.9)";
+    ctx.stroke();
+
+    ctx.font = "bold 34px Arial";
+    ctx.fillStyle = "rgba(220,220,220,1)";
+    ctx.fillText(String(Math.max(1, remain)), cx, cy + 10);
+
+    ctx.font = "bold 22px Arial";
+    ctx.fillStyle = "rgba(170,170,170,1)";
+    ctx.fillText(`${title} ${Math.max(1, remain)}.`, cx, cy + 60);
+    ctx.restore();
+
+    if (remain <= 0) {
+      bittyBomb.phase = "done";
+      bittyBomb.active = false;
+      startBombVisuals(() => startBombRain(bittyBomb.queuedRain));
+      try {
+        (thunderSounds?.[Math.floor(Math.random()*thunderSounds.length)] || thunder1).play();
+      } catch {}
+    }
+  }
 }
-
 
 // ❤️ full-screen heart celebration
 let heartCelebration = {
@@ -720,38 +711,40 @@ let heartCelebration = {
 };
 
 function triggerHeartCelebration() {
+  // zorg dat overlay er is
   ensureFxCanvas();
-  const DPR = Math.max(1, window.devicePixelRatio || 1);
-  const W = fxCanvas.width / DPR;
-  const H = fxCanvas.height / DPR;
-  const s = getScale();
 
-  if (!window.heartCelebration) {
-    window.heartCelebration = { active: false, hearts: [], t0: 0 };
-  }
+  // 🎵 speel nu jouw nieuwe bitty-level-up mp3
+  try {
+    bittyLevelUpSfx.currentTime = 0;
+    bittyLevelUpSfx.play();
+  } catch (e) {}
 
-  const hc = window.heartCelebration; // 👈 gebruik dezelfde
-  hc.active = true;
-  hc.t0 = performance.now();
-  hc.hearts = [];
+  const W = fxCanvas.width;
+  const H = fxCanvas.height;
+
+  heartCelebration.active = true;
+  heartCelebration.t0 = performance.now();
+  heartCelebration.hearts = [];
+
+  // 👇 nieuw: kort het levelup-plaatje laten zien
+  heartCelebration.showMascot = true;
+  heartCelebration.mascotStart = performance.now();
 
   const count = 50;
   for (let i = 0; i < count; i++) {
-    const baseSize = (32 + Math.random() * 26);
-    hc.hearts.push({
+    heartCelebration.hearts.push({
       x: Math.random() * W,
       y: -40 - Math.random() * 200,
       dx: (Math.random() - 0.5) * 1.2,
-      dy: (2 + Math.random() * 2.5),
-      size: baseSize * s,
-      _baseSize: baseSize,
+      dy: 2 + Math.random() * 2.5,
+      size: 32 + Math.random() * 26,
       rot: Math.random() * Math.PI * 2,
-      rotSpeed: (-1 + Math.random() * 2) * 0.04 * s,
+      rotSpeed: (-1 + Math.random() * 2) * 0.04,
       pulse: Math.random() * Math.PI * 2
     });
   }
 }
-
 
 function drawHeartCelebration() {
   if (!heartCelebration.active || !fxCtx) return;
@@ -857,46 +850,14 @@ function drawHeartCelebration() {
   }
 }
 
-// === REPLACE / EXTEND rescaleActiveVFX(scale) FUNCTION ===
 function rescaleActiveVFX(scale) {
-  // accept either explicit scale param of gebruik getScale()
-  const s = (typeof scale !== 'undefined') ? scale : getScale();
-
-  // Hearts: herbereken size en beweging
-  if (window.heartCelebration && Array.isArray(heartCelebration.hearts)) {
-    heartCelebration.hearts.forEach(h => {
-      if (typeof h._baseSize === 'undefined') h._baseSize = h.size;
-      h.size = h._baseSize * s;
-      // Herbereken velocities relatief aan schaal (optioneel: behoud richting)
-      if (typeof h._baseDx === 'undefined') { h._baseDx = h.dx / (h._baseSize || 1); }
-      if (typeof h._baseDy === 'undefined') { h._baseDy = h.dy / (h._baseSize || 1); }
-      h.dx = (h._baseDx || (Math.random()-0.5)*1.2) * (h._baseSize || 40) * 0.02 * s;
-      h.dy = (h._baseDy || (2 + Math.random()*2.5)) * s;
-      // rotSpeed ook schalen
-      if (typeof h._baseRotSpeed === 'undefined') h._baseRotSpeed = h.rotSpeed;
-      h.rotSpeed = h._baseRotSpeed * s;
-    });
-  }
-
-  // Explosions / particles (basisvoorbeeld)
-  if (window.explosions && Array.isArray(explosions)) {
+  if (Array.isArray(explosions)) {
     explosions.forEach(e => {
-      if (typeof e._baseRadius === 'undefined') e._baseRadius = e.radius;
-      e.radius = e._baseRadius * s;
+      if (!e._baseRadius) e._baseRadius = e.radius;
+      e.radius = e._baseRadius * scale;
     });
   }
-
-  // Stars: we bewaren baseSize in object; render gebruikt getScale(), dus meestal niets nodig.
-  if (window.starPowerFX && Array.isArray(starPowerFX.stars)) {
-    starPowerFX.stars.forEach(st => {
-      if (typeof st._baseSize === 'undefined') st._baseSize = st._baseSize || 56;
-      // je kunt velocity/amp opslaan en schalen indien gewenst:
-      if (typeof st._baseVx === 'undefined') st._baseVx = st.vx;
-      if (typeof st._baseVy === 'undefined') st._baseVy = st.vy;
-      st.vx = st._baseVx * s;
-      st.vy = st._baseVy * s;
-    });
-  }
+  // hier kun je later electricBursts of andere VFX bijzetten
 }
 
 
@@ -2970,9 +2931,6 @@ function startBombRain(n = 13) {
   }
   _bittyActivationLock = false;
 
-  // haal schaal
-  const s = (typeof getScale === 'function') ? getScale() : (typeof currentScale !== 'undefined' ? currentScale : 1);
-
   // verzamel alle actieve bricks
   const pool = [];
   for (let c = 0; c < brickColumnCount; c++) {
@@ -2992,34 +2950,15 @@ function startBombRain(n = 13) {
   const count = Math.min(n, pool.length);
   for (let i = 0; i < count; i++) {
     const t = pool[i];
-
-    // delays in ms (houdt tempo hetzelfde, independent van schaal)
-    const delay = 150 + Math.random() * 1400;
-
-    // startX: centreer op brick + random offset, offset schaalt
-    const offsetX = (Math.random() * 80 - 40) * s;
-    const startX  = t.x + (brickWidth / 2) + offsetX;
-
-    // startY: boven het scherm, schaal toegepast
-    const startY  = (-40 - Math.random() * 200) * s;
-
-    // targetY: nét voor de steen, menjaga dezelfde relatieve afstand
-    const targetY = t.y - (14 * s);
-
-    // speed: base speed * schaal (zodat het tempo/afstand consistent voelt)
-    const speed   = (3.2 + Math.random() * 1.8) * s;
+    const delay   = 150 + Math.random() * 1400;   // door elkaar
+    const startX  = t.x + brickWidth/2 + (Math.random()*80 - 40);
+    const startY  = -40 - Math.random() * 200;    // verschillende hoogtes
+    const targetY = t.y - 14;                      // nét voor de steen
+    const speed   = 3.2 + Math.random() * 1.8;
 
     bombRain.push({
-      x: startX,
-      y: startY,
-      vx: 0,
-      vy: speed,
-      _baseVy: speed,        // bewaren voor later rescale
-      _baseStartY: startY,
-      _baseOffsetX: offsetX,
-      targetY,
-      col: t.c,
-      row: t.r,
+      x: startX, y: startY, vx: 0, vy: speed,
+      targetY, col: t.c, row: t.r,
       startAt: performance.now() + delay,
       exploded: false
     });
@@ -3028,6 +2967,39 @@ function startBombRain(n = 13) {
   // leuk: voice of sfx kan hier
   try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch {}
 }
+
+function drawPointPopups() {
+  const s = getScale(); // haal actuele schaalfactor op
+
+  for (let i = pointPopups.length - 1; i >= 0; i--) {
+    const p = pointPopups[i];
+
+    // Basisinstellingen
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`; // goudkleurig
+
+    // Schaalbaar lettertype
+    const size = p.fontSize || (18 * s);
+    ctx.font = `bold ${size}px Arial`;
+    ctx.textAlign = "center";
+
+    // Tekst tekenen
+    ctx.fillText(p.value, p.x, p.y);
+
+    // Animatie met schaalbare snelheid
+    p.y -= p.vy || (0.5 * s);
+    p.alpha -= 0.01;
+
+    // Verwijderen zodra onzichtbaar
+    if (p.alpha <= 0) {
+      pointPopups.splice(i, 1);
+    }
+  }
+
+  // Transparantie herstellen
+  ctx.globalAlpha = 1;
+}
+
 
 function resetBricks() {
   // 1) schaal updaten op basis van huidige canvas
@@ -4440,45 +4412,26 @@ function stopAndDisarmAllTNT() {
   }
 }
 
-// === VERVANG updateAndDrawBombRain() MET DEZE ===
 function updateAndDrawBombRain() {
   const now = performance.now();
-  const s = (typeof getScale === 'function') ? getScale() : (typeof currentScale !== 'undefined' ? currentScale : 1);
-
   for (let i = bombRain.length - 1; i >= 0; i--) {
     const b = bombRain[i];
+    if (now < b.startAt) continue;
 
-    // wacht tot starttijd
-    if (b.startAt && now < b.startAt) continue;
-
-    // beweging (let: b.vy zou bij spawn al met schaal gezet moeten zijn)
+    // vallen
     b.y += b.vy;
 
-    // teken grootte geschaald
-    const size = Math.max(6, Math.round(28 * s));
-    const img = (typeof bombTokenImg !== 'undefined' && bombTokenImg && bombTokenImg.complete) ? bombTokenImg : tntImg;
-    // centreer sprite op b.x / b.y
-    ctx.drawImage(img, b.x - size / 2, b.y - size / 2, size, size);
-
-    // zorg dat targetY correct geschaald is (fallback voor oudere entries)
-    if (typeof b._targetScaled === 'undefined') {
-      // als spawn code targetY al had, trust it; anders recompute op basis van brick
-      if (!b.targetY && bricks?.[b.col]?.[b.row]) {
-        b.targetY = bricks[b.col][b.row].y - (14 * s);
-      } else if (b.targetY) {
-        // markeer dat target in pixels nou als geschaald wordt beschouwd
-        // (we kunnen niet weten of het al geschaald is, dus we markeren gewoon)
-      }
-      b._targetScaled = true;
-    }
+    // tekenen
+    const img = (bombTokenImg && bombTokenImg.complete) ? bombTokenImg : tntImg;
+    ctx.drawImage(img, b.x - 14, b.y - 14, 28, 28);
 
     // geland?
-    if (!b.exploded && b.y >= (typeof b.targetY !== 'undefined' ? b.targetY : canvas.height)) {
+    if (!b.exploded && b.y >= b.targetY) {
       b.exploded = true;
 
       // veilige guard: bestaat target nog?
       if (bricks?.[b.col]?.[b.row]?.status === 1) {
-        explodeTNT(b.col, b.row);  // wis center + buren (gebruik jouw bestaande functie)
+        explodeTNT(b.col, b.row);  // wist center + buren
       } else {
         // fallback: zoek dichtstbijzijnde nog-actieve brick in buurt
         let best = null, bestD = Infinity;
@@ -4486,40 +4439,25 @@ function updateAndDrawBombRain() {
           for (let r = 0; r < brickRowCount; r++) {
             const bx = bricks[c][r];
             if (bx?.status !== 1) continue;
-            const dx = (bx.x + brickWidth / 2) - b.x;
-            const dy = (bx.y + brickHeight / 2) - b.y;
-            const d2 = dx * dx + dy * dy;
+            const dx = (bx.x + brickWidth/2) - b.x;
+            const dy = (bx.y + brickHeight/2) - b.y;
+            const d2 = dx*dx + dy*dy;
             if (d2 < bestD) { bestD = d2; best = { c, r }; }
           }
         }
         if (best) explodeTNT(best.c, best.r);
       }
 
-      // geluid & VFX
-      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch (e) {}
-      // spawn explosion visual (gebruik jouw functie indien aanwezig)
-      if (typeof spawnExplosionAt === 'function') {
-        spawnExplosionAt(b.x, b.y, { scale: s });
-      } else if (typeof createExplosion === 'function') {
-        createExplosion(b.x, b.y, Math.round(24 * s));
-      }
-
-      // bom weg
+      // leuke rook + knal die je al tekent
+      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
+      // laat sprite verdwijnen na knal
       bombRain.splice(i, 1);
-      continue;
     }
 
-    // buiten beeld / fail-safe (schaal meegenomen)
-    if (b.y > (canvas.height + (40 * s))) {
-      bombRain.splice(i, 1);
-      continue;
-    }
-
-    // (optioneel) kleine versnelling: uncomment en tune als je wilt
-    // b.vy += 0.12 * s;
+    // buiten beeld/fail-safe
+    if (b.y > canvas.height + 40) bombRain.splice(i, 1);
   }
 }
-
 
 
 
@@ -5085,49 +5023,32 @@ function updateAndDrawBombVisuals(ctx) {
 
   const now = performance.now();
   const t   = now - bombVisuals.t0;
-  const W   = canvas.width;
-  const H   = canvas.height;
-  const cx  = W / 2;
-  const cy  = H / 2;
-  const s   = (typeof getScale === 'function') ? getScale() : (typeof currentScale !== 'undefined' ? currentScale : 1);
+  const W   = canvas.width, H = canvas.height;
+  const cx  = W/2, cy = H/2;
 
   // FLASH (0.5–0.8s)
   if (t >= BOMB_VFX.FLASH_START && t <= BOMB_VFX.FLASH_END) {
     const k = (t - BOMB_VFX.FLASH_START) / (BOMB_VFX.FLASH_END - BOMB_VFX.FLASH_START);
-    // r schalen we mee: hypot(W,H) is al schermafhankelijk, maar we geven wat extra controle via s
-    const r = (0.2 + 0.8 * k) * Math.hypot(W, H) * 0.55 * s;
+    const r = (0.2 + 0.8*k) * Math.hypot(W, H) * 0.55;
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
     g.addColorStop(0.00, "rgba(255,255,255,0.95)");
     g.addColorStop(0.35, "rgba(255,245,200,0.45)");
     g.addColorStop(1.00, "rgba(255,180, 80,0.0)");
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
     ctx.restore();
-    bombVisuals.ringR = r * 0.55;
-    bombVisuals.ringAlpha = 0.55;
+    bombVisuals.ringR = r * 0.55; bombVisuals.ringAlpha = 0.55;
   }
 
   // SHOCKWAVE-RING
   if (bombVisuals.ringAlpha > 0) {
-    // groeisnelheid ook schalen
-    bombVisuals.ringR += (10 * s) + bombVisuals.ringR * 0.015;
+    bombVisuals.ringR += 10 + bombVisuals.ringR * 0.015;
     bombVisuals.ringAlpha *= 0.94;
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
     ctx.strokeStyle = `rgba(255,255,255,${bombVisuals.ringAlpha})`;
-    ctx.lineWidth = 6 * s;
-    ctx.beginPath();
-    ctx.arc(cx, cy, bombVisuals.ringR, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.strokeStyle = `rgba(255,200,120,${bombVisuals.ringAlpha * 0.6})`;
-    ctx.lineWidth = 2.5 * s;
-    ctx.beginPath();
-    ctx.arc(cx, cy, bombVisuals.ringR, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(cx, cy, bombVisuals.ringR, 0, Math.PI*2); ctx.stroke();
+    ctx.strokeStyle = `rgba(255,200,120,${bombVisuals.ringAlpha*0.6})`;
+    ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(cx, cy, bombVisuals.ringR, 0, Math.PI*2); ctx.stroke();
     ctx.restore();
   }
 
@@ -5135,13 +5056,12 @@ function updateAndDrawBombVisuals(ctx) {
   if (t >= BOMB_VFX.FLAME_START && t <= BOMB_VFX.FLAME_END) {
     for (let i = 0; i < 24; i++) {
       const ang = Math.random() * Math.PI * 2;
-      const spd = randRange(2.0, 5.0) * s; // snelheid geschaald
+      const spd = randRange(2.0, 5.0);
       bombVisuals.flames.push({
-        x: cx,
-        y: cy,
+        x: cx, y: cy,
         vx: Math.cos(ang) * spd * randRange(0.7, 1.3),
         vy: Math.sin(ang) * spd * randRange(0.7, 1.3),
-        r: randRange(2.0, 4.0) * s,         // vlam radius
+        r: randRange(2.0, 4.0),
         life: randRange(500, 900),
         born: now
       });
@@ -5149,23 +5069,14 @@ function updateAndDrawBombVisuals(ctx) {
   }
   for (let i = bombVisuals.flames.length - 1; i >= 0; i--) {
     const p = bombVisuals.flames[i];
-    const age = now - p.born;
-    const k = Math.max(0, 1 - age / p.life);
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vx *= 0.992;
-    p.vy = p.vy * 0.992 + (0.025 * s); // lichte “stijg”/val schalen
-
-    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
-    grad.addColorStop(0.00, `rgba(255,235,170,${0.90 * k})`);
-    grad.addColorStop(0.35, `rgba(255,160, 60,${0.60 * k})`);
+    const age = now - p.born, k = Math.max(0, 1 - age / p.life);
+    p.x += p.vx; p.y += p.vy; p.vx *= 0.992; p.vy = p.vy * 0.992 + 0.025;
+    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*5);
+    grad.addColorStop(0.00, `rgba(255,235,170,${0.90*k})`);
+    grad.addColorStop(0.35, `rgba(255,160, 60,${0.60*k})`);
     grad.addColorStop(1.00, `rgba(255, 80,  0,0)`);
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(p.x, p.y, p.r*4, 0, Math.PI*2); ctx.fill();
     ctx.restore();
     if (age >= p.life) bombVisuals.flames.splice(i, 1);
   }
@@ -5174,10 +5085,9 @@ function updateAndDrawBombVisuals(ctx) {
   if (t >= 750 && t <= 1200) {
     for (let i = 0; i < 16; i++) {
       const ang = Math.random() * Math.PI * 2;
-      const spd = randRange(4.0, 8.0) * s;
+      const spd = randRange(4.0, 8.0);
       bombVisuals.sparks.push({
-        x: cx,
-        y: cy,
+        x: cx, y: cy,
         vx: Math.cos(ang) * spd,
         vy: Math.sin(ang) * spd,
         life: randRange(180, 320),
@@ -5186,55 +5096,40 @@ function updateAndDrawBombVisuals(ctx) {
     }
   }
   for (let i = bombVisuals.sparks.length - 1; i >= 0; i--) {
-    const sp = bombVisuals.sparks[i];
-    const age = now - sp.born;
-    const k = Math.max(0, 1 - age / sp.life);
-    sp.x += sp.vx;
-    sp.y += sp.vy;
-    sp.vx *= 0.985;
-    sp.vy = sp.vy * 0.985 + (0.015 * s);
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.strokeStyle = `rgba(255,255,180,${0.9 * k})`;
-    ctx.lineWidth = 2 * s;
-    ctx.beginPath();
-    ctx.moveTo(sp.x, sp.y);
-    ctx.lineTo(sp.x - sp.vx * 1.8, sp.y - sp.vy * 1.8);
-    ctx.stroke();
+    const s = bombVisuals.sparks[i];
+    const age = now - s.born, k = Math.max(0, 1 - age / s.life);
+    s.x += s.vx; s.y += s.vy; s.vx *= 0.985; s.vy = s.vy * 0.985 + 0.015;
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    ctx.strokeStyle = `rgba(255,255,180,${0.9*k})`; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(s.x, s.y);
+    ctx.lineTo(s.x - s.vx*1.8, s.y - s.vy*1.8); ctx.stroke();
     ctx.restore();
-    if (age >= sp.life) bombVisuals.sparks.splice(i, 1);
+    if (age >= s.life) bombVisuals.sparks.splice(i, 1);
   }
 
   // SMOKE (na-gloed)
   if (t >= BOMB_VFX.SMOKE_START) {
     for (let i = 0; i < 4; i++) {
       const ang = Math.random() * Math.PI * 2;
-      const spd = randRange(0.6, 1.4) * s;
+      const spd = randRange(0.6, 1.4);
       bombVisuals.smoke.push({
-        x: cx + Math.cos(ang) * randRange(0, 8) * s,
-        y: cy + Math.sin(ang) * randRange(0, 8) * s,
+        x: cx + Math.cos(ang) * randRange(0, 8),
+        y: cy + Math.sin(ang) * randRange(0, 8),
         vx: Math.cos(ang) * spd * 0.4,
-        vy: Math.sin(ang) * spd * 0.4 - (0.05 * s),
-        r: randRange(6, 10) * s,
+        vy: Math.sin(ang) * spd * 0.4 - 0.05,
+        r: randRange(6, 10),
         alpha: 0.35,
-        grow: randRange(0.06, 0.12) * s
+        grow: randRange(0.06, 0.12)
       });
     }
   }
   for (let i = bombVisuals.smoke.length - 1; i >= 0; i--) {
     const m = bombVisuals.smoke[i];
-    m.x += m.vx;
-    m.y += m.vy;
-    m.vx *= 0.995;
-    m.vy *= 0.995;
-    m.r += m.grow;
-    m.alpha *= 0.96;
-    ctx.save();
-    ctx.globalCompositeOperation = "source-over";
+    m.x += m.vx; m.y += m.vy; m.vx *= 0.995; m.vy *= 0.995;
+    m.r += m.grow; m.alpha *= 0.96;
+    ctx.save(); ctx.globalCompositeOperation = "source-over";
     ctx.fillStyle = `rgba(160,170,180,${m.alpha})`;
-    ctx.beginPath();
-    ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI*2); ctx.fill();
     ctx.restore();
     if (m.alpha < 0.03) bombVisuals.smoke.splice(i, 1);
   }
@@ -5245,17 +5140,12 @@ function updateAndDrawBombVisuals(ctx) {
     for (let i = 0; i < count; i++) {
       const edge = Math.floor(Math.random() * 4);
       let tx, ty;
-      if (edge === 0) { tx = Math.random() * W; ty = -20 * s; }
-      else if (edge === 1) { tx = W + 20 * s; ty = Math.random() * H; }
-      else if (edge === 2) { tx = Math.random() * W; ty = H + 20 * s; }
-      else { tx = -20 * s; ty = Math.random() * H; }
+      if (edge === 0) { tx = Math.random() * W; ty = -20; }
+      else if (edge === 1) { tx = W + 20; ty = Math.random() * H; }
+      else if (edge === 2) { tx = Math.random() * W; ty = H + 20; }
+      else { tx = -20; ty = Math.random() * H; }
       drawBolt(ctx, cx, cy, tx, ty, {
-        depth: 4,
-        roughness: 16 * s,
-        forks: 2,
-        forkChance: 0.5,
-        forkAngle: Math.PI / 5,
-        shrink: 0.65
+        depth: 4, roughness: 16, forks: 2, forkChance: 0.5, forkAngle: Math.PI/5, shrink: 0.65
       });
     }
   }
@@ -5268,6 +5158,7 @@ function updateAndDrawBombVisuals(ctx) {
     if (cb) cb();
   }
 }
+
 
 
 
@@ -6092,7 +5983,7 @@ heartLevelupImg.onload = onImageLoad;
 tenHitImg.onload = onImageLoad;
 
 
-// ✅ Dynamische schaal bij schermverandering (geconsolideerde, correcte versie)
+// ✅ Dynamische schaal bij schermverandering
 window.addEventListener('resize', () => {
   // 1️⃣ Canvas zelf aanpassen aan nieuwe schermgrootte
   if (typeof updateCanvasSize === 'function') {
@@ -6102,40 +5993,23 @@ window.addEventListener('resize', () => {
   // 2️⃣ Nieuwe schaal berekenen en opslaan
   currentScale = canvas.width / baseCanvasWidth;
 
-  // 3️⃣ Schaal opnieuw toepassen op alle hoofdelementen (helpers)
-  if (typeof applyScaleToBricks === 'function') applyScaleToBricks(currentScale);
-  if (typeof applyScaleToPaddle === 'function') applyScaleToPaddle(currentScale);
-  if (typeof applyScaleToBall === 'function') applyScaleToBall(currentScale);
-
-  // 4️⃣ Extra: effecten en bonus-intro’s (hearts, stars, bomb intro)
-  if (typeof rescaleActiveVFX === 'function') {
-    // geef voorkeur aan getScale() als aanwezig, anders currentScale
-    rescaleActiveVFX(typeof getScale === 'function' ? getScale() : currentScale);
-  }
-
-  // 5️⃣ Optioneel: FX-canvas (zoals sterren- en hartjes-intro’s)
-  if (typeof ensureFxCanvas === 'function') {
-    // ensureFxCanvas heeft intern zijn eigen resize; forceren voor zekerheid
-    ensureFxCanvas();
-  }
-
-  // 6️⃣ Basisobjecten (bal & paddle) opnieuw schalen
+  // 3️⃣ Basisobjecten (bal & paddle) opnieuw schalen
   ballRadius   = 8 * currentScale;
   paddleHeight = 20 * currentScale;
   paddleWidth  = 120 * currentScale;
   paddleY      = canvas.height - paddleHeight - (8 * currentScale);
 
-  // 7️⃣ Bricks opnieuw schalen (nogmaals, in geval applyScaleToBricks nodig is voor state)
+  // 4️⃣ Bricks opnieuw schalen
   if (typeof applyScaleToBricks === 'function') {
     applyScaleToBricks(currentScale);
   }
 
-  // 8️⃣ Eventuele actieve visuele effecten opnieuw schalen (explosies, silver FX)
+  // 5️⃣ Eventuele actieve visuele effecten opnieuw schalen (explosies, silver FX)
   if (typeof rescaleActiveVFX === 'function') {
-    rescaleActiveVFX(typeof getScale === 'function' ? getScale() : currentScale);
+    rescaleActiveVFX(currentScale);
   }
 
-  // 9️⃣ Bricks/bal opnieuw opbouwen indien jouw game dat zo doet
+  // 6️⃣ Bricks/bal opnieuw opbouwen indien jouw game dat zo doet
   if (typeof resetBricks === 'function') {
     resetBricks();
   }
@@ -6143,24 +6017,25 @@ window.addEventListener('resize', () => {
     resetBall();
   }
 
-  // 10️⃣ Paddle opnieuw tekenen met nieuwe breedte / damage-laag
+  // 7️⃣ Paddle opnieuw tekenen met nieuwe breedte / damage-laag
   if (typeof redrawPaddleCanvas === 'function') {
     redrawPaddleCanvas();
   }
 
-  // 11️⃣ Bonus / UI panel ook updaten met huidige waardes
+  // 8️⃣ Bonus / UI panel ook updaten met huidige waardes
   if (typeof updateBonusPowerPanel === 'function') {
-    // zorg dat de variabelen (starsCollected, bombsCollected, badCrossesCaught) bestaan in scope
-    updateBonusPowerPanel(typeof starsCollected !== 'undefined' ? starsCollected : 0,
-                          typeof bombsCollected !== 'undefined' ? bombsCollected : 0,
-                          typeof badCrossesCaught !== 'undefined' ? badCrossesCaught : 0);
+    updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
   }
-}); // einde window.addEventListener('resize', ...)
- 
+});
+
+
+
+
 // 🧠 Tot slot: als je een aparte loader-functie hebt, roep die één keer aan
 if (typeof loadStonefallImages === "function") {
   loadStonefallImages();
 }
+
 
 document.addEventListener("mousedown", function (e) {
   // 🛡️ Alleen reageren als er op het canvas geklikt wordt
