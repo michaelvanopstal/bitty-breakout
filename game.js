@@ -3778,28 +3778,62 @@ function spawnCoin(x, y) {
   });
 }
 
-// === Coins tekenen ===
 function drawCoins() {
   const scale = (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1);
-  for (let i = 0; i < coins.length; i++) {
+
+  // haal paddle-bounds op als je die functie hebt
+  // anders gebruiken we paddleX/paddleY/paddleWidth/paddleHeight
+  const pb = (typeof getPaddleBounds === 'function')
+    ? getPaddleBounds()
+    : {
+        left:   paddleX,
+        right:  paddleX + paddleWidth,
+        top:    paddleY,
+        bottom: paddleY + paddleHeight
+      };
+
+  for (let i = coins.length - 1; i >= 0; i--) {
     const coin = coins[i];
     if (!coin.active) continue;
 
-    // Tekenen op geschaalde grootte
+    // tekenen
     ctx.drawImage(coinImg, coin.x, coin.y, coin.size, coin.size);
 
-    // Val met geschaalde snelheid
+    // laten vallen
     coin.y += coin.dy;
 
-    // Onderkant van canvas -> inactief maken
+    // ⬇️ collision met paddle, maar nu geschaald
+    const cLeft   = coin.x;
+    const cRight  = coin.x + coin.size;
+    const cTop    = coin.y;
+    const cBottom = coin.y + coin.size;
+
+    const overlap =
+      cRight  >= pb.left  &&
+      cLeft   <= pb.right &&
+      cBottom >= pb.top   &&
+      cTop    <= pb.bottom;
+
+    if (overlap) {
+      // doe hier je reward bijv.
+      const earned = doublePointsActive ? 20 : 10;
+      score += earned;
+      updateScoreDisplay?.();
+      pointPopups.push({ x: coin.x + coin.size / 2, y: coin.y, value: "+" + earned, alpha: 1 });
+
+      coin.active = false;
+      coins.splice(i, 1);
+      continue;
+    }
+
+    // onder uit beeld → weg
     if (coin.y > canvas.height + coin.size) {
       coin.active = false;
+      coins.splice(i, 1);
     }
   }
-
-  // Ruim inactieve coins op
-  coins = coins.filter(c => c.active);
 }
+
 
 function drawFallingHearts() {
   // we lopen achteruit zodat we veilig kunnen splicen
