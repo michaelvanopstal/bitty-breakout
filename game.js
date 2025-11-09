@@ -3335,8 +3335,6 @@ function resetAllBonuses(opts = {}) {
 
   // (belangrijk:) tokens/collectables laten we staan
 }
-
-
 function resetBall() {
   // 🎯 huidige level ophalen
   const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
@@ -3350,12 +3348,12 @@ function resetBall() {
       : 0;
   const speed = baseSpeed + boost;
 
-  // 🏐 bal opnieuw op de paddle parkeren
+  // 🏐 bal opnieuw op de paddle parkeren (CENTER-BASED!)
   balls = [{
-    x: paddleX + paddleWidth / 2 - ballRadius,
-    y: paddleY - ballRadius * 2,
+    x: paddleX + paddleWidth / 2,   // midden van paddle
+    y: paddleY - ballRadius,        // net boven de paddle
     dx: 0,
-    dy: -speed,          // 🔥 startsnelheid van dit level
+    dy: -speed,                     // 🔥 startsnelheid van dit level
     radius: ballRadius,
     isMain: true
   }];
@@ -3381,9 +3379,9 @@ function resetBall() {
 
       const b = balls[0];
 
-      // zekerheid: exact boven paddle leggen
-      b.x = paddleX + paddleWidth / 2 - ballRadius;
-      b.y = paddleY - ballRadius * 2;
+      // zekerheid: exact boven paddle leggen (CENTER-BASED)
+      b.x = paddleX + paddleWidth / 2;
+      b.y = paddleY - ballRadius;
 
       // klein horizontaal zetje voor natuurlijk gevoel
       if (Math.abs(b.dx) < 0.5) {
@@ -3408,6 +3406,7 @@ function resetBall() {
     }, 200);
   }
 }
+
 
 
 
