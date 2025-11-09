@@ -4417,6 +4417,8 @@ function stopAndDisarmAllTNT() {
 
 function updateAndDrawBombRain() {
   const now = performance.now();
+  const s = getBombScale();
+
   for (let i = bombRain.length - 1; i >= 0; i--) {
     const b = bombRain[i];
     if (now < b.startAt) continue;
@@ -4426,42 +4428,42 @@ function updateAndDrawBombRain() {
 
     // tekenen
     const img = (bombTokenImg && bombTokenImg.complete) ? bombTokenImg : tntImg;
-    ctx.drawImage(img, b.x - 14, b.y - 14, 28, 28);
+    const drawSize = b.size || (28 * s);
+    ctx.drawImage(img, b.x - drawSize / 2, b.y - drawSize / 2, drawSize, drawSize);
 
     // geland?
     if (!b.exploded && b.y >= b.targetY) {
       b.exploded = true;
 
-      // veilige guard: bestaat target nog?
       if (bricks?.[b.col]?.[b.row]?.status === 1) {
-        explodeTNT(b.col, b.row);  // wist center + buren
+        explodeTNT(b.col, b.row);
       } else {
-        // fallback: zoek dichtstbijzijnde nog-actieve brick in buurt
+        // fallback: dichtstbijzijnde brick zoeken (jouw originele code)
         let best = null, bestD = Infinity;
         for (let c = 0; c < brickColumnCount; c++) {
           for (let r = 0; r < brickRowCount; r++) {
             const bx = bricks[c][r];
             if (bx?.status !== 1) continue;
-            const dx = (bx.x + brickWidth/2) - b.x;
-            const dy = (bx.y + brickHeight/2) - b.y;
-            const d2 = dx*dx + dy*dy;
+            const dx = (bx.x + brickWidth / 2) - b.x;
+            const dy = (bx.y + brickHeight / 2) - b.y;
+            const d2 = dx * dx + dy * dy;
             if (d2 < bestD) { bestD = d2; best = { c, r }; }
           }
         }
         if (best) explodeTNT(best.c, best.r);
       }
 
-      // leuke rook + knal die je al tekent
       try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
-      // laat sprite verdwijnen na knal
       bombRain.splice(i, 1);
+      continue;
     }
 
     // buiten beeld/fail-safe
-    if (b.y > canvas.height + 40) bombRain.splice(i, 1);
+    if (b.y > canvas.height + 40 * s) {
+      bombRain.splice(i, 1);
+    }
   }
 }
-
 
 
 function drawFlyingCoins() {
