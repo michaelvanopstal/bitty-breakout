@@ -475,9 +475,12 @@ function chooseSpawnX(cfg) {
 }
 
 
+// === REPLACE ensureFxCanvas() WITH THIS BLOCK ===
 function ensureFxCanvas() {
-  if (fxCanvas) return;
-  fxCanvas = document.createElement('canvas');
+  if (typeof document === 'undefined') return;
+  if (window.fxCanvas && window.fxCtx) return;
+
+  window.fxCanvas = document.createElement('canvas');
   fxCanvas.style.position = 'fixed';
   fxCanvas.style.top = '0';
   fxCanvas.style.left = '0';
@@ -486,15 +489,31 @@ function ensureFxCanvas() {
   fxCanvas.style.pointerEvents = 'none';
   fxCanvas.style.zIndex = '9999';
   document.body.appendChild(fxCanvas);
-  fxCtx = fxCanvas.getContext('2d');
 
-  const resizeFx = () => { fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; };
+  window.fxCtx = fxCanvas.getContext('2d');
+
+  const resizeFx = () => {
+    const DPR = Math.max(1, window.devicePixelRatio || 1);
+    // set canvas internal pixel size to DPR * css pixels
+    fxCanvas.width  = Math.round(window.innerWidth * DPR);
+    fxCanvas.height = Math.round(window.innerHeight * DPR);
+    // Keep CSS pixel size (style.width/height) intact; scale context so drawing code can use CSS pixels
+    fxCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  };
+
+  // initial size and on-resize handling
   addEventListener('resize', resizeFx);
   resizeFx();
 }
 
+// === ADD IF MISSING: getScale() helper ===
 function getScale() {
-  return (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+  // Als je currentScale al ergens set (resize-handler), return dat; anders fallback
+  if (typeof currentScale !== 'undefined' && currentScale) return currentScale;
+  // fallback op basis van schermgrootte (je kunt dit aanpassen)
+  const base = Math.min(window.innerWidth, window.innerHeight);
+  // base 800px => scale 1.0; smaller => smaller; larger => proportioneel
+  return Math.max(0.5, Math.min(2.0, base / 800));
 }
 
 
