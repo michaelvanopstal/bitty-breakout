@@ -671,12 +671,12 @@ function renderBittyBombIntro() {
   const now = performance.now();
   const W = canvas.width, H = canvas.height;
   const cx = W / 2, cy = H / 2;
-  const s = getBombScale(); // 👈 schaal pakken
+  const s  = getBombScale(); // jouw schaal
 
   if (bittyBomb.phase === "countdown") {
     const elapsed = now - bittyBomb.start;
-    const secs = Math.floor(elapsed / 1000);
-    const remain = Math.max(0, bittyBomb.countdownFrom - secs);
+    const secs    = Math.floor(elapsed / 1000);
+    const remain  = Math.max(0, bittyBomb.countdownFrom - secs);
     const blinkOn = (Math.floor(elapsed / 500) % 2) === 0;
 
     const title = "BITTY BOMB  ACTIVATED !";
@@ -684,6 +684,7 @@ function renderBittyBombIntro() {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
+    // titel
     ctx.font = `bold ${40 * s}px Arial`;
     ctx.fillStyle = blinkOn ? "rgba(180,180,180,1)" : "rgba(120,120,120,1)";
     ctx.strokeStyle = "rgba(50,50,50,0.7)";
@@ -691,23 +692,43 @@ function renderBittyBombIntro() {
     ctx.strokeText(title, cx, cy - 60 * s);
     ctx.fillText(title,  cx, cy - 60 * s);
 
-    // cirkel rond het cijfer
+    // cirkel
     ctx.beginPath();
     ctx.arc(cx, cy + 10 * s, 28 * s, 0, Math.PI * 2);
     ctx.lineWidth = 6 * s;
     ctx.strokeStyle = blinkOn ? "rgba(200,200,200,0.9)" : "rgba(160,160,160,0.9)";
     ctx.stroke();
 
+    // nummer
     ctx.font = `bold ${34 * s}px Arial`;
     ctx.fillStyle = "rgba(220,220,220,1)";
     ctx.fillText(String(Math.max(1, remain)), cx, cy + 10 * s);
 
+    // ondertekst
     ctx.font = `bold ${22 * s}px Arial`;
     ctx.fillStyle = "rgba(170,170,170,1)";
     ctx.fillText(`${title} ${Math.max(1, remain)}.`, cx, cy + 60 * s);
     ctx.restore();
+
+    // 👇 dit stukje miste bij jou
+    if (remain <= 0) {
+      bittyBomb.phase  = "done";
+      bittyBomb.active = false;
+
+      // eerst de grote flits / vlammen
+      startBombVisuals(() => {
+        // als die klaar is → echte regen
+        startBombRain(bittyBomb.queuedRain);
+      });
+
+      // optioneel dondergeluid zoals in je andere file
+      try {
+        (thunderSounds?.[Math.floor(Math.random() * thunderSounds.length)] || thunder1).play();
+      } catch {}
+    }
   }
 }
+
 
 // ❤️ full-screen heart celebration
 let heartCelebration = {
