@@ -698,6 +698,20 @@ function renderBittyBombIntro() {
   }
 }
 
+// algemene schaal voor effecten
+function getEffectScale() {
+  const s = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+  return s;
+}
+
+// algemene schaal voor tekst / popups
+function getTextScale() {
+  const s = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+  // tekst iets minder agressief laten meegaan
+  return Math.max(0.7, Math.min(1.15, s));
+}
+
+
 // ❤️ full-screen heart celebration
 let heartCelebration = {
   active: false,
