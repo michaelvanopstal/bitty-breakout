@@ -4401,26 +4401,45 @@ function stopAndDisarmAllTNT() {
   }
 }
 
+// === VERVANG updateAndDrawBombRain() MET DEZE ===
 function updateAndDrawBombRain() {
   const now = performance.now();
+  const s = (typeof getScale === 'function') ? getScale() : (typeof currentScale !== 'undefined' ? currentScale : 1);
+
   for (let i = bombRain.length - 1; i >= 0; i--) {
     const b = bombRain[i];
-    if (now < b.startAt) continue;
 
-    // vallen
+    // wacht tot starttijd
+    if (b.startAt && now < b.startAt) continue;
+
+    // beweging (let: b.vy zou bij spawn al met schaal gezet moeten zijn)
     b.y += b.vy;
 
-    // tekenen
-    const img = (bombTokenImg && bombTokenImg.complete) ? bombTokenImg : tntImg;
-    ctx.drawImage(img, b.x - 14, b.y - 14, 28, 28);
+    // teken grootte geschaald
+    const size = Math.max(6, Math.round(28 * s));
+    const img = (typeof bombTokenImg !== 'undefined' && bombTokenImg && bombTokenImg.complete) ? bombTokenImg : tntImg;
+    // centreer sprite op b.x / b.y
+    ctx.drawImage(img, b.x - size / 2, b.y - size / 2, size, size);
+
+    // zorg dat targetY correct geschaald is (fallback voor oudere entries)
+    if (typeof b._targetScaled === 'undefined') {
+      // als spawn code targetY al had, trust it; anders recompute op basis van brick
+      if (!b.targetY && bricks?.[b.col]?.[b.row]) {
+        b.targetY = bricks[b.col][b.row].y - (14 * s);
+      } else if (b.targetY) {
+        // markeer dat target in pixels nou als geschaald wordt beschouwd
+        // (we kunnen niet weten of het al geschaald is, dus we markeren gewoon)
+      }
+      b._targetScaled = true;
+    }
 
     // geland?
-    if (!b.exploded && b.y >= b.targetY) {
+    if (!b.exploded && b.y >= (typeof b.targetY !== 'undefined' ? b.targetY : canvas.height)) {
       b.exploded = true;
 
       // veilige guard: bestaat target nog?
       if (bricks?.[b.col]?.[b.row]?.status === 1) {
-        explodeTNT(b.col, b.row);  // wist center + buren
+        explodeTNT(b.col, b.row);  // wis center + buren (gebruik jouw bestaande functie)
       } else {
         // fallback: zoek dichtstbijzijnde nog-actieve brick in buurt
         let best = null, bestD = Infinity;
@@ -4428,25 +4447,40 @@ function updateAndDrawBombRain() {
           for (let r = 0; r < brickRowCount; r++) {
             const bx = bricks[c][r];
             if (bx?.status !== 1) continue;
-            const dx = (bx.x + brickWidth/2) - b.x;
-            const dy = (bx.y + brickHeight/2) - b.y;
-            const d2 = dx*dx + dy*dy;
+            const dx = (bx.x + brickWidth / 2) - b.x;
+            const dy = (bx.y + brickHeight / 2) - b.y;
+            const d2 = dx * dx + dy * dy;
             if (d2 < bestD) { bestD = d2; best = { c, r }; }
           }
         }
         if (best) explodeTNT(best.c, best.r);
       }
 
-      // leuke rook + knal die je al tekent
-      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch {}
-      // laat sprite verdwijnen na knal
+      // geluid & VFX
+      try { tntExplodeSound.currentTime = 0; tntExplodeSound.play(); } catch (e) {}
+      // spawn explosion visual (gebruik jouw functie indien aanwezig)
+      if (typeof spawnExplosionAt === 'function') {
+        spawnExplosionAt(b.x, b.y, { scale: s });
+      } else if (typeof createExplosion === 'function') {
+        createExplosion(b.x, b.y, Math.round(24 * s));
+      }
+
+      // bom weg
       bombRain.splice(i, 1);
+      continue;
     }
 
-    // buiten beeld/fail-safe
-    if (b.y > canvas.height + 40) bombRain.splice(i, 1);
+    // buiten beeld / fail-safe (schaal meegenomen)
+    if (b.y > (canvas.height + (40 * s))) {
+      bombRain.splice(i, 1);
+      continue;
+    }
+
+    // (optioneel) kleine versnelling: uncomment en tune als je wilt
+    // b.vy += 0.12 * s;
   }
 }
+
 
 
 
