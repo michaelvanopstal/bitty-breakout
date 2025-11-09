@@ -474,6 +474,14 @@ function chooseSpawnX(cfg) {
   return x;
 }
 
+// === BOMMEN SCALE UPDATE v1 ===
+function getBombScale() {
+  // gebruik je globale schaal als die er is
+  if (typeof getScale === "function") return getScale();
+  if (typeof currentScale === "number" && currentScale > 0) return currentScale;
+  return 1;
+}
+
 
 function ensureFxCanvas() {
   if (fxCanvas) return;
