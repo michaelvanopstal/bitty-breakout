@@ -909,12 +909,12 @@ function drawHeartCelebration() {
   }
 }
 
-// 👇 zet deze bij je andere rescale helpers
-function rescaleHeartCelebration(scale) {
+const rescaleHeartCelebration = (scale) => {
   if (heartCelebration && heartCelebration.active) {
     heartCelebration.scale = scale;
   }
-}
+};
+
 
 function rescaleActiveVFX(scale) {
   if (Array.isArray(explosions)) {
