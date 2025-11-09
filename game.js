@@ -2938,26 +2938,31 @@ function drawPointPopups() {
 
   ctx.globalAlpha = 1; // Transparantie resetten
 }
+
 function resetBricks() {
+  // 1) schaal updaten op basis van huidige canvas
   currentScale = canvas.width / baseCanvasWidth;   // 👈 global bijwerken
   if (typeof applyScaleToBricks === "function") {
     applyScaleToBricks(currentScale);
   }
-  // ... rest zoals je al had ...
 
-  // 3. level-def ophalen
+  // ✨ extra: ook bal- en paddle-maten opnieuw zetten
+  ballRadius   = 8  * currentScale;
+  paddleHeight = 20 * currentScale;
+  // paddleY opnieuw net boven de onderkant
+  paddleY = canvas.height - paddleHeight - (8 * currentScale);
+
+  // 2) level-def ophalen
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
   const currentMap = (def && Array.isArray(def.map)) ? def.map : [];
   const p = def?.params || {};
 
-  // 4. paddle-breedte uit level, maar nu ook schalen
-  //    jouw originele range was 60..140, die houden we aan maar in "basis-px"
+  // 3) paddle-breedte uit level, maar nu ook schalen
   const targetPaddleBaseWidth = Math.max(60, Math.min(140, p.paddleWidth ?? 100));
-  // schaal toepassen
   const targetPaddleWidth = targetPaddleBaseWidth * currentScale;
   paddleBaseWidth = targetPaddleWidth;
 
-  // 5. event. size-effect opruimen
+  // 4) event. size-effect opruimen
   if (paddleSizeEffect) {
     stopPaddleSizeEffect();
   } else {
@@ -2973,7 +2978,7 @@ function resetBricks() {
     }
   }
 
-  // 6. alle bricks resetten volgens de level-map
+  // 5) alle bricks resetten volgens de level-map
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
@@ -2994,12 +2999,10 @@ function resetBricks() {
         b.hitsNeeded = 2;
         b.hasDroppedBag = false;
       } else if (brickType === "tenhit") {
-        // jouw 10x-blok
         b.hits = 0;
         b.hitsNeeded = 10;
         delete b.hasDroppedBag;
       } else {
-        // gewone blokken: rommel opruimen
         delete b.hits;
         delete b.hitsNeeded;
         delete b.hasDroppedBag;
@@ -3022,17 +3025,17 @@ function resetBricks() {
     }
   }
 
-  // 7. bommenregen opruimen bij levelstart (voortgang teller behouden)
+  // 6) bommenregen opruimen bij levelstart (voortgang teller behouden)
   if (typeof bombRain !== 'undefined') bombRain = [];
 
-  // 8. drops resetten
+  // 7) drops resetten
   if (typeof fallingDrops !== 'undefined') fallingDrops = [];
   if (typeof dropsSpawned !== 'undefined') dropsSpawned = 0;
   if (typeof lastDropAt !== 'undefined') lastDropAt = performance.now();
 
   const lvl = level || 1;
 
-  // 9. start drops voor dit level
+  // 8) start drops voor dit level (waarden worden in startDrops nog geschaald)
   startDrops({
     continuous: true,
     minIntervalMs: (lvl <= 3) ? 1200 : (lvl <= 10) ? 900 : 800,
@@ -3055,11 +3058,12 @@ function resetBricks() {
     minSpacing: 70
   });
 
-  // 10. panel in sync
+  // 9) panel in sync
   if (typeof updateBonusPowerPanel === "function") {
     updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
   }
 }
+
 
 
 
