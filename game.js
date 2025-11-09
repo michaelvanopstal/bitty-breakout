@@ -4640,22 +4640,20 @@ function checkCoinCollision() {
 
       const earned = doublePointsActive ? 20 : 10;
       score += earned;
-      updateScoreDisplay(); // 👈 aangepaste regel
+      updateScoreDisplay(); // score bijwerken
 
+      // geluid afspelen
       coinSound.currentTime = 0;
       coinSound.play();
 
-      pointPopups.push({
-        x: coin.x,
-        y: coin.y,
-        value: "+" + earned,
-        alpha: 1
-      });
+      // schaalbare popup gebruiken
+      pushPointPopup(coin.x + coin.radius, coin.y, "+" + earned);
     } else if (coinBottom > canvas.height) {
       coin.active = false;
     }
   });
 }
+
 
 function collisionDetection() {
   // 🔧 Instelling: hoe vaak moet hij "watch out..." zeggen (1x per X hits)
