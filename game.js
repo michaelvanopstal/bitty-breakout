@@ -3855,8 +3855,7 @@ function spawnCoin(x, y) {
 function drawCoins() {
   const scale = (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1);
 
-  // haal paddle-bounds op als je die functie hebt
-  // anders gebruiken we paddleX/paddleY/paddleWidth/paddleHeight
+  // paddle-bounds ophalen (voorkeur) of fallback naar globale paddle-waarden
   const pb = (typeof getPaddleBounds === 'function')
     ? getPaddleBounds()
     : {
@@ -3870,13 +3869,13 @@ function drawCoins() {
     const coin = coins[i];
     if (!coin.active) continue;
 
-    // tekenen
+    // coin tekenen
     ctx.drawImage(coinImg, coin.x, coin.y, coin.size, coin.size);
 
     // laten vallen
     coin.y += coin.dy;
 
-    // ⬇️ collision met paddle, maar nu geschaald
+    // collision met paddle
     const cLeft   = coin.x;
     const cRight  = coin.x + coin.size;
     const cTop    = coin.y;
@@ -3889,11 +3888,12 @@ function drawCoins() {
       cTop    <= pb.bottom;
 
     if (overlap) {
-      // doe hier je reward bijv.
       const earned = doublePointsActive ? 20 : 10;
       score += earned;
       updateScoreDisplay?.();
-      pointPopups.push({ x: coin.x + coin.size / 2, y: coin.y, value: "+" + earned, alpha: 1 });
+
+      // 🔸 schaalbare popup, gecentreerd op de coin
+      pushPointPopup(coin.x + coin.size / 2, coin.y, "+" + earned);
 
       coin.active = false;
       coins.splice(i, 1);
@@ -3907,6 +3907,7 @@ function drawCoins() {
     }
   }
 }
+
 
 
 function drawFallingHearts() {
