@@ -5640,141 +5640,6 @@ for (let i = pxpBags.length - 1; i >= 0; i--) {
 if (machineGunActive && !machineGunCooldownActive) {
   // 📍 Instelbare offset tussen paddle en gun
   const verticalOffset = machineGunYOffset;
-  const minY = 0;                  // bovenste limiet
-  const maxY = paddleY - 10;       // optioneel: niet te dicht bij paddle
-
-  // Targetposities voor X en Y
-  const targetX = paddleX + paddleWidth / 2 - 30;
-  let targetY = paddleY - verticalOffset;
-  targetY = Math.max(minY, targetY);
-  targetY = Math.min(targetY, maxY);
-
-  const followSpeed = machineGunDifficulty === 1 ? 1 : machineGunDifficulty === 2 ? 2 : 3;
-
-  // 🟢 Volg paddle horizontaal
-  if (machineGunGunX < targetX) machineGunGunX += followSpeed;
-  else if (machineGunGunX > targetX) machineGunGunX -= followSpeed;
-
-  // 🟢 Volg paddle verticaal
-  if (machineGunGunY < targetY) machineGunGunY += followSpeed;
-  else if (machineGunGunY > targetY) machineGunGunY -= followSpeed;
-
- // 🔫 Teken geweer (geschaald)
-const gunSize = 60 * (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1);
-ctx.drawImage(machinegunGunImg, machineGunGunX, machineGunGunY, gunSize, gunSize);
-
-// 🔥 Vuur kogels (geschaald)
-const bulletSpeed = 6 * (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1);
-const bulletRadius = 4 * (typeof currentScale === "number" && currentScale > 0 ? currentScale : 1);
-
-  // 🔥 Vuur kogels
-  if (Date.now() - machineGunLastShot > machineGunBulletInterval && machineGunShotsFired < 30) {
-    machineGunBullets.push({
-      x: machineGunGunX + 30,
-      y: machineGunGunY + 60,
-      dy: 6
-    });
-    machineGunShotsFired++;
-    machineGunLastShot = Date.now();
-    shootSound.currentTime = 0;
-    shootSound.play();
-  }
-
-// 💥 Verwerk kogels
-for (let i = machineGunBullets.length - 1; i >= 0; i--) {
-  const bullet = machineGunBullets[i];
-
-  // schaalfactor ophalen
-  const s = (typeof getScale === "function") ? getScale() : 1;
-
-  // snelheid updaten (val terug op vy als dy niet bestaat)
-  const dy = (typeof bullet.dy === "number") ? bullet.dy : (bullet.vy ?? 0);
-  bullet.y += dy * s; // 🔸 snelheid ook schaalbaar
-
-  // teken kogel (straal schaalt mee)
-  const radius = 4 * s; // 🔸 standaard 4, nu met schaal
-  ctx.beginPath();
-  ctx.arc(bullet.x, bullet.y, radius, 0, Math.PI * 2);
-  ctx.fillStyle = "red";
-  ctx.fill();
-
-  // 🎯 Check botsing met paddle
-  if (
-    bullet.y >= paddleY &&
-    bullet.x >= paddleX &&
-    bullet.x <= paddleX + paddleWidth
-  ) {
-    if (invincibleActive) {
-      // 🛡️ tijdens sterren-bonus: geen schade — kogel weg (of reflecteer)
-      machineGunBullets.splice(i, 1);
-      continue;
-    }
-
-    // ... jouw bestaande paddle-schade of hit-logica hieronder ...
-  }
-
-  // ⬇️ Verwijderen als kogel buiten beeld is
-  if (bullet.y > canvas.height + radius || bullet.y < -radius) {
-    machineGunBullets.splice(i, 1);
-  }
-}
-
-
-    const hitX = bullet.x - paddleX;
-    const radius = 6;
-
-    if (!paddleDamageZones.some(x => Math.abs(x - bullet.x) < paddleWidth / 10)) {
-      paddleDamageZones.push(bullet.x);
-
-      // ❗ GAT MAKEN
-      paddleCtx.globalCompositeOperation = 'destination-out';
-      paddleCtx.beginPath();
-      paddleCtx.arc(hitX, paddleHeight / 2, radius, 0, Math.PI * 2);
-      paddleCtx.fill();
-      paddleCtx.globalCompositeOperation = 'source-over';
-    }
-
-    machineGunBullets.splice(i, 1);
-    continue;
-  }
-
-  // buiten beeld? weg ermee
-  if (bullet.y > canvas.height) {
-    machineGunBullets.splice(i, 1);
-    continue;
-  }
-}
-
-
-  // ⏳ Start cooldown als alle 30 kogels zijn afgevuurd
-  if (machineGunShotsFired >= 30 && machineGunBullets.length === 0 && !machineGunCooldownActive) {
-    machineGunCooldownActive = true;
-    machineGunStartTime = Date.now();
-  }
-}
-
-if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCooldownTime) {
-  machineGunCooldownActive = false;
-  machineGunActive = false;
-  paddleDamageZones = [];
-
-  // ✅ +500 punten en UI direct bijwerken
-  score += 500;
-  if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
-
-  pointPopups.push({
-    x: paddleX + paddleWidth / 2,
-    y: canvas.height - 30,
-    value: "+500",
-    alpha: 1
-  });
-
-  resetPaddle(true, true); // ✅ geen ball reset, geen centrering
-}
-
-if (machineGunActive && !machineGunCooldownActive) {
-  // 📍 Instelbare offset tussen paddle en gun
-  const verticalOffset = machineGunYOffset;
   const minY = 0;
   const maxY = paddleY - 10;
 
@@ -5881,7 +5746,12 @@ if (machineGunCooldownActive && Date.now() - machineGunStartTime > machineGunCoo
   // ✅ +500 punten en popup
   score += 500;
   if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
-  pushPointPopup(paddleX + paddleWidth / 2, canvas.height - 30, "+500");
+  pointPopups.push({
+    x: paddleX + paddleWidth / 2,
+    y: canvas.height - 30,
+    value: "+500",
+    alpha: 1
+  });
 
   resetPaddle(true, true); // geen ball reset, geen centrering
 }
@@ -5980,8 +5850,6 @@ if (showGameOver) {
 
   try { fadeOutAndStop(starAuraSound, 200); } catch (e) {}
 }
-
-
 
 
   // 🎇 Paddle-explosie tekenen
