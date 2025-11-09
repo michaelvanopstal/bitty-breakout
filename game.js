@@ -148,6 +148,11 @@ function getPaddleBounds() {
   };
 }
 
+const sc = (typeof getScale === "function") ? getScale() : 1;
+rescaleBombSystems?.(sc);
+rescaleStarsSystems?.(sc);
+
+
 // ⭐ SFX: ster gepakt
 const starCatchSfx = new Audio("starbutton.mp3");
 starCatchSfx.preload = "auto";
@@ -533,6 +538,9 @@ function startStarPowerCelebration() {
   starPowerFX.stars = [];
   starPowerFX.particles = [];
 
+  // 👇 hier pakken we jouw huidige game-scale
+  starPowerFX.scale = (typeof getScale === "function") ? getScale() : 1;
+
   const W = fxCanvas.width, H = fxCanvas.height;
   const N = 10;
 
@@ -570,8 +578,8 @@ function renderStarPowerFX() {
   fxCtx.fillStyle = "rgba(0,0,0,0.12)";
   fxCtx.fillRect(0, 0, W, H);
 
-  // ... 👇 vanaf hier blijft alles hetzelfde als jouw versie ...
-  // ik laat de rest van je code hieronder staan, ongewijzigd:
+  // 👇 globale scale voor dit effect
+  const gS = (typeof starPowerFX.scale === "number") ? starPowerFX.scale : 1;
 
   // Sterren + stardust
   for (const s of starPowerFX.stars) {
@@ -584,7 +592,9 @@ function renderStarPowerFX() {
     fxCtx.save();
     fxCtx.translate(s.x, s.y);
     fxCtx.rotate(s.r);
-    const size = 56 * s.scale;
+
+    // 👇 hier zat jouw vaste 56, nu * gS
+    const size = 56 * s.scale * gS;
 
     const grd = fxCtx.createRadialGradient(0, 0, size * 0.15, 0, 0, size * 0.9);
     grd.addColorStop(0.00, `rgba(${AURA_RGB},0.30)`);
@@ -613,6 +623,7 @@ function renderStarPowerFX() {
     }
   }
 
+  // particles
   for (let i = starPowerFX.particles.length - 1; i >= 0; i--) {
     const p = starPowerFX.particles[i];
     p.age += dt;
@@ -625,12 +636,13 @@ function renderStarPowerFX() {
     fxCtx.globalCompositeOperation = 'lighter';
     fxCtx.globalAlpha = a * 0.95;
 
-    const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2);
+    // 👇 ook particle-radius mee schalen
+    const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2 * gS);
     grd.addColorStop(0, `rgba(${AURA_SPARK_RGB},1)`);
     grd.addColorStop(1, `rgba(${AURA_RGB},0)`);
     fxCtx.fillStyle = grd;
     fxCtx.beginPath();
-    fxCtx.arc(p.x, p.y, p.r * 3.2, 0, Math.PI * 2);
+    fxCtx.arc(p.x, p.y, p.r * 3.2 * gS, 0, Math.PI * 2);
     fxCtx.fill();
     fxCtx.restore();
   }
@@ -642,7 +654,9 @@ function renderStarPowerFX() {
   fxCtx.save();
   fxCtx.globalAlpha = alpha;
   const title = "Bitty STAR POWER!";
-  fxCtx.font = `bold ${Math.round(Math.min(W, H) * 0.08)}px Arial`;
+
+  // 👇 font ook mee laten groeien
+  fxCtx.font = `bold ${Math.round(Math.min(W, H) * 0.08 * gS)}px Arial`;
   fxCtx.textAlign = "center";
   fxCtx.textBaseline = "middle";
 
@@ -664,6 +678,7 @@ function renderStarPowerFX() {
     fxCtx.clearRect(0, 0, W, H);
   }
 }
+
 
 function renderBittyBombIntro() {
   if (!bittyBomb.active) return;
@@ -726,6 +741,12 @@ function renderBittyBombIntro() {
         (thunderSounds?.[Math.floor(Math.random() * thunderSounds.length)] || thunder1).play();
       } catch {}
     }
+  }
+}
+
+function rescaleStarsSystems(scale) {
+  if (starPowerFX && starPowerFX.active) {
+    starPowerFX.scale = scale;
   }
 }
 
