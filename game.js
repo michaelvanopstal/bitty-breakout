@@ -481,6 +481,14 @@ function getBombScale() {
   if (typeof currentScale === "number" && currentScale > 0) return currentScale;
   return 1;
 }
+// === BOMMEN SCALE UPDATE v1 (hook) ===
+function rescaleBombSystems(scale) {
+  // voor nu hoeven we alleen actieve visuals opnieuw te schalen
+  // bommen die al vallen hebben hun eigen size, dus die laten we met rust
+  if (typeof rescaleActiveVFX === "function") {
+    rescaleActiveVFX(scale); // je had deze al voor explosions e.d. :contentReference[oaicite:9]{index=9}
+  }
+}
 
 
 function ensureFxCanvas() {
