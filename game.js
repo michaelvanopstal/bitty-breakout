@@ -6529,7 +6529,6 @@ function drawElectricBursts() {
 }
 
 
-
 function getRandomElectricColor() {
   const colors = [
     "rgba(255, 255, 255, ALPHA)", // wit
@@ -6540,9 +6539,8 @@ function getRandomElectricColor() {
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
-
+// 💥 zilveren steensplinters, nu schaal-aware
 function triggerSilverExplosion(x, y) {
-  // veilig de schaal ophalen
   let es = 1;
   if (typeof getEffectScale === "function") {
     es = getEffectScale();
@@ -6564,14 +6562,13 @@ function triggerSilverExplosion(x, y) {
   }
 }
 
-
-
+// ⚡ dit stuk moet in een functie
+function triggerThunderAndLightning() {
   // 🎧 Dondergeluid direct bij start van de explosie
- const sound = thunderSounds[Math.floor(Math.random() * thunderSounds.length)];
- sound.currentTime = 0;
- sound.volume = 0.8;
- sound.play();
-
+  const sound = thunderSounds[Math.floor(Math.random() * thunderSounds.length)];
+  sound.currentTime = 0;
+  sound.volume = 0.8;
+  sound.play();
 
   // Witte flitsen + elektriciteit over canvas
   for (let i = 0; i < 15; i++) {
@@ -6642,6 +6639,7 @@ function triggerSilverExplosion(x, y) {
     }
   }
 }
+
 
 
 
