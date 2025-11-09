@@ -5123,20 +5123,22 @@ function spawnExtraBall(originBall) {
       ? lvl.params.ballSpeed
       : DEFAULT_BALL_SPEED;
 
-  // 🔸 Geef de bestaande bal een kleine afwijking
-  originBall.dx = -1;
+  // 🔸 Geef de bestaande bal een kleine afwijking naar links
+  originBall.dx = -1 * (Math.random() * 1.5 + 0.5);
   originBall.dy = -baseSpeed;
 
-  // 🔸 Voeg een tweede bal toe die recht omhoog gaat
+  // 🔸 Voeg een tweede bal toe met lichte afwijking naar rechts
   balls.push({
+    // CENTER-BASED: gebruik exact dezelfde x/y (het middelpunt)
     x: originBall.x,
     y: originBall.y,
-    dx: 0,
+    dx: Math.random() * 1.5 + 0.5,
     dy: -baseSpeed,
     radius: ballRadius,
     isMain: false
   });
 }
+
 
 
 function spawnPxpBag(x, y) {
