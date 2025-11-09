@@ -818,14 +818,46 @@ function drawHeartCelebration() {
   }
 }
 
+// === REPLACE / EXTEND rescaleActiveVFX(scale) FUNCTION ===
 function rescaleActiveVFX(scale) {
-  if (Array.isArray(explosions)) {
-    explosions.forEach(e => {
-      if (!e._baseRadius) e._baseRadius = e.radius;
-      e.radius = e._baseRadius * scale;
+  // accept either explicit scale param of gebruik getScale()
+  const s = (typeof scale !== 'undefined') ? scale : getScale();
+
+  // Hearts: herbereken size en beweging
+  if (window.heartCelebration && Array.isArray(heartCelebration.hearts)) {
+    heartCelebration.hearts.forEach(h => {
+      if (typeof h._baseSize === 'undefined') h._baseSize = h.size;
+      h.size = h._baseSize * s;
+      // Herbereken velocities relatief aan schaal (optioneel: behoud richting)
+      if (typeof h._baseDx === 'undefined') { h._baseDx = h.dx / (h._baseSize || 1); }
+      if (typeof h._baseDy === 'undefined') { h._baseDy = h.dy / (h._baseSize || 1); }
+      h.dx = (h._baseDx || (Math.random()-0.5)*1.2) * (h._baseSize || 40) * 0.02 * s;
+      h.dy = (h._baseDy || (2 + Math.random()*2.5)) * s;
+      // rotSpeed ook schalen
+      if (typeof h._baseRotSpeed === 'undefined') h._baseRotSpeed = h.rotSpeed;
+      h.rotSpeed = h._baseRotSpeed * s;
     });
   }
-  // hier kun je later electricBursts of andere VFX bijzetten
+
+  // Explosions / particles (basisvoorbeeld)
+  if (window.explosions && Array.isArray(explosions)) {
+    explosions.forEach(e => {
+      if (typeof e._baseRadius === 'undefined') e._baseRadius = e.radius;
+      e.radius = e._baseRadius * s;
+    });
+  }
+
+  // Stars: we bewaren baseSize in object; render gebruikt getScale(), dus meestal niets nodig.
+  if (window.starPowerFX && Array.isArray(starPowerFX.stars)) {
+    starPowerFX.stars.forEach(st => {
+      if (typeof st._baseSize === 'undefined') st._baseSize = st._baseSize || 56;
+      // je kunt velocity/amp opslaan en schalen indien gewenst:
+      if (typeof st._baseVx === 'undefined') st._baseVx = st.vx;
+      if (typeof st._baseVy === 'undefined') st._baseVy = st.vy;
+      st.vx = st._baseVx * s;
+      st.vy = st._baseVy * s;
+    });
+  }
 }
 
 
