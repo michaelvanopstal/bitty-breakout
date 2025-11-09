@@ -729,37 +729,35 @@ let heartCelebration = {
   hearts: []
 };
 
+// === REPLACE / PATCH heart celebration init inside triggerHeartCelebration() ===
 function triggerHeartCelebration() {
-  // zorg dat overlay er is
   ensureFxCanvas();
+  const DPR = Math.max(1, window.devicePixelRatio || 1);
+  const W = fxCanvas.width / DPR;
+  const H = fxCanvas.height / DPR;
+  const s = getScale();
 
-  // 🎵 speel nu jouw nieuwe bitty-level-up mp3
-  try {
-    bittyLevelUpSfx.currentTime = 0;
-    bittyLevelUpSfx.play();
-  } catch (e) {}
-
-  const W = fxCanvas.width;
-  const H = fxCanvas.height;
+  // init heartCelebration structure if missing
+  if (!window.heartCelebration) {
+    window.heartCelebration = { active: false, hearts: [], t0: 0 };
+  }
 
   heartCelebration.active = true;
   heartCelebration.t0 = performance.now();
   heartCelebration.hearts = [];
 
-  // 👇 nieuw: kort het levelup-plaatje laten zien
-  heartCelebration.showMascot = true;
-  heartCelebration.mascotStart = performance.now();
-
-  const count = 50;
+  const count = 50; // aantal hearts, kan omlaag voor performance op mobiel
   for (let i = 0; i < count; i++) {
+    const baseSize = (32 + Math.random() * 26); // basis in px
     heartCelebration.hearts.push({
       x: Math.random() * W,
       y: -40 - Math.random() * 200,
-      dx: (Math.random() - 0.5) * 1.2,
-      dy: 2 + Math.random() * 2.5,
-      size: 32 + Math.random() * 26,
+      dx: (Math.random() - 0.5) * 1.2,     // CSS px/frame (we schalen bij set)
+      dy: (2 + Math.random() * 2.5),       // CSS px/frame
+      size: baseSize * s,                  // DIRECT geschaald met getScale()
+      _baseSize: baseSize,                 // bewaren voor later rescale
       rot: Math.random() * Math.PI * 2,
-      rotSpeed: (-1 + Math.random() * 2) * 0.04,
+      rotSpeed: (-1 + Math.random() * 2) * 0.04 * s,
       pulse: Math.random() * Math.PI * 2
     });
   }
