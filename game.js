@@ -850,6 +850,16 @@ function drawHeartCelebration() {
   }
 }
 
+function rescaleActiveVFX(scale) {
+  if (Array.isArray(explosions)) {
+    explosions.forEach(e => {
+      if (!e._baseRadius) e._baseRadius = e.radius;
+      e.radius = e._baseRadius * scale;
+    });
+  }
+  // hier kun je later electricBursts of andere VFX bijzetten
+}
+
 
 function showLevelBanner(text) {
   levelMessageText = text;
