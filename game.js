@@ -215,18 +215,22 @@ let rockWarnTriggerIndex = Math.random() < 0.5 ? 1 : 3; // 1e of 3e keer
 const DEFAULT_BALL_SPEED = 9;
 
 
-// eerste bal nu ook met scale-afmetingen
+
 const currentLevelIndex = level - 1;
-const initialSpeedBoost = 0; // als je later uit LEVELS wilt halen kun je dat hier doen
+const initialSpeedBoost = 0; // eventueel via LEVELS[currentLevelIndex]?.params
+
+const s = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
 
 balls.push({
+  // 🎯 Center-based: midden van het canvas
   x: canvas.width / 2,
-  y: canvas.height - paddleHeight - (10 * scaleFactor),
+  y: canvas.height - paddleHeight - (10 * s) - ballRadius, // net boven de paddle
   dx: 0,
   dy: -(DEFAULT_BALL_SPEED + initialSpeedBoost),
-  radius: ballRadius,
+  radius: ballRadius,  // jouw geschaalde balradius
   isMain: true
 });
+
 
 
 // 🎉 Level overlay + confetti/vuurwerk (ENKEL HIER de levelMessage-variabelen)
