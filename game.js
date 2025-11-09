@@ -2312,7 +2312,11 @@ function updateAndDrawDrops() {
 
     // basisval en optionele snelheidsvelden (magnet kan vx/vy invullen)
     d.t = (d.t || 0) + (dt / 16.7);
-    d.y += (d.dy || (dropConfig?.speed || 2.5));
+
+    // 👇 snelheid komt uit dropConfig en is al geschaald in startDrops()
+    const dyBase = (dropConfig?.speed || 2.5);
+    d.y += (d.dy || dyBase);
+
     if (d.vx) d.x += d.vx;
     if (d.vy) d.y += d.vy;
 
@@ -2322,7 +2326,10 @@ function updateAndDrawDrops() {
 
     // catch/miss detectie
     const pb = getPaddleBounds(); // {left,right,top,bottom}
-    const size = 28;              // generieke AABB voor overlap
+
+    // 👇 generieke hitbox nu óók geschaald
+    const hitScale = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+    const size = 28 * hitScale;
     const l = d.x - size / 2, r = d.x + size / 2, t = d.y - size / 2, b = d.y + size / 2;
 
     const overlap =
@@ -2343,6 +2350,7 @@ function updateAndDrawDrops() {
     }
   }
 }
+
 
 
 
