@@ -4067,6 +4067,8 @@ function triggerStonefall(originX, originY) {
 
 
 function drawFallingStones() {
+  const scale = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+
   for (let i = fallingStones.length - 1; i >= 0; i--) {
     const s = fallingStones[i];
     if (!s.active) {
@@ -4074,11 +4076,14 @@ function drawFallingStones() {
       continue;
     }
 
+    // 👇 geschaalde size per frame
+    const size = (s.size || 80) * scale;
+
     // Tekenen
     if (s.img && s.img.complete) {
-      ctx.drawImage(s.img, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+      ctx.drawImage(s.img, s.x - size / 2, s.y - size / 2, size, size);
     } else {
-      ctx.drawImage(stoneLargeImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+      ctx.drawImage(stoneLargeImg, s.x - size / 2, s.y - size / 2, size, size);
     }
 
     // ===== beweging =====
@@ -4088,13 +4093,17 @@ function drawFallingStones() {
     const prevY = s.prevY;
     s.prevX = s.x;
     s.prevY = s.y;
-    s.y += s.dy; // val
+
+    // val met schaal (als s.dy de 'basis' is)
+    const dy = (s.dy != null ? s.dy : 3) * scale;
+    s.y += dy;
 
     // ---- Botsing met paddle ----
     if (s.framesInside == null) s.framesInside = 0;
 
-    const baseRadius = s.size * 0.42;
-    const isLarge = s.size >= 100;
+    // radius en “large” nu op basis van de geschaalde size
+    const baseRadius = size * 0.42;
+    const isLarge = size >= 100 * scale;
 
     // ⛏️ lees SOFT uit centrale settings
     const hitboxScale         = isLarge ? STONE_COLLISION.hitboxScaleLarge : STONE_COLLISION.hitboxScaleSmall;
@@ -4104,7 +4113,7 @@ function drawFallingStones() {
 
     const r = baseRadius * hitboxScale;
 
-    // Paddle-bounds
+    // Paddle-bounds (paddle is al geschaald elders)
     const paddleLeft   = paddleX;
     const paddleTop    = paddleY;
     const paddleW      = paddleWidth;
@@ -4120,7 +4129,7 @@ function drawFallingStones() {
     const extRight  = paddleRight  + r;
     const extTop    = paddleTop    - r;
     const extBottom = paddleBottom + r;
-    const dx = s.x - prevX, dy = s.y - prevY;
+    const dx = s.x - prevX, dySeg = s.y - prevY;
     let t0 = 0, t1 = 1;
     const clip = (p, q) => {
       if (p === 0) return q >= 0;
@@ -4133,29 +4142,29 @@ function drawFallingStones() {
     if (
       clip(-dx, prevX - extLeft) &&
       clip( dx, extRight - prevX) &&
-      clip(-dy, prevY - extTop) &&
-      clip( dy, extBottom - prevY)
+      clip(-dySeg, prevY - extTop) &&
+      clip( dySeg, extBottom - prevY)
     ) sweptHit = (t0 <= t1);
 
     // 2) Basisvoorwaarden
-    const falling = s.dy > 0;
+    const falling = dy > 0;
     const prevBottom = prevY + r;
     const nowBottom  = s.y + r;
-    const enterTol   = Math.max(4, Math.min(16, Math.abs(dy) * 1.5));
+    const enterTol   = Math.max(4, Math.min(16, Math.abs(dySeg) * 1.5));
     const enteredFromAbove = (prevBottom <= paddleTop + enterTol);
 
     // 3) Overlapmetrics
     const stoneLeft  = s.x - r;
     const stoneRight = s.x + r;
     const overlapX   = Math.max(0, Math.min(stoneRight, paddleRight) - Math.max(stoneLeft, paddleLeft));
-    const minOverlapSoft = Math.max(6, Math.min(r * minHorizOverlapFrac, paddleW * 0.5)); // drempel in SOFT
+    const minOverlapSoft = Math.max(6 * scale, Math.min(r * minHorizOverlapFrac, paddleW * 0.5)); // drempel in SOFT
 
     // ========= Verticale hit-pad (SOFT) =========
-    const minPenetrationPx = Math.max(4, Math.min(r * 0.50, r * minPenetrationFrac, paddleH * 0.8));
+    const minPenetrationPx = Math.max(4 * scale, Math.min(r * 0.50, r * minPenetrationFrac, paddleH * 0.8));
     const penetrates       = nowBottom >= (paddleTop + minPenetrationPx);
 
     // kleine guard tegen rand-graze
-    const edgeGuardV    = Math.min(Math.max(4, paddleW * 0.06), 14);
+    const edgeGuardV    = Math.min(Math.max(4 * scale, paddleW * 0.06), 14 * scale);
     const centerInsideV = (s.x >= paddleLeft + edgeGuardV) && (s.x <= paddleRight - edgeGuardV);
 
     const cornerRejectV = intersects && (overlapX < Math.min(r * 0.28, paddleW * 0.25))
@@ -4170,11 +4179,11 @@ function drawFallingStones() {
       && !cornerRejectV;
 
     // ========= Side-hit pad (SOFT) =========
-    const sideBandTol = Math.min(12, Math.max(6, r * 0.25)); // verticale marge boven/onder paddle
+    const sideBandTol = Math.min(12 * scale, Math.max(6 * scale, r * 0.25)); // verticale marge boven/onder paddle
     const centerInVerticalBand =
       (s.y >= paddleTop - sideBandTol) && (s.y <= paddleBottom + sideBandTol);
 
-    const minOverlapSide = Math.max(8, Math.min(r * 0.45, paddleW * 0.6));
+    const minOverlapSide = Math.max(8 * scale, Math.min(r * 0.45, paddleW * 0.6));
     const wideEnoughSide = overlapX >= minOverlapSide;
 
     const cornerRejectS = (intersects || sweptHit) && (overlapX < Math.min(r * 0.22, paddleW * 0.20));
@@ -4192,7 +4201,7 @@ function drawFallingStones() {
     if (contactNow) {
       const stoneBottom = s.y + r;
       // pas counts als de steen echt bij de paddle is
-      if (stoneBottom >= paddleTop - 2) {
+      if (stoneBottom >= paddleTop - 2 * scale) {
         s.framesInside++;
       } else {
         s.framesInside = 0;
@@ -4209,11 +4218,11 @@ function drawFallingStones() {
         const paddleRight = paddleX + paddleWidth;
         const rel = ((s.x - paddleLeft) / (paddleRight - paddleLeft)) - 0.5; // -0.5..+0.5
 
-        s.vy = -Math.max(6, Math.abs(s.vy || 6));
+        s.vy = -Math.max(6 * scale, Math.abs(s.vy || (6 * scale)));
         s.vx = (s.vx || 0) + rel * 2;
 
-        const r = s.size / 2;
-        s.y = paddleY - r - 1;
+        const rr = size / 2;
+        s.y = paddleY - rr - 1;
 
         stoneHitOverlayTimer = 10;
       } else {
@@ -4233,7 +4242,7 @@ function drawFallingStones() {
     }
 
     // onder uit beeld → vergruizen
-    if (s.y - s.size / 2 > canvas.height) {
+    if (s.y - size / 2 > canvas.height) {
       spawnStoneDebris(s.x, canvas.height - 10);
       s.active = false;
     }
@@ -4245,6 +4254,7 @@ function drawFallingStones() {
     stoneClearRequested = false;
   }
 }
+
 
 
 
