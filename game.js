@@ -493,6 +493,11 @@ function ensureFxCanvas() {
   resizeFx();
 }
 
+function getScale() {
+  return (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+}
+
+
 function startStarPowerCelebration() {
   ensureFxCanvas();
 
