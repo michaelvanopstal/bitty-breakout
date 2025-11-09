@@ -6457,21 +6457,25 @@ function getRandomElectricColor() {
 
 
 function triggerSilverExplosion(x, y) {
+  const es = (typeof getEffectScale === "function") ? getEffectScale() : 1;
+
   // Zilveren steensplinters vanuit middelpunt
   for (let i = 0; i < 20; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 5 + 2;
+    const speed = (Math.random() * 5 + 2) * es;  // snelheid mee schalen
 
     stoneDebris.push({
       x: x,
       y: y,
       dx: Math.cos(angle) * speed,
       dy: Math.sin(angle) * speed,
-      radius: Math.random() * 3 + 2,
+      radius: (Math.random() * 3 + 2) * es, // grootte mee schalen
       alpha: 1,
       type: "silver"
     });
   }
+}
+
 
   // 🎧 Dondergeluid direct bij start van de explosie
  const sound = thunderSounds[Math.floor(Math.random() * thunderSounds.length)];
