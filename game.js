@@ -516,12 +516,30 @@ function getScale() {
   return Math.max(0.5, Math.min(2.0, base / 800));
 }
 
-
-// === PATCH star init inside startStarPowerCelebration() ===
-function startStarPowerCelebration(x,y) {
+// ✅ STAR POWER START
+function startStarPowerCelebration(x, y) {
   ensureFxCanvas();
-  const s = getScale();
-  if (!window.starPowerFX) starPowerFX = { stars: [], active: true, t0: performance.now() };
+  const s = (typeof getScale === 'function') ? getScale() : 1;
+
+  // maak globale container als die er nog niet is
+  if (!window.starPowerFX) {
+    window.starPowerFX = {
+      active: true,
+      t0: performance.now(),
+      duration: 2000,
+      stars: [],
+      particles: [],
+      showTitle: true,
+      titleText: "Bitty STAR POWER!"
+    };
+  } else {
+    // reset basis
+    starPowerFX.active = true;
+    starPowerFX.t0 = performance.now();
+    starPowerFX.stars = [];
+    // laat eventueel particles staan of leeg ze ook:
+    starPowerFX.particles = [];
+  }
 
   const N = 40;
   for (let i = 0; i < N; i++) {
@@ -532,112 +550,127 @@ function startStarPowerCelebration(x,y) {
       y: y + (Math.random() - 0.5) * 80,
       vx: (Math.random() - 0.5) * 1.8,
       vy: -1 - Math.random() * 2,
-      scale: baseScale,            // bewaar base scale
-      _baseSize: baseSize,         // basis px voor deze soort
+      scale: baseScale,
+      _baseSize: baseSize,
       t: Math.random() * 1000
     });
   }
-  starPowerFX.active = true;
 }
 
-
-// === PATCH parts of renderStarPowerFX() where size/text computed ===
+// ✅ STAR POWER RENDER
 function renderStarPowerFX(now) {
   if (!window.starPowerFX || !starPowerFX.active) return;
   ensureFxCanvas();
+
   const DPR = Math.max(1, window.devicePixelRatio || 1);
   const W = fxCanvas.width / DPR;
   const H = fxCanvas.height / DPR;
-  const gScale = getScale();
+  const gScale = (typeof getScale === 'function') ? getScale() : 1;
 
-  // clear with some translucency if needed
-  fxCtx.clearRect(0,0,W,H);
+  const tElapsed = now - starPowerFX.t0;
+  const duration = starPowerFX.duration || 2000;
 
+  // achtergrond leegmaken voor deze overlay
+  fxCtx.clearRect(0, 0, W, H);
+
+  // 1) de “grote” sterren
   for (let i = starPowerFX.stars.length - 1; i >= 0; i--) {
     const st = starPowerFX.stars[i];
     st.x += st.vx * gScale;
     st.y += st.vy * gScale;
     st.t += 16;
 
-    const size = Math.round(st._baseSize * st.scale * gScale); // schaal toegepast
-    // teken ster (voorbeeld: eenvoudige filled circle of sprite)
+    const size = Math.round(st._baseSize * st.scale * gScale);
+
     fxCtx.save();
     fxCtx.translate(st.x, st.y);
     fxCtx.rotate((st.t * 0.002) % (Math.PI * 2));
-    fxCtx.beginPath();
     fxCtx.globalAlpha = Math.max(0, 1 - (st.t / 1200));
+    fxCtx.beginPath();
     fxCtx.arc(0, 0, size / 2, 0, Math.PI * 2);
     fxCtx.fillStyle = "#fff";
     fxCtx.fill();
     fxCtx.restore();
 
-    // remove when off-screen / faded
+    // opruimen
     if (st.y < -100 || st.y > H + 100 || st.t > 2400) {
       starPowerFX.stars.splice(i, 1);
     }
   }
 
-  // Tekst/titel (bijv. "Stars!") - maak fontgrootte schaalbaar
-  if (starPowerFX.showTitle) {
-    const baseFont = Math.round(Math.min(W, H) * 0.06); // 6% van min-dim
-    fxCtx.font = `bold ${Math.max(14, Math.round(baseFont * gScale))}px Arial`;
-    fxCtx.textAlign = 'center';
-    fxCtx.fillStyle = 'white';
-    fxCtx.fillText(starPowerFX.titleText || 'Stars!', W / 2, H * 0.15);
+  // 2) optionele “particles”-laag — alleen tekenen als die bestaat
+  if (Array.isArray(starPowerFX.particles) && starPowerFX.particles.length) {
+    // we hebben in jouw snippet geen dt, dus we maken een simpele:
+    const dt = 16; // ~1 frame
+    for (let i = starPowerFX.particles.length - 1; i >= 0; i--) {
+      const p = starPowerFX.particles[i];
+      p.age += dt;
+      if (p.age >= p.life) {
+        starPowerFX.particles.splice(i, 1);
+        continue;
+      }
+      const a = 1 - (p.age / p.life);
+      p.x += p.vx * (dt / 1000);
+      p.y += p.vy * (dt / 1000);
+
+      fxCtx.save();
+      fxCtx.globalCompositeOperation = 'lighter';
+      fxCtx.globalAlpha = a * 0.95;
+
+      // als je AURA_* constants hebt, gebruik die; anders fallback
+      const AURA_SPARK_RGB = window.AURA_SPARK_RGB || "255,255,255";
+      const AURA_RGB = window.AURA_RGB || "255,255,255";
+
+      const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2 * gScale);
+      grd.addColorStop(0, `rgba(${AURA_SPARK_RGB},1)`);
+      grd.addColorStop(1, `rgba(${AURA_RGB},0)`);
+      fxCtx.fillStyle = grd;
+      fxCtx.beginPath();
+      fxCtx.arc(p.x, p.y, p.r * 3.2 * gScale, 0, Math.PI * 2);
+      fxCtx.fill();
+      fxCtx.restore();
+    }
   }
-}
 
-  for (let i = starPowerFX.particles.length - 1; i >= 0; i--) {
-    const p = starPowerFX.particles[i];
-    p.age += dt;
-    if (p.age >= p.life) { starPowerFX.particles.splice(i, 1); continue; }
-    const a = 1 - (p.age / p.life);
-    p.x += p.vx * (dt / 1000);
-    p.y += p.vy * (dt / 1000);
+  // 3) titel / tekst met fade in/out
+  const fadeIn  = Math.min(1, tElapsed / 300);
+  const fadeOut = Math.min(1, Math.max(0, (duration - tElapsed) / 300));
+  const alpha   = Math.min(fadeIn, fadeOut);
 
+  if (starPowerFX.showTitle && alpha > 0) {
     fxCtx.save();
-    fxCtx.globalCompositeOperation = 'lighter';
-    fxCtx.globalAlpha = a * 0.95;
+    fxCtx.globalAlpha = alpha;
+    const title = starPowerFX.titleText || "Bitty STAR POWER!";
+    const fontSize = Math.round(Math.min(W, H) * 0.08 * gScale);
+    fxCtx.font = `bold ${fontSize}px Arial`;
+    fxCtx.textAlign = "center";
+    fxCtx.textBaseline = "middle";
 
-    const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2);
-    grd.addColorStop(0, `rgba(${AURA_SPARK_RGB},1)`);
-    grd.addColorStop(1, `rgba(${AURA_RGB},0)`);
-    fxCtx.fillStyle = grd;
-    fxCtx.beginPath();
-    fxCtx.arc(p.x, p.y, p.r * 3.2, 0, Math.PI * 2);
-    fxCtx.fill();
+    const AURA_RGB = window.AURA_RGB || "255,255,255";
+    const AURA_HEX = window.AURA_HEX || "#ffffff";
+    const AURA_EDGE_HEX = window.AURA_EDGE_HEX || "#ffdd88";
+
+    // glow-laag
+    fxCtx.fillStyle = `rgba(${AURA_RGB},0.22)`;
+    for (let g = 0; g < 5; g++) {
+      fxCtx.fillText(title, W / 2, H * 0.25);
+    }
+
+    fxCtx.fillStyle = AURA_HEX;
+    fxCtx.strokeStyle = AURA_EDGE_HEX;
+    fxCtx.lineWidth = 4;
+    fxCtx.strokeText(title, W / 2, H * 0.25);
+    fxCtx.fillText(title, W / 2, H * 0.25);
     fxCtx.restore();
   }
 
-  const fadeIn = Math.min(1, tElapsed / 300);
-  const fadeOut = Math.min(1, Math.max(0, (starPowerFX.duration - tElapsed) / 300));
-  const alpha = Math.min(fadeIn, fadeOut);
-
-  fxCtx.save();
-  fxCtx.globalAlpha = alpha;
-  const title = "Bitty STAR POWER!";
-  fxCtx.font = `bold ${Math.round(Math.min(W, H) * 0.08)}px Arial`;
-  fxCtx.textAlign = "center";
-  fxCtx.textBaseline = "middle";
-
-  fxCtx.fillStyle = `rgba(${AURA_RGB},0.22)`;
-  for (let g = 0; g < 5; g++) {
-    fxCtx.fillText(title, W / 2, H * 0.25);
-  }
-
-  fxCtx.fillStyle = AURA_HEX;
-  fxCtx.strokeStyle = AURA_EDGE_HEX;
-  fxCtx.lineWidth = 4;
-  fxCtx.strokeText(title, W / 2, H * 0.25);
-  fxCtx.fillText(title, W / 2, H * 0.25);
-
-  fxCtx.restore();
-
-  if (tElapsed >= starPowerFX.duration) {
+  // 4) einde effect
+  if (tElapsed >= duration) {
     starPowerFX.active = false;
     fxCtx.clearRect(0, 0, W, H);
   }
 }
+
 
 // === PATCH renderBittyBombIntro() font/size usage ===
 function renderBittyBombIntro(now) {
