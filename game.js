@@ -3524,39 +3524,65 @@ function drawLivesOnCanvas() {
 
 function drawPaddleFlags() {
   if (flagsOnPaddle && Date.now() - flagTimer < 20000) {
-    ctx.drawImage(vlagImgLeft, paddleX - 5, paddleY - 40, 45, 45);
-    ctx.drawImage(vlagImgRight, paddleX + paddleWidth - 31, paddleY - 40, 45, 45);
+    const s = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+
+    // vlag-afmetingen
+    const flagW = 45 * s;
+    const flagH = 45 * s;
+    const flagOffsetY = 40 * s;
+
+    // links
+    ctx.drawImage(
+      vlagImgLeft,
+      paddleX - 5 * s,
+      paddleY - flagOffsetY,
+      flagW,
+      flagH
+    );
+
+    // rechts
+    ctx.drawImage(
+      vlagImgRight,
+      paddleX + paddleWidth - (31 * s),
+      paddleY - flagOffsetY,
+      flagW,
+      flagH
+    );
   } else if (flagsOnPaddle && Date.now() - flagTimer >= 20000) {
     flagsOnPaddle = false;
   }
 }
 
-
 function shootFromFlags() {
-  const coinSpeed = 8;
+  const s = (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
+  const coinSpeed = 8 * s;
+  const flagOffsetY = 40 * s;
 
-  // Linkervlag
+  // Linkervlag (ongeveer midden van de vlag)
   flyingCoins.push({
-    x: paddleX - 5 + 12,
-    y: paddleY - 40,
+    x: paddleX - 5 * s + (45 * s) / 2,
+    y: paddleY - flagOffsetY,
     dy: -coinSpeed,
     active: true
   });
 
   // Rechtervlag
   flyingCoins.push({
-    x: paddleX + paddleWidth - 19 + 12,
-   y: paddleY - 40,
+    x: paddleX + paddleWidth - (31 * s) + (45 * s) / 2,
+    y: paddleY - flagOffsetY,
     dy: -coinSpeed,
     active: true
   });
 
   // 🔫 Speel laser-geluid als bonus actief is
   if (flagsOnPaddle && Date.now() - flagTimer < 20000) {
-    laserSound.currentTime = 0;
-    laserSound.play();
+    if (typeof laserSound !== "undefined" && laserSound) {
+      laserSound.currentTime = 0;
+      laserSound.play();
+    }
   }
 }
+
 
 function checkFlyingCoinHits() {
   flyingCoins.forEach((coin) => {
