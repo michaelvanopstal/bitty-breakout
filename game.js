@@ -152,6 +152,11 @@ const sc = (typeof getScale === "function") ? getScale() : 1;
 rescaleBombSystems?.(sc);
 rescaleStarsSystems?.(sc);
 
+const sc = (typeof getScale === "function") ? getScale() : 1;
+rescaleBombSystems?.(sc);
+rescaleStarsSystems?.(sc);
+rescaleHeartCelebration?.(sc); // 👈 deze erbij
+
 
 // ⭐ SFX: ster gepakt
 const starCatchSfx = new Audio("starbutton.mp3");
@@ -751,11 +756,13 @@ function rescaleStarsSystems(scale) {
 }
 
 
+
 // ❤️ full-screen heart celebration
 let heartCelebration = {
   active: false,
   t0: 0,
-  hearts: []
+  hearts: [],
+  scale: 1
 };
 
 function triggerHeartCelebration() {
@@ -775,7 +782,10 @@ function triggerHeartCelebration() {
   heartCelebration.t0 = performance.now();
   heartCelebration.hearts = [];
 
-  // 👇 nieuw: kort het levelup-plaatje laten zien
+  // 👇 scale van dit moment pakken
+  heartCelebration.scale = (typeof getScale === "function") ? getScale() : 1;
+
+  // kort het levelup-plaatje laten zien
   heartCelebration.showMascot = true;
   heartCelebration.mascotStart = performance.now();
 
@@ -786,7 +796,7 @@ function triggerHeartCelebration() {
       y: -40 - Math.random() * 200,
       dx: (Math.random() - 0.5) * 1.2,
       dy: 2 + Math.random() * 2.5,
-      size: 32 + Math.random() * 26,
+      size: (32 + Math.random() * 26), // basis, schalen we in draw
       rot: Math.random() * Math.PI * 2,
       rotSpeed: (-1 + Math.random() * 2) * 0.04,
       pulse: Math.random() * Math.PI * 2
@@ -802,6 +812,9 @@ function drawHeartCelebration() {
   const W = fxCanvas.width;
   const H = fxCanvas.height;
 
+  // globale scale van dit effect
+  const gS = (typeof heartCelebration.scale === "number") ? heartCelebration.scale : 1;
+
   // duur van de animatie
   const DURATION = 4000; // 4 sec
   if (elapsed > DURATION) {
@@ -815,8 +828,8 @@ function drawHeartCelebration() {
 
   // canvas leegmaken
   fxCtx.clearRect(0, 0, W, H);
- 
-  // 👇 NIEUW: jouw levelup-plaatje 2 seconden tonen op originele grootte
+
+  // 👉 levelup-plaatje tonen (nu ook geschaald)
   if (
     heartCelebration.showMascot &&
     typeof heartLevelupImg !== "undefined" &&
@@ -828,8 +841,8 @@ function drawHeartCelebration() {
       const a = 1 - popElapsed / POP_DURATION; // fade-out
 
       // originele grootte
-      let drawW = heartLevelupImg.width;
-      let drawH = heartLevelupImg.height;
+      let drawW = heartLevelupImg.width * gS;
+      let drawH = heartLevelupImg.height * gS;
 
       // veiligheidscheck: als het groter is dan canvas, dan passend maken
       const maxW = W * 0.9;
@@ -850,7 +863,7 @@ function drawHeartCelebration() {
       fxCtx.drawImage(
         heartLevelupImg,
         (W - drawW) / 2,
-        (H - drawH) / 2 + 20, // mag je nog tunen
+        (H - drawH) / 2 + 20 * gS, // ook dit een beetje mee
         drawW,
         drawH
       );
@@ -859,7 +872,6 @@ function drawHeartCelebration() {
       heartCelebration.showMascot = false;
     }
   }
-
 
   // hartjes tekenen
   for (const h of heartCelebration.hearts) {
@@ -872,11 +884,14 @@ function drawHeartCelebration() {
     // we RESPAWNEN NIET meer → als ze uit beeld zijn, tekenen we ze gewoon niet
     if (h.y > H + 80) continue;
 
+    // geschaalde grootte
+    const heartSize = h.size * gS;
+
     // aura
     fxCtx.save();
     fxCtx.translate(h.x, h.y);
 
-    const auraR = h.size * (0.55 + 0.15 * Math.sin(h.pulse));
+    const auraR = heartSize * (0.55 + 0.15 * Math.sin(h.pulse));
     const auraGrad = fxCtx.createRadialGradient(0, 0, 4, 0, 0, auraR);
     fxCtx.globalAlpha = 0.7 * fade;
     auraGrad.addColorStop(0, "rgba(255,180,220,0.9)");
@@ -893,8 +908,15 @@ function drawHeartCelebration() {
     fxCtx.translate(h.x, h.y);
     fxCtx.rotate(h.rot);
     fxCtx.globalAlpha = fade;
-    fxCtx.drawImage(heartImg, -h.size / 2, -h.size / 2, h.size, h.size);
+    fxCtx.drawImage(heartImg, -heartSize / 2, -heartSize / 2, heartSize, heartSize);
     fxCtx.restore();
+  }
+}
+
+// 👇 zet deze bij je andere rescale helpers
+function rescaleHeartCelebration(scale) {
+  if (heartCelebration && heartCelebration.active) {
+    heartCelebration.scale = scale;
   }
 }
 
