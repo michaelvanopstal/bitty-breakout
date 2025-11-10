@@ -3084,6 +3084,11 @@ function resetBricks(opts = {}) {
   if (typeof rescaleStarsSystems === "function") {
     rescaleStarsSystems(currentScale);
   }
+  // 📱 als we op mobiel zitten: bricks extra opschalen
+  if (window.innerWidth <= 768) {
+    brickWidth  = customBrickBaseWidth  * currentScale * 1.15;
+    brickHeight = customBrickBaseHeight * currentScale * 1.15;
+  }
 
   // ✨ extra: ook bal- en paddle-maten opnieuw zetten
   ballRadius   = 8  * currentScale;
