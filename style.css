@@ -520,7 +520,6 @@ body {
 
   #chatbox {
     position: absolute !important;
-    left: 50% !important;
     transform: translateX(-50%) !important;
     bottom: 10px !important;   /* onderaan midden */
     right: auto !important;    /* desktop-rechts uitzetten */
