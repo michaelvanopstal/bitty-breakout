@@ -456,7 +456,7 @@ body {
     background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
-    z-index: 6000;
+    z-index:1;
   }
 
   /* 🔥 hier komt de nauwkeurige positionering */
