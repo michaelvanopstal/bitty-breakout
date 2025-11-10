@@ -516,8 +516,7 @@ body {
 
 @media (max-width: 600px) {
   body {
-    overflow: visible;   /* laat dingen onder het scherm toe */
-
+  overflow: visible;   /* laat dingen onder het scherm toe */
     
 /* ===== Chat Box styles ===== */
 #chatbox{
