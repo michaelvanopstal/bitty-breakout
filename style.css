@@ -512,22 +512,16 @@ body {
     font-size: 14px !important;
     z-index: 4000 !important;
   }
-}
-
-
-/* 📱 alleen verplaatsen op kleine schermen */
-@media (max-width: 600px) {
-  /* anders wordt hij soms afgekapt */
-  body {
-    overflow: visible;
-  }
 
   #chatbox {
-    position: absolute !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    bottom: 10px !important;   /* onderaan midden */
-    right: auto !important;    /* desktop-rechts uitzetten */
+  position: absolute;
+  top: 90px;
+  right: 30px;
+  left: auto;
+  text-align: right;
+  z-index: 999;
+
+
   }
 }
 
