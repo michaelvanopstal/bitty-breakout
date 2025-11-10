@@ -3090,6 +3090,12 @@ function resetBricks(opts = {}) {
     brickHeight = customBrickBaseHeight * currentScale * 1.15;
   }
 
+    if (window.innerWidth <= 768) {
+    paddleWidth = paddleWidth * 1.1;  // 10% breder
+    redrawPaddleCanvas?.();
+  }
+
+
   // ✨ extra: ook bal- en paddle-maten opnieuw zetten
   ballRadius   = 8  * currentScale;
   paddleHeight = 20 * currentScale;
