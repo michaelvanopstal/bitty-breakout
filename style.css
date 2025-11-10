@@ -496,6 +496,6 @@ body {
 
 #game-container {
   background: url("mobile.png") no-repeat center center;
-  background-size: 110%; /* groter maken */
+  background-size: 100%; /* groter maken */
  }
 }
