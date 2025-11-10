@@ -514,112 +514,150 @@ body {
   }
 }
 
+
+
+  /* 📥 Plaats chatbox onder het mobiele scherm */
 @media (max-width: 600px) {
-  body {
-  overflow: visible;   /* laat dingen onder het scherm toe */
-    
-/* ===== Chat Box styles ===== */
-#chatbox{
+  #chatbox {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: calc(-8vh + var(--frame-bottom-space)) !important;
+    width: 85vw !important;       /* past zich aan de breedte aan */
+    height: 40vh !important;      /* hoogte afhankelijk van scherm */
+    max-width: 420px !important;  /* limiet voor iets grotere telefoons */
+    z-index: 4900 !important;
+  }
+  
+    /* ===== Chat Box styles (schaalbaar) ===== */
+#chatbox {
   position: fixed;
-  right: 40px;
-  top: 320px;
-  width: 300px;
-  height: 360px;
+  right: 3vw;              /* 40px → ±3% van viewportbreedte */
+  top: 20vh;               /* 160px → ±20% van viewporthoogte */
+  width: 25vw;             /* 300px → ±25% van viewportbreedte */
+  height: 45vh;            /* 360px → ±45% van viewporthoogte */
   display: flex;
   flex-direction: column;
   z-index: 9998;
   font-family: system-ui, Arial, sans-serif;
-  border-radius: 18px;
-  background: linear-gradient(#f6a53b,#e27e22);
-  box-shadow: 0 8px 20px rgba(0,0,0,.35), inset 0 0 0 4px #c76b12, inset 0 0 0 8px #ffc85a;
+  border-radius: 2vw;      /* 18px → ±2% van viewportbreedte */
+  background: linear-gradient(#f6a53b, #e27e22);
+  box-shadow:
+    0 0.8vw 2vw rgba(0, 0, 0, 0.35),
+    inset 0 0 0 0.4vw #c76b12,
+    inset 0 0 0 0.8vw #ffc85a;
   overflow: hidden;
   max-width: 90vw;
 }
-#chatbox .chatbox-header{
-  height:42px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 12px 0 16px;
-  background: linear-gradient(#ffd56a,#ffb12b);
-  color:#7a2b00;
-  font-weight:800;
-  letter-spacing:.5px;
-  border-bottom:2px solid #b66414;
-}
-#chatClearBtn{
-  border:none;
-  background:rgba(0,0,0,.08);
-  color:#7a2b00;
-  width:28px;height:28px; border-radius:8px; cursor:pointer;
-}
-#chatClearBtn:hover{ background:rgba(0,0,0,.16); }
 
-#chatMessages{
+#chatbox .chatbox-header {
+  height: 6vh;             /* 42px → ±6% van viewporthoogte */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2vw 0 2vw;    /* 12–16px → ±2% */
+  background: linear-gradient(#ffd56a, #ffb12b);
+  color: #7a2b00;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-bottom: 0.25vh solid #b66414;
+}
+
+#chatClearBtn {
+  border: none;
+  background: rgba(0, 0, 0, 0.08);
+  color: #7a2b00;
+  width: 4vw;
+  height: 4vw;
+  border-radius: 1vw;
+  cursor: pointer;
+}
+#chatClearBtn:hover { background: rgba(0, 0, 0, 0.16); }
+
+#chatMessages {
   flex: 1;
-  padding: 10px 10px 6px 10px;
+  padding: 1vh 1vw 0.5vh 1vw;
   background: #6a0f0f;
   color: #ffe9c4;
-  border-top: 2px solid #ffcf62;
-  border-bottom: 2px solid #b66414;
+  border-top: 0.3vh solid #ffcf62;
+  border-bottom: 0.3vh solid #b66414;
   overflow-y: auto;
   overflow-x: auto;
   word-wrap: break-word;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
-.chat-msg{
-  background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,200,90,.35);
-  padding:6px 8px;
-  margin-bottom:6px;
-  border-radius:10px;
-  line-height:1.2;
-  box-shadow: inset 0 0 8px rgba(0,0,0,.15);
+
+.chat-msg {
+  background: rgba(255, 255, 255, 0.06);
+  border: 0.15vh solid rgba(255, 200, 90, 0.35);
+  padding: 0.6vh 0.8vw;
+  margin-bottom: 0.6vh;
+  border-radius: 1vw;
+  line-height: 1.2;
+  box-shadow: inset 0 0 1vw rgba(0, 0, 0, 0.15);
 }
-.chat-meta{ font-size:11px; opacity:.8; margin-bottom:2px; color:#ffdfa0; }
-.chat-text{ font-size:13px; }
+
+.chat-meta { font-size: 1.3vh; opacity: 0.8; margin-bottom: 0.3vh; color: #ffdfa0; }
+.chat-text { font-size: 1.5vh; }
+
 .chat-thumb {
   display: block;
-  max-width: 120px;
-  max-height: 120px;
-  margin-top: 6px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.3);
+  max-width: 20vw;
+  max-height: 20vw;
+  margin-top: 1vh;
+  border-radius: 1vw;
+  border: 0.1vw solid rgba(255, 255, 255, 0.3);
   object-fit: cover;
-  box-shadow: 0 0 4px rgba(0,0,0,0.4);
+  box-shadow: 0 0 0.4vw rgba(0, 0, 0, 0.4);
 }
-#chatForm { display:flex; gap:6px; padding:8px; background: linear-gradient(#ffb545,#f08a25); border-top:2px solid #b66414; }
-#chatForm input{
+
+#chatForm {
+  display: flex;
+  gap: 1vw;
+  padding: 1vh;
+  background: linear-gradient(#ffb545, #f08a25);
+  border-top: 0.3vh solid #b66414;
+}
+
+#chatForm input {
   flex: 1;
   min-width: 0;
-  height: 34px;
-  border: none; outline: none;
-  border-radius: 10px;
-  padding: 0 10px;
+  height: 5vh;
+  border: none;
+  outline: none;
+  border-radius: 1vw;
+  padding: 0 1vw;
   background: #fff5e3;
 }
-#chatInput{
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+#chatName { flex: 0 0 15vw; }
+#chatForm button {
+  flex: 0 0 7vw;
+  border: none;
+  cursor: pointer;
+  border-radius: 1vw;
+  background: #7a2b00;
+  color: #ffd56a;
+  font-weight: 700;
 }
-#chatName{ flex:0 0 98px; }
-#chatForm button{
-  flex:0 0 46px;
-  border:none; cursor:pointer;
-  border-radius:10px;
-  background:#7a2b00; color:#ffd56a; font-weight:700;
+#chatForm button:hover { filter: brightness(1.08); }
+
+.chat-icon-btn {
+  border: none;
+  background: rgba(0, 0, 0, 0.08);
+  color: #7a2b00;
+  width: 4vw;
+  height: 4vw;
+  border-radius: 1vw;
+  cursor: pointer;
 }
-#chatForm button:hover{ filter:brightness(1.08); }
-.chat-icon-btn{
-  border:none; background:rgba(0,0,0,.08); color:#7a2b00;
-  width:28px; height:28px; border-radius:8px; cursor:pointer;
-}
-.chat-icon-btn:hover{ background:rgba(0,0,0,.16); }
-#chatbox.collapsed{ height:42px; overflow:hidden; }
+.chat-icon-btn:hover { background: rgba(0, 0, 0, 0.16); }
+
+#chatbox.collapsed { height: 6vh; overflow: hidden; }
 #chatbox.collapsed #chatMessages,
-#chatbox.collapsed #chatForm{ display:none; }
-#chatbox:not(.collapsed) #chatToggleBtn{ transform: rotate(90deg); }
-#chatbox.collapsed #chatToggleBtn{ transform: rotate(0deg); }
+#chatbox.collapsed #chatForm { display: none; }
+#chatbox:not(.collapsed) #chatToggleBtn { transform: rotate(90deg); }
+#chatbox.collapsed #chatToggleBtn { transform: rotate(0deg); }
+
   
