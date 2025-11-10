@@ -427,45 +427,41 @@ body {
     right: 20px;
   }
 }
-/* =========================================================
-   📱 Mobiele versie (tot 768px)
-   Met instelbare marges voor het frame & canvas
-   ========================================================= */
+
 @media (max-width: 768px) {
 
-  /* --------------------------
-     🔧 Handige instelbare marges
-     -------------------------- */
   :root {
-    --frame-top-space: 5vh;      /* ruimte boven het frame */
-    --frame-bottom-space: 15vh;  /* ruimte onder het frame (voor chatbox) */
-    --frame-side-space: 3vw;     /* marge links en rechts van het frame */
+    /* ruimte rondom het plaatje binnen het scherm */
+    --frame-padding-top: 3vh;     /* bovenkant */
+    --frame-padding-bottom: 12vh; /* onderkant, voor chatruimte */
+    --frame-padding-sides: 3vw;   /* links/rechts, schuift het plaatje naar binnen */
 
-    --canvas-top-offset: 18%;    /* positie van canvas binnen het frame */
+    /* canvaspositie binnen het frame */
+    --canvas-top-offset: 18%;
     --canvas-left-offset: 4.5%;
-    --canvas-width: 91%;         /* breedte van canvas binnen het frame */
+    --canvas-width: 91%;
   }
 
   body {
     background: #b21a0d;
   }
 
-  /* 📱 jouw container als telefoonframe */
+  /* het telefoonframe */
   #game-container {
     position: relative;
-    width: calc(100vw - (2 * var(--frame-side-space)));
-    height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
-    margin-top: var(--frame-top-space);
-    margin-bottom: var(--frame-bottom-space);
-    margin-left: var(--frame-side-space);
-    margin-right: var(--frame-side-space);
+    width: 100vw;
+    height: calc(100vh - var(--frame-padding-bottom));
+    padding: var(--frame-padding-top) var(--frame-padding-sides)
+             var(--frame-padding-bottom) var(--frame-padding-sides);
+    box-sizing: border-box;
     background: url("mobile.png") no-repeat center center;
-    background-size: cover;
+    background-size: contain; /* behoudt volledige rand */
+    background-position: center center;
     overflow: hidden;
     z-index: 1;
   }
 
-  /* 🎮 canvas binnen het frame */
+  /* het canvas (spel) */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-top-offset) !important;
@@ -478,7 +474,7 @@ body {
     z-index: 2 !important;
   }
 
-  /* dingen die op mobiel in de weg zitten → uit */
+  /* optionele verbergers */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -490,36 +486,20 @@ body {
     display: none !important;
   }
 
-  /* HUD bovenaan houden */
-  #login-overlay {
-    position: fixed !important;
-    top: 10px !important;
-    right: 10px !important;
-    z-index: 4000 !important;
-  }
-
-  #player-display {
-    position: fixed !important;
-    top: 12px !important;
-    left: 10px !important;
-    font-size: 14px !important;
-    z-index: 4000 !important;
-  }
-
-  #scoreDisplay {
-    position: fixed !important;
-    top: 12px !important;
-    right: 10px !important;
-    font-size: 14px !important;
-    z-index: 4000 !important;
-  }
-
+  /* HUD bovenaan */
+  #login-overlay,
+  #player-display,
+  #scoreDisplay,
   #time-box {
     position: fixed !important;
-    top: 12px !important;
-    right: 90px !important;
-    font-size: 14px !important;
     z-index: 4000 !important;
   }
+
+  #login-overlay { top: 10px !important; right: 10px !important; }
+  #player-display { top: 12px !important; left: 10px !important; font-size: 14px !important; }
+  #scoreDisplay { top: 12px !important; right: 10px !important; font-size: 14px !important; }
+  #time-box { top: 12px !important; right: 90px !important; font-size: 14px !important; }
 }
+
+
 
