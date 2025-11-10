@@ -512,18 +512,89 @@ body {
     z-index: 4000 !important;
   }
 
-       @media (max-width: 600px) {
-  /* anders wordt hij soms afgekapt */
-  body {
-    overflow: visible;
+   /* standaard: mobile chat uit */
+#chatbox-mobile {
+  display: none;
+}
+
+/* 📱 alleen op mobiel */
+@media (max-width: 600px) {
+
+  /* verstop de desktop-versie op mobiel, of laat hem staan maar buiten beeld */
+  #chatbox {
+    display: none !important;
   }
 
-  #chatbox {
-    position: absolute !important;
-    transform: translateX(-50%) !important;
-    bottom: 10px !important;   /* onderaan midden */
-    right: auto !important;    /* desktop-rechts uitzetten */
-     z-index: 5000 !important;
+  /* mobiele variant */
+  #chatbox-mobile {
+    display: block;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;                  /* start onderaan */
+    width: 85vw;
+    max-width: 420px;
+    background: linear-gradient(#f6a53b,#e27e22);
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -6px 20px rgba(0,0,0,.35);
+    z-index: 6000;
+    overflow: hidden;
+    /* standaard ingeklapt */
+    height: 42px;
+    transition: height .25s ease;
+  }
+
+  /* header bovenin balkje */
+  .chatbox-header-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    background: linear-gradient(#ffd56a,#ffb12b);
+    color: #7a2b00;
+    font-weight: 700;
+  }
+
+  #chatMobileClose {
+    background: rgba(0,0,0,.08);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    color: #7a2b00;
+  }
+
+  /* open toestand → klapt OMHOOG */
+  #chatbox-mobile.open {
+    height: 55vh;               /* klapt omhoog */
+  }
+
+  /* inhoudsvakken binnen mobiel */
+  #chatMobileMessages {
+    height: calc(55vh - 90px);
+    overflow-y: auto;
+    background: #6a0f0f;
+    color: #ffe9c4;
+    padding: 8px;
+  }
+
+  #chatMobileForm {
+    background: linear-gradient(#ffb545,#f08a25);
+    padding: 8px;
+  }
+
+  /* stickerpaneel ook omhoog laten gaan */
+  #chat-sticker-panel {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 55vh;               /* komt boven de open chat te staan */
+    width: 85vw;
+    max-width: 420px;
+    background: #6a0f0f;
+    border: 2px solid #b66414;
+    border-radius: 12px 12px 0 0;
+    z-index: 6001;
   }
 }
 
