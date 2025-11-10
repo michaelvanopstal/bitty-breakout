@@ -114,8 +114,6 @@ const AURA_EDGE_HEX  = "rgba(255,140,0,0.9)"; // warme rand voor tekststroke
 const AURA_SOFT_GLOW = "rgba(255,215,0,0.20)";
 const AURA_SPARK_RGB = "255,240,150";       // lichtere vonkjes (warm wit/goud)
 
-let starPowerFX = { active: false, t0: 0, duration: 3000, stars: [], particles: [] };
-let fxCanvas = null, fxCtx = null;
 
 // ❌ Foute kruisen
 let badCrossesCaught = 0;
@@ -147,6 +145,8 @@ function getPaddleBounds() {
     bottom: paddleY + paddleHeight,
   };
 }
+
+let fxCanvas = null, fxCtx = null;
 
 // ⭐ SFX: ster gepakt
 const starCatchSfx = new Audio("starbutton.mp3");
