@@ -429,42 +429,42 @@ body {
 }
 
 /* =========================================================
-   📱 Mobiele versie (tot 768px) – afgestemd op jouw index
+   📱 Mobiele versie (tot 768px) – versie 2
    ========================================================= */
 @media (max-width: 768px) {
 
-  /* achtergrond achter alles */
   body {
     background: #b21a0d;
   }
 
-  /* jouw bestaande wrapper wordt nu het telefoonplaatje */
+  /* jouw bestaande container = telefoonframe */
   #game-container {
     position: relative;
     width: 100vw;
-    max-width: 738px;          /* breedte van je screenshot */
-    aspect-ratio: 738 / 1600;  /* verhouding van je screenshot */
+    /* hoogte van het plaatje: 1600 / 738 ≈ 2.168 */
+    height: calc(100vw * 2.168);   /* zo blijft het hele plaatje zichtbaar */
+    max-width: 738px;
     margin: 0 auto;
     background: url("mobile.png") no-repeat top center;
-    background-size: contain;
+    background-size: 100% 100%;    /* niet 'contain', maar echt vullen → frame wordt even breed als scherm */
     overflow: hidden;
     z-index: 1;
   }
 
-  /* het canvas zelf in het gouden vlak van je afbeelding */
+  /* het spel in het midden van het frame */
   #gameCanvas {
     position: absolute !important;
-    top: 19% !important;      /* hoogte t.o.v. het plaatje */
-    left: 6.5% !important;    /* marge links zoals in je screenshot */
-    width: 87% !important;    /* breedte van het speelveld */
+    top: 15.5% !important;    /* iets lager dan eerst zodat het niet door de titel gaat */
+    left: 3.5% !important;    /* kleine marge zodat je gouden rand zichtbaar blijft */
+    width: 93% !important;    /* blokken passen nu binnen de gouden rand */
     height: auto !important;
     transform: none !important;
     border: none !important;
-    z-index: 2 !important;
     background: transparent !important;
+    z-index: 2 !important;
   }
 
-  /* dingen die op mobiel niet hoeven */
+  /* dingen die in de weg zitten op mobiel */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -476,7 +476,7 @@ body {
     display: none !important;
   }
 
-  /* HUD bovenop houden */
+  /* HUD vastplakken bovenaan */
   #login-overlay {
     position: fixed !important;
     top: 10px !important;
@@ -510,4 +510,3 @@ body {
     left: auto !important;
   }
 }
-
