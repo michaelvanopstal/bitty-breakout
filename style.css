@@ -426,17 +426,19 @@ body {
   }
 
   /* je telefoonframe */
-  #game-container {
-    position: relative;
-    width: 100vw;
-    max-width: 738px;             /* breedte van je mobile.png */
-    aspect-ratio: 738 / 1600;     /* verhouding van je mobile.png */
-    margin: 0 auto;
-    background: url("mobile.png") no-repeat center center;
-    background-size: 220%;        /* ⬅️ hier kun je 95%, 110%, 120% van maken */
-    overflow: hidden;
-    z-index: 1;
-  }
+ #game-container {
+  position: relative;
+  width: 100vw;
+  max-width: 738px;
+  aspect-ratio: 738 / 1600;
+  margin: 0 auto;
+  background: url("mobile.png") no-repeat center center;
+  /* ⬇️ forceer het vergroten */
+  background-size: 160% auto !important;
+  overflow: hidden;
+  z-index: 1;
+}
+
 
   /* alleen het SPEL verschuiven binnen het plaatje */
   #gameCanvas {
