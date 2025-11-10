@@ -516,7 +516,7 @@ body {
          #chatbox {
         position: fixed;
         bottom: 40px;
-        right: 1000px;
+        right: 100px;
         width: 100px;
         height: 100px;
         z-index: 4000;
