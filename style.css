@@ -517,19 +517,8 @@ body {
 
 
   /* 📥 Plaats chatbox onder het mobiele scherm */
-@media (max-width: 600px) {
-  #chatbox {
-    position: absolute !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    bottom: calc(-8vh + var(--frame-bottom-space)) !important;
-    width: 85vw !important;       /* past zich aan de breedte aan */
-    height: 40vh !important;      /* hoogte afhankelijk van scherm */
-    max-width: 420px !important;  /* limiet voor iets grotere telefoons */
-    z-index: 4900 !important;
-  }
-  
-    /* ===== Chat Box styles (schaalbaar) ===== */
+
+  @media (max-width: 600px) {
 #chatbox {
   position: fixed;
   right: 3vw;              /* 40px → ±3% van viewportbreedte */
