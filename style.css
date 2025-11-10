@@ -456,7 +456,7 @@ body {
     background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
-    z-index: 1;           /* achtergrondlaag */
+    z-index: 30;           /* achtergrondlaag */
   }
 
   /* 🎮 canvas precies in het gele scherm */
@@ -471,7 +471,7 @@ body {
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 2 !important;
+    z-index: 32 !important;
   }
 
   /* dingen die je op mobiel verbergt */
