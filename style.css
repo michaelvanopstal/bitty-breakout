@@ -514,6 +514,44 @@ body {
   }
 }
 
+/* ====== 📱 alleen TELEFOON ====== */
+@media (max-width: 600px) {
+  /* chat als bottom sheet */
+  #chatbox {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: -55vh;
+    height: 55vh;
+    background: #fff;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    box-shadow: 0 -6px 20px rgba(0,0,0,.2);
+    transition: bottom .25s ease;
+    z-index: 5000;
+    display: block !important;
+  }
+
+  #chatbox.open {
+    bottom: 0;
+  }
+
+  /* sticker-paneel ook mobiel laten schuiven */
+  #chat-sticker-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: -30vh;
+    height: 30vh;
+    background: #fff;
+    transition: bottom .25s ease;
+    z-index: 5001;
+  }
+  #chat-sticker-panel.open {
+    bottom: 55vh;
+  }
+}
+
 
 
 
