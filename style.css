@@ -423,31 +423,31 @@ body {
     --frame-bottom-space: 15vh;
     --frame-side-space: 0vw;
 
-    --canvas-top-offset: 18%;
-    --canvas-left-offset: 4.5%;
-    --canvas-width: 91%;
+    /* 🔽 hier stel je het GELE VENSTER in */
+    --canvas-inset-top: 17.5%;    /* hoe ver onder de bovenrand van je plaatje */
+    --canvas-inset-left: 3.2%;    /* hoeveel ruimte links in het gele frame */
+    --canvas-inset-right: 3.2%;   /* hoeveel ruimte rechts in het gele frame */
+    --canvas-inset-bottom: 18%;   /* onderkant waar de paddle eindigt */
 
     /* zoom van het plaatje */
-    --bg-scale: 1 ;   /* 0.95 = iets kleiner, 1.05 = iets groter */
+    --bg-scale: 1;
   }
 
   body {
     background:#FF9305;
-    padding-bottom: 0; /* je mag hier later weer 12vh van maken voor je chat */
+    padding-bottom: 0;
   }
 
-  /* 1. HOU DER */
   #game-container {
     position: relative;
     width: calc(100vw - (2 * var(--frame-side-space)));
     height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
     margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
     overflow: hidden;
-    z-index: 0;        /* onder alles */
-    background: none;  /* achtergrond komt uit ::before */
+    z-index: 0;
+    background: none;
   }
 
-  /* 2. ACHTERGRONDLAAG */
   #game-container::before {
     content: "";
     position: absolute;
@@ -456,23 +456,25 @@ body {
     background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
-    z-index: 0;  /* echt achteraan */
+    z-index: 0;
   }
 
-  /* 3. SPEL */
+  /* 🔥 hier komt de nauwkeurige positionering */
   #gameCanvas {
     position: absolute !important;
-    top: var(--canvas-top-offset) !important;
-    left: var(--canvas-left-offset) !important;
-    width: var(--canvas-width) !important;
+    top: var(--canvas-inset-top) !important;
+    left: var(--canvas-inset-left) !important;
+    right: var(--canvas-inset-right) !important;
+    bottom: var(--canvas-inset-bottom) !important;
+    width: auto !important;        /* breedte volgt uit left+right */
     height: auto !important;
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 2 !important;   /* altijd boven het plaatje */
+    z-index: 2 !important;
   }
 
-  /* dingen die op mobiel weg mogen */
+  /* rest van je spullen... */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -484,7 +486,6 @@ body {
     display: none !important;
   }
 
-  /* HUD bovenaan laten zweven */
   #login-overlay {
     position: fixed !important;
     top: 10px !important;
@@ -513,6 +514,7 @@ body {
     z-index: 4000 !important;
   }
 }
+
 
 
 
