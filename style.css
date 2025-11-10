@@ -515,9 +515,6 @@ body {
 }
 
 
-
-  /* 📥 Plaats chatbox onder het mobiele scherm */
-
 /* 📱 alleen verplaatsen op kleine schermen */
 @media (max-width: 600px) {
   /* anders wordt hij soms afgekapt */
