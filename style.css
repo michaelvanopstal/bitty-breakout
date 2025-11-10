@@ -412,61 +412,37 @@ body {
   }
 }
 /* =========================================================
-   💻 Tablet / kleinere laptops (tot 1200px)
+   📱 Mobiele versie (tot 768px)
+   Terug naar stabiele frame + alleen canvas verschuiven
    ========================================================= */
-@media (max-width: 1200px) {
-  #scoreDisplay {
-    right: 20px;
-    left: auto;
-  }
-  #time-box {
-    right: 140px;
-    left: auto;
-  }
-  #bonus-power-panel {
-    right: 20px;
-  }
-}
-
 @media (max-width: 768px) {
 
-  :root {
-    /* ruimte rondom het plaatje binnen het scherm */
-    --frame-padding-top: 3vh;     /* bovenkant */
-    --frame-padding-bottom: 12vh; /* onderkant, voor chatruimte */
-    --frame-padding-sides: 3vw;   /* links/rechts, schuift het plaatje naar binnen */
-
-    /* canvaspositie binnen het frame */
-    --canvas-top-offset: 18%;
-    --canvas-left-offset: 4.5%;
-    --canvas-width: 91%;
-  }
-
+  /* gewoon ruimte maken voor je chat straks */
   body {
     background: #b21a0d;
+    padding-bottom: 12vh;   /* onderaan rode ruimte */
+    padding-top: 0;         /* kun je ook verhogen als je wilt */
   }
 
-  /* het telefoonframe */
+  /* jouw plaatje volledig tonen, niet laten krimpen */
   #game-container {
     position: relative;
     width: 100vw;
-    height: calc(100vh - var(--frame-padding-bottom));
-    padding: var(--frame-padding-top) var(--frame-padding-sides)
-             var(--frame-padding-bottom) var(--frame-padding-sides);
-    box-sizing: border-box;
-    background: url("mobile.png") no-repeat center center;
-    background-size: contain; /* behoudt volledige rand */
-    background-position: center center;
+    max-width: 738px;             /* breedte van je mobile.png */
+    aspect-ratio: 738 / 1600;     /* verhouding van je mobile.png */
+    margin: 0 auto;
+    background: url("mobile.png") no-repeat top center;
+    background-size: contain;     /* hele rand blijft zichtbaar */
     overflow: hidden;
     z-index: 1;
   }
 
-  /* het canvas (spel) */
+  /* alleen het SPEL verschuiven binnen het plaatje */
   #gameCanvas {
     position: absolute !important;
-    top: var(--canvas-top-offset) !important;
-    left: var(--canvas-left-offset) !important;
-    width: var(--canvas-width) !important;
+    top: 16.5% !important;    /* hoe hoog het speelveld in je plaatje begint */
+    left: 3.5% !important;    /* iets naar binnen zodat je gouden rand links blijft */
+    width: 93% !important;    /* breedte van het speelveld binnen het kader */
     height: auto !important;
     transform: none !important;
     border: none !important;
@@ -474,7 +450,7 @@ body {
     z-index: 2 !important;
   }
 
-  /* optionele verbergers */
+  /* dingen die in de weg zitten op mobiel */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -486,20 +462,40 @@ body {
     display: none !important;
   }
 
-  /* HUD bovenaan */
-  #login-overlay,
-  #player-display,
-  #scoreDisplay,
-  #time-box {
+  /* HUD bovenaan laten zweven */
+  #login-overlay {
     position: fixed !important;
+    top: 10px !important;
+    right: 10px !important;
     z-index: 4000 !important;
   }
 
-  #login-overlay { top: 10px !important; right: 10px !important; }
-  #player-display { top: 12px !important; left: 10px !important; font-size: 14px !important; }
-  #scoreDisplay { top: 12px !important; right: 10px !important; font-size: 14px !important; }
-  #time-box { top: 12px !important; right: 90px !important; font-size: 14px !important; }
+  #player-display {
+    position: fixed !important;
+    top: 12px !important;
+    left: 10px !important;
+    font-size: 14px !important;
+    z-index: 4000 !important;
+  }
+
+  #scoreDisplay {
+    position: fixed !important;
+    top: 12px !important;
+    right: 10px !important;
+    font-size: 14px !important;
+    z-index: 4000 !important;
+  }
+
+  #time-box {
+    position: fixed !important;
+    top: 12px !important;
+    right: 90px !important;
+    font-size: 14px !important;
+    z-index: 4000 !important;
+  }
+
+#game-container {
+  background: url("mobile.png") no-repeat center center;
+  background-size: 110%; /* groter maken */
+ }
 }
-
-
-
