@@ -153,6 +153,9 @@ const starCatchSfx = new Audio("starbutton.mp3");
 starCatchSfx.preload = "auto";
 starCatchSfx.loop = false;
 starCatchSfx.volume = 0.85; // pas aan naar smaak
+const sc = (typeof getScale === "function") ? getScale() : 1;
+rescaleBombSystems?.(sc);
+rescaleStarsSystems?.(sc); // 👈 nieuwe
 
 // === Bomb Token & Rain ===
 let bombsCollected = 0;
@@ -513,6 +516,15 @@ function getScale() {
   return (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
 }
 
+// === STAR POWER FX ===========================
+const starPowerFX = {
+  active: false,
+  t0: 0,
+  stars: [],
+  particles: [],
+  duration: 4000, // 4 sec is mooi
+  scale: 1        // wordt bij start gevuld met echte scale
+};
 
 function startStarPowerCelebration() {
   ensureFxCanvas();
@@ -533,6 +545,9 @@ function startStarPowerCelebration() {
   starPowerFX.stars = [];
   starPowerFX.particles = [];
 
+  // 👇 pak jouw huidige scale van de game
+  starPowerFX.scale = (typeof getScale === "function") ? getScale() : 1;
+
   const W = fxCanvas.width, H = fxCanvas.height;
   const N = 10;
 
@@ -546,14 +561,20 @@ function startStarPowerCelebration() {
     const vx = dir * speed;
 
     starPowerFX.stars.push({
-      x: startX, y, vx, vy: 0,
-      r: 0, vr: (Math.random() * 2 - 1) * 0.015,
+      x: startX,
+      y,
+      vx,
+      vy: 0,
+      r: 0,
+      vr: (Math.random() * 2 - 1) * 0.015,
       scale: 0.7 + Math.random() * 0.6,
-      amp, freq, t: Math.random() * 1000, dir
+      amp,
+      freq,
+      t: Math.random() * 1000,
+      dir
     });
   }
 }
-
 
 function renderStarPowerFX() {
   if (!starPowerFX.active || !fxCtx) return;
@@ -565,13 +586,13 @@ function renderStarPowerFX() {
   const tElapsed = now - starPowerFX.t0;
   const W = fxCanvas.width, H = fxCanvas.height;
 
-  // Clear + subtiele donkerte zodat neon beter "pop"t (heel licht!)
+  // Clear + subtiele donkerte zodat neon beter "pop"t
   fxCtx.clearRect(0, 0, W, H);
   fxCtx.fillStyle = "rgba(0,0,0,0.12)";
   fxCtx.fillRect(0, 0, W, H);
 
-  // ... 👇 vanaf hier blijft alles hetzelfde als jouw versie ...
-  // ik laat de rest van je code hieronder staan, ongewijzigd:
+  // globale scale voor dit effect (komt uit start)
+  const gS = (typeof starPowerFX.scale === "number") ? starPowerFX.scale : 1;
 
   // Sterren + stardust
   for (const s of starPowerFX.stars) {
@@ -584,7 +605,9 @@ function renderStarPowerFX() {
     fxCtx.save();
     fxCtx.translate(s.x, s.y);
     fxCtx.rotate(s.r);
-    const size = 56 * s.scale;
+
+    // 👇 hier zat jouw vaste 56, nu met globale schaal
+    const size = 56 * s.scale * gS;
 
     const grd = fxCtx.createRadialGradient(0, 0, size * 0.15, 0, 0, size * 0.9);
     grd.addColorStop(0.00, `rgba(${AURA_RGB},0.30)`);
@@ -600,6 +623,7 @@ function renderStarPowerFX() {
     fxCtx.drawImage(starImg, -size/2, -size/2, size, size);
     fxCtx.restore();
 
+    // kleine sparkles van deze ster
     for (let k = 0; k < 3; k++) {
       starPowerFX.particles.push({
         x: s.x,
@@ -613,10 +637,14 @@ function renderStarPowerFX() {
     }
   }
 
+  // Particles tekenen
   for (let i = starPowerFX.particles.length - 1; i >= 0; i--) {
     const p = starPowerFX.particles[i];
     p.age += dt;
-    if (p.age >= p.life) { starPowerFX.particles.splice(i, 1); continue; }
+    if (p.age >= p.life) {
+      starPowerFX.particles.splice(i, 1);
+      continue;
+    }
     const a = 1 - (p.age / p.life);
     p.x += p.vx * (dt / 1000);
     p.y += p.vy * (dt / 1000);
@@ -625,45 +653,47 @@ function renderStarPowerFX() {
     fxCtx.globalCompositeOperation = 'lighter';
     fxCtx.globalAlpha = a * 0.95;
 
-    const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2);
+    const r = p.r * 3.2 * gS; // ook hier schaal toepassen
+    const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
     grd.addColorStop(0, `rgba(${AURA_SPARK_RGB},1)`);
     grd.addColorStop(1, `rgba(${AURA_RGB},0)`);
     fxCtx.fillStyle = grd;
     fxCtx.beginPath();
-    fxCtx.arc(p.x, p.y, p.r * 3.2, 0, Math.PI * 2);
+    fxCtx.arc(p.x, p.y, r, 0, Math.PI * 2);
     fxCtx.fill();
     fxCtx.restore();
   }
 
+  // fade-in / fade-out
   const fadeIn = Math.min(1, tElapsed / 300);
   const fadeOut = Math.min(1, Math.max(0, (starPowerFX.duration - tElapsed) / 300));
   const alpha = Math.min(fadeIn, fadeOut);
 
+  // titel
   fxCtx.save();
   fxCtx.globalAlpha = alpha;
   const title = "Bitty STAR POWER!";
-  fxCtx.font = `bold ${Math.round(Math.min(W, H) * 0.08)}px Arial`;
+  // font ook mee laten groeien
+  fxCtx.font = `bold ${Math.round(Math.min(W, H) * 0.08 * gS)}px Arial`;
   fxCtx.textAlign = "center";
   fxCtx.textBaseline = "middle";
-
-  fxCtx.fillStyle = `rgba(${AURA_RGB},0.22)`;
-  for (let g = 0; g < 5; g++) {
-    fxCtx.fillText(title, W / 2, H * 0.25);
-  }
-
-  fxCtx.fillStyle = AURA_HEX;
-  fxCtx.strokeStyle = AURA_EDGE_HEX;
-  fxCtx.lineWidth = 4;
-  fxCtx.strokeText(title, W / 2, H * 0.25);
-  fxCtx.fillText(title, W / 2, H * 0.25);
-
+  fxCtx.fillStyle = "rgba(255,255,255,0.95)";
+  fxCtx.fillText(title, W / 2, H * 0.12);
   fxCtx.restore();
 
+  // einde
   if (tElapsed >= starPowerFX.duration) {
     starPowerFX.active = false;
-    fxCtx.clearRect(0, 0, W, H);
   }
 }
+
+// 👇 zet deze bij je andere rescale-functies
+function rescaleStarsSystems(scale) {
+  if (starPowerFX && starPowerFX.active) {
+    starPowerFX.scale = scale;
+  }
+}
+
 
 function renderBittyBombIntro() {
   if (!bittyBomb.active) return;
