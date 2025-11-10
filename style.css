@@ -444,7 +444,7 @@ body {
     height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
     margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
     overflow: hidden;
-    z-index: 0;
+    z-index: 6000;
     background: none;
   }
 
@@ -456,7 +456,7 @@ body {
     background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
-    z-index: 0;
+    z-index: 6000;
   }
 
   /* 🔥 hier komt de nauwkeurige positionering */
