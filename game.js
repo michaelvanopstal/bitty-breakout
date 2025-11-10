@@ -148,12 +148,6 @@ function getPaddleBounds() {
   };
 }
 
-const sc = (typeof getScale === "function") ? getScale() : 1;
-rescaleBombSystems?.(sc);
-rescaleStarsSystems?.(sc);
-rescaleHeartCelebration?.(sc); // 👈 deze erbij
-
-
 // ⭐ SFX: ster gepakt
 const starCatchSfx = new Audio("starbutton.mp3");
 starCatchSfx.preload = "auto";
@@ -539,9 +533,6 @@ function startStarPowerCelebration() {
   starPowerFX.stars = [];
   starPowerFX.particles = [];
 
-  // 👇 hier pakken we jouw huidige game-scale
-  starPowerFX.scale = (typeof getScale === "function") ? getScale() : 1;
-
   const W = fxCanvas.width, H = fxCanvas.height;
   const N = 10;
 
@@ -579,8 +570,8 @@ function renderStarPowerFX() {
   fxCtx.fillStyle = "rgba(0,0,0,0.12)";
   fxCtx.fillRect(0, 0, W, H);
 
-  // 👇 globale scale voor dit effect
-  const gS = (typeof starPowerFX.scale === "number") ? starPowerFX.scale : 1;
+  // ... 👇 vanaf hier blijft alles hetzelfde als jouw versie ...
+  // ik laat de rest van je code hieronder staan, ongewijzigd:
 
   // Sterren + stardust
   for (const s of starPowerFX.stars) {
@@ -593,9 +584,7 @@ function renderStarPowerFX() {
     fxCtx.save();
     fxCtx.translate(s.x, s.y);
     fxCtx.rotate(s.r);
-
-    // 👇 hier zat jouw vaste 56, nu * gS
-    const size = 56 * s.scale * gS;
+    const size = 56 * s.scale;
 
     const grd = fxCtx.createRadialGradient(0, 0, size * 0.15, 0, 0, size * 0.9);
     grd.addColorStop(0.00, `rgba(${AURA_RGB},0.30)`);
@@ -624,7 +613,6 @@ function renderStarPowerFX() {
     }
   }
 
-  // particles
   for (let i = starPowerFX.particles.length - 1; i >= 0; i--) {
     const p = starPowerFX.particles[i];
     p.age += dt;
@@ -637,13 +625,12 @@ function renderStarPowerFX() {
     fxCtx.globalCompositeOperation = 'lighter';
     fxCtx.globalAlpha = a * 0.95;
 
-    // 👇 ook particle-radius mee schalen
-    const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2 * gS);
+    const grd = fxCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2);
     grd.addColorStop(0, `rgba(${AURA_SPARK_RGB},1)`);
     grd.addColorStop(1, `rgba(${AURA_RGB},0)`);
     fxCtx.fillStyle = grd;
     fxCtx.beginPath();
-    fxCtx.arc(p.x, p.y, p.r * 3.2 * gS, 0, Math.PI * 2);
+    fxCtx.arc(p.x, p.y, p.r * 3.2, 0, Math.PI * 2);
     fxCtx.fill();
     fxCtx.restore();
   }
@@ -655,9 +642,7 @@ function renderStarPowerFX() {
   fxCtx.save();
   fxCtx.globalAlpha = alpha;
   const title = "Bitty STAR POWER!";
-
-  // 👇 font ook mee laten groeien
-  fxCtx.font = `bold ${Math.round(Math.min(W, H) * 0.08 * gS)}px Arial`;
+  fxCtx.font = `bold ${Math.round(Math.min(W, H) * 0.08)}px Arial`;
   fxCtx.textAlign = "center";
   fxCtx.textBaseline = "middle";
 
@@ -679,7 +664,6 @@ function renderStarPowerFX() {
     fxCtx.clearRect(0, 0, W, H);
   }
 }
-
 
 function renderBittyBombIntro() {
   if (!bittyBomb.active) return;
@@ -745,20 +729,12 @@ function renderBittyBombIntro() {
   }
 }
 
-function rescaleStarsSystems(scale) {
-  if (starPowerFX && starPowerFX.active) {
-    starPowerFX.scale = scale;
-  }
-}
-
-
 
 // ❤️ full-screen heart celebration
 let heartCelebration = {
   active: false,
   t0: 0,
-  hearts: [],
-  scale: 1
+  hearts: []
 };
 
 function triggerHeartCelebration() {
@@ -778,10 +754,7 @@ function triggerHeartCelebration() {
   heartCelebration.t0 = performance.now();
   heartCelebration.hearts = [];
 
-  // 👇 scale van dit moment pakken
-  heartCelebration.scale = (typeof getScale === "function") ? getScale() : 1;
-
-  // kort het levelup-plaatje laten zien
+  // 👇 nieuw: kort het levelup-plaatje laten zien
   heartCelebration.showMascot = true;
   heartCelebration.mascotStart = performance.now();
 
@@ -792,7 +765,7 @@ function triggerHeartCelebration() {
       y: -40 - Math.random() * 200,
       dx: (Math.random() - 0.5) * 1.2,
       dy: 2 + Math.random() * 2.5,
-      size: (32 + Math.random() * 26), // basis, schalen we in draw
+      size: 32 + Math.random() * 26,
       rot: Math.random() * Math.PI * 2,
       rotSpeed: (-1 + Math.random() * 2) * 0.04,
       pulse: Math.random() * Math.PI * 2
@@ -808,9 +781,6 @@ function drawHeartCelebration() {
   const W = fxCanvas.width;
   const H = fxCanvas.height;
 
-  // globale scale van dit effect
-  const gS = (typeof heartCelebration.scale === "number") ? heartCelebration.scale : 1;
-
   // duur van de animatie
   const DURATION = 4000; // 4 sec
   if (elapsed > DURATION) {
@@ -824,8 +794,8 @@ function drawHeartCelebration() {
 
   // canvas leegmaken
   fxCtx.clearRect(0, 0, W, H);
-
-  // 👉 levelup-plaatje tonen (nu ook geschaald)
+ 
+  // 👇 NIEUW: jouw levelup-plaatje 2 seconden tonen op originele grootte
   if (
     heartCelebration.showMascot &&
     typeof heartLevelupImg !== "undefined" &&
@@ -837,8 +807,8 @@ function drawHeartCelebration() {
       const a = 1 - popElapsed / POP_DURATION; // fade-out
 
       // originele grootte
-      let drawW = heartLevelupImg.width * gS;
-      let drawH = heartLevelupImg.height * gS;
+      let drawW = heartLevelupImg.width;
+      let drawH = heartLevelupImg.height;
 
       // veiligheidscheck: als het groter is dan canvas, dan passend maken
       const maxW = W * 0.9;
@@ -859,7 +829,7 @@ function drawHeartCelebration() {
       fxCtx.drawImage(
         heartLevelupImg,
         (W - drawW) / 2,
-        (H - drawH) / 2 + 20 * gS, // ook dit een beetje mee
+        (H - drawH) / 2 + 20, // mag je nog tunen
         drawW,
         drawH
       );
@@ -868,6 +838,7 @@ function drawHeartCelebration() {
       heartCelebration.showMascot = false;
     }
   }
+
 
   // hartjes tekenen
   for (const h of heartCelebration.hearts) {
@@ -880,14 +851,11 @@ function drawHeartCelebration() {
     // we RESPAWNEN NIET meer → als ze uit beeld zijn, tekenen we ze gewoon niet
     if (h.y > H + 80) continue;
 
-    // geschaalde grootte
-    const heartSize = h.size * gS;
-
     // aura
     fxCtx.save();
     fxCtx.translate(h.x, h.y);
 
-    const auraR = heartSize * (0.55 + 0.15 * Math.sin(h.pulse));
+    const auraR = h.size * (0.55 + 0.15 * Math.sin(h.pulse));
     const auraGrad = fxCtx.createRadialGradient(0, 0, 4, 0, 0, auraR);
     fxCtx.globalAlpha = 0.7 * fade;
     auraGrad.addColorStop(0, "rgba(255,180,220,0.9)");
@@ -904,17 +872,10 @@ function drawHeartCelebration() {
     fxCtx.translate(h.x, h.y);
     fxCtx.rotate(h.rot);
     fxCtx.globalAlpha = fade;
-    fxCtx.drawImage(heartImg, -heartSize / 2, -heartSize / 2, heartSize, heartSize);
+    fxCtx.drawImage(heartImg, -h.size / 2, -h.size / 2, h.size, h.size);
     fxCtx.restore();
   }
 }
-
-function rescaleHeartCelebration(scale) {
-  if (heartCelebration && heartCelebration.active) {
-    heartCelebration.scale = scale;
-  }
-}
-
 
 function rescaleActiveVFX(scale) {
   if (Array.isArray(explosions)) {
@@ -1143,6 +1104,17 @@ function activateInvincibleShield(ms = 30000) {
   } catch (e) {}
 }
 
+function pushPointPopup(x, y, text) {
+  const s = getScale();           // gebruikt jouw bestaande helper
+  pointPopups.push({
+    x,
+    y,
+    value: text,
+    alpha: 1,
+    fontSize: 18 * s,             // font schaalt mee
+    vy: 0.5 * s                   // omhoog-snelheid schaalt mee
+  });
+}
 
 
 
@@ -3069,9 +3041,6 @@ function resetBricks() {
   }
   if (typeof rescaleBombSystems === "function") {
   rescaleBombSystems(currentScale);
-}
-  if (typeof rescaleStarsSystems === "function") {
-  rescaleStarsSystems(currentScale);
 }
 
   // ✨ extra: ook bal- en paddle-maten opnieuw zetten
