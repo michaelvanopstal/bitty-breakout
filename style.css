@@ -414,38 +414,48 @@ body {
 
 /* =========================================================
    📱 Mobiele versie (tot 768px)
-   Stabiel frame + canvas verschuiven + schaalbaar plaatje
+   Met instelbare marges voor het frame & canvas
    ========================================================= */
 @media (max-width: 768px) {
 
-  /* ruimte voor chat enz. */
-  body {
-    background: #b21a0d;
-    padding-bottom: 12vh;
-    padding-top: 0;
+  /* --------------------------
+     🔧 Handige instelbare marges
+     -------------------------- */
+  :root {
+    --frame-top-space: 5vh;      /* ruimte boven het frame */
+    --frame-bottom-space: 15vh;  /* ruimte onder het frame (voor chatbox) */
+    --frame-side-space: 0vw;     /* marge links en rechts van het frame */
+
+    --canvas-top-offset: 18%;    /* positie van canvas binnen het frame */
+    --canvas-left-offset: 4.5%;
+    --canvas-width: 91%;         /* breedte van canvas binnen het frame */
   }
 
-  /* je telefoonframe */
- #game-container {
-  position: relative;
-  width: 100vw;
-  max-width: 738px;
-  aspect-ratio: 738 / 1600;
-  margin: 0 auto;
-  background: url("mobile.png") no-repeat center center;
-  /* ⬇️ forceer het vergroten */
-  background-size: 160% auto !important;
-  overflow: hidden;
-  z-index: 1;
-}
+  body {
+    background: #b21a0d;
+  }
 
+  /* 📱 jouw container als telefoonframe */
+  #game-container {
+    position: relative;
+    width: calc(100vw - (2 * var(--frame-side-space)));
+    height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
+    margin-top: var(--frame-top-space);
+    margin-bottom: var(--frame-bottom-space);
+    margin-left: var(--frame-side-space);
+    margin-right: var(--frame-side-space);
+    background: url("mobile.png") no-repeat center center;
+    background-size: cover;
+    overflow: hidden;
+    z-index: 1;
+  }
 
-  /* alleen het SPEL verschuiven binnen het plaatje */
+  /* 🎮 canvas binnen het frame */
   #gameCanvas {
     position: absolute !important;
-    top: 16.5% !important;    /* hoe hoog het speelveld in je plaatje begint */
-    left: 3.5% !important;    /* iets naar binnen zodat je gouden rand links blijft */
-    width: 93% !important;    /* breedte van het speelveld binnen het kader */
+    top: var(--canvas-top-offset) !important;
+    left: var(--canvas-left-offset) !important;
+    width: var(--canvas-width) !important;
     height: auto !important;
     transform: none !important;
     border: none !important;
@@ -453,7 +463,7 @@ body {
     z-index: 2 !important;
   }
 
-  /* dingen die op mobiel in de weg zitten */
+  /* dingen die op mobiel in de weg zitten → uit */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -465,7 +475,7 @@ body {
     display: none !important;
   }
 
-  /* HUD bovenaan laten zweven */
+  /* HUD bovenaan houden */
   #login-overlay {
     position: fixed !important;
     top: 10px !important;
@@ -497,4 +507,5 @@ body {
     z-index: 4000 !important;
   }
 }
+
 
