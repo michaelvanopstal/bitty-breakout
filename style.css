@@ -456,7 +456,7 @@ body {
     background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
-    z-index: 30;           /* achtergrondlaag */
+    z-index: 5501;           /* achtergrondlaag */
   }
 
   /* 🎮 canvas precies in het gele scherm */
