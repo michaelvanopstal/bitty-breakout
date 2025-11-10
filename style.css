@@ -526,7 +526,7 @@ body {
     background: #fff;
     border-radius: 14px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    z-index: 4000 !important;
+    z-index: 4900 !important;
     padding: 10px;
   }
 
@@ -539,7 +539,7 @@ body {
     width: 85% !important;
     max-width: 400px !important;
     display: block !important;
-    z-index: 4001 !important;
+    z-index: 5000!important;
   }
 }
 
