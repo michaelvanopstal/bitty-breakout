@@ -411,28 +411,29 @@ body {
     right: 360px;
   }
 }
+
 /* =========================================================
    📱 Mobiele versie (tot 768px)
-   Terug naar stabiele frame + alleen canvas verschuiven
+   Stabiel frame + canvas verschuiven + schaalbaar plaatje
    ========================================================= */
 @media (max-width: 768px) {
 
-  /* gewoon ruimte maken voor je chat straks */
+  /* ruimte voor chat enz. */
   body {
     background: #b21a0d;
-    padding-bottom: 12vh;   /* onderaan rode ruimte */
-    padding-top: 0;         /* kun je ook verhogen als je wilt */
+    padding-bottom: 12vh;
+    padding-top: 0;
   }
 
-  /* jouw plaatje volledig tonen, niet laten krimpen */
+  /* je telefoonframe */
   #game-container {
     position: relative;
     width: 100vw;
     max-width: 738px;             /* breedte van je mobile.png */
     aspect-ratio: 738 / 1600;     /* verhouding van je mobile.png */
     margin: 0 auto;
-    background: url("mobile.png") no-repeat top center;
-    background-size: contain;     /* hele rand blijft zichtbaar */
+    background: url("mobile.png") no-repeat center center;
+    background-size: 100%;        /* ⬅️ hier kun je 95%, 110%, 120% van maken */
     overflow: hidden;
     z-index: 1;
   }
@@ -450,7 +451,7 @@ body {
     z-index: 2 !important;
   }
 
-  /* dingen die in de weg zitten op mobiel */
+  /* dingen die op mobiel in de weg zitten */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -493,9 +494,5 @@ body {
     font-size: 14px !important;
     z-index: 4000 !important;
   }
-
-#game-container {
-  background: url("mobile.png") no-repeat center center;
-  background-size: 100%; /* groter maken */
- }
 }
+
