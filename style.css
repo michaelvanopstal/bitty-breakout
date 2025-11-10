@@ -439,7 +439,7 @@ body {
   :root {
     --frame-top-space: 5vh;      /* ruimte boven het frame */
     --frame-bottom-space: 15vh;  /* ruimte onder het frame (voor chatbox) */
-    --frame-side-space: 0vw;     /* marge links en rechts van het frame */
+    --frame-side-space: 3vw;     /* marge links en rechts van het frame */
 
     --canvas-top-offset: 18%;    /* positie van canvas binnen het frame */
     --canvas-left-offset: 4.5%;
