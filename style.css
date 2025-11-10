@@ -514,15 +514,18 @@ body {
   }
 }
 
-/* 📥 alleen TELEFOON: chat onder het gele frame */
 @media (max-width: 600px) {
+  body {
+    overflow: visible;   /* laat dingen onder het scherm toe */
+  }
+
   #chatbox {
     position: absolute !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     bottom: calc(-8vh + var(--frame-bottom-space)) !important;
     width: 85% !important;
-    max-width: 200px !important;
+    max-width: 400px !important;
     background: #fff;
     border-radius: 14px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -530,23 +533,14 @@ body {
     padding: 10px;
   }
 
-  /* stickerpaneel óók mobiel onderaan laten komen */
   #chat-sticker-panel {
     position: absolute !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     bottom: calc(-8vh + var(--frame-bottom-space) + 60px) !important;
     width: 85% !important;
-    max-width: 200px !important;
+    max-width: 400px !important;
     display: block !important;
-    z-index: 5000!important;
+    z-index: 5000 !important;
   }
 }
-
-
-
-
-
-
-
-
