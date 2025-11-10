@@ -515,15 +515,11 @@ body {
 
          #chatbox {
         position: fixed;
-        bottom: 40px;
-        right: 100px;
-        width: 100px;
-        height: 100px;
-        z-index: 4000;
-  
-
-
-  }
-}
+        position: fixed !important;
+        bottom: 10px !important;
+        right: 30px !important;
+        z-index: 4000 !important;
+      }
+    }
 
 
