@@ -3064,18 +3064,21 @@ function drawPointPopups() {
 }
 
 
-function resetBricks() {
+function resetBricks(opts = {}) {
+  // 👇 extra optie: laat long/small paddle met rust
+  const { keepPaddleSize = false } = opts;
+
   // 1) schaal updaten op basis van huidige canvas
   currentScale = canvas.width / baseCanvasWidth;   // 👈 global bijwerken
   if (typeof applyScaleToBricks === "function") {
     applyScaleToBricks(currentScale);
   }
   if (typeof rescaleBombSystems === "function") {
-  rescaleBombSystems(currentScale);
-}
-if (typeof rescaleStarsSystems === "function") {
-  rescaleStarsSystems(currentScale);
-}
+    rescaleBombSystems(currentScale);
+  }
+  if (typeof rescaleStarsSystems === "function") {
+    rescaleStarsSystems(currentScale);
+  }
 
   // ✨ extra: ook bal- en paddle-maten opnieuw zetten
   ballRadius   = 8  * currentScale;
@@ -3094,12 +3097,16 @@ if (typeof rescaleStarsSystems === "function") {
   paddleBaseWidth = targetPaddleWidth;
 
   // 4) event. size-effect opruimen
-  if (paddleSizeEffect) {
+  // 👉 alleen resetten als we dat mogen
+  if (paddleSizeEffect && !keepPaddleSize) {
     stopPaddleSizeEffect();
   } else {
     // paddle gecentreerd houden bij veranderde breedte
     const centerX = paddleX + paddleWidth / 2;
-    paddleWidth = paddleBaseWidth;
+    // alleen terugzetten naar base als we níet in een actief size-effect zitten
+    if (!paddleSizeEffect) {
+      paddleWidth = paddleBaseWidth;
+    }
     // canvas.width kan door schaal veranderd zijn, dus hier ook clampen
     paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, centerX - paddleWidth / 2));
 
