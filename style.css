@@ -444,7 +444,7 @@ body {
     height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
     margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
     overflow: hidden;
-    z-index: 6000;        /* frame-laag */
+    z-index: 5500;        /* frame-laag */
     background: none;
   }
 
@@ -599,6 +599,6 @@ body {
     background: #6a0f0f;
     border: 2px solid #b66414;
     border-radius: 12px 12px 0 0;
-    z-index: 7001;
+    z-index: 70001;
   }
 }
