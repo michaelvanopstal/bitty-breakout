@@ -514,37 +514,33 @@ body {
   }
 }
 
-/* 📥 Chatbox netjes onder het gele frame */
-@media (min-width: 600px) {
-#chatbox {
-  position: absolute !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  bottom: calc(-8vh + var(--frame-bottom-space)) !important; 
-  /* ^ schuift hem iets onder het frame — pas -8vh aan als nodig */
-  width: 85% !important;          /* breedte van de chatbox */
-  max-width: 400px !important;    /* niet breder dan dit */
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  z-index: 4000 !important;
-  padding: 10px;
-  text-align: center;
-}
+/* 📥 alleen TELEFOON: chat onder het gele frame */
+@media (max-width: 600px) {
+  #chatbox {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: calc(-8vh + var(--frame-bottom-space)) !important;
+    width: 85% !important;
+    max-width: 400px !important;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 4000 !important;
+    padding: 10px;
+  }
 
-/* optioneel: als je er een “chat” knopje bij wilt */
-#chat-toggle-btn {
-  position: absolute !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  bottom: calc(-12vh + var(--frame-bottom-space)) !important;
-  background: #b21a0d;
-  color: #fff;
-  padding: 6px 16px;
-  border-radius: 9999px;
-  z-index: 4100 !important;
-  font-size: 14px;
-  border: none;
+  /* stickerpaneel óók mobiel onderaan laten komen */
+  #chat-sticker-panel {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: calc(-8vh + var(--frame-bottom-space) + 60px) !important;
+    width: 85% !important;
+    max-width: 400px !important;
+    display: block !important;
+    z-index: 4001 !important;
+  }
 }
 
 
