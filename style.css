@@ -424,17 +424,17 @@ body {
     --frame-side-space: 0vw;
 
     /* 🔽 hier stel je het GELE VENSTER in */
-    --canvas-inset-top: 15%;    /* hoe ver onder de bovenrand van je plaatje */
-    --canvas-inset-left:  3.6%;    /* hoeveel ruimte links in het gele frame */
-    --canvas-inset-right: 3.6%;   /* hoeveel ruimte rechts in het gele frame */
-    --canvas-inset-bottom: 18%;   /* onderkant waar de paddle eindigt */
+    --canvas-inset-top: 15%;       /* hoe ver onder de bovenrand van je plaatje */
+    --canvas-inset-left: 3.6%;     /* ruimte links in het gele frame */
+    --canvas-inset-right: 3.6%;    /* ruimte rechts in het gele frame */
+    --canvas-inset-bottom: 18%;    /* onderkant waar de paddle eindigt */
 
     /* zoom van het plaatje */
     --bg-scale: 1;
   }
 
   body {
-    background:#FF9305;
+    background: #FF9305;
     padding-bottom: 0;
   }
 
@@ -444,7 +444,7 @@ body {
     height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
     margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
     overflow: hidden;
-    z-index: 6000;
+    z-index: 6000;        /* frame-laag */
     background: none;
   }
 
@@ -456,10 +456,10 @@ body {
     background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
-    z-index:1;
+    z-index: 1;           /* achtergrondlaag */
   }
 
-  /* 🔥 hier komt de nauwkeurige positionering */
+  /* 🎮 canvas precies in het gele scherm */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-inset-top) !important;
@@ -474,7 +474,7 @@ body {
     z-index: 2 !important;
   }
 
-  /* rest van je spullen... */
+  /* dingen die je op mobiel verbergt */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -484,6 +484,7 @@ body {
     display: none !important;
   }
 
+  /* HUD bovenaan laten zweven */
   #login-overlay {
     position: fixed !important;
     top: 10px !important;
@@ -512,18 +513,23 @@ body {
     z-index: 4000 !important;
   }
 
-   /* standaard: mobile chat uit */
-#chatbox-mobile {
-  display: none;
+  /* standaard: mobiele chat uit (we zetten 'm aan in de 600px-query) */
+  #chatbox-mobile {
+    display: none;
+  }
 }
 
-/* 📱 alleen op mobiel */
+/* =========================================================
+   📱 ECHT klein (tot 600px) → mobiele chat die OMHOOG klapt
+   ========================================================= */
 @media (max-width: 600px) {
 
-  /* verstop de desktop-versie op mobiel, of laat hem staan maar buiten beeld */
-  #chatbox {
-    display: none !important;
+  body {
+    overflow: visible; /* anders wordt chat afgekapt */
   }
+
+  /* als je de desktop-chat wilt verstoppen op echt kleine schermen */
+  /* #chatbox { display: none !important; } */
 
   /* mobiele variant */
   #chatbox-mobile {
@@ -537,14 +543,13 @@ body {
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 0 0;
     box-shadow: 0 -6px 20px rgba(0,0,0,.35);
-    z-index: 6000;
+    z-index: 7000;              /* hoger dan #game-container (6000) */
     overflow: hidden;
-    /* standaard ingeklapt */
-    height: 42px;
+    height: 42px;               /* ingeklapt */
     transition: height .25s ease;
   }
 
-  /* header bovenin balkje */
+  /* header van mobiele chat */
   .chatbox-header-mobile {
     display: flex;
     justify-content: space-between;
@@ -566,10 +571,10 @@ body {
 
   /* open toestand → klapt OMHOOG */
   #chatbox-mobile.open {
-    height: 55vh;               /* klapt omhoog */
+    height: 55vh;
   }
 
-  /* inhoudsvakken binnen mobiel */
+  /* inhoud in mobiele chat */
   #chatMobileMessages {
     height: calc(55vh - 90px);
     overflow-y: auto;
@@ -583,20 +588,17 @@ body {
     padding: 8px;
   }
 
-  /* stickerpaneel ook omhoog laten gaan */
+  /* stickerpaneel óók boven de chat laten verschijnen */
   #chat-sticker-panel {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 55vh;               /* komt boven de open chat te staan */
+    bottom: 55vh;               /* direct boven open chat */
     width: 85vw;
     max-width: 420px;
     background: #6a0f0f;
     border: 2px solid #b66414;
     border-radius: 12px 12px 0 0;
-    z-index: 6001;
+    z-index: 7001;
   }
 }
-
-   
-
