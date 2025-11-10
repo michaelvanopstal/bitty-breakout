@@ -489,6 +489,10 @@ function rescaleBombSystems(scale) {
     rescaleActiveVFX(scale); // je had deze al voor explosions e.d. :contentReference[oaicite:9]{index=9}
   }
 }
+function rescaleStarsSystems(scale) {
+  if (!starPowerFX) return;
+  starPowerFX.scale = scale;
+}
 
 
 function ensureFxCanvas() {
