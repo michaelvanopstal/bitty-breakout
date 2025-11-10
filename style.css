@@ -433,7 +433,7 @@ body {
     aspect-ratio: 738 / 1600;     /* verhouding van je mobile.png */
     margin: 0 auto;
     background: url("mobile.png") no-repeat center center;
-    background-size: 100%;        /* ⬅️ hier kun je 95%, 110%, 120% van maken */
+    background-size: 160%;        /* ⬅️ hier kun je 95%, 110%, 120% van maken */
     overflow: hidden;
     z-index: 1;
   }
