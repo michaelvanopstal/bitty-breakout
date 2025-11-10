@@ -514,10 +514,10 @@ body {
   }
 
          #chatbox {
-        position: fixed;
         position: fixed !important;
         bottom: 10px !important;
         right: 30px !important;
+        left: auto;
         z-index: 4000 !important;
       }
     }
