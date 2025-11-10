@@ -411,9 +411,10 @@ body {
     right: 360px;
   }
 }
+
 /* =========================================================
    📱 Mobiele versie (tot 768px)
-   Stabiele container + echte zoom met ::before
+   container + pseudo-achtergrond + vaste z-indexen
    ========================================================= */
 @media (max-width: 768px) {
 
@@ -426,51 +427,52 @@ body {
     --canvas-left-offset: 4.5%;
     --canvas-width: 91%;
 
-    /* ⬅️ HIER zoom je het plaatje echt */
-    --bg-scale: 1;   /* 1 = normaal, 0.9 = iets kleiner, 1.1 = iets groter */
+    /* zoom van het plaatje */
+    --bg-scale: 1;   /* 0.95 = iets kleiner, 1.05 = iets groter */
   }
 
   body {
     background: #b21a0d;
+    padding-bottom: 0; /* je mag hier later weer 12vh van maken voor je chat */
   }
 
-  /* buitenkant van je spel */
+  /* 1. HOU DER */
   #game-container {
     position: relative;
     width: calc(100vw - (2 * var(--frame-side-space)));
     height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
-    margin-top: var(--frame-top-space);
-    margin-bottom: var(--frame-bottom-space);
-    margin-left: var(--frame-side-space);
-    margin-right: var(--frame-side-space);
+    margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
     overflow: hidden;
-    z-index: 1;
+    z-index: 0;        /* onder alles */
+    background: none;  /* achtergrond komt uit ::before */
   }
 
-  /* de ACHTERGROND als aparte laag */
+  /* 2. ACHTERGRONDLAAG */
   #game-container::before {
     content: "";
     position: absolute;
     inset: 0;
     background: url("mobile.png") no-repeat center center;
-    background-size: cover;              /* basis: vullend */
-    transform: scale(var(--bg-scale));   /* echte zoom */
-    transform-origin: center center;     /* vanuit midden in-/uitzoomen */
-    z-index: 0;
+    background-size: cover;
+    transform: scale(var(--bg-scale));
+    transform-origin: center center;
+    z-index: 0;  /* echt achteraan */
   }
 
-  /* jouw canvas erboven */
+  /* 3. SPEL */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-top-offset) !important;
     left: var(--canvas-left-offset) !important;
     width: var(--canvas-width) !important;
     height: auto !important;
+    transform: none !important;
+    border: none !important;
     background: transparent !important;
-    z-index: 2 !important;  /* boven ::before */
+    z-index: 2 !important;   /* altijd boven het plaatje */
   }
 
-  /* dingen verbergen op mobiel */
+  /* dingen die op mobiel weg mogen */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -482,7 +484,7 @@ body {
     display: none !important;
   }
 
-  /* HUD */
+  /* HUD bovenaan laten zweven */
   #login-overlay {
     position: fixed !important;
     top: 10px !important;
