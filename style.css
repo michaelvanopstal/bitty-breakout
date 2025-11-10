@@ -513,13 +513,14 @@ body {
     z-index: 4000 !important;
   }
 
-  #chatbox {
-  position: absolute;
-  top: 90px;
-  right: 30px;
-  left: auto;
-  text-align: right;
-  z-index: 1500;
+         #chatbox {
+        position: fixed;
+        bottom: 40px;
+        right: 30px;
+        width: 100px;
+        height: 100px;
+        z-index: 300;
+  
 
 
   }
