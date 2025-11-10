@@ -517,7 +517,7 @@ body {
         bottom: 10px !important;
         right: 30px !important;
         left: auto;
-        z-index: 4000 !important;
+        z-index: 8000 !important;
       }
     }
 
