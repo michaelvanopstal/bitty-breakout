@@ -513,22 +513,7 @@ body {
     z-index: 4000 !important;
   }
 }
-/* 📱 chat als bottom sheet op mobiel */
-#chatbox {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: -55vh;              /* verstopt onder beeld */
-  height: 55vh;                /* hoe hoog de chat wordt */
-  background: #fff;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  box-shadow: 0 -6px 20px rgba(0,0,0,.2);
-  transition: bottom .25s ease;
-  z-index: 5000;
-  display: block !important;   /* we willen ’m op mobiel juist tonen */
-  overflow: hidden;
-}
+
 
 
 
