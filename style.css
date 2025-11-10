@@ -514,7 +514,7 @@ body {
   }
 
          #chatbox {
-        position: fixed !important;
+        position:  absolute;
         bottom: 10px !important;
         right: 30px !important;
         left: auto;
