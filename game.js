@@ -764,7 +764,6 @@ function renderBittyBombIntro() {
   }
 }
 
-
 // ❤️ full-screen heart celebration
 let heartCelebration = {
   active: false,
@@ -773,10 +772,8 @@ let heartCelebration = {
 };
 
 function triggerHeartCelebration() {
-  // zorg dat overlay er is
   ensureFxCanvas();
 
-  // 🎵 speel nu jouw nieuwe bitty-level-up mp3
   try {
     bittyLevelUpSfx.currentTime = 0;
     bittyLevelUpSfx.play();
@@ -789,18 +786,21 @@ function triggerHeartCelebration() {
   heartCelebration.t0 = performance.now();
   heartCelebration.hearts = [];
 
-  // 👇 nieuw: kort het levelup-plaatje laten zien
+  // pak hier al de schaal
+  const s = (typeof getScale === "function") ? getScale() : 1;
+
   heartCelebration.showMascot = true;
   heartCelebration.mascotStart = performance.now();
 
   const count = 50;
   for (let i = 0; i < count; i++) {
+    const baseSize = 32 + Math.random() * 26;
     heartCelebration.hearts.push({
       x: Math.random() * W,
       y: -40 - Math.random() * 200,
       dx: (Math.random() - 0.5) * 1.2,
       dy: 2 + Math.random() * 2.5,
-      size: 32 + Math.random() * 26,
+      size: baseSize * s,            // 👈 meteen geschaald opslaan
       rot: Math.random() * Math.PI * 2,
       rotSpeed: (-1 + Math.random() * 2) * 0.04,
       pulse: Math.random() * Math.PI * 2
@@ -816,36 +816,34 @@ function drawHeartCelebration() {
   const W = fxCanvas.width;
   const H = fxCanvas.height;
 
-  // duur van de animatie
-  const DURATION = 4000; // 4 sec
+  const DURATION = 4000;
   if (elapsed > DURATION) {
     heartCelebration.active = false;
     return;
   }
 
-  // 0..1
   const progress = elapsed / DURATION;
   const fade = 1 - progress;
 
-  // canvas leegmaken
   fxCtx.clearRect(0, 0, W, H);
- 
-  // 👇 NIEUW: jouw levelup-plaatje 2 seconden tonen op originele grootte
+
+  // we pakken de actuele schaal ook hier (voor plaatje + mocht canvas resizen)
+  const s = (typeof getScale === "function") ? getScale() : 1;
+
+  // level-up plaatje (al geschaald)
   if (
     heartCelebration.showMascot &&
     typeof heartLevelupImg !== "undefined" &&
     heartLevelupImg.complete
   ) {
-    const POP_DURATION = 2000; // 2 sec
+    const POP_DURATION = 2000;
     const popElapsed = now - heartCelebration.mascotStart;
     if (popElapsed < POP_DURATION) {
-      const a = 1 - popElapsed / POP_DURATION; // fade-out
+      const a = 1 - popElapsed / POP_DURATION;
 
-      // originele grootte
-      let drawW = heartLevelupImg.width;
-      let drawH = heartLevelupImg.height;
+      let drawW = heartLevelupImg.width * s;
+      let drawH = heartLevelupImg.height * s;
 
-      // veiligheidscheck: als het groter is dan canvas, dan passend maken
       const maxW = W * 0.9;
       const maxH = H * 0.9;
       if (drawW > maxW) {
@@ -864,7 +862,7 @@ function drawHeartCelebration() {
       fxCtx.drawImage(
         heartLevelupImg,
         (W - drawW) / 2,
-        (H - drawH) / 2 + 20, // mag je nog tunen
+        (H - drawH) / 2 + 20 * s,
         drawW,
         drawH
       );
@@ -874,16 +872,13 @@ function drawHeartCelebration() {
     }
   }
 
-
   // hartjes tekenen
   for (const h of heartCelebration.hearts) {
-    // bewegen
     h.x += h.dx;
     h.y += h.dy;
     h.rot += h.rotSpeed;
     h.pulse += 0.25;
 
-    // we RESPAWNEN NIET meer → als ze uit beeld zijn, tekenen we ze gewoon niet
     if (h.y > H + 80) continue;
 
     // aura
@@ -911,6 +906,7 @@ function drawHeartCelebration() {
     fxCtx.restore();
   }
 }
+
 
 function rescaleActiveVFX(scale) {
   if (Array.isArray(explosions)) {
