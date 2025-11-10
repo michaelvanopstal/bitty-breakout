@@ -414,7 +414,7 @@ body {
 
 /* =========================================================
    📱 Mobiele versie (tot 768px)
-   Met instelbare marges voor het frame & canvas
+   Met instelbare marges + ZOOM voor achtergrond
    ========================================================= */
 @media (max-width: 768px) {
 
@@ -429,6 +429,9 @@ body {
     --canvas-top-offset: 18%;    /* positie van canvas binnen het frame */
     --canvas-left-offset: 4.5%;
     --canvas-width: 91%;         /* breedte van canvas binnen het frame */
+
+    /* 🔎 NIEUW: zoom voor je mobile.png */
+    --bg-zoom: 100;              /* 100 = normaal, 90 = iets kleiner, 110 = iets groter */
   }
 
   body {
@@ -445,7 +448,8 @@ body {
     margin-left: var(--frame-side-space);
     margin-right: var(--frame-side-space);
     background: url("mobile.png") no-repeat center center;
-    background-size: cover;
+    /* ⬇️ hier zit de zoom */
+    background-size: calc(var(--bg-zoom) * 1%) auto !important;
     overflow: hidden;
     z-index: 1;
   }
@@ -507,5 +511,6 @@ body {
     z-index: 4000 !important;
   }
 }
+
 
 
