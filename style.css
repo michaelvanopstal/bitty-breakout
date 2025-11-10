@@ -427,36 +427,50 @@ body {
     right: 20px;
   }
 }
-
 /* =========================================================
-   📱 Mobiele versie (tot 768px) – versie 2
+   📱 Mobiele versie (tot 768px)
+   Met instelbare marges voor het frame & canvas
    ========================================================= */
 @media (max-width: 768px) {
+
+  /* --------------------------
+     🔧 Handige instelbare marges
+     -------------------------- */
+  :root {
+    --frame-top-space: 5vh;      /* ruimte boven het frame */
+    --frame-bottom-space: 15vh;  /* ruimte onder het frame (voor chatbox) */
+    --frame-side-space: 0vw;     /* marge links en rechts van het frame */
+
+    --canvas-top-offset: 18%;    /* positie van canvas binnen het frame */
+    --canvas-left-offset: 4.5%;
+    --canvas-width: 91%;         /* breedte van canvas binnen het frame */
+  }
 
   body {
     background: #b21a0d;
   }
 
-  /* jouw bestaande container = telefoonframe */
+  /* 📱 jouw container als telefoonframe */
   #game-container {
     position: relative;
-    width: 100vw;
-    /* hoogte van het plaatje: 1600 / 738 ≈ 2.168 */
-    height: calc(100vw * 2.168);   /* zo blijft het hele plaatje zichtbaar */
-    max-width: 738px;
-    margin: 0 auto;
-    background: url("mobile.png") no-repeat top center;
-    background-size: 100% 100%;    /* niet 'contain', maar echt vullen → frame wordt even breed als scherm */
+    width: calc(100vw - (2 * var(--frame-side-space)));
+    height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
+    margin-top: var(--frame-top-space);
+    margin-bottom: var(--frame-bottom-space);
+    margin-left: var(--frame-side-space);
+    margin-right: var(--frame-side-space);
+    background: url("mobile.png") no-repeat center center;
+    background-size: cover;
     overflow: hidden;
     z-index: 1;
   }
 
-  /* het spel in het midden van het frame */
+  /* 🎮 canvas binnen het frame */
   #gameCanvas {
     position: absolute !important;
-    top: 15.5% !important;    /* iets lager dan eerst zodat het niet door de titel gaat */
-    left: 3.5% !important;    /* kleine marge zodat je gouden rand zichtbaar blijft */
-    width: 93% !important;    /* blokken passen nu binnen de gouden rand */
+    top: var(--canvas-top-offset) !important;
+    left: var(--canvas-left-offset) !important;
+    width: var(--canvas-width) !important;
     height: auto !important;
     transform: none !important;
     border: none !important;
@@ -464,7 +478,7 @@ body {
     z-index: 2 !important;
   }
 
-  /* dingen die in de weg zitten op mobiel */
+  /* dingen die op mobiel in de weg zitten → uit */
   #bonus-power-panel,
   #highscore-overlay,
   #trophy,
@@ -476,7 +490,7 @@ body {
     display: none !important;
   }
 
-  /* HUD vastplakken bovenaan */
+  /* HUD bovenaan houden */
   #login-overlay {
     position: fixed !important;
     top: 10px !important;
@@ -498,7 +512,6 @@ body {
     right: 10px !important;
     font-size: 14px !important;
     z-index: 4000 !important;
-    left: auto !important;
   }
 
   #time-box {
@@ -507,6 +520,6 @@ body {
     right: 90px !important;
     font-size: 14px !important;
     z-index: 4000 !important;
-    left: auto !important;
   }
 }
+
