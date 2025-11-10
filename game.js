@@ -516,15 +516,18 @@ function ensureFxCanvas() {
 function getScale() {
   return (typeof currentScale === "number" && currentScale > 0) ? currentScale : 1;
 }
-// 🌟 STAR POWER FX — schaalbaar
-let starPowerFX = {
+
+// 🌟 STAR POWER FX — schaalbaar (safe)
+window.starPowerFX = window.starPowerFX || {
   active: false,
   t0: 0,
   duration: 4000,
   stars: [],
   particles: [],
-  scale: 1   // 👈 actuele schaal wordt hier bijgehouden
+  scale: 1
 };
+const starPowerFX = window.starPowerFX;
+
 
 function startStarPowerCelebration() {
   ensureFxCanvas();
