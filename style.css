@@ -441,7 +441,7 @@ body {
   /* jouw bestaande wrapper wordt nu het telefoonplaatje */
   #game-container {
     position: relative;
-    width: 200vw;
+    width: 100vw;
     max-width: 738px;          /* breedte van je screenshot */
     aspect-ratio: 738 / 1600;  /* verhouding van je screenshot */
     margin: 0 auto;
