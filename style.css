@@ -428,7 +428,7 @@ body {
     --canvas-width: 91%;
 
     /* zoom van het plaatje */
-    --bg-scale: 1;   /* 0.95 = iets kleiner, 1.05 = iets groter */
+    --bg-scale: 0.95;   /* 0.95 = iets kleiner, 1.05 = iets groter */
   }
 
   body {
