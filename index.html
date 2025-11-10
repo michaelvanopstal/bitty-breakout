@@ -773,7 +773,39 @@
 </script>
 
 
+
+<!-- nieuw script voor mobiele chat -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const desktopChat = document.getElementById("chatbox");
+  const mobileChat = document.getElementById("chatbox-mobile");
+  const mobileHeader = document.querySelector(".chatbox-header-mobile");
+  const mobileClose = document.getElementById("chatMobileClose");
+  const mobileMessages = document.getElementById("chatMobileMessages");
+  const mobileForm = document.getElementById("chatMobileForm");
+
+  // alleen op mobiel klonen
+  if (window.innerWidth <= 600 && desktopChat && mobileMessages && mobileForm) {
+    const realMessages = document.getElementById("chatMessages");
+    const realForm = document.getElementById("chatForm");
+
+    if (realMessages) mobileMessages.innerHTML = realMessages.innerHTML;
+    if (realForm) mobileForm.innerHTML = realForm.innerHTML;
+
+    // openen/sluiten
+    if (mobileHeader) {
+      mobileHeader.addEventListener("click", () => {
+        mobileChat.classList.toggle("open");
+      });
+    }
+    if (mobileClose) {
+      mobileClose.addEventListener("click", () => {
+        mobileChat.classList.remove("open");
+      });
+    }
+  }
+});
+</script>
 </body>
 </html>
-
 
