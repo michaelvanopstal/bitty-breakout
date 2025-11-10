@@ -454,7 +454,7 @@ body {
   /* het canvas zelf in het gouden vlak van je afbeelding */
   #gameCanvas {
     position: absolute !important;
-    top: 19% !important;      /* hoogte t.o.v. het plaatje */
+    top: 30% !important;      /* hoogte t.o.v. het plaatje */
     left: 6.5% !important;    /* marge links zoals in je screenshot */
     width: 87% !important;    /* breedte van het speelveld */
     height: auto !important;
