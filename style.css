@@ -526,7 +526,7 @@ body {
     bottom: calc(-8vh + var(--frame-bottom-space)) !important;
     width: 85% !important;
     max-width: 400px !important;
-    background: #fff;
+    background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 14px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     z-index: 4900 !important;
