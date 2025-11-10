@@ -512,13 +512,21 @@ body {
     z-index: 4000 !important;
   }
 
-        #chatbox {
-        position:  absolute;
-        bottom: 10px !important;
-        right: 30px !important;
-        left: auto;
-        z-index: 8000 !important;
-      }
-    }
+       @media (max-width: 600px) {
+  /* anders wordt hij soms afgekapt */
+  body {
+    overflow: visible;
+  }
 
+  #chatbox {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: 10px !important;   /* onderaan midden */
+    right: auto !important;    /* desktop-rechts uitzetten */
+     z-index: 5000 !important;
+  }
+}
+
+   
 
