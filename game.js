@@ -6088,8 +6088,14 @@ window.addEventListener('resize', () => {
   // 3) basis dingen opnieuw schalen
   ballRadius   = 8 * currentScale;
   paddleHeight = 20 * currentScale;
-  paddleWidth  = 120 * currentScale;
-  paddleY      = canvas.height - paddleHeight - (8 * currentScale);
+
+  // 👇 alleen terug naar standaardbreedte als er géén actief size-effect is
+  if (!paddleSizeEffect) {
+    paddleWidth = 120 * currentScale;
+  }
+
+  // paddle opnieuw net boven de onderkant
+  paddleY = canvas.height - paddleHeight - (8 * currentScale);
 
   // 4) bricks de nieuwe schaal geven (maar niet alles resetten)
   if (typeof applyScaleToBricks === 'function') {
@@ -6111,17 +6117,12 @@ window.addEventListener('resize', () => {
     redrawPaddleCanvas();
   }
 
-
-  // 7️⃣ Paddle opnieuw tekenen met nieuwe breedte / damage-laag
-  if (typeof redrawPaddleCanvas === 'function') {
-    redrawPaddleCanvas();
-  }
-
-  // 8️⃣ Bonus / UI panel ook updaten met huidige waardes
+  // 8) Bonus / UI panel ook updaten met huidige waardes
   if (typeof updateBonusPowerPanel === 'function') {
     updateBonusPowerPanel(starsCollected, bombsCollected, badCrossesCaught);
   }
 });
+
 
 
 
