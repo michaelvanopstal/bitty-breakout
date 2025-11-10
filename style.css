@@ -603,4 +603,23 @@ body {
     border-radius: 12px 12px 0 0;
     z-index: 70001;
   }
+
+#chatbox-mobile {
+  display: none;
+}
+
+/* =========================================================
+   📱 Alleen telefoons (tot 600px)
+   ========================================================= */
+@media (max-width: 600px) {
+  /* verberg de oude chat en stickerpaneel op mobiel */
+  #chatbox,
+  #chat-sticker-panel {
+    display: none !important;
+  }
+
+  /* mobiele chat tonen */
+  #chatbox-mobile {
+    display: block !important;
+  }
 }
