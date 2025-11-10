@@ -474,15 +474,17 @@ body {
     z-index: 32 !important;
   }
 
-  /* dingen die je op mobiel verbergt */
-  #bonus-power-panel,
-  #highscore-overlay,
-  #trophy,
-  #musicToggle,
-  #resetBallBtn,
-  #bikeFlyer {
-    display: none !important;
-  }
+ /* dingen die je op mobiel verbergt */
+#bonus-power-panel,
+#highscore-overlay,
+#trophy,
+#musicToggle,
+#resetBallBtn,
+#bikeFlyer,
+#chatbox,                /* oude chatbox uitschakelen op mobiel */
+#chat-sticker-panel {     /* oude stickerpaneel ook uitschakelen */
+  display: none !important;
+}
 
   /* HUD bovenaan laten zweven */
   #login-overlay {
