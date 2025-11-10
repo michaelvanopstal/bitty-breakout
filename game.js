@@ -1802,12 +1802,17 @@ let brickColumnCount = 9;
 let brickWidth  = customBrickBaseWidth  * scaleFactor;
 let brickHeight = customBrickBaseHeight * scaleFactor;
 
+// 📱 extra: meteen al iets grotere bricks op kleine schermen
+if (window.innerWidth <= 768) {
+  brickWidth  = customBrickBaseWidth  * scaleFactor * 1.15;  // 15% groter
+  brickHeight = customBrickBaseHeight * scaleFactor * 1.15;
+}
+
 // 👉 helper om later opnieuw te schalen
 function applyScaleToBricks(newScale) {
   brickWidth  = customBrickBaseWidth  * newScale;
   brickHeight = customBrickBaseHeight * newScale;
 }
-
 
 
 const starAuraSound = new Audio("starsound.mp3");
