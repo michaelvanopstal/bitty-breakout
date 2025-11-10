@@ -425,8 +425,8 @@ body {
 
     /* 🔽 hier stel je het GELE VENSTER in */
     --canvas-inset-top: 15%;    /* hoe ver onder de bovenrand van je plaatje */
-    --canvas-inset-left:  2.8%;    /* hoeveel ruimte links in het gele frame */
-    --canvas-inset-right: 2.8%;   /* hoeveel ruimte rechts in het gele frame */
+    --canvas-inset-left:  3.2%;    /* hoeveel ruimte links in het gele frame */
+    --canvas-inset-right: 3.2%;   /* hoeveel ruimte rechts in het gele frame */
     --canvas-inset-bottom: 18%;   /* onderkant waar de paddle eindigt */
 
     /* zoom van het plaatje */
