@@ -6068,39 +6068,42 @@ heartLevelupImg.onload = onImageLoad;
 tenHitImg.onload = onImageLoad;
 
 
-// ✅ Dynamische schaal bij schermverandering
+// ✅ Dynamische schaal bij schermverandering (mobiel-safe)
 window.addEventListener('resize', () => {
-  // 1️⃣ Canvas zelf aanpassen aan nieuwe schermgrootte
+  // 1) canvas opnieuw passend maken
   if (typeof updateCanvasSize === 'function') {
     updateCanvasSize();
   }
 
-  // 2️⃣ Nieuwe schaal berekenen en opslaan
+  // 2) nieuwe schaal berekenen
   currentScale = canvas.width / baseCanvasWidth;
 
-  // 3️⃣ Basisobjecten (bal & paddle) opnieuw schalen
+  // 3) basis dingen opnieuw schalen
   ballRadius   = 8 * currentScale;
   paddleHeight = 20 * currentScale;
   paddleWidth  = 120 * currentScale;
   paddleY      = canvas.height - paddleHeight - (8 * currentScale);
 
-  // 4️⃣ Bricks opnieuw schalen
+  // 4) bricks de nieuwe schaal geven (maar niet alles resetten)
   if (typeof applyScaleToBricks === 'function') {
     applyScaleToBricks(currentScale);
   }
 
-  // 5️⃣ Eventuele actieve visuele effecten opnieuw schalen (explosies, silver FX)
+  // 5) actieve VFX meescalen (explosies, silver fx, bommen)
   if (typeof rescaleActiveVFX === 'function') {
     rescaleActiveVFX(currentScale);
   }
 
-  // 6️⃣ Bricks/bal opnieuw opbouwen indien jouw game dat zo doet
-  if (typeof resetBricks === 'function') {
-    resetBricks();
+  // 6) ⭐ jouw sterren-celebration ook meescalen
+  if (typeof rescaleStarsSystems === 'function') {
+    rescaleStarsSystems(currentScale);
   }
-  if (typeof resetBall === 'function') {
-    resetBall();
+
+  // 7) paddle opnieuw tekenen
+  if (typeof redrawPaddleCanvas === 'function') {
+    redrawPaddleCanvas();
   }
+
 
   // 7️⃣ Paddle opnieuw tekenen met nieuwe breedte / damage-laag
   if (typeof redrawPaddleCanvas === 'function') {
