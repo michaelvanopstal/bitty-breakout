@@ -522,7 +522,7 @@ body {
     transform: translateX(-50%) !important;
     bottom: calc(-8vh + var(--frame-bottom-space)) !important;
     width: 85% !important;
-    max-width: 400px !important;
+    max-width: 200px !important;
     background: #fff;
     border-radius: 14px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -537,7 +537,7 @@ body {
     transform: translateX(-50%) !important;
     bottom: calc(-8vh + var(--frame-bottom-space) + 60px) !important;
     width: 85% !important;
-    max-width: 400px !important;
+    max-width: 200px !important;
     display: block !important;
     z-index: 5000!important;
   }
