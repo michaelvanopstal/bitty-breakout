@@ -1802,17 +1802,12 @@ let brickColumnCount = 9;
 let brickWidth  = customBrickBaseWidth  * scaleFactor;
 let brickHeight = customBrickBaseHeight * scaleFactor;
 
-// 📱 extra: meteen al iets grotere bricks op kleine schermen
-if (window.innerWidth <= 768) {
-  brickWidth  = customBrickBaseWidth  * scaleFactor * 1.15;  // 15% groter
-  brickHeight = customBrickBaseHeight * scaleFactor * 1.15;
-}
-
 // 👉 helper om later opnieuw te schalen
 function applyScaleToBricks(newScale) {
   brickWidth  = customBrickBaseWidth  * newScale;
   brickHeight = customBrickBaseHeight * newScale;
 }
+
 
 
 const starAuraSound = new Audio("starsound.mp3");
@@ -3084,17 +3079,6 @@ function resetBricks(opts = {}) {
   if (typeof rescaleStarsSystems === "function") {
     rescaleStarsSystems(currentScale);
   }
-  // 📱 als we op mobiel zitten: bricks extra opschalen
-  if (window.innerWidth <= 768) {
-    brickWidth  = customBrickBaseWidth  * currentScale * 1.15;
-    brickHeight = customBrickBaseHeight * currentScale * 1.15;
-  }
-
-    if (window.innerWidth <= 768) {
-    paddleWidth = paddleWidth * 1.1;  // 10% breder
-    redrawPaddleCanvas?.();
-  }
-
 
   // ✨ extra: ook bal- en paddle-maten opnieuw zetten
   ballRadius   = 8  * currentScale;
