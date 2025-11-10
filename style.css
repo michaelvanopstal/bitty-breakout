@@ -460,7 +460,7 @@ body {
     height: auto !important;
     transform: none !important;
     border: none !important;
-    z-index: 20 !important;
+    z-index: 1000 !important;
     background: transparent !important;
   }
 
