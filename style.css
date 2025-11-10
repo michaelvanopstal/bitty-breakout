@@ -513,7 +513,7 @@ body {
     z-index: 4000 !important;
   }
 
-         #chatbox {
+        #chatbox {
         position:  absolute;
         bottom: 10px !important;
         right: 30px !important;
