@@ -3079,6 +3079,22 @@ function resetBricks(opts = {}) {
   if (typeof rescaleStarsSystems === "function") {
     rescaleStarsSystems(currentScale);
   }
+   if (window.innerWidth <= 768) {
+  // 1️⃣ Canvas vult volledige breedte
+  canvas.width  = window.innerWidth * 0.91;  // iets kleiner dan totaal, zodat gele rand zichtbaar blijft
+  canvas.height = window.innerHeight * 0.55; // stel hoogte naar verhouding in
+
+  // 2️⃣ Brickbreedte opnieuw uitrekenen zodat ze tot de randen komen
+  const brickPadding = 0; // geen ruimte tussen bricks
+  brickWidth = canvas.width / brickColumnCount - brickPadding;
+  brickHeight = 25 * currentScale; // hoogte mag wat groter blijven
+
+  // 3️⃣ Paddle centreren
+  paddleWidth = canvas.width * 0.2;
+  paddleX = (canvas.width - paddleWidth) / 2;
+}
+
+  
 
   // ✨ extra: ook bal- en paddle-maten opnieuw zetten
   ballRadius   = 8  * currentScale;
