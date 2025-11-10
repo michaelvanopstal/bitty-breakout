@@ -2661,26 +2661,6 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
   console.log("✅ Touch controls geactiveerd");
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  const chat = document.getElementById("chatbox");
-  const stickerPanel = document.getElementById("chat-sticker-panel");
-  const chatBtn = document.getElementById("chatButton"); // <- dit is jouw huidige knopnaam, laat die zo
-
-  if (!chat || !chatBtn) return;
-
-  chatBtn.addEventListener("click", function () {
-    // desktop mag gewoon doen wat hij al deed
-    // maar op mobiel willen we hem laten omhoogklappen
-    if (window.innerWidth <= 768) {
-      chat.classList.toggle("open");
-      if (stickerPanel) {
-        stickerPanel.classList.toggle("open");
-      }
-    }
-  });
-});
-
-
 function keyUpHandler(e) {
   if (
     e.key === "Right" || e.key === "ArrowRight" || e.key === ">" || e.key === "."
