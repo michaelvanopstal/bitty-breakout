@@ -866,4 +866,20 @@ body {
   }
 }
 
+/* ===== 📱 BONUS POWER PANEL OP MOBIEL ===== */
+@media (max-width: 600px) {
+  #bonus-power-panel {
+    display: block !important;     /* weer zichtbaar op mobiel */
+    position: fixed;               /* los van gamecanvas */
+    top: 60px;                     /* afstand vanaf bovenkant */
+    left: 50%;                     /* centreren horizontaal */
+    transform: translateX(-50%) scale(0.75); /* kleiner + in het midden */
+    transform-origin: top center;
+    z-index: 9999;
+    width: 210px;                  /* breedte van paneel */
+    box-shadow: 0 4px 12px rgba(0,0,0,.4);
+  }
+}
+
+
 
