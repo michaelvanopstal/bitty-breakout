@@ -871,11 +871,11 @@ body {
   #bonus-power-panel {
     display: block !important;     /* weer zichtbaar op mobiel */
     position: fixed;               /* los van gamecanvas */
-    top: 60px;                     /* afstand vanaf bovenkant */
+    top: 20px;                     /* afstand vanaf bovenkant */
     left: 50%;                     /* centreren horizontaal */
-    transform: translateX(-50%) scale(0.50); /* kleiner + in het midden */
+    transform: translateX(-50%) scale(0.30); /* kleiner + in het midden */
     transform-origin: top center;
-    z-index: 11199;
+    z-index: 9999;
     width: 160px;                  /* breedte van paneel */
     box-shadow: 0 4px 12px rgba(0,0,0,.4);
   }
