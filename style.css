@@ -455,7 +455,7 @@ body {
     background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
-    z-index: 5501;
+    z-index: 5000;
   }
 
   /* canvas in het gele scherm */
