@@ -522,24 +522,17 @@ body {
 }
 
 
-/* =========================================================
-   📱 ECHT klein (tot 600px) → alleen chat en sticker
-   ========================================================= */
-/* ======= 📱 MOBIEL ======= */
 @media (max-width: 600px) {
 
-  body {
-    overflow: visible; /* anders wordt chat afgekapt door body */
-  }
-
-  /* 🌟 verplaatsbare gele chat-knop (zoals screenshot) */
+  /* knop resetten en stylen zoals jij wilt */
   #chat-mobile-button {
+    all: unset;
     position: fixed;
     bottom: 18px;
     right: 18px;
     z-index: 250;
-    background: linear-gradient(180deg, #ffd46a 0%, #ffb52f 100%);
-    border: 2px solid rgba(255, 191, 83, 0.9);
+    background: linear-gradient(180deg, #ffe09c 0%, #ffc44b 100%);
+    border: 1.5px solid rgba(231, 159, 41, 0.8);
     border-radius: 999px;
     height: 46px;
     min-width: 150px;
@@ -565,17 +558,14 @@ body {
     background: radial-gradient(circle, #ffa423 0%, #e57611 80%);
     border-radius: 50%;
     display: block;
-    box-shadow: inset 0 1px 3px rgba(255,255,255,.6);
   }
   #chat-mobile-button .cmb-arrow {
     font-size: 11px;
     color: #5f3001;
-    line-height: 1;
   }
   #chat-mobile-button .cmb-label {
     font-weight: 700;
     color: #5f3001;
-    letter-spacing: 0.3px;
     font-size: 14px;
   }
   #chat-mobile-button .cmb-close {
@@ -584,37 +574,47 @@ body {
     width: 22px;
     height: 22px;
     border-radius: 999px;
-    font-size: 13px;
     display: grid;
     place-items: center;
     color: #5f3001;
+    font-size: 13px;
   }
 
-  /* 4️⃣ mobiele chat boven HUD */
+  /* verborgen chat-paneel dat uit de knop komt */
   #chatbox-mobile {
-    display: block !important;
     position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 0;
+    /* eerste positie: net boven de knop, die zetten we in JS precies */
+    bottom: 72px;
+    right: 18px;
     width: 85vw;
     max-width: 420px;
     background: linear-gradient(#f6a53b,#e27e22);
-    border-radius: 18px 18px 0 0;
-    box-shadow: 0 -6px 20px rgba(0,0,0,.35);
-    z-index: 200;              /* onder de knop (250) */
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    z-index: 240;
     overflow: hidden;
-    height: 42px;              /* ingeklapt */
-    transition: height .25s ease;
+
+    /* VERBORGEN staat */
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+
+  /* zichtbare staat: chat 'komt uit de knop' */
+  #chatbox-mobile.open {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
   }
 
   .chatbox-header-mobile {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 6px 12px;
+    justify-content: space-between;
     background: linear-gradient(#ffd56a,#ffb12b);
     color: #7a2b00;
+    padding: 6px 12px;
     font-weight: 700;
   }
 
@@ -627,16 +627,11 @@ body {
     color: #7a2b00;
   }
 
-  /* open toestand → omhoog */
-  #chatbox-mobile.open {
-    height: 55vh;
-  }
-
   #chatMobileMessages {
-    height: calc(55vh - 90px);
-    overflow-y: auto;
+    max-height: 42vh;
     background: #6a0f0f;
     color: #ffe9c4;
+    overflow-y: auto;
     padding: 8px;
     position: relative;
     z-index: 5;
@@ -645,64 +640,40 @@ body {
   #chatMobileForm {
     background: linear-gradient(#ffb545,#f08a25);
     padding: 8px;
-    position: relative;
+    display: flex;
+    gap: 6px;
+    align-items: center;
     z-index: 5;
   }
+  #chatMobileForm input {
+    flex: 1;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 8px;
+  }
 
-  /* ✅ nieuw: sticker-overlay BÍNNEN de chat, zelfde maat */
+  /* overlay bovenop de chat, zelfde maat */
   #chatStickerOverlay {
     position: absolute;
     inset: 42px 0 0 0; /* onder de header */
     background: #6a0f0f;
     border-top: 2px solid #b66414;
-    z-index: 15;
-    overflow-y: auto;
+    z-index: 20;
     display: none;
+    overflow-y: auto;
   }
   #chatStickerOverlay.show {
     display: block;
   }
-  #chatStickerOverlay .sticker-section-title {
-    font-weight: 700;
-    font-size: 13px;
-    color: #ffffff;
-    margin: 6px 0 4px;
-    text-shadow: 0 1px 2px rgba(0,0,0,.4);
-    border-bottom: 1px solid rgba(255,255,255,.15);
-    padding-bottom: 2px;
-  }
-  #chatStickerOverlay .sticker-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
-    gap: 8px;
-    padding: 6px;
-  }
-  #chatStickerOverlay .sticker-item {
-    cursor: pointer;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  #chatStickerOverlay .sticker-item img {
-    width: 100%;
-    display: block;
-  }
-
-  /* ⛔ oude losse stickerpanel niet meer gebruiken
-  #chat-sticker-panel-mobile { ... }
-  */
 }
 
-
-/* =========================================================
-   💻 Desktop fallback: mobiele chat uit
-   ========================================================= */
+/* desktop: verberg deze varianten */
 @media (min-width: 601px) {
+  #chat-mobile-button,
   #chatbox-mobile {
     display: none !important;
   }
-  #chat-mobile-button {
-    display: none !important;
-  }
 }
+
 
 
