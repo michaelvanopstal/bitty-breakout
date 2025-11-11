@@ -474,15 +474,16 @@ body {
     z-index: 10 !important;   /* boven frame, onder HUD */
   }
 
-  /* dingen die weg mogen op mobiel */
-  #bonus-power-panel,
-  #highscore-overlay,
-  #trophy,
-  #musicToggle,
-  #resetBallBtn,
-  #bikeFlyer,
-    display: none !important;
-  }
+/* dingen die weg mogen op mobiel */
+#bonus-power-panel,
+#highscore-overlay,
+#trophy,
+#musicToggle,
+#resetBallBtn,
+#bikeFlyer {
+  display: none !important;
+}
+
 
   /* 3️⃣ HUD boven het spel */
   #login-overlay {
