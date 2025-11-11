@@ -476,17 +476,17 @@ body {
 
   /* dingen die weg mogen op mobiel */
 
- #highscore-overlay,
+#highscore-overlay,
 #trophy,
 #musicToggle,
 #resetBallBtn,
 #bikeFlyer,
 #chatbox,             /* oude desktopchat uit op mobiel */
 #chat-sticker-panel,  /* oud stickerpaneel ook uit op mobiel */
-#bonus-power-panel {  /* ❌ verberg ook Bonus Power Panel */
+#bonus-power-panel,   /* verberg ook Bonus Power Panel */
+#hud {                /* 💖 verberg de desktop-levens op mobiel */
   display: none !important;
 }
-
 
 
   /* 3️⃣ HUD boven het spel */
