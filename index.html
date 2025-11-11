@@ -69,6 +69,15 @@
     </div>
   </div>
 
+<!-- 📱 Highscore knop + paneel -->
+<div id="mobile-highscore">
+  <button id="mobileHighscoreBtn">🏆 High Scores</button>
+  <div id="mobileHighscorePanel">
+    <ol id="mobileHighscoreList"></ol>
+  </div>
+</div>
+
+  
   <!-- 1x STICKERS definieren -->
   <script>
     const STICKERS = [
@@ -829,6 +838,38 @@
       c.style.top = finalTop + 'px';
     }
   </script>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn   = document.getElementById('mobileHighscoreBtn');
+  const panel = document.getElementById('mobileHighscorePanel');
+  const list  = document.getElementById('mobileHighscoreList');
+
+  if (!btn || !panel || !list) return;
+
+  // toggle open/dicht
+  btn.addEventListener('click', () => {
+    panel.classList.toggle('show');
+  });
+
+  // laad highscores vanuit je bestaande lokale lijst
+  function renderMobileHighscores() {
+    list.innerHTML = '';
+    const highscores = JSON.parse(localStorage.getItem('highscores')) || [];
+    highscores.forEach((entry, i) => {
+      const li = document.createElement('li');
+      li.textContent = `${i + 1}. ${entry.name || '—'} — ${entry.score || 0} (${entry.time || '00:00'})`;
+      list.appendChild(li);
+    });
+  }
+
+  // 1x laden bij opstart
+  renderMobileHighscores();
+
+  // en elke 5 sec refreshen (optioneel)
+  setInterval(renderMobileHighscores, 5000);
+});
+</script>
 
 </body>
 </html>
