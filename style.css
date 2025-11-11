@@ -426,7 +426,7 @@ body {
     /* gele venster */
     --canvas-inset-top: 15%;
     --canvas-inset-left: 5%;
-   --canvas-inset-right: 2.6%;
+    --canvas-inset-right: 2.6%;
     --canvas-inset-bottom: 18%;
 
     --bg-scale: 1;
@@ -457,22 +457,20 @@ body {
     background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
-    z-index: 1;
+    z-index: 1;                 /* onder alles */
   }
 
-  /* 2️⃣ canvas in het gele scherm */
+  /* 2️⃣ canvas stabiel gecentreerd in gele scherm */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-inset-top) !important;
     left: var(--canvas-inset-left) !important;
-    right: var(--canvas-inset-right) !important;
-    bottom: var(--canvas-inset-bottom) !important;
-    width: auto !important;
+    width: calc(100% - var(--canvas-inset-left) - var(--canvas-inset-right)) !important;
     height: auto !important;
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 10 !important;
+    z-index: 10 !important;      /* boven het frame, onder HUD */
   }
 
   /* dingen die weg mogen op mobiel */
@@ -516,11 +514,12 @@ body {
     z-index: 100 !important;
   }
 
-  /* standaard: mobiele chat is uit, aan in 600px blok */
+  /* standaard: mobiele chat is uit (aan in 600px blok) */
   #chatbox-mobile {
     display: none;
   }
 }
+
 
 /* =========================================================
    📱 ECHT klein (tot 600px) → mobiele chat die omhoog klapt
