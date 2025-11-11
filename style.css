@@ -573,7 +573,7 @@ body {
   /* berichtenvlak */
   #chatMobileMessages {
     position: relative;
-    z-index: 2;  /* onder overlay, boven background */
+    z-index: 9990;  /* onder overlay, boven background */
     height: calc(75vh - 44px - 56px);
     background: #6a0f0f;
     color: #ffe9c4;
@@ -584,7 +584,7 @@ body {
   /* input onderin */
   #chatMobileForm {
     position: relative;
-    z-index: 2;
+    z-index: 99900;
     background: linear-gradient(#ffb545,#f08a25);
     padding: 8px;
     display: flex;
