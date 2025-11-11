@@ -40,15 +40,19 @@
   </div>
   <!-- ===== /Chat Box ===== -->
 
-  <!-- ===== Mobiele chat-schil (leeg, we vullen met JS) ===== -->
-  <div id="chatbox-mobile">
-    <div class="chatbox-header-mobile">
-      <span>Chat</span>
-      <button id="chatMobileClose">×</button>
-    </div>
+ <!-- 📱 mobiele chat -->
+<div id="chatbox-mobile">
+  <div class="chatbox-header-mobile">
+    <span>CHAT</span>
+    <button id="chatMobileClose" type="button">×</button>
+  </div>
+
+  <!-- deze body is standaard verborgen, alleen zichtbaar als .open -->
+  <div class="chat-mobile-body">
     <div id="chatMobileMessages"></div>
     <div id="chatMobileForm"></div>
   </div>
+</div>
 
   <!-- 1x STICKERS definieren -->
   <script>
