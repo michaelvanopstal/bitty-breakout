@@ -828,27 +828,31 @@ document.addEventListener("DOMContentLoaded", function() {
   const mobileMessagesWr = document.getElementById("chatMobileMessages");
   const mobileFormWr     = document.getElementById("chatMobileForm");
 
-  if (!desktopChatBox || !desktopMessages || !desktopForm || !mobileChatBox || !mobileMessagesWr || !mobileFormWr) {
+  // als iets mist, stoppen
+  if (!desktopChatBox || !desktopMessages || !desktopForm ||
+      !mobileChatBox || !mobileMessagesWr || !mobileFormWr) {
     return;
   }
 
   function moveToMobile() {
-    // messages en form verhuizen
+    // berichten naar mobiel
     if (desktopMessages.parentElement !== mobileMessagesWr) {
       mobileMessagesWr.innerHTML = "";
       mobileMessagesWr.appendChild(desktopMessages);
     }
+    // form naar mobiel
     if (desktopForm.parentElement !== mobileFormWr) {
       mobileFormWr.innerHTML = "";
       mobileFormWr.appendChild(desktopForm);
     }
 
-    // ✋ stickerpanel NIET verhuizen → blijft in body
+    // desktop-chat verbergen, mobiele laten zien (dichte balk)
     desktopChatBox.style.display = "none";
     mobileChatBox.style.display  = "block";
   }
 
   function moveToDesktop() {
+    // terugzetten naar gewone chatbox
     const header = desktopChatBox.querySelector(".chatbox-header");
     if (header && desktopMessages.parentElement !== desktopChatBox) {
       desktopChatBox.insertBefore(desktopMessages, header.nextSibling);
@@ -860,13 +864,14 @@ document.addEventListener("DOMContentLoaded", function() {
       desktopChatBox.appendChild(desktopForm);
     }
 
-    // stickerpanel ook terug naar desktop-chat
-    if (desktopSticker && desktopSticker.parentElement !== document.body) {
-      document.body.appendChild(desktopSticker);
+    // stickerpanel hoort op desktop, dus terug naar body of naar desktop
+    if (desktopSticker && desktopSticker.parentElement !== desktopChatBox) {
+      desktopChatBox.appendChild(desktopSticker);
     }
 
     desktopChatBox.style.display = "flex";
     mobileChatBox.style.display  = "none";
+    mobileChatBox.classList.remove("open");
   }
 
   function checkLayout() {
@@ -877,24 +882,28 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+  // meteen 1x draaien
   checkLayout();
   window.addEventListener("resize", checkLayout);
 
-  // mobiel open/dicht
+  /* ✅ alleen dit stuk is voor het open-/dichtklappen van de gele balk */
   const mobileHeader = mobileChatBox.querySelector(".chatbox-header-mobile");
   const mobileClose  = document.getElementById("chatMobileClose");
+
   if (mobileHeader) {
     mobileHeader.addEventListener("click", () => {
       mobileChatBox.classList.toggle("open");
     });
   }
   if (mobileClose) {
-    mobileClose.addEventListener("click", () => {
+    mobileClose.addEventListener("click", (e) => {
+      e.stopPropagation();             // voorkomen dat 'ie meteen weer opent
       mobileChatBox.classList.remove("open");
     });
   }
 });
 </script>
+
 
 </body>
 </html>
