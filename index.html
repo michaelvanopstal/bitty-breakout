@@ -42,16 +42,29 @@
 
 
 
-<!-- nieuwe mobiele chat-schil -->
 <div id="chatbox-mobile">
   <div class="chatbox-header-mobile">
     <span>Chat</span>
     <button id="chatMobileClose">×</button>
   </div>
-  <!-- we hergebruiken straks #chatMessages en #chatForm via JS -->
+
+  <!-- 👇 overlay voor stickers/gifs (zelfde maat als chat) -->
+  <div id="chatStickerOverlay" class="hidden"></div>
+
   <div id="chatMobileMessages"></div>
   <div id="chatMobileForm"></div>
 </div>
+
+  <!-- 🌟 verplaatsbare chat-knop voor mobiel -->
+<button id="chat-mobile-button" type="button">
+  <span class="cmb-left">
+    <span class="cmb-dot"></span>
+    <span class="cmb-arrow">▶</span>
+  </span>
+  <span class="cmb-label">CHAT</span>
+  <span class="cmb-close">✕</span>
+</button>
+
 
 
   <!-- 1x STICKERS definieren -->
