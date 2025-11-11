@@ -215,8 +215,7 @@
     window.scoresRef = scoresRef;
     console.log("✅ Firebase connected!");
   </script>
-
- <!-- ✅ CHAT SCRIPT (desktop + mobile + stickers) -->
+<!-- ✅ CHAT SCRIPT (desktop + mobile + stickers) -->
 <script>
 (() => {
   // ====== ELEMENTEN DESKTOP ======
@@ -226,7 +225,7 @@
   const $name   = document.getElementById('chatName');
   const $clear  = document.getElementById('chatClearBtn');
   const stickerPanel = document.getElementById('chat-sticker-panel');
-  const stickerBtn   = document.getElementById('chatStickersBtn');
+  const stickerBtn   = document.getElementById('chatStickersBtn'); // ← die miste je
 
   // ====== ELEMENTEN MOBIEL ======
   const $mobileMsgs   = document.getElementById('chatMobileMessages');
@@ -295,7 +294,7 @@
     return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
   }
 
-  // message -> beide
+  // ------ berichten tekenen ------
   function renderMessageInContainer(container, m){
     if (!container) return;
     const wrap = document.createElement('div');
@@ -450,6 +449,7 @@
   }
   buildMobileStickers();
 
+  // dit is de goeie toggle voor mobiel → laten staan
   if ($mobileStkBtn && $mobileStkOv) {
     $mobileStkBtn.addEventListener('click', () => {
       $mobileStkOv.classList.toggle('show');
@@ -458,7 +458,6 @@
 
   // ---------- DESKTOP sticker panel ----------
   if (stickerBtn && stickerPanel) {
-    // vul het panel
     const list = Array.isArray(STICKERS) ? STICKERS : [];
     const imageGrid = document.createElement('div');
     imageGrid.className = 'sticker-grid';
@@ -528,9 +527,8 @@
     stickerPanel.appendChild(gifTitle);
     stickerPanel.appendChild(gifGrid);
 
-    // 🔴 HIER: open/dicht
+    // openen/sluiten desktop-paneel
     stickerBtn.addEventListener('click', () => {
-      console.log('[chat] desktop sticker button clicked');
       const cur = stickerPanel.style.display;
       stickerPanel.style.display = (cur === 'block') ? 'none' : 'block';
     });
@@ -538,6 +536,7 @@
 
 })();
 </script>
+
 
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="650"></canvas>
