@@ -481,8 +481,6 @@ body {
   #musicToggle,
   #resetBallBtn,
   #bikeFlyer,
-  #chatbox,             /* oude desktopchat uit op mobiel */
-  #chat-sticker-panel { /* oud stickerpaneel ook uit op mobiel */
     display: none !important;
   }
 
