@@ -688,48 +688,62 @@ body {
   position: relative;      /* ← overlay hecht zich hieraan */
 }
 
-/* mobiele chat overlay die UITKLAPT vanuit onderen */
+  /* 📱 overlay voor stickers BOVENOP de mobiele chat */
+#chatbox-mobile {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 50px;
+  width: 90vw;
+  max-width: 460px;
+  background: linear-gradient(#f6a53b,#e27e22);
+  border-radius: 18px 18px 14px 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  z-index: 9980;
+  overflow: hidden;      /* mag hier weer, want overlay zit nu erin */
+  display: none;
+  position: relative;
+}
+
+/* dit is het paneel dat over de berichten komt */
 #chatStickerOverlay {
   position: absolute;
+  top: 42px;             /* onder de mobiele header */
+  bottom: 52px;          /* boven de inputbalk */
   left: 0;
   right: 0;
-  bottom: 0;
-  background: rgba(30, 10, 10, 0.96);
-  border-top: 2px solid #b66414;
+  background: #7b1e1e;   /* zelfde rood als je chat */
   z-index: 12050;
-  height: 70%;                  /* vaste hoogte voor duidelijk effect */
-  transform: translateY(100%);
-  transition: transform 0.35s ease;
+  display: none;
   overflow-y: auto;
-  display: block;               /* altijd block, maar buiten beeld tot .show */
-  padding: 10px;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -6px 15px rgba(0,0,0,0.4);
+  overflow-x: auto;
+  padding: 10px 8px 12px;
 }
 
+/* zichtbaar maken */
 #chatStickerOverlay.show {
-  transform: translateY(0);     /* schuift omhoog */
+  display: block;
 }
 
-/* optioneel: mooi raster voor stickers */
+/* raster / grootte zoals desktop-achtig */
 #chatStickerOverlay .sticker-item {
   display: inline-block;
-  width: 25%;
-  padding: 6px;
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-#chatStickerOverlay .sticker-item:hover {
-  transform: scale(1.1);
+  width: 72px;
+  height: 72px;
+  margin: 4px;
+  background: rgba(0,0,0,0.12);
+  border-radius: 10px;
+  text-align: center;
+  vertical-align: top;
 }
 
 #chatStickerOverlay .sticker-item img {
   width: 100%;
-  border-radius: 8px;
-  pointer-events: none;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
 }
+
 
 /* ======= 💻 DESKTOP ======= */
 @media (min-width: 601px) {
