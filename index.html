@@ -226,348 +226,258 @@
   console.log("✅ Firebase connected!");
 </script>
 
-<!-- ✅ CHAT SCRIPT (nu met desktop + mobile) -->
-<script>
-(() => {
-  // ------- DESKTOP ELEMENTEN -------
-  const $msgs   = document.getElementById('chatMessages');
-  const $form   = document.getElementById('chatForm');
-  const $input  = document.getElementById('chatInput');
-  const $name   = document.getElementById('chatName');
-  const $clear  = document.getElementById('chatClearBtn');
 
-  const stickerPanel = document.getElementById('chat-sticker-panel');
-  const stickerBtn   = document.getElementById('chatStickersBtn');
+  <!-- ✅ CHAT SCRIPT (nu met Firebase) -->
+  <script>
+  (() => {
+    const $msgs   = document.getElementById('chatMessages');
+    const $form   = document.getElementById('chatForm');
+    const $input  = document.getElementById('chatInput');
+    const $name   = document.getElementById('chatName');
+    const $clear  = document.getElementById('chatClearBtn');
 
-  // ------- MOBILE ELEMENTEN -------
-  const $mobileMsgs   = document.getElementById('chatMobileMessages');     // <div> of <ul> voor mobile
-  const $mobileInput  = document.getElementById('chatMobileInput');
-  const $mobileSend   = document.getElementById('chatMobileSendBtn');
-  const $mobileStkBtn = document.getElementById('chatMobileStickersBtn');
-  const $mobileStkOv  = document.getElementById('chatStickerOverlay');
+    const stickerPanel = document.getElementById('chat-sticker-panel');
+    const stickerBtn   = document.getElementById('chatStickersBtn');
 
-  const STORE_KEY = 'bb_chat_messages';
-  const LIMIT = 100;
+    const STORE_KEY = 'bb_chat_messages';
+    const LIMIT = 100;
 
-  let selectedSticker = null;
-  let currentStickerEl = null;
+    let selectedSticker = null;
+    let currentStickerEl = null;
 
-  // ------------------ HULPFUNCTIES ------------------
-  function detectPlayerName() {
-    let playerName = '';
+    function detectPlayerName() {
+      let playerName = '';
 
-    const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
-    const display   = document.getElementById('player-display');
+      const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
+      const display   = document.getElementById('player-display');
 
-    if (nameInput && nameInput.value.trim() !== '') {
-      playerName = nameInput.value.trim();
-    } else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player') {
-      playerName = display.textContent.trim();
+      if (nameInput && nameInput.value.trim() !== '') {
+        playerName = nameInput.value.trim();
+      } else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player') {
+        playerName = display.textContent.trim();
+      }
+
+      if (!playerName && localStorage.getItem('chatName')) {
+        playerName = localStorage.getItem('chatName');
+      }
+
+      return playerName || 'Anon';
     }
 
-    if (!playerName && localStorage.getItem('chatName')) {
-      playerName = localStorage.getItem('chatName');
+    function updateChatName() {
+      const name = detectPlayerName();
+      if ($name) {
+        $name.value = name;
+        $name.disabled = true;
+      }
+      localStorage.setItem('chatName', name);
+    }
+    updateChatName();
+    setInterval(updateChatName, 1000);
+
+    function getStore(){
+      try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+      catch(e){ return []; }
+    }
+    function setStore(arr){
+      try{ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }catch(e){}
     }
 
-    return playerName || 'Anon';
-  }
-
-  function updateChatName() {
-    const name = detectPlayerName();
-    if ($name) {
-      $name.value = name;
-      $name.disabled = true;
-    }
-    localStorage.setItem('chatName', name);
-  }
-  updateChatName();
-  setInterval(updateChatName, 1000);
-
-  function getStore(){
-    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
-    catch(e){ return []; }
-  }
-  function setStore(arr){
-    try{ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }catch(e){}
-  }
-
-  function pad(n){ return String(n).padStart(2,'0'); }
-  function nowTime(){
-    const d = new Date();
-    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
-
-  function escapeHTML(s){
-    return s.replace(/[&<>"']/g, c => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-    }[c]));
-  }
-  function linkify(s){
-    return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-  }
-
-  // 🔥 nieuwe helper om in willekeurige container te tekenen
-  function renderMessageInContainer(container, m){
-    if (!container) return;
-    const wrap = document.createElement('div');
-    wrap.className = 'chat-msg';
-
-    let html = `<div class="chat-meta">${m.time || '--:--'} — <b>${escapeHTML(m.name || 'Anon')}</b></div>`;
-    if (m.text) {
-      html += `<div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
-    }
-    if (m.img) {
-      html += `<img src="${m.img}" class="chat-thumb" alt="image">`;
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function nowTime(){
+      const d = new Date();
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
-    wrap.innerHTML = html;
-    container.appendChild(wrap);
-    container.scrollTop = container.scrollHeight;
-  }
+    function escapeHTML(s){
+      return s.replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      }[c]));
+    }
+    function linkify(s){
+      return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
 
-  // 👉 deze vervangt je oude appendChatMessage
-  function appendChatMessage(m){
-    // desktop
-    renderMessageInContainer($msgs, m);
-    // mobile
-    renderMessageInContainer($mobileMsgs, m);
-  }
+    function appendChatMessage(m){
+      if (!$msgs) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'chat-msg';
 
-  function render(all){
-    if ($msgs) $msgs.innerHTML = '';
-    if ($mobileMsgs) $mobileMsgs.innerHTML = '';
-    all.forEach(appendChatMessage);
-  }
+      let html = `<div class="chat-meta">${m.time || '--:--'} — <b>${escapeHTML(m.name || 'Anon')}</b></div>`;
+      if (m.text) {
+        html += `<div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
+      }
+      if (m.img) {
+        html += `<img src="${m.img}" class="chat-thumb" alt="image">`;
+      }
 
-  // bericht toevoegen -> naar Firebase
-  function addMessage(name, text, imgData = null){
-    const msg = {
-      name: name,
-      text: text,
-      img: imgData,
-      time: nowTime()
-    };
+      wrap.innerHTML = html;
+      $msgs.appendChild(wrap);
+      $msgs.scrollTop = $msgs.scrollHeight;
+    }
 
-    if (window.chatRef) {
-      console.log('[chat] probeer te pushen naar Firebase:', msg);
-      window.chatRef.push(msg, (err) => {
-        if (err) {
-          console.error('[chat] Firebase push MISLUKT:', err);
-        } else {
-          console.log('[chat] Firebase push GELUKT ✅');
+    function render(all){
+      if (!$msgs) return;
+      $msgs.innerHTML = '';
+      all.forEach(appendChatMessage);
+    }
+
+    // bericht toevoegen -> naar Firebase
+    function addMessage(name, text, imgData = null){
+      const msg = {
+        name: name,
+        text: text,
+        img: imgData,
+        time: nowTime()
+      };
+
+      if (window.chatRef) {
+        console.log('[chat] probeer te pushen naar Firebase:', msg);
+        window.chatRef.push(msg, (err) => {
+          if (err) {
+            console.error('[chat] Firebase push MISLUKT:', err);
+          } else {
+            console.log('[chat] Firebase push GELUKT ✅');
+          }
+        });
+      } else {
+        console.warn('[chat] geen chatRef -> gebruik localStorage');
+        let all = getStore();
+        if(all.length >= LIMIT){
+          all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
         }
+        all.push(msg);
+        setStore(all);
+        render(all);
+      }
+    }
+
+    // Firebase luisteraar
+    if (window.chatRef) {
+      window.chatRef.limitToLast(200).on('child_added', snap => {
+        const m = snap.val();
+        console.log('[chat] nieuw bericht uit Firebase:', m);
+        appendChatMessage(m);
       });
     } else {
-      console.warn('[chat] geen chatRef -> gebruik localStorage');
-      let all = getStore();
-      if(all.length >= LIMIT){
-        all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
-      }
-      all.push(msg);
-      setStore(all);
-      render(all);
+      render(getStore());
     }
-  }
 
-  // ------------------ FIREBASE LISTENER ------------------
-  if (window.chatRef) {
-    window.chatRef.limitToLast(200).on('child_added', snap => {
-      const m = snap.val();
-      console.log('[chat] nieuw bericht uit Firebase:', m);
-      appendChatMessage(m); // toont nu op beide
-    });
-  } else {
-    render(getStore());
-  }
-
-  // ------------------ DESKTOP FORM ------------------
-  if ($form) {
-    $form.addEventListener('submit', e=>{
-      e.preventDefault();
-      const name = detectPlayerName();
-      const text = $input.value.trim();
-
-      if (!text && !selectedSticker) return;
-
-      addMessage(name, text, selectedSticker);
-
-      $input.value = '';
-      $input.focus();
-
-      selectedSticker = null;
-      if (currentStickerEl) {
-        currentStickerEl.classList.remove('selected');
-        currentStickerEl = null;
-      }
-      if (stickerPanel) stickerPanel.style.display = 'none';
-    });
-  }
-
-  if ($clear) {
-    $clear.addEventListener('click', ()=>{
-      setStore([]);
-      render([]);
-    });
-  }
-
-  if ($input) {
-    $input.addEventListener('keydown', e=>{
-      if(e.key === 'Enter' && !e.shiftKey){
+    if ($form) {
+      $form.addEventListener('submit', e=>{
         e.preventDefault();
-        $form.requestSubmit();
-      }
-    });
-  }
-
-  // ------------------ MOBILE SEND ------------------
-  if ($mobileSend && $mobileInput) {
-    $mobileSend.addEventListener('click', () => {
-      const name = detectPlayerName();
-      const text = $mobileInput.value.trim();
-      if (!text && !selectedSticker) return;
-
-      addMessage(name, text, selectedSticker);
-
-      $mobileInput.value = '';
-      selectedSticker = null;
-    });
-
-    $mobileInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        $mobileSend.click();
-      }
-    });
-  }
-
- <script>
-(() => {
-  // ... alles wat je al hierboven had (consts, addMessage, firebase, mobile send, etc.)
-
-  // ------------------ MOBILE STICKERS ------------------
-  function buildMobileStickers(){
-    if (!$mobileStkOv) return;
-    $mobileStkOv.innerHTML = '';
-
-    // als je al een globale STICKERS array hebt, gebruik die
-    const list = (typeof STICKERS !== 'undefined' && Array.isArray(STICKERS)) ? STICKERS : [];
-
-    const grid = document.createElement('div');
-    grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(56px, 1fr))';
-    grid.style.gap = '8px';
-    grid.style.padding = '8px';
-
-    list.forEach(src => {
-      const item = document.createElement('div');
-      item.className = 'sticker-item';
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = 'sticker';
-      img.style.width = '100%';
-      item.appendChild(img);
-
-      item.addEventListener('click', () => {
         const name = detectPlayerName();
-        const txt = $mobileInput ? $mobileInput.value.trim() : '';
-        addMessage(name, txt, src);
-        if ($mobileInput) $mobileInput.value = '';
-        $mobileStkOv.classList.remove('show');
-      });
+        const text = $input.value.trim();
 
-      grid.appendChild(item);
-    });
+        if (!text && !selectedSticker) return;
 
-    $mobileStkOv.appendChild(grid);
-  }
-  buildMobileStickers();
+        addMessage(name, text, selectedSticker);
 
-  if ($mobileStkBtn && $mobileStkOv) {
-    $mobileStkBtn.addEventListener('click', () => {
-      $mobileStkOv.classList.toggle('show');
-    });
-  }
+        $input.value = '';
+        $input.focus();
 
-  // ------------------ DESKTOP STICKER PANEL ------------------
-  if (stickerBtn && stickerPanel) {
-    const imageGrid = document.createElement('div');
-    imageGrid.className = 'sticker-grid';
-
-    const gifGrid = document.createElement('div');
-    gifGrid.className = 'sticker-grid';
-
-    const imgTitle = document.createElement('div');
-    imgTitle.textContent = 'Stickers';
-    imgTitle.className = 'sticker-section-title';
-
-    const gifTitle = document.createElement('div');
-    gifTitle.textContent = 'GIFs';
-    gifTitle.className = 'sticker-section-title';
-
-    const list = Array.isArray(STICKERS) ? STICKERS : [];
-    list.forEach(src => {
-      const item = document.createElement('div');
-      item.className = 'sticker-item';
-
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = 'sticker';
-      item.appendChild(img);
-
-      // selecteer
-      item.addEventListener('click', () => {
-        if (selectedSticker === src) {
-          selectedSticker = null;
-          item.classList.remove('selected');
-          currentStickerEl = null;
-          return;
-        }
-        selectedSticker = src;
-        if (currentStickerEl) currentStickerEl.classList.remove('selected');
-        item.classList.add('selected');
-        currentStickerEl = item;
-      });
-
-      // direct versturen bij dubbelklik
-      item.addEventListener('dblclick', () => {
-        const name = detectPlayerName();
-        const text = $input ? $input.value.trim() : '';
-        addMessage(name, text, src);
-
-        if ($input) {
-          $input.value = '';
-          $input.focus();
-        }
         selectedSticker = null;
         if (currentStickerEl) {
           currentStickerEl.classList.remove('selected');
           currentStickerEl = null;
         }
-        stickerPanel.style.display = 'none';
+        if (stickerPanel) stickerPanel.style.display = 'none';
+      });
+    }
+
+    if ($clear) {
+      $clear.addEventListener('click', ()=>{
+        setStore([]);
+        render([]);
+      });
+    }
+
+    if ($input) {
+      $input.addEventListener('keydown', e=>{
+        if(e.key === 'Enter' && !e.shiftKey){
+          e.preventDefault();
+          $form.requestSubmit();
+        }
+      });
+    }
+
+    // STICKER PANEL
+    if (stickerBtn && stickerPanel) {
+      const imageGrid = document.createElement('div');
+      imageGrid.className = 'sticker-grid';
+
+      const gifGrid = document.createElement('div');
+      gifGrid.className = 'sticker-grid';
+
+      const imgTitle = document.createElement('div');
+      imgTitle.textContent = 'Stickers';
+      imgTitle.className = 'sticker-section-title';
+
+      const gifTitle = document.createElement('div');
+      gifTitle.textContent = 'GIFs';
+      gifTitle.className = 'sticker-section-title';
+
+      const list = Array.isArray(STICKERS) ? STICKERS : [];
+      list.forEach(src => {
+        const item = document.createElement('div');
+        item.className = 'sticker-item';
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'sticker';
+        item.appendChild(img);
+
+        item.addEventListener('click', () => {
+          if (selectedSticker === src) {
+            selectedSticker = null;
+            item.classList.remove('selected');
+            currentStickerEl = null;
+            return;
+          }
+          selectedSticker = src;
+          if (currentStickerEl) currentStickerEl.classList.remove('selected');
+          item.classList.add('selected');
+          currentStickerEl = item;
+        });
+
+        item.addEventListener('dblclick', () => {
+          const name = detectPlayerName();
+          const text = $input ? $input.value.trim() : '';
+          addMessage(name, text, src);
+
+          if ($input) {
+            $input.value = '';
+            $input.focus();
+          }
+          selectedSticker = null;
+          if (currentStickerEl) {
+            currentStickerEl.classList.remove('selected');
+            currentStickerEl = null;
+          }
+          stickerPanel.style.display = 'none';
+        });
+
+        if (src.toLowerCase().endsWith('.gif')) {
+          gifGrid.appendChild(item);
+        } else {
+          imageGrid.appendChild(item);
+        }
       });
 
-      // scheiden in gif / niet-gif
-      if (src.toLowerCase().endsWith('.gif')) {
-        gifGrid.appendChild(item);
-      } else {
-        imageGrid.appendChild(item);
-      }
-    });
+      stickerPanel.innerHTML = '';
+      stickerPanel.appendChild(imgTitle);
+      stickerPanel.appendChild(imageGrid);
+      stickerPanel.appendChild(gifTitle);
+      stickerPanel.appendChild(gifGrid);
 
-    stickerPanel.innerHTML = '';
-    stickerPanel.appendChild(imgTitle);
-    stickerPanel.appendChild(imageGrid);
-    stickerPanel.appendChild(gifTitle);
-    stickerPanel.appendChild(gifGrid);
+      stickerBtn.addEventListener('click', () => {
+        const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
+        stickerPanel.style.display = show ? 'block' : 'none';
+      });
+    }
 
-    stickerBtn.addEventListener('click', () => {
-      const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
-      stickerPanel.style.display = show ? 'block' : 'none';
-    });
-  }
-
-})();  // <— nu echt sluiten
-</script>
+  })();
+  </script>
 
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="650"></canvas>
