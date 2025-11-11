@@ -706,3 +706,22 @@ body {
     display: none;
   }
 }
+
+#mobile-hud {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  z-index: 9999;
+}
+
+@media (min-width: 601px) {
+  #mobile-hud {
+    display: none; /* alleen op telefoon laten zien */
+  }
+}
+
