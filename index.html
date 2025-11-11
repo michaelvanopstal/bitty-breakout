@@ -552,7 +552,84 @@ document.addEventListener("DOMContentLoaded", function() {
   <script src="login.js"></script>
   <script src="game.js"></script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const desktopChatBox   = document.getElementById("chatbox");
+  const desktopMessages  = document.getElementById("chatMessages");
+  const desktopForm      = document.getElementById("chatForm");
+  const desktopSticker   = document.getElementById("chat-sticker-panel");
 
+  const mobileChatBox    = document.getElementById("chatbox-mobile");
+  const mobileMessagesWr = document.getElementById("chatMobileMessages");
+  const mobileFormWr     = document.getElementById("chatMobileForm");
+
+  if (!desktopChatBox || !desktopMessages || !desktopForm || !mobileChatBox || !mobileMessagesWr || !mobileFormWr) {
+    return;
+  }
+
+  function moveToMobile() {
+    // echte messages en form in de mobiele vakken zetten
+    if (desktopMessages.parentElement !== mobileMessagesWr) {
+      mobileMessagesWr.innerHTML = "";
+      mobileMessagesWr.appendChild(desktopMessages);
+    }
+    if (desktopForm.parentElement !== mobileFormWr) {
+      mobileFormWr.innerHTML = "";
+      mobileFormWr.appendChild(desktopForm);
+    }
+
+    // stickerpanel ook tonen op mobiel (zelfde id!)
+    if (desktopSticker && desktopSticker.parentElement !== mobileChatBox) {
+      mobileChatBox.appendChild(desktopSticker);
+    }
+
+    // desktop verborgen, mobiel zichtbaar
+    desktopChatBox.style.display = "none";
+    mobileChatBox.style.display  = "block";
+  }
+
+  function moveToDesktop() {
+    // terugzetten naar de originele chatbox
+    if (desktopMessages.parentElement !== desktopChatBox) {
+      // na de header
+      const header = desktopChatBox.querySelector(".chatbox-header");
+      if (header && header.nextSibling) {
+        desktopChatBox.insertBefore(desktopMessages, header.nextSibling);
+      } else {
+        desktopChatBox.appendChild(desktopMessages);
+      }
+    }
+    if (desktopForm.parentElement !== desktopChatBox) {
+      desktopChatBox.appendChild(desktopForm);
+    }
+    if (desktopSticker && desktopSticker.parentElement !== desktopChatBox) {
+      desktopChatBox.appendChild(desktopSticker);
+    }
+
+    desktopChatBox.style.display = "flex"; // of "block" wat jij had
+    mobileChatBox.style.display  = "none";
+  }
+
+  function checkLayout() {
+    if (window.innerWidth <= 600) {
+      moveToMobile();
+    } else {
+      moveToDesktop();
+    }
+  }
+
+  checkLayout();
+  window.addEventListener("resize", checkLayout);
+
+  // mobiele header klap/inklap
+  const mobileHeader = mobileChatBox.querySelector(".chatbox-header-mobile");
+  if (mobileHeader) {
+    mobileHeader.addEventListener("click", () => {
+      mobileChatBox.classList.toggle("open");
+    });
+  }
+});
+</script>
 
 
  
