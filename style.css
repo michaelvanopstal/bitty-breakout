@@ -542,7 +542,7 @@ body {
     border-radius: 18px 18px 0 0;
     box-shadow: 0 -6px 20px rgba(0,0,0,.35);
     z-index: 200;              /* boven HUD (100), onder sticker (300) */
-    overflow: hidden;
+    overflow: visible;         /* belangrijk: sticker mag erbuiten komen */
     height: 42px;              /* ingeklapt */
     transition: height .25s ease;
   }
@@ -584,18 +584,21 @@ body {
     padding: 8px;
   }
 
-  /* 5️⃣ stickerpaneel helemaal bovenop */
-  #chat-sticker-panel-mobile {
+  /* 5️⃣ bestaande stickerpanel (zelfde id als desktop) boven de chat */
+  #chat-sticker-panel {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 55vh;
+    bottom: 55vh;              /* net boven de open chat */
     width: 85vw;
     max-width: 420px;
     background: #6a0f0f;
     border: 2px solid #b66414;
     border-radius: 12px 12px 0 0;
     z-index: 300;
+    display: none;             /* jouw JS zet dit op block bij klik */
+    max-height: 160px;
+    overflow-y: auto;
   }
 }
 
@@ -605,7 +608,8 @@ body {
    ========================================================= */
 @media (min-width: 601px) {
   #chatbox-mobile {
-    display: none ;
+    display: none;
   }
 }
+
 
