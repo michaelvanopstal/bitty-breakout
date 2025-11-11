@@ -598,7 +598,8 @@ body {
   box-shadow: 0 6px 18px rgba(0,0,0,.35);
   z-index: 9980;
   overflow: hidden;
-  display: none;            /* standaard verborgen */
+  display: none;    
+   position: relative;  /* ← deze erbij */
 }
 
 
@@ -668,18 +669,16 @@ body {
   z-index: 9900;          /* lager dan overlay */
 }
 
-/* overlay voor stickers/gifs bovenop chat */
 #chatStickerOverlay {
   position: absolute;
-  inset: 42px 0 0 0;      /* onder de header van je mobile chat */
-  background: #6a0f0f;
+  inset: 42px 0 0 0;           /* onder de mobile header */
+  background: rgba(106, 15, 15, 0.95);
   border-top: 2px solid #b66414;
-  z-index: 9950;          /* hoger dan de chatbox zelf */
+  z-index: 99999;               /* lekker hoog zodat hij boven alles is */
   display: none;
   overflow-y: auto;
-  max-height: calc(100% - 42px); /* zodat hij niet buiten beeld loopt */
+  max-height: calc(100% - 42px);
 }
-
 #chatStickerOverlay.show {
   display: block;
 }
