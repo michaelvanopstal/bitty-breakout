@@ -669,6 +669,25 @@ body {
   z-index: 9900;          /* lager dan overlay */
 }
 
+/* ===== 📱 MOBIELE CHAT STICKER OVERLAY ===== */
+
+/* Zorg dat de chatbox het ankerpunt is */
+#chatbox-mobile {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 50px;
+  width: 90vw;
+  max-width: 460px;
+  background: linear-gradient(#f6a53b,#e27e22);
+  border-radius: 18px 18px 14px 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  z-index: 9980;
+  overflow: visible;       /* ← belangrijk, anders zie je overlay niet */
+  display: none;
+  position: relative;      /* ← overlay hecht zich hieraan */
+}
+
 /* mobiele chat overlay die UITKLAPT vanuit onderen */
 #chatStickerOverlay {
   position: absolute;
@@ -678,17 +697,18 @@ body {
   background: rgba(30, 10, 10, 0.96);
   border-top: 2px solid #b66414;
   z-index: 12050;
-  max-height: 70%;
+  height: 70%;                  /* vaste hoogte voor duidelijk effect */
   transform: translateY(100%);
   transition: transform 0.35s ease;
   overflow-y: auto;
-  display: block; /* altijd block, maar buiten beeld tot .show */
-  padding-bottom: 10px;
+  display: block;               /* altijd block, maar buiten beeld tot .show */
+  padding: 10px;
   border-radius: 16px 16px 0 0;
+  box-shadow: 0 -6px 15px rgba(0,0,0,0.4);
 }
 
 #chatStickerOverlay.show {
-  transform: translateY(0); /* schuift omhoog */
+  transform: translateY(0);     /* schuift omhoog */
 }
 
 /* optioneel: mooi raster voor stickers */
@@ -697,20 +717,26 @@ body {
   width: 25%;
   padding: 6px;
   box-sizing: border-box;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
+
+#chatStickerOverlay .sticker-item:hover {
+  transform: scale(1.1);
+}
+
 #chatStickerOverlay .sticker-item img {
   width: 100%;
   border-radius: 8px;
+  pointer-events: none;
 }
-
-
-
 
 /* ======= 💻 DESKTOP ======= */
 @media (min-width: 601px) {
   #chat-mobile-button,
   #chatbox-mobile {
-    display: none ;
+    display: none;
   }
 }
+
 
