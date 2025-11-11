@@ -520,30 +520,26 @@ body {
 }
 
 
-/* =========================================================
-   📱 ECHT klein (tot 600px) → alleen chat en sticker
-   ========================================================= */
 @media (max-width: 600px) {
 
   body {
-    overflow: visible; /* anders wordt chat afgekapt door body */
+    overflow: visible;
   }
 
-  /* 4️⃣ mobiele chat boven HUD */
   #chatbox-mobile {
     display: block !important;
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 0;
+    bottom: 60px;              /* 🔼 verhoogd van 0 naar 60px */
     width: 85vw;
     max-width: 420px;
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 0 0;
     box-shadow: 0 -6px 20px rgba(0,0,0,.35);
-    z-index: 200;              /* boven HUD (100), onder sticker (300) */
-    overflow: visible;         /* belangrijk: sticker mag erbuiten komen */
-    height: 42px;              /* ingeklapt */
+    z-index: 200;
+    overflow: visible;
+    height: 42px;
     transition: height .25s ease;
   }
 
@@ -566,7 +562,6 @@ body {
     color: #7a2b00;
   }
 
-  /* open toestand → omhoog */
   #chatbox-mobile.open {
     height: 55vh;
   }
@@ -584,28 +579,21 @@ body {
     padding: 8px;
   }
 
-  /* 5️⃣ bestaande stickerpanel (zelfde id als desktop) boven de chat */
   #chat-sticker-panel {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 55vh;              /* net boven de open chat */
+    bottom: calc(55vh + 60px); /* sticker ook hoger meeschuiven */
     width: 85vw;
     max-width: 420px;
     background: #6a0f0f;
     border: 2px solid #b66414;
     border-radius: 12px 12px 0 0;
+    box-shadow: 0 -6px 20px rgba(0,0,0,.35);
     z-index: 300;
-    display: none;             /* jouw JS zet dit op block bij klik */
-    max-height: 160px;
-    overflow-y: auto;
   }
 }
 
-
-/* =========================================================
-   💻 Desktop fallback: mobiele chat uit
-   ========================================================= */
 @media (min-width: 601px) {
   #chatbox-mobile {
     display: none;
