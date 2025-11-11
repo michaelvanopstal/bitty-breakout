@@ -460,6 +460,66 @@
   })();
   </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", function() {
+  const desktopChatBox   = document.getElementById("chatbox");
+  const desktopMessages  = document.getElementById("chatMessages");
+  const desktopForm      = document.getElementById("chatForm");
+
+  const mobileChatBox    = document.getElementById("chatbox-mobile");
+  const mobileMessagesWr = document.getElementById("chatMobileMessages");
+  const mobileFormWr     = document.getElementById("chatMobileForm");
+
+  // veiligheid: als iets ontbreekt, stoppen
+  if (!desktopChatBox || !desktopMessages || !desktopForm ||
+      !mobileChatBox || !mobileMessagesWr || !mobileFormWr) {
+    return;
+  }
+
+  function moveToMobile() {
+    // echte elementen naar mobile wrappers
+    if (desktopMessages.parentElement !== mobileMessagesWr) {
+      mobileMessagesWr.innerHTML = "";           // zeker leeg
+      mobileMessagesWr.appendChild(desktopMessages);
+    }
+    if (desktopForm.parentElement !== mobileFormWr) {
+      mobileFormWr.innerHTML = "";
+      mobileFormWr.appendChild(desktopForm);
+    }
+    // optioneel: desktop chat verbergen op klein scherm
+    desktopChatBox.style.display = "none";
+    mobileChatBox.style.display  = "block";
+  }
+
+  function moveToDesktop() {
+    // terugzetten in originele volgorde
+    const desktopHeader = desktopChatBox.querySelector(".chatbox-header");
+    if (desktopHeader && desktopMessages.parentElement !== desktopChatBox) {
+      desktopChatBox.insertBefore(desktopMessages, desktopHeader.nextSibling);
+    }
+    if (desktopForm.parentElement !== desktopChatBox) {
+      desktopChatBox.appendChild(desktopForm);
+    }
+    desktopChatBox.style.display = "block";
+    mobileChatBox.style.display  = "none";
+  }
+
+  function checkLayout() {
+    if (window.innerWidth <= 600) {
+      moveToMobile();
+    } else {
+      moveToDesktop();
+    }
+  }
+
+  // direct bij start
+  checkLayout();
+  // en bij scherm veranderen
+  window.addEventListener("resize", checkLayout);
+});
+</script>
+
+
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="650"></canvas>
   
