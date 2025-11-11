@@ -15,7 +15,7 @@
 </head>
 
 <body>
-  <!-- ===== Chat Box (DESKTOP / standaard) ===== -->
+  <!-- ===== Chat Box (rechts) ===== -->
   <div id="chatbox">
     <div class="chatbox-header">
       <button id="chatToggleBtn" class="chat-icon-btn" type="button" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
@@ -33,28 +33,27 @@
     <form id="chatForm" autocomplete="off">
       <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
       <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
-      <!-- 📷 Camera-icoon opent de sticker-popup -->
+      <!-- 📷 Camera-icoon opent nu de sticker-popup -->
       <button id="chatStickersBtn" class="chat-icon-btn" type="button" title="Kies een plaatje">📷</button>
       <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
     </form>
   </div>
   <!-- ===== /Chat Box ===== -->
 
-  
-  <div id="chatbox-mobile">
-  <div class="chatbox-header-mobile" id="chatMobileBar">
-    <span>CHAT</span>
+
+
+<!-- nieuwe mobiele chat-schil -->
+<div id="chatbox-mobile">
+  <div class="chatbox-header-mobile">
+    <span>Chat</span>
     <button id="chatMobileClose">×</button>
   </div>
-  <div class="chat-mobile-body">
-    <div id="chatMobileMessages"></div>
-    <div id="chatMobileForm"></div>
-  </div>
+  <!-- we hergebruiken straks #chatMessages en #chatForm via JS -->
+  <div id="chatMobileMessages"></div>
+  <div id="chatMobileForm"></div>
 </div>
 
 
-
-  
   <!-- 1x STICKERS definieren -->
   <script>
     const STICKERS = [
@@ -82,7 +81,7 @@
       'Hieronymus Bosch Bitcoin Sticker by herecomesbitcoin.gif',
       'Jack Dorsey Bitcoin Sticker by herecomesbitcoin.gif',
       'San Francisco Dancing GIF by herecomesbitcoin.gif',
-      'BITTYbread.gif',
+       'BITTYbread.gif',
       'bittymoney.gif',
       'ufobitty.gif',
       'fallingbitty.gif',
@@ -91,10 +90,11 @@
       'bttyhead.gif',
       'queen.gif',
       'satoschi.gif',
+      
     ];
   </script>
 
-  <!-- ===== BONUS POWER panel ===== -->
+  <!-- ===== BONUS POWER los van chat ===== -->
   <div id="bonus-power-panel">
     <div class="bp-header">BONUS POWER</div>
 
@@ -139,7 +139,7 @@
     </div>
   </div>
 
-  <!-- HUD / displays -->
+  <!-- andere elementen die je al had -->
   <span id="player-display">Player</span>
   <span id="scoreDisplay">0</span>
 
@@ -178,34 +178,35 @@
       onmouseout="this.style.transform='scale(1)'"
   >
 
-  <!-- Firebase compat libraries -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
-      authDomain: "bitty-brickshift.firebaseapp.com",
-      databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "bitty-brickshift",
-      storageBucket: "bitty-brickshift.appspot.com",
-      messagingSenderId: "823337012487",
-      appId: "1:823337012487:web:1d217b13195f48809389a2"
-    };
+ <!-- Firebase compat libraries -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
+    authDomain: "bitty-brickshift.firebaseapp.com",
+    databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "bitty-brickshift",
+    storageBucket: "bitty-brickshift.appspot.com",
+    messagingSenderId: "823337012487",
+    appId: "1:823337012487:web:1d217b13195f48809389a2"
+  };
 
-    // init
-    firebase.initializeApp(firebaseConfig);
+  // init
+  firebase.initializeApp(firebaseConfig);
 
-    // refs
-    const db        = firebase.database();
-    const chatRef   = db.ref("chat");
-    const scoresRef = db.ref("scores");
+  // refs
+  const db        = firebase.database();
+  const chatRef   = db.ref("chat");
+  const scoresRef = db.ref("scores");
 
-    // globaal maken
-    window.chatRef   = chatRef;
-    window.scoresRef = scoresRef;
+  // globaal maken
+  window.chatRef   = chatRef;
+  window.scoresRef = scoresRef;
 
-    console.log("✅ Firebase connected!");
-  </script>
+  console.log("✅ Firebase connected!");
+</script>
+
 
   <!-- ✅ CHAT SCRIPT (nu met Firebase) -->
   <script>
@@ -459,135 +460,6 @@
   })();
   </script>
 
-  <!-- ✅ chat desktop open/dicht / shortcuts -->
-  <script>
-  (() => {
-    const chat = document.getElementById('chatbox');
-    const toggleBtn = document.getElementById('chatToggleBtn');
-    const chatInput = document.getElementById('chatInput');
-
-    try {
-      if (localStorage.getItem('chatCollapsed') === '1') {
-        chat.classList.add('collapsed');
-      }
-    } catch (e) {}
-
-    toggleBtn?.addEventListener('click', () => {
-      chat.classList.toggle('collapsed');
-      try {
-        localStorage.setItem(
-          'chatCollapsed',
-          chat.classList.contains('collapsed') ? '1' : '0'
-        );
-      } catch (e) {}
-    });
-
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') return;
-      if (document.activeElement === chatInput) return;
-      if (e.code === 'Escape') {
-        chat.classList.add('collapsed');
-        try {
-          localStorage.setItem('chatCollapsed', '1');
-        } catch (e) {}
-      }
-    });
-  })();
-  </script><!-- ✅ mobiele chat koppelen aan desktop chat -->
-
-  
-  <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const desktopChatBox   = document.getElementById("chatbox");
-  const desktopMessages  = document.getElementById("chatMessages");
-  const desktopForm      = document.getElementById("chatForm");
-  const desktopSticker   = document.getElementById("chat-sticker-panel");
-
-  const mobileChatBox    = document.getElementById("chatbox-mobile");
-  const mobileMessagesWr = document.getElementById("chatMobileMessages");
-  const mobileFormWr     = document.getElementById("chatMobileForm");
-
-  // veiligheidscheck
-  if (!desktopChatBox || !desktopMessages || !desktopForm || !mobileChatBox || !mobileMessagesWr || !mobileFormWr) {
-    console.warn("⚠️ Chat-elementen niet gevonden, mobiele koppeling overgeslagen.");
-    return;
-  }
-
-  // 📱 verplaats inhoud naar mobiele chat
-  function moveToMobile() {
-    if (desktopMessages.parentElement !== mobileMessagesWr) {
-      mobileMessagesWr.innerHTML = "";
-      mobileMessagesWr.appendChild(desktopMessages);
-    }
-
-    if (desktopForm.parentElement !== mobileFormWr) {
-      mobileFormWr.innerHTML = "";
-      mobileFormWr.appendChild(desktopForm);
-    }
-
-    // ❌ stickerpanel niet meer in mobiele chat plaatsen
-    // blijft op body zodat het vrij kan openen boven de chat
-
-    desktopChatBox.style.display = "none";
-    mobileChatBox.style.display  = "block";
-  }
-
-  // 💻 terug naar desktop
-  function moveToDesktop() {
-    const header = desktopChatBox.querySelector(".chatbox-header");
-
-    if (header && desktopMessages.parentElement !== desktopChatBox) {
-      desktopChatBox.insertBefore(desktopMessages, header.nextSibling);
-    } else if (desktopMessages.parentElement !== desktopChatBox) {
-      desktopChatBox.appendChild(desktopMessages);
-    }
-
-    if (desktopForm.parentElement !== desktopChatBox) {
-      desktopChatBox.appendChild(desktopForm);
-    }
-
-    // zorg dat het stickerpaneel weer in de body hangt
-    if (desktopSticker && desktopSticker.parentElement !== document.body) {
-      document.body.appendChild(desktopSticker);
-    }
-
-    desktopChatBox.style.display = "flex";
-    mobileChatBox.style.display  = "none";
-  }
-
-  // 📏 controleer bij start en bij resize
-  function checkLayout() {
-    if (window.innerWidth <= 600) {
-      moveToMobile();
-    } else {
-      moveToDesktop();
-    }
-  }
-
-  checkLayout();
-  window.addEventListener("resize", checkLayout);
-
-  // 📂 open/dicht gedrag op mobiel
-  const mobileHeader = mobileChatBox.querySelector(".chatbox-header-mobile");
-  const mobileClose  = document.getElementById("chatMobileClose");
-
-  if (mobileHeader) {
-    mobileHeader.addEventListener("click", () => {
-      mobileChatBox.classList.toggle("open");
-    });
-  }
-
-  if (mobileClose) {
-    mobileClose.addEventListener("click", () => {
-      mobileChatBox.classList.remove("open");
-    });
-  }
-});
-</script>
-
-  </script>
-
-  <!-- GAME CONTAINER -->
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="650"></canvas>
   
@@ -602,9 +474,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <button id="logout-btn" style="display: none;">Logout</button>
       </div>
     </div>
-
     <img id="musicToggle" src="playmusic button.png" alt="Play Music" style="cursor: pointer; width: 180px;" />
-
     <div id="highscore-overlay">
       <ol id="highscore-list">
         <li></li><li></li><li></li><li></li><li></li>
@@ -619,72 +489,76 @@ document.addEventListener("DOMContentLoaded", function () {
 
   <img src="beker_clipped_rev_2.png" id="trophy" alt="Trophy">
 
-  <!-- externe scripts -->
   <script src="login.js"></script>
   <script src="game.js"></script>
 
-  <!-- highscores -->
-  <script>
-    let highscores = JSON.parse(localStorage.getItem("highscores")) || [
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 },
-      { name: "—", score: 0, time: "00:00", level: 1 }
-    ];
 
-    function updateHighscoreBoard() {
-      const highscoreList = document.getElementById("highscore-list");
-      if (!highscoreList) return;
 
-      highscoreList.innerHTML = "";
-      highscores.forEach((entry, index) => {
-        const levelText = entry.level ? `— Level ${entry.level}` : "";
-        const li = document.createElement("li");
-        li.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} ${levelText}`;
-        highscoreList.appendChild(li);
-      });
-    }
 
-    function checkAndUpdateHighscores(name, score, time, level = 1) {
-      console.log("🏁 checkAndUpdateHighscores aangeroepen met:", name, score, time, level);
+ 
+   <script>
+  let highscores = JSON.parse(localStorage.getItem("highscores")) || [
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 }
+  ];
 
-      const newEntry = { name, score, time, level };
-      highscores.push(newEntry);
-      highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
-      highscores = highscores.slice(0, 10);
-      localStorage.setItem("highscores", JSON.stringify(highscores));
-      updateHighscoreBoard();
+  function updateHighscoreBoard() {
+    const highscoreList = document.getElementById("highscore-list");
+    if (!highscoreList) return;
 
-      if (window.scoresRef) {
-        console.log("📡 scoresRef gevonden, push naar Firebase...");
-        window.scoresRef.push({
-          name: name,
-          score: score,
-          time: time,
-          level: level,
-          created: Date.now()
-        })
-        .then(() => {
-          console.log("✅ Score toegevoegd aan Firebase");
-        })
-        .catch(err => {
-          console.error("❌ Kon score niet naar Firebase pushen:", err);
-        });
-      } else {
-        console.warn("⚠️ window.scoresRef bestaat niet op dit moment, niets naar Firebase gestuurd.");
-      }
-    }
-
-    window.addEventListener("load", () => {
-      updateHighscoreBoard();
+    highscoreList.innerHTML = "";
+    highscores.forEach((entry, index) => {
+      const levelText = entry.level ? `— Level ${entry.level}` : "";
+      const li = document.createElement("li");
+      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} ${levelText}`;
+      highscoreList.appendChild(li);
     });
-  </script>
+  }
+
+  // 👉 deze wordt door je game aangeroepen
+  function checkAndUpdateHighscores(name, score, time, level = 1) {
+    console.log("🏁 checkAndUpdateHighscores aangeroepen met:", name, score, time, level);
+
+    const newEntry = { name, score, time, level };
+    highscores.push(newEntry);
+    highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
+    highscores = highscores.slice(0, 10);
+    localStorage.setItem("highscores", JSON.stringify(highscores));
+    updateHighscoreBoard();
+
+    // ✨ ook naar Firebase sturen
+    if (window.scoresRef) {
+      console.log("📡 scoresRef gevonden, push naar Firebase...");
+      window.scoresRef.push({
+        name: name,
+        score: score,
+        time: time,
+        level: level,
+        created: Date.now()
+      })
+      .then(() => {
+        console.log("✅ Score toegevoegd aan Firebase");
+      })
+      .catch(err => {
+        console.error("❌ Kon score niet naar Firebase pushen:", err);
+      });
+    } else {
+      console.warn("⚠️ window.scoresRef bestaat niet op dit moment, niets naar Firebase gestuurd.");
+    }
+  }
+
+  window.addEventListener("load", () => {
+    updateHighscoreBoard();
+  });
+</script>
 
   <style>
     #game-container {
@@ -750,9 +624,14 @@ document.addEventListener("DOMContentLoaded", function () {
       }, delay);
     }
 
+    // Start eerste run
     animateFlyer("bikeFlyer", 20000, 1000);
+    // Herhaal elke 30 sec
     setInterval(() => animateFlyer("bikeFlyer", 20000, 1000), 30000);
   </script>
+
+  <!-- Externe scripts -->
+  <script src="login.js"></script>
 
   <!-- Muziekalbumscript -->
   <script>
@@ -818,116 +697,113 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   </script>
 
-<!-- ✅ mobiele chat koppelen aan desktop chat -->
+<!-- 💬 Chat open/dicht -->
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  // desktop elementen
-  const desktopChatBox  = document.getElementById("chatbox");
-  const desktopMessages = document.getElementById("chatMessages");
-  const desktopForm     = document.getElementById("chatForm");
-  const desktopSticker  = document.getElementById("chat-sticker-panel");
-  const desktopStickerBtn = document.getElementById("chatStickersBtn");
+(() => {
+  const chat = document.getElementById('chatbox');
+  const toggleBtn = document.getElementById('chatToggleBtn');
+  const chatInput = document.getElementById('chatInput');
 
-  // mobiele elementen
-  const mobileChatBox   = document.getElementById("chatbox-mobile");
-  const mobileMessages  = document.getElementById("chatMobileMessages");
-  const mobileForm      = document.getElementById("chatMobileForm");
-  const mobileBar       = document.getElementById("chatMobileBar");   // hele gele balk
-  const mobileClose     = document.getElementById("chatMobileClose"); // het X-je
-
-  // als er iets mist: stoppen
-  if (!desktopChatBox || !desktopMessages || !desktopForm ||
-      !mobileChatBox  || !mobileMessages  || !mobileForm) {
-    return;
-  }
-
-  // ---------- helpers ----------
-  function moveToMobile() {
-    // berichtenbak verhuizen
-    if (desktopMessages.parentElement !== mobileMessages) {
-      mobileMessages.innerHTML = "";
-      mobileMessages.appendChild(desktopMessages);
+  // laatste status terugzetten
+  try {
+    if (localStorage.getItem('chatCollapsed') === '1') {
+      chat.classList.add('collapsed');
     }
-    // formulier verhuizen
-    if (desktopForm.parentElement !== mobileForm) {
-      mobileForm.innerHTML = "";
-      mobileForm.appendChild(desktopForm);
+  } catch (e) {}
+
+  // alleen met de knop open/dicht
+  toggleBtn?.addEventListener('click', () => {
+    chat.classList.toggle('collapsed');
+    try {
+      localStorage.setItem(
+        'chatCollapsed',
+        chat.classList.contains('collapsed') ? '1' : '0'
+      );
+    } catch (e) {}
+  });
+
+  // ⛔ spatie mag chat NIET meer openen/sluiten
+  window.addEventListener('keydown', (e) => {
+    // laat spatie met rust voor het spel
+    if (e.code === 'Space') return;
+
+    // als je in het chat-inputje zit, gewoon typen
+    if (document.activeElement === chatInput) return;
+
+    // escape mag chat wél dicht gooien
+    if (e.code === 'Escape') {
+      chat.classList.add('collapsed');
+      try {
+        localStorage.setItem('chatCollapsed', '1');
+      } catch (e) {}
     }
+  });
+})();
+</script>
 
-    // desktop verstoppen, mobiel laten zien
-    desktopChatBox.style.display = "none";
-    mobileChatBox.style.display  = "block";
+<!-- 📱 auto-fix voor mobiele schermen -->
+<script>
+  document.addEventListener('DOMContentLoaded', autoPlaceCanvas);
+  window.addEventListener('resize', autoPlaceCanvas);
+
+  function autoPlaceCanvas() {
+    // alleen op mobiel
+    if (window.innerWidth > 768) return;
+
+    const c = document.getElementById('gameCanvas');
+    if (!c) return;
+
+    const ratio = 600 / 645;
+    const vw = window.innerWidth;
+    const canvasWidth = Math.min(vw * 0.84, 550);
+    const canvasHeight = canvasWidth * ratio;
+
+    c.width = canvasWidth;
+    c.height = canvasHeight;
+
+    const vh = window.innerHeight;
+    const minTop = 180;                 // ← zelfde waarde als in CSS
+    const centeredTop = (vh - canvasHeight) / 2;
+    const finalTop = Math.max(minTop, centeredTop);
+
+    c.style.top = finalTop + 'px';
   }
-
-  function moveToDesktop() {
-    // desktop-chat weer opbouwen
-    const header = desktopChatBox.querySelector(".chatbox-header");
-    if (header && desktopMessages.parentElement !== desktopChatBox) {
-      desktopChatBox.insertBefore(desktopMessages, header.nextSibling);
-    } else if (desktopMessages.parentElement !== desktopChatBox) {
-      desktopChatBox.appendChild(desktopMessages);
-    }
-
-    if (desktopForm.parentElement !== desktopChatBox) {
-      desktopChatBox.appendChild(desktopForm);
-    }
-
-    // sticker-panel hoort weer bij desktop
-    if (desktopSticker && desktopSticker.parentElement !== document.body) {
-      document.body.appendChild(desktopSticker);
-    }
-
-    desktopChatBox.style.display = "flex";
-    mobileChatBox.style.display  = "none";
-  }
-
-  function checkLayout() {
-    if (window.innerWidth <= 600) {
-      moveToMobile();
-    } else {
-      moveToDesktop();
-    }
-  }
-
-  // start + bij resize
-  checkLayout();
-  window.addEventListener("resize", checkLayout);
-
-  // ---------- mobiel open/dicht ----------
-  if (mobileBar) {
-    mobileBar.addEventListener("click", function () {
-      mobileChatBox.classList.toggle("open");
-    });
-  }
-  if (mobileClose) {
-    mobileClose.addEventListener("click", function (e) {
-      e.stopPropagation();               // voorkomt dat de balk alsnog opent
-      mobileChatBox.classList.remove("open");
-    });
-  }
-
-  // ---------- stickerknop werkt ook op mobiel ----------
-  if (desktopStickerBtn && desktopSticker) {
-    desktopStickerBtn.addEventListener("click", function (e) {
-      e.preventDefault();
-      // op mobiel willen we 'm boven de chat
-      if (window.innerWidth <= 600) {
-        desktopSticker.style.display =
-          (desktopSticker.style.display === "block") ? "none" : "block";
-      } else {
-        // desktop-gedrag
-        desktopSticker.style.display =
-          (desktopSticker.style.display === "block") ? "none" : "block";
-      }
-    });
-  }
-});
 </script>
 
 
 
+<!-- nieuw script voor mobiele chat -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const desktopChat = document.getElementById("chatbox");
+  const mobileChat = document.getElementById("chatbox-mobile");
+  const mobileHeader = document.querySelector(".chatbox-header-mobile");
+  const mobileClose = document.getElementById("chatMobileClose");
+  const mobileMessages = document.getElementById("chatMobileMessages");
+  const mobileForm = document.getElementById("chatMobileForm");
 
+  // alleen op mobiel klonen
+  if (window.innerWidth <= 600 && desktopChat && mobileMessages && mobileForm) {
+    const realMessages = document.getElementById("chatMessages");
+    const realForm = document.getElementById("chatForm");
+
+    if (realMessages) mobileMessages.innerHTML = realMessages.innerHTML;
+    if (realForm) mobileForm.innerHTML = realForm.innerHTML;
+
+    // openen/sluiten
+    if (mobileHeader) {
+      mobileHeader.addEventListener("click", () => {
+        mobileChat.classList.toggle("open");
+      });
+    }
+    if (mobileClose) {
+      mobileClose.addEventListener("click", () => {
+        mobileChat.classList.remove("open");
+      });
+    }
+  }
+});
+</script>
 </body>
 </html>
-
 

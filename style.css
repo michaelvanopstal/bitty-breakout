@@ -474,16 +474,17 @@ body {
     z-index: 10 !important;   /* boven frame, onder HUD */
   }
 
-/* dingen die weg mogen op mobiel */
-#bonus-power-panel,
-#highscore-overlay,
-#trophy,
-#musicToggle,
-#resetBallBtn,
-#bikeFlyer {
-  display: none !important;
-}
-
+  /* dingen die weg mogen op mobiel */
+  #bonus-power-panel,
+  #highscore-overlay,
+  #trophy,
+  #musicToggle,
+  #resetBallBtn,
+  #bikeFlyer,
+  #chatbox,             /* oude desktopchat uit op mobiel */
+  #chat-sticker-panel { /* oud stickerpaneel ook uit op mobiel */
+    display: none !important;
+  }
 
   /* 3️⃣ HUD boven het spel */
   #login-overlay {
@@ -521,14 +522,18 @@ body {
 }
 
 
-/* 📱 mobiele chat (tot 600px) */
+/* =========================================================
+   📱 ECHT klein (tot 600px) → alleen chat en sticker
+   ========================================================= */
 @media (max-width: 600px) {
 
   body {
-    overflow: visible;
+    overflow: visible; /* anders wordt chat afgekapt door body */
   }
 
+  /* 4️⃣ mobiele chat boven HUD */
   #chatbox-mobile {
+    display: block !important;
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
@@ -538,15 +543,13 @@ body {
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 0 0;
     box-shadow: 0 -6px 20px rgba(0,0,0,.35);
-    z-index: 200;
-    /* alleen de balk tonen */
-    height: 46px;
+    z-index: 200;              /* boven HUD (100), onder sticker (300) */
     overflow: hidden;
+    height: 42px;              /* ingeklapt */
     transition: height .25s ease;
   }
 
-  /* header blijft altijd zichtbaar */
-  #chatbox-mobile .chatbox-header-mobile {
+  .chatbox-header-mobile {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -556,7 +559,7 @@ body {
     font-weight: 700;
   }
 
-  #chatbox-mobile .chatbox-header-mobile button {
+  #chatMobileClose {
     background: rgba(0,0,0,.08);
     border: none;
     width: 28px;
@@ -565,46 +568,46 @@ body {
     color: #7a2b00;
   }
 
-  /* de inhoud (messages + form) standaard verbergen */
-  #chatbox-mobile .chat-mobile-body {
-    display: none;
-    background: #6a0f0f;
-  }
-
-  /* als de chat open is: hoger + body tonen */
+  /* open toestand → omhoog */
   #chatbox-mobile.open {
     height: 55vh;
   }
-  #chatbox-mobile.open .chat-mobile-body {
-    display: block;
+
+  #chatMobileMessages {
+    height: calc(55vh - 90px);
+    overflow-y: auto;
+    background: #6a0f0f;
+    color: #ffe9c4;
+    padding: 8px;
   }
 
-  /* iOS anti-zoom: inputs ≥16px */
-  #chatMobileForm input,
-  #chatMobileForm button,
-  #chatbox-mobile input,
-  #chatbox-mobile button {
-    font-size: 16px;
+  #chatMobileForm {
+    background: linear-gradient(#ffb545,#f08a25);
+    padding: 8px;
+  }
+
+  /* 5️⃣ stickerpaneel helemaal bovenop */
+  #chat-sticker-panel-mobile {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 55vh;
+    width: 85vw;
+    max-width: 420px;
+    background: #6a0f0f;
+    border: 2px solid #b66414;
+    border-radius: 12px 12px 0 0;
+    z-index: 300;
   }
 }
 
-/* desktop: mobiele chat weg */
+
+/* =========================================================
+   💻 Desktop fallback: mobiele chat uit
+   ========================================================= */
 @media (min-width: 601px) {
   #chatbox-mobile {
     display: none !important;
-  }
-}
-
-@media (max-width:600px){
-  #chat-sticker-panel {
-    position: fixed !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    bottom: 55vh !important;
-    width: 85vw !important;
-    max-width: 420px !important;
-    display: none;
-    z-index: 300;
   }
 }
 
