@@ -423,11 +423,13 @@ body {
     --frame-bottom-space: 15vh;
     --frame-side-space: 0vw;
 
-    /* gele venster */
+    /* gele venster / speelveld binnen het plaatje */
     --canvas-inset-top: 15%;
     --canvas-inset-left: 5%;
     --canvas-inset-right: 2.6%;
     --canvas-inset-bottom: 18%;
+
+    --bg-scale: 1;
   }
 
   body {
@@ -435,18 +437,18 @@ body {
     padding-bottom: 0;
   }
 
-  /* 0️⃣ container mag laag blijven, we willen er overheen kunnen */
+  /* 0️⃣ container laag houden zodat andere dingen erover kunnen */
   #game-container {
     position: relative;
     width: calc(100vw - (2 * var(--frame-side-space)));
     height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
     margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
-    overflow: visible;          /* belangrijk: chat mag erbuiten */
+    overflow: visible;          /* chat mag erbuiten */
     z-index: 0;
     background: none;
   }
 
-  /* 1️⃣ frame / mobile.png */
+  /* 1️⃣ frame / mobile.png onder alles */
   #game-container::before {
     content: "";
     position: absolute;
@@ -455,10 +457,11 @@ body {
     background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
-    z-index: 1;                 /* onder alles */
+    z-index: 1;
   }
 
-  /* 2️⃣ canvas stabiel gecentreerd in gele scherm */
+  /* 2️⃣ canvas STABIEL in het gele scherm
+         → geen right/bottom meer, alleen left + breedte */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-inset-top) !important;
@@ -468,7 +471,7 @@ body {
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 10 !important;      /* boven het frame, onder HUD */
+    z-index: 10 !important;   /* boven frame, onder HUD */
   }
 
   /* dingen die weg mogen op mobiel */
@@ -483,7 +486,7 @@ body {
     display: none !important;
   }
 
-  /* 3️⃣ HUD blijft zweven boven canvas */
+  /* 3️⃣ HUD boven het spel */
   #login-overlay {
     position: fixed !important;
     top: 10px !important;
@@ -512,7 +515,7 @@ body {
     z-index: 100 !important;
   }
 
-  /* standaard: mobiele chat is uit (aan in 600px blok) */
+  /* standaard: mobiele chat uit, die doen we pas in 600px */
   #chatbox-mobile {
     display: none;
   }
@@ -520,7 +523,7 @@ body {
 
 
 /* =========================================================
-   📱 ECHT klein (tot 600px) → mobiele chat die omhoog klapt
+   📱 ECHT klein (tot 600px) → alleen chat en sticker
    ========================================================= */
 @media (max-width: 600px) {
 
@@ -598,6 +601,7 @@ body {
   }
 }
 
+
 /* =========================================================
    💻 Desktop fallback: mobiele chat uit
    ========================================================= */
@@ -606,3 +610,4 @@ body {
     display: none !important;
   }
 }
+
