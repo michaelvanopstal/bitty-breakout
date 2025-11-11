@@ -793,8 +793,8 @@ body {
 /* ===== ❤️ MOBIELE LEVENS ===== */
 #mobile-lives {
   position: fixed;
-  top: 50px;              /* afstand van bovenkant scherm */
-  right: 12px;            /* rechts uitgelijnd, boven de chatknop */
+  top: 70px;              /* afstand van bovenkant scherm */
+  right: 6px;            /* rechts uitgelijnd, boven de chatknop */
   z-index: 9999;
   display: flex;
   gap: 8px;
