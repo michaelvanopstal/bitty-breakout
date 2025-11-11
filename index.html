@@ -791,43 +791,50 @@
   })();
   </script>
 
-  <!-- 📱 mobiele chat open/dicht -->
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const btn        = document.getElementById('chat-mobile-button');
-    const box        = document.getElementById('chatbox-mobile');
-    const close      = document.getElementById('chatMobileClose');
-    const overlay    = document.getElementById('chatStickerOverlay');
-    const stickerBtn = document.getElementById('chatMobileStickersBtn');
+ <script>
+document.addEventListener('DOMContentLoaded', function() {
+  const btn        = document.getElementById('chat-mobile-button');
+  const box        = document.getElementById('chatbox-mobile');
+  const close      = document.getElementById('chatMobileClose');
+  const overlay    = document.getElementById('chatStickerOverlay');
+  const stickerBtn = document.getElementById('chatMobileStickersBtn');
 
-    if (!btn || !box) return;
+  // als er geen box is: niks doen
+  if (!box) return;
 
+  // open/dicht de mobiele chat
+  if (btn) {
     btn.addEventListener('click', () => {
       const isOpen = box.classList.toggle('open');
       if (!isOpen && overlay) {
-        overlay.classList.remove('show');
+        overlay.classList.remove('show'); // chat dicht = overlay dicht
       }
     });
+  }
 
-    if (close) {
-      close.addEventListener('click', (e) => {
-        e.stopPropagation();
-        box.classList.remove('open');
-        if (overlay) overlay.classList.remove('show');
-      });
-    }
+  // kruisje in de mobile chat
+  if (close) {
+    close.addEventListener('click', (e) => {
+      e.stopPropagation();
+      box.classList.remove('open');
+      if (overlay) overlay.classList.remove('show');
+    });
+  }
 
-    if (stickerBtn && overlay) {
-      stickerBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (!box.classList.contains('open')) {
-          box.classList.add('open');
-        }
-        overlay.classList.toggle('show');
-      });
-    }
-  });
-  </script>
+  // 📷 knop in de mobile chat → alleen overlay tonen/verbergen
+  if (stickerBtn && overlay) {
+    stickerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // chat moet open zijn
+      if (!box.classList.contains('open')) {
+        box.classList.add('open');
+      }
+      overlay.classList.toggle('show');
+    });
+  }
+});
+</script>
+
 
   <!-- 📱 auto-fix voor mobiele schermen -->
   <script>
