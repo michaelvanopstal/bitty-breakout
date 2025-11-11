@@ -677,7 +677,7 @@ body {
   bottom: 0;
   background: rgba(30, 10, 10, 0.96);
   border-top: 2px solid #b66414;
-  z-index: 10050;
+  z-index: 12050;
   max-height: 70%;
   transform: translateY(100%);
   transition: transform 0.35s ease;
