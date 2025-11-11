@@ -590,7 +590,7 @@ body {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 50px; /* laat hem netjes boven de knop */
+  bottom: 50px; /* direct boven de knop */
   width: 90vw;
   max-width: 460px;
   background: linear-gradient(#f6a53b,#e27e22);
@@ -598,11 +598,7 @@ body {
   box-shadow: 0 6px 18px rgba(0,0,0,.35);
   z-index: 9980;
   overflow: hidden;
-  display: none;
-  
-  /* 🔥 voeg deze regels toe of pas ze aan */
-  height: 600px;       /* maak de chatbox zelf hoger */
-  max-height: 90vh;    /* laat hem bijna tot boven het scherm komen */
+  display: none;            /* standaard verborgen */
 }
 
 
@@ -632,15 +628,15 @@ body {
     line-height: 1;
   }
 
-  #chatMobileMessages {
-    max-height: 80vh;
-    overflow-y: auto;
-    background: #6a0f0f;
-    color: #ffe9c4;
-    padding: 8px;
-    position: relative;
-    z-index: 9900;
-  }
+ #chatMobileMessages {
+  height: 380px;          /* ← maak het bruine berichtenvlak hoger */
+  overflow-y: auto;
+  background: #6a0f0f;
+  color: #ffe9c4;
+  padding: 8px;
+  position: relative;
+  z-index: 9900;
+}
 
   #chatMobileForm {
     background: linear-gradient(#ffb545,#f08a25);
