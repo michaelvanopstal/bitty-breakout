@@ -40,20 +40,18 @@
   </div>
   <!-- ===== /Chat Box ===== -->
 
- <!-- 📱 mobiele chat -->
-<div id="chatbox-mobile">
-  <div class="chatbox-header-mobile">
+  
+  <div id="chatbox-mobile">
+  <div class="chatbox-header-mobile" id="chatMobileBar">
     <span>CHAT</span>
-    <button id="chatMobileClose" type="button">×</button>
+    <button id="chatMobileClose">×</button>
   </div>
-
-  <!-- deze body is standaard verborgen, alleen zichtbaar als .open -->
-  <div class="chat-mobile-body">
-    <div id="chatMobileMessages"></div>
-    <div id="chatMobileForm"></div>
-  </div>
+  <div id="chatMobileMessages"></div>
+  <div id="chatMobileForm"></div>
 </div>
 
+
+  
   <!-- 1x STICKERS definieren -->
   <script>
     const STICKERS = [
@@ -817,42 +815,49 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   </script>
 
+<!-- ✅ mobiele chat koppelen aan desktop chat -->
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const desktopChatBox   = document.getElementById("chatbox");
-  const desktopMessages  = document.getElementById("chatMessages");
-  const desktopForm      = document.getElementById("chatForm");
-  const desktopSticker   = document.getElementById("chat-sticker-panel");
+document.addEventListener("DOMContentLoaded", function () {
+  // desktop elementen
+  const desktopChatBox  = document.getElementById("chatbox");
+  const desktopMessages = document.getElementById("chatMessages");
+  const desktopForm     = document.getElementById("chatForm");
+  const desktopSticker  = document.getElementById("chat-sticker-panel");
+  const desktopStickerBtn = document.getElementById("chatStickersBtn");
 
-  const mobileChatBox    = document.getElementById("chatbox-mobile");
-  const mobileMessagesWr = document.getElementById("chatMobileMessages");
-  const mobileFormWr     = document.getElementById("chatMobileForm");
+  // mobiele elementen
+  const mobileChatBox   = document.getElementById("chatbox-mobile");
+  const mobileMessages  = document.getElementById("chatMobileMessages");
+  const mobileForm      = document.getElementById("chatMobileForm");
+  const mobileBar       = document.getElementById("chatMobileBar");   // hele gele balk
+  const mobileClose     = document.getElementById("chatMobileClose"); // het X-je
 
-  // als iets mist, stoppen
+  // als er iets mist: stoppen
   if (!desktopChatBox || !desktopMessages || !desktopForm ||
-      !mobileChatBox || !mobileMessagesWr || !mobileFormWr) {
+      !mobileChatBox  || !mobileMessages  || !mobileForm) {
     return;
   }
 
+  // ---------- helpers ----------
   function moveToMobile() {
-    // berichten naar mobiel
-    if (desktopMessages.parentElement !== mobileMessagesWr) {
-      mobileMessagesWr.innerHTML = "";
-      mobileMessagesWr.appendChild(desktopMessages);
+    // berichtenbak verhuizen
+    if (desktopMessages.parentElement !== mobileMessages) {
+      mobileMessages.innerHTML = "";
+      mobileMessages.appendChild(desktopMessages);
     }
-    // form naar mobiel
-    if (desktopForm.parentElement !== mobileFormWr) {
-      mobileFormWr.innerHTML = "";
-      mobileFormWr.appendChild(desktopForm);
+    // formulier verhuizen
+    if (desktopForm.parentElement !== mobileForm) {
+      mobileForm.innerHTML = "";
+      mobileForm.appendChild(desktopForm);
     }
 
-    // desktop-chat verbergen, mobiele laten zien (dichte balk)
+    // desktop verstoppen, mobiel laten zien
     desktopChatBox.style.display = "none";
     mobileChatBox.style.display  = "block";
   }
 
   function moveToDesktop() {
-    // terugzetten naar gewone chatbox
+    // desktop-chat weer opbouwen
     const header = desktopChatBox.querySelector(".chatbox-header");
     if (header && desktopMessages.parentElement !== desktopChatBox) {
       desktopChatBox.insertBefore(desktopMessages, header.nextSibling);
@@ -864,14 +869,13 @@ document.addEventListener("DOMContentLoaded", function() {
       desktopChatBox.appendChild(desktopForm);
     }
 
-    // stickerpanel hoort op desktop, dus terug naar body of naar desktop
-    if (desktopSticker && desktopSticker.parentElement !== desktopChatBox) {
-      desktopChatBox.appendChild(desktopSticker);
+    // sticker-panel hoort weer bij desktop
+    if (desktopSticker && desktopSticker.parentElement !== document.body) {
+      document.body.appendChild(desktopSticker);
     }
 
     desktopChatBox.style.display = "flex";
     mobileChatBox.style.display  = "none";
-    mobileChatBox.classList.remove("open");
   }
 
   function checkLayout() {
@@ -882,27 +886,42 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  // meteen 1x draaien
+  // start + bij resize
   checkLayout();
   window.addEventListener("resize", checkLayout);
 
-  /* ✅ alleen dit stuk is voor het open-/dichtklappen van de gele balk */
-  const mobileHeader = mobileChatBox.querySelector(".chatbox-header-mobile");
-  const mobileClose  = document.getElementById("chatMobileClose");
-
-  if (mobileHeader) {
-    mobileHeader.addEventListener("click", () => {
+  // ---------- mobiel open/dicht ----------
+  if (mobileBar) {
+    mobileBar.addEventListener("click", function () {
       mobileChatBox.classList.toggle("open");
     });
   }
   if (mobileClose) {
-    mobileClose.addEventListener("click", (e) => {
-      e.stopPropagation();             // voorkomen dat 'ie meteen weer opent
+    mobileClose.addEventListener("click", function (e) {
+      e.stopPropagation();               // voorkomt dat de balk alsnog opent
       mobileChatBox.classList.remove("open");
+    });
+  }
+
+  // ---------- stickerknop werkt ook op mobiel ----------
+  if (desktopStickerBtn && desktopSticker) {
+    desktopStickerBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      // op mobiel willen we 'm boven de chat
+      if (window.innerWidth <= 600) {
+        desktopSticker.style.display =
+          (desktopSticker.style.display === "block") ? "none" : "block";
+      } else {
+        // desktop-gedrag
+        desktopSticker.style.display =
+          (desktopSticker.style.display === "block") ? "none" : "block";
+      }
     });
   }
 });
 </script>
+
+
 
 
 </body>
