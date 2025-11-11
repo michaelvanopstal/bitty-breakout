@@ -586,20 +586,21 @@ body {
   }
 
   /* popup chatbox (verstopt tot open) */
-  #chatbox-mobile {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 50px; /* direct boven de knop */
-    width: 90vw;
-    max-width: 460px;
-    background: linear-gradient(#f6a53b,#e27e22);
-    border-radius: 18px 18px 14px 14px;
-    box-shadow: 0 6px 18px rgba(0,0,0,.35);
-    z-index: 9980;
-    overflow: hidden;
-    display: none;            /* standaard verborgen */
-  }
+ #chatbox-mobile {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 80x; /* direct boven de knop */
+  width: 90vw;
+  max-width: 460px;
+  background: linear-gradient(#f6a53b,#e27e22);
+  border-radius: 18px 18px 14px 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  z-index: 9980;
+  overflow: hidden;
+  display: none;            /* standaard verborgen */
+}
+
 
   #chatbox-mobile.open {
     display: block;           /* zichtbaar zodra .open wordt toegevoegd */
