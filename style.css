@@ -688,36 +688,56 @@ body {
   position: relative;      /* ← overlay hecht zich hieraan */
 }
 
-  /* 📱 overlay voor stickers BOVENOP de mobiele chat */
+/* =====📱 MOBIELE CHAT BASIS===== */
 #chatbox-mobile {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 50px;
-  width: 90vw;
-  max-width: 460px;
+  bottom: 58px;                 /* net boven je grote CHAT-balk */
+  width: min(420px, 92vw);
   background: linear-gradient(#f6a53b,#e27e22);
   border-radius: 18px 18px 14px 14px;
   box-shadow: 0 6px 18px rgba(0,0,0,.35);
   z-index: 9980;
-  overflow: hidden;      /* mag hier weer, want overlay zit nu erin */
-  display: none;
-  position: relative;
+  overflow: hidden;             /* we tekenen alles erin */
+  display: none;                /* standaard dicht */
 }
 
-/* dit is het paneel dat over de berichten komt */
+#chatbox-mobile.open {
+  display: block;
+}
+
+/* berichtenvlak moet ruimte laten voor overlay */
+#chatMobileMessages {
+  height: 280px;                /* wat jij prettig vindt */
+  overflow-y: auto;
+  background: #7b1e1e;
+}
+
+/* input onderaan mobiel */
+#chatMobileForm {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  background: #f6a53b;
+  padding: 6px 10px 10px;
+}
+#chatMobileForm input {
+  flex: 1;
+}
+
+/* =====📱 STICKER OVERLAY IN DE CHAT===== */
 #chatStickerOverlay {
   position: absolute;
-  top: 42px;             /* onder de mobiele header */
-  bottom: 52px;          /* boven de inputbalk */
+  top: 42px;                    /* precies onder de mobiele header */
+  bottom: 56px;                 /* precies boven het input-balkje */
   left: 0;
   right: 0;
-  background: #7b1e1e;   /* zelfde rood als je chat */
-  z-index: 12050;
+  background: #7b1e1e;          /* zelfde donkerrood als chat */
+  z-index: 9999;
   display: none;
   overflow-y: auto;
-  overflow-x: auto;
-  padding: 10px 8px 12px;
+  padding: 10px 6px 12px;
 }
 
 /* zichtbaar maken */
@@ -725,7 +745,7 @@ body {
   display: block;
 }
 
-/* raster / grootte zoals desktop-achtig */
+/* stickertegels */
 #chatStickerOverlay .sticker-item {
   display: inline-block;
   width: 72px;
@@ -744,13 +764,10 @@ body {
   border-radius: 10px;
 }
 
-
-/* ======= 💻 DESKTOP ======= */
+/* desktop: verberg mobiele chat */
 @media (min-width: 601px) {
   #chat-mobile-button,
   #chatbox-mobile {
     display: none;
   }
 }
-
-
