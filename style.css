@@ -627,7 +627,7 @@ body {
   }
 
   #chatMobileMessages {
-    max-height: 45vh;
+    max-height: 80vh;
     overflow-y: auto;
     background: #6a0f0f;
     color: #ffe9c4;
