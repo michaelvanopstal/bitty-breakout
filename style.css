@@ -521,6 +521,7 @@ body {
 }
 
 
+/* 📱 mobiele chat (tot 600px) */
 @media (max-width: 600px) {
 
   body {
@@ -528,23 +529,24 @@ body {
   }
 
   #chatbox-mobile {
-    display: block !important;
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 60px;              /* 🔼 verhoogd van 0 naar 60px */
+    bottom: 0;
     width: 85vw;
     max-width: 420px;
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 0 0;
     box-shadow: 0 -6px 20px rgba(0,0,0,.35);
     z-index: 200;
-    overflow: visible;
-    height: 42px;
+    /* alleen de balk tonen */
+    height: 46px;
+    overflow: hidden;
     transition: height .25s ease;
   }
 
-  .chatbox-header-mobile {
+  /* header blijft altijd zichtbaar */
+  #chatbox-mobile .chatbox-header-mobile {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -554,7 +556,7 @@ body {
     font-weight: 700;
   }
 
-  #chatMobileClose {
+  #chatbox-mobile .chatbox-header-mobile button {
     background: rgba(0,0,0,.08);
     border: none;
     width: 28px;
@@ -563,42 +565,32 @@ body {
     color: #7a2b00;
   }
 
+  /* de inhoud (messages + form) standaard verbergen */
+  #chatbox-mobile .chat-mobile-body {
+    display: none;
+    background: #6a0f0f;
+  }
+
+  /* als de chat open is: hoger + body tonen */
   #chatbox-mobile.open {
     height: 55vh;
   }
-
-  #chatMobileMessages {
-    height: calc(55vh - 90px);
-    overflow-y: auto;
-    background: #6a0f0f;
-    color: #ffe9c4;
-    padding: 8px;
+  #chatbox-mobile.open .chat-mobile-body {
+    display: block;
   }
 
-  #chatMobileForm {
-    background: linear-gradient(#ffb545,#f08a25);
-    padding: 8px;
-  }
-
-  #chat-sticker-panel {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: calc(55vh + 60px); /* sticker ook hoger meeschuiven */
-    width: 85vw;
-    max-width: 420px;
-    background: #6a0f0f;
-    border: 2px solid #b66414;
-    border-radius: 12px 12px 0 0;
-    box-shadow: 0 -6px 20px rgba(0,0,0,.35);
-    z-index: 300;
+  /* iOS anti-zoom: inputs ≥16px */
+  #chatMobileForm input,
+  #chatMobileForm button,
+  #chatbox-mobile input,
+  #chatbox-mobile button {
+    font-size: 16px;
   }
 }
 
+/* desktop: mobiele chat weg */
 @media (min-width: 601px) {
   #chatbox-mobile {
-    display: none;
+    display: none !important;
   }
 }
-
-
