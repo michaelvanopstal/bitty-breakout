@@ -590,7 +590,7 @@ body {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 80x; /* direct boven de knop */
+  bottom: 50px; /* laat hem netjes boven de knop */
   width: 90vw;
   max-width: 460px;
   background: linear-gradient(#f6a53b,#e27e22);
@@ -598,8 +598,13 @@ body {
   box-shadow: 0 6px 18px rgba(0,0,0,.35);
   z-index: 9980;
   overflow: hidden;
-  display: none;            /* standaard verborgen */
+  display: none;
+  
+  /* 🔥 voeg deze regels toe of pas ze aan */
+  height: 600px;       /* maak de chatbox zelf hoger */
+  max-height: 90vh;    /* laat hem bijna tot boven het scherm komen */
 }
+
 
 
   #chatbox-mobile.open {
