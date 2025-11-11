@@ -42,7 +42,7 @@
 
 
 
-<!-- verplaatsbare chat-knop -->
+<!-- knop onderaan, zelfde breedte als oude chat -->
 <button id="chat-mobile-button" type="button">
   <span class="cmb-left">
     <span class="cmb-dot"></span>
@@ -52,21 +52,21 @@
   <span class="cmb-close">✕</span>
 </button>
 
-<!-- chat-paneel dat uit de knop komt -->
+<!-- popup-chat die moet verschijnen -->
 <div id="chatbox-mobile">
   <div class="chatbox-header-mobile">
     <span>Chat</span>
     <button id="chatMobileClose" type="button">×</button>
   </div>
 
-  <!-- overlay voor stickers/gifs, zelfde maat als chat -->
+  <!-- overlay voor stickers -->
   <div id="chatStickerOverlay"></div>
 
   <div id="chatMobileMessages">
-    <!-- hier komen je berichten -->
+    <!-- jouw berichten -->
   </div>
   <div id="chatMobileForm">
-    <input id="chatInput" type="text" placeholder="Type a message…" />
+    <input id="chatInput" type="text" placeholder="Type..." />
     <button id="chatStickersBtn" type="button">📷</button>
     <button id="chatSendBtn" type="button">Send</button>
   </div>
@@ -800,33 +800,41 @@ document.addEventListener('DOMContentLoaded', function() {
   const overlay = document.getElementById('chatStickerOverlay');
   const stickerBtn = document.getElementById('chatStickersBtn');
 
-  // positie van chat laten volgen op basis van knop
+  // als knop of chat niet bestaat, stoppen we
+  if (!btn || !box) {
+    return;
+  }
+
+  // chat boven de knop laten komen
   function positionChatFromButton() {
     const rect = btn.getBoundingClientRect();
-    // chat boven de knop zetten
+    // chat boven de knop zetten (net erboven)
     box.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
     box.style.right = (window.innerWidth - rect.right) + 'px';
   }
 
-  // open/dicht
+  // open/dicht via de knop
   btn.addEventListener('click', () => {
     if (box.classList.contains('open')) {
       box.classList.remove('open');
-      overlay.classList.remove('show');
+      if (overlay) overlay.classList.remove('show');
     } else {
       positionChatFromButton();
       box.classList.add('open');
     }
   });
 
-  close.addEventListener('click', (e) => {
-    e.stopPropagation();
-    box.classList.remove('open');
-    overlay.classList.remove('show');
-  });
+  // kruisje in de chat
+  if (close) {
+    close.addEventListener('click', (e) => {
+      e.stopPropagation();
+      box.classList.remove('open');
+      if (overlay) overlay.classList.remove('show');
+    });
+  }
 
-  // sticker / camera → overlay
-  if (stickerBtn) {
+  // sticker / camera → overlay bovenop chat
+  if (stickerBtn && overlay) {
     stickerBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       // chat moet open zijn
@@ -838,12 +846,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // verplaatsbaar maken
+  // knop verplaatsbaar maken
   let dragging = false;
   let startX, startY, startLeft, startTop;
-
-  btn.addEventListener('mousedown', startDrag);
-  btn.addEventListener('touchstart', startDrag, {passive:false});
 
   function startDrag(e) {
     dragging = true;
@@ -856,20 +861,17 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
   }
 
-  window.addEventListener('mousemove', onDrag);
-  window.addEventListener('touchmove', onDrag, {passive:false});
-
   function onDrag(e) {
     if (!dragging) return;
     const ev = e.touches ? e.touches[0] : e;
     let newLeft = startLeft + (ev.clientX - startX);
     let newTop = startTop + (ev.clientY - startY);
 
-    // binnen scherm houden
     const w = btn.offsetWidth;
     const h = btn.offsetHeight;
     const maxX = window.innerWidth - w - 6;
     const maxY = window.innerHeight - h - 6;
+
     if (newLeft < 6) newLeft = 6;
     if (newTop < 6) newTop = 6;
     if (newLeft > maxX) newLeft = maxX;
@@ -880,17 +882,26 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.style.right = 'auto';
     btn.style.bottom = 'auto';
 
-    // als chat open is, mee verplaatsen
+    // als de chat open is, verplaats die mee
     if (box.classList.contains('open')) {
       positionChatFromButton();
     }
   }
 
-  window.addEventListener('mouseup', () => dragging = false);
-  window.addEventListener('touchend', () => dragging = false);
+  function stopDrag() {
+    dragging = false;
+  }
+
+  btn.addEventListener('mousedown', startDrag);
+  btn.addEventListener('touchstart', startDrag, { passive: false });
+
+  window.addEventListener('mousemove', onDrag);
+  window.addEventListener('touchmove', onDrag, { passive: false });
+
+  window.addEventListener('mouseup', stopDrag);
+  window.addEventListener('touchend', stopDrag);
 });
 </script>
 
 </body>
 </html>
-
