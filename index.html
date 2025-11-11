@@ -42,21 +42,7 @@
 
 
 
-<!-- 📱 mobiele chat-container -->
-<div id="chatbox-mobile">
-  <div class="chatbox-header-mobile">
-    <span>Chat</span>
-    <button id="chatMobileClose" type="button">×</button>
-  </div>
-
-  <!-- 👇 overlay voor stickers/gifs (zelfde maat als chat) -->
-  <div id="chatStickerOverlay"></div>
-
-  <div id="chatMobileMessages"></div>
-  <div id="chatMobileForm"></div>
-</div>
-
-<!-- 🌟 verplaatsbare chat-knop voor mobiel -->
+<!-- verplaatsbare chat-knop -->
 <button id="chat-mobile-button" type="button">
   <span class="cmb-left">
     <span class="cmb-dot"></span>
@@ -66,6 +52,25 @@
   <span class="cmb-close">✕</span>
 </button>
 
+<!-- chat-paneel dat uit de knop komt -->
+<div id="chatbox-mobile">
+  <div class="chatbox-header-mobile">
+    <span>Chat</span>
+    <button id="chatMobileClose" type="button">×</button>
+  </div>
+
+  <!-- overlay voor stickers/gifs, zelfde maat als chat -->
+  <div id="chatStickerOverlay"></div>
+
+  <div id="chatMobileMessages">
+    <!-- hier komen je berichten -->
+  </div>
+  <div id="chatMobileForm">
+    <input id="chatInput" type="text" placeholder="Type a message…" />
+    <button id="chatStickersBtn" type="button">📷</button>
+    <button id="chatSendBtn" type="button">Send</button>
+  </div>
+</div>
 
 
 
@@ -787,38 +792,105 @@
 
 
 
-<!-- nieuw script voor mobiele chat -->
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const desktopChat = document.getElementById("chatbox");
-  const mobileChat = document.getElementById("chatbox-mobile");
-  const mobileHeader = document.querySelector(".chatbox-header-mobile");
-  const mobileClose = document.getElementById("chatMobileClose");
-  const mobileMessages = document.getElementById("chatMobileMessages");
-  const mobileForm = document.getElementById("chatMobileForm");
+document.addEventListener('DOMContentLoaded', function() {
+  const btn = document.getElementById('chat-mobile-button');
+  const box = document.getElementById('chatbox-mobile');
+  const close = document.getElementById('chatMobileClose');
+  const overlay = document.getElementById('chatStickerOverlay');
+  const stickerBtn = document.getElementById('chatStickersBtn');
 
-  // alleen op mobiel klonen
-  if (window.innerWidth <= 600 && desktopChat && mobileMessages && mobileForm) {
-    const realMessages = document.getElementById("chatMessages");
-    const realForm = document.getElementById("chatForm");
+  // positie van chat laten volgen op basis van knop
+  function positionChatFromButton() {
+    const rect = btn.getBoundingClientRect();
+    // chat boven de knop zetten
+    box.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
+    box.style.right = (window.innerWidth - rect.right) + 'px';
+  }
 
-    if (realMessages) mobileMessages.innerHTML = realMessages.innerHTML;
-    if (realForm) mobileForm.innerHTML = realForm.innerHTML;
-
-    // openen/sluiten
-    if (mobileHeader) {
-      mobileHeader.addEventListener("click", () => {
-        mobileChat.classList.toggle("open");
-      });
+  // open/dicht
+  btn.addEventListener('click', () => {
+    if (box.classList.contains('open')) {
+      box.classList.remove('open');
+      overlay.classList.remove('show');
+    } else {
+      positionChatFromButton();
+      box.classList.add('open');
     }
-    if (mobileClose) {
-      mobileClose.addEventListener("click", () => {
-        mobileChat.classList.remove("open");
-      });
+  });
+
+  close.addEventListener('click', (e) => {
+    e.stopPropagation();
+    box.classList.remove('open');
+    overlay.classList.remove('show');
+  });
+
+  // sticker / camera → overlay
+  if (stickerBtn) {
+    stickerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // chat moet open zijn
+      if (!box.classList.contains('open')) {
+        positionChatFromButton();
+        box.classList.add('open');
+      }
+      overlay.classList.toggle('show');
+    });
+  }
+
+  // verplaatsbaar maken
+  let dragging = false;
+  let startX, startY, startLeft, startTop;
+
+  btn.addEventListener('mousedown', startDrag);
+  btn.addEventListener('touchstart', startDrag, {passive:false});
+
+  function startDrag(e) {
+    dragging = true;
+    const ev = e.touches ? e.touches[0] : e;
+    startX = ev.clientX;
+    startY = ev.clientY;
+    const rect = btn.getBoundingClientRect();
+    startLeft = rect.left;
+    startTop = rect.top;
+    e.preventDefault();
+  }
+
+  window.addEventListener('mousemove', onDrag);
+  window.addEventListener('touchmove', onDrag, {passive:false});
+
+  function onDrag(e) {
+    if (!dragging) return;
+    const ev = e.touches ? e.touches[0] : e;
+    let newLeft = startLeft + (ev.clientX - startX);
+    let newTop = startTop + (ev.clientY - startY);
+
+    // binnen scherm houden
+    const w = btn.offsetWidth;
+    const h = btn.offsetHeight;
+    const maxX = window.innerWidth - w - 6;
+    const maxY = window.innerHeight - h - 6;
+    if (newLeft < 6) newLeft = 6;
+    if (newTop < 6) newTop = 6;
+    if (newLeft > maxX) newLeft = maxX;
+    if (newTop > maxY) newTop = maxY;
+
+    btn.style.left = newLeft + 'px';
+    btn.style.top = newTop + 'px';
+    btn.style.right = 'auto';
+    btn.style.bottom = 'auto';
+
+    // als chat open is, mee verplaatsen
+    if (box.classList.contains('open')) {
+      positionChatFromButton();
     }
   }
+
+  window.addEventListener('mouseup', () => dragging = false);
+  window.addEventListener('touchend', () => dragging = false);
 });
 </script>
+
 </body>
 </html>
 
