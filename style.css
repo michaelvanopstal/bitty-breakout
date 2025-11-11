@@ -425,8 +425,8 @@ body {
 
     /* gele venster */
     --canvas-inset-top: 15%;
-    --canvas-inset-left: 4.8%;
-   --canvas-inset-right: 2.4%;
+    --canvas-inset-left: 5%;
+   --canvas-inset-right: 2.6%;
     --canvas-inset-bottom: 18%;
 
     --bg-scale: 1;
