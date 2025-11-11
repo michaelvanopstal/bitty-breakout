@@ -604,22 +604,27 @@ body {
     z-index: 70001;
   }
 
-#chatbox-mobile {
-  display: none;
-}
-
 /* =========================================================
    📱 Alleen telefoons (tot 600px)
    ========================================================= */
 @media (max-width: 600px) {
-  /* verberg de oude chat en stickerpaneel op mobiel */
+  /* verberg oude chat en stickerpaneel op mobiel */
   #chatbox,
   #chat-sticker-panel {
     display: none !important;
   }
 
-  /* mobiele chat tonen */
+  /* toon mobiele chat */
   #chatbox-mobile {
     display: block !important;
+  }
+}
+
+/* =========================================================
+   💻 Desktop fallback: mobiele chat uit
+   ========================================================= */
+@media (min-width: 601px) {
+  #chatbox-mobile {
+    display: none !important;
   }
 }
