@@ -812,4 +812,58 @@ body {
   }
 }
 
+/* ===== 📱 BONUS POWER PANEL MOBIEL ===== */
+#bonus-power-mobile {
+  position: fixed;
+  bottom: 120px;         /* standaardpositie */
+  right: 12px;
+  width: 160px;
+  background: linear-gradient(#f6a53b,#e27e22);
+  border: 2px solid #b66414;
+  border-radius: 14px;
+  padding: 6px;
+  color: #5a2700;
+  z-index: 9999;
+  transform: scale(0.85);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.35);
+}
+
+#bonus-power-mobile .bp-header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #fff3d0;
+  margin-bottom: 4px;
+}
+
+#bonus-power-mobile .bp-row {
+  display: flex;
+  align-items: center;
+  margin: 3px 0;
+  gap: 6px;
+}
+
+#bonus-power-mobile .bp-icon {
+  width: 18px;
+  height: 18px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.bp-icon-heart { background-image: url('heart.png'); }
+.bp-icon-star  { background-image: url('star.png'); }
+.bp-icon-bomb  { background-image: url('bomb.png'); }
+
+#bonus-power-mobile .bp-value {
+  color: #fff1c0;
+  font-size: 12px;
+}
+
+/* Desktop: verberg deze versie */
+@media (min-width: 601px) {
+  #bonus-power-mobile {
+    display: none;
+  }
+}
+
 
