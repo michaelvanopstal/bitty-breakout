@@ -6530,19 +6530,33 @@ function startLevelTransition() {
 }
 
 function updateLivesDisplay() {
-  const display = document.getElementById("livesDisplay");
-  if (!display) return;
+  const display = document.getElementById("livesDisplay");          // desktop
+  const mobileDisplay = document.getElementById("mobileLivesDisplay"); // mobiel
 
-  display.innerHTML = "";
+  if (display) display.innerHTML = "";
+  if (mobileDisplay) mobileDisplay.innerHTML = "";
 
   for (let i = 0; i < lives; i++) {
-    const img = document.createElement("img");
-    img.src = "level.png";
-    img.style.width = "28px";
-    img.style.height = "28px";
-    display.appendChild(img);
+    // 🎯 desktop levens
+    if (display) {
+      const img = document.createElement("img");
+      img.src = "level.png";
+      img.style.width = "28px";
+      img.style.height = "28px";
+      display.appendChild(img);
+    }
+
+    // 📱 mobiele levens
+    if (mobileDisplay) {
+      const img2 = document.createElement("img");
+      img2.src = "level.png";
+      img2.style.width = "22px";   // iets kleiner voor mobiel
+      img2.style.height = "22px";
+      mobileDisplay.appendChild(img2);
+    }
   }
 }
+
 
 function drawElectricBursts() {
   for (let i = electricBursts.length - 1; i >= 0; i--) {
