@@ -794,7 +794,7 @@ body {
 #mobile-lives {
   position: fixed;
   top: 70px;              /* afstand van bovenkant scherm */
-  right: 6px;            /* rechts uitgelijnd, boven de chatknop */
+  left: 6px;            /* rechts uitgelijnd, boven de chatknop */
   z-index: 9999;
   display: flex;
   gap: 8px;
