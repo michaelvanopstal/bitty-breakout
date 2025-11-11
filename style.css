@@ -594,3 +594,17 @@ body {
     display: none !important;
   }
 }
+
+@media (max-width:600px){
+  #chat-sticker-panel {
+    position: fixed !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: 55vh !important;
+    width: 85vw !important;
+    max-width: 420px !important;
+    display: none;
+    z-index: 300;
+  }
+}
+
