@@ -607,7 +607,7 @@ body {
    ========================================================= */
 @media (min-width: 601px) {
   #chatbox-mobile {
-    display: none !important;
+    display: none ;
   }
 }
 
