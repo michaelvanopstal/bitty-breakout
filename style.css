@@ -411,6 +411,7 @@ body {
     right: 360px;
   }
 }
+
 /* =========================================================
    📱 Mobiele versie (tot 768px)
    container + pseudo-achtergrond + vaste z-indexen
@@ -602,9 +603,30 @@ body {
 /* =========================================================
    💻 Desktop fallback: mobiele chat uit
    ========================================================= */
+/* 🔒 standaard: mobiele chat nooit tonen */
+#chatbox-mobile {
+  display: none;
+}
+
+/* 📱 alleen tonen op kleine schermen */
+@media (max-width: 600px) {
+  /* oude desktopchat en stickers weg op mobiel */
+  #chatbox,
+  #chat-sticker-panel {
+    display: none !important;
+  }
+
+  /* nieuwe mobiele chat wél */
+  #chatbox-mobile {
+    display: block !important;
+  }
+}
+
+/* 💻 desktop fallback (optioneel extra bescherming) */
 @media (min-width: 601px) {
   #chatbox-mobile {
     display: none !important;
   }
 }
+
 
