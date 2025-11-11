@@ -440,6 +440,10 @@
     });
   }
 
+ <script>
+(() => {
+  // ... alles wat je al hierboven had (consts, addMessage, firebase, mobile send, etc.)
+
   // ------------------ MOBILE STICKERS ------------------
   function buildMobileStickers(){
     if (!$mobileStkOv) return;
@@ -484,87 +488,86 @@
     });
   }
 
-})();
-</script>
+  // ------------------ DESKTOP STICKER PANEL ------------------
+  if (stickerBtn && stickerPanel) {
+    const imageGrid = document.createElement('div');
+    imageGrid.className = 'sticker-grid';
 
+    const gifGrid = document.createElement('div');
+    gifGrid.className = 'sticker-grid';
 
-    // STICKER PANEL
-    if (stickerBtn && stickerPanel) {
-      const imageGrid = document.createElement('div');
-      imageGrid.className = 'sticker-grid';
+    const imgTitle = document.createElement('div');
+    imgTitle.textContent = 'Stickers';
+    imgTitle.className = 'sticker-section-title';
 
-      const gifGrid = document.createElement('div');
-      gifGrid.className = 'sticker-grid';
+    const gifTitle = document.createElement('div');
+    gifTitle.textContent = 'GIFs';
+    gifTitle.className = 'sticker-section-title';
 
-      const imgTitle = document.createElement('div');
-      imgTitle.textContent = 'Stickers';
-      imgTitle.className = 'sticker-section-title';
+    const list = Array.isArray(STICKERS) ? STICKERS : [];
+    list.forEach(src => {
+      const item = document.createElement('div');
+      item.className = 'sticker-item';
 
-      const gifTitle = document.createElement('div');
-      gifTitle.textContent = 'GIFs';
-      gifTitle.className = 'sticker-section-title';
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = 'sticker';
+      item.appendChild(img);
 
-      const list = Array.isArray(STICKERS) ? STICKERS : [];
-      list.forEach(src => {
-        const item = document.createElement('div');
-        item.className = 'sticker-item';
-
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = 'sticker';
-        item.appendChild(img);
-
-        item.addEventListener('click', () => {
-          if (selectedSticker === src) {
-            selectedSticker = null;
-            item.classList.remove('selected');
-            currentStickerEl = null;
-            return;
-          }
-          selectedSticker = src;
-          if (currentStickerEl) currentStickerEl.classList.remove('selected');
-          item.classList.add('selected');
-          currentStickerEl = item;
-        });
-
-        item.addEventListener('dblclick', () => {
-          const name = detectPlayerName();
-          const text = $input ? $input.value.trim() : '';
-          addMessage(name, text, src);
-
-          if ($input) {
-            $input.value = '';
-            $input.focus();
-          }
+      // selecteer
+      item.addEventListener('click', () => {
+        if (selectedSticker === src) {
           selectedSticker = null;
-          if (currentStickerEl) {
-            currentStickerEl.classList.remove('selected');
-            currentStickerEl = null;
-          }
-          stickerPanel.style.display = 'none';
-        });
-
-        if (src.toLowerCase().endsWith('.gif')) {
-          gifGrid.appendChild(item);
-        } else {
-          imageGrid.appendChild(item);
+          item.classList.remove('selected');
+          currentStickerEl = null;
+          return;
         }
+        selectedSticker = src;
+        if (currentStickerEl) currentStickerEl.classList.remove('selected');
+        item.classList.add('selected');
+        currentStickerEl = item;
       });
 
-      stickerPanel.innerHTML = '';
-      stickerPanel.appendChild(imgTitle);
-      stickerPanel.appendChild(imageGrid);
-      stickerPanel.appendChild(gifTitle);
-      stickerPanel.appendChild(gifGrid);
+      // direct versturen bij dubbelklik
+      item.addEventListener('dblclick', () => {
+        const name = detectPlayerName();
+        const text = $input ? $input.value.trim() : '';
+        addMessage(name, text, src);
 
-      stickerBtn.addEventListener('click', () => {
-        const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
-        stickerPanel.style.display = show ? 'block' : 'none';
+        if ($input) {
+          $input.value = '';
+          $input.focus();
+        }
+        selectedSticker = null;
+        if (currentStickerEl) {
+          currentStickerEl.classList.remove('selected');
+          currentStickerEl = null;
+        }
+        stickerPanel.style.display = 'none';
       });
-    }
 
-  })();
-  </script>
+      // scheiden in gif / niet-gif
+      if (src.toLowerCase().endsWith('.gif')) {
+        gifGrid.appendChild(item);
+      } else {
+        imageGrid.appendChild(item);
+      }
+    });
+
+    stickerPanel.innerHTML = '';
+    stickerPanel.appendChild(imgTitle);
+    stickerPanel.appendChild(imageGrid);
+    stickerPanel.appendChild(gifTitle);
+    stickerPanel.appendChild(gifGrid);
+
+    stickerBtn.addEventListener('click', () => {
+      const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
+      stickerPanel.style.display = show ? 'block' : 'none';
+    });
+  }
+
+})();  // <— nu echt sluiten
+</script>
 
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="650"></canvas>
