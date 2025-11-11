@@ -470,7 +470,7 @@ body {
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 32 !important;
+    z-index: 120 !important;
   }
 
   /* dingen die weg mogen op mobiel */
