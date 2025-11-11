@@ -661,21 +661,29 @@ body {
     cursor: pointer;
   }
 
-  /* overlay voor stickers/gifs bovenop chat */
-  #chatStickerOverlay {
-    position: absolute;
-    inset: 42px 0 0 0; /* onder de header */
-    background: #6a0f0f;
-    border-top: 2px solid #b66414;
-    z-index: 9950;
-    display: none;
-    overflow-y: auto;
-  }
-
-  #chatStickerOverlay.show {
-    display: block;
-  }
+/* mobiele chat zelf moet 't referentiepunt zijn */
+#chatbox-mobile {
+  position: fixed;        /* of absolute, wat jij nu hebt */
+  /* ... je bestaande styles ... */
+  z-index: 9900;          /* lager dan overlay */
 }
+
+/* overlay voor stickers/gifs bovenop chat */
+#chatStickerOverlay {
+  position: absolute;
+  inset: 42px 0 0 0;      /* onder de header van je mobile chat */
+  background: #6a0f0f;
+  border-top: 2px solid #b66414;
+  z-index: 9950;          /* hoger dan de chatbox zelf */
+  display: none;
+  overflow-y: auto;
+  max-height: calc(100% - 42px); /* zodat hij niet buiten beeld loopt */
+}
+
+#chatStickerOverlay.show {
+  display: block;
+}
+
 
 
 /* ======= 💻 DESKTOP ======= */
