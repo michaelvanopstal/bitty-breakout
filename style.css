@@ -437,16 +437,18 @@ body {
     padding-bottom: 0;
   }
 
+  /* 0️⃣ container mag laag blijven, we willen er overheen kunnen */
   #game-container {
     position: relative;
     width: calc(100vw - (2 * var(--frame-side-space)));
     height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
     margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
-    overflow: hidden;
-    z-index: 99;
+    overflow: visible;          /* belangrijk: chat mag erbuiten */
+    z-index: 0;
     background: none;
   }
 
+  /* 1️⃣ frame / mobile.png */
   #game-container::before {
     content: "";
     position: absolute;
@@ -455,10 +457,10 @@ body {
     background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
-    z-index: 100;
+    z-index: 1;
   }
 
-  /* canvas in het gele scherm */
+  /* 2️⃣ canvas in het gele scherm */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-inset-top) !important;
@@ -470,7 +472,7 @@ body {
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 120 !important;
+    z-index: 10 !important;
   }
 
   /* dingen die weg mogen op mobiel */
@@ -485,36 +487,36 @@ body {
     display: none !important;
   }
 
-  /* HUD blijft zweven */
+  /* 3️⃣ HUD blijft zweven boven canvas */
   #login-overlay {
     position: fixed !important;
     top: 10px !important;
     right: 10px !important;
-    z-index: 4000 !important;
+    z-index: 100 !important;
   }
   #player-display {
     position: fixed !important;
     top: 12px !important;
     left: 10px !important;
     font-size: 14px !important;
-    z-index: 4000 !important;
+    z-index: 100 !important;
   }
   #scoreDisplay {
     position: fixed !important;
     top: 12px !important;
     right: 10px !important;
     font-size: 14px !important;
-    z-index: 4000 !important;
+    z-index: 100 !important;
   }
   #time-box {
     position: fixed !important;
     top: 12px !important;
     right: 90px !important;
     font-size: 14px !important;
-    z-index: 4000 !important;
+    z-index: 100 !important;
   }
 
-  /* standaard: mobiele chat is uit, wordt aangezet in 600px blok */
+  /* standaard: mobiele chat is uit, aan in 600px blok */
   #chatbox-mobile {
     display: none;
   }
@@ -529,7 +531,7 @@ body {
     overflow: visible; /* anders wordt chat afgekapt door body */
   }
 
-  /* mobiele chat tonen */
+  /* 4️⃣ mobiele chat boven HUD */
   #chatbox-mobile {
     display: block !important;
     position: fixed;
@@ -541,9 +543,9 @@ body {
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 0 0;
     box-shadow: 0 -6px 20px rgba(0,0,0,.35);
-    z-index: 7000;
+    z-index: 200;              /* boven HUD (100), onder sticker (300) */
     overflow: hidden;
-    height: 42px;          /* ingeklapt */
+    height: 42px;              /* ingeklapt */
     transition: height .25s ease;
   }
 
@@ -584,8 +586,7 @@ body {
     padding: 8px;
   }
 
-  /* als je een mobiel stickerpaneel wilt laten mee omhoog komen
-     (dit is een andere dan de desktop-versie die we boven hadden verborgen) */
+  /* 5️⃣ stickerpaneel helemaal bovenop */
   #chat-sticker-panel-mobile {
     position: fixed;
     left: 50%;
@@ -596,37 +597,15 @@ body {
     background: #6a0f0f;
     border: 2px solid #b66414;
     border-radius: 12px 12px 0 0;
-    z-index: 7001;
+    z-index: 300;
   }
 }
 
 /* =========================================================
    💻 Desktop fallback: mobiele chat uit
    ========================================================= */
-/* 🔒 standaard: mobiele chat nooit tonen */
-#chatbox-mobile {
-  display: none;
-}
-
-/* 📱 alleen tonen op kleine schermen */
-@media (max-width: 600px) {
-  /* oude desktopchat en stickers weg op mobiel */
-  #chatbox,
-  #chat-sticker-panel {
-    display: none !important;
-  }
-
-  /* nieuwe mobiele chat wél */
-  #chatbox-mobile {
-    display: block !important;
-  }
-}
-
-/* 💻 desktop fallback (optioneel extra bescherming) */
 @media (min-width: 601px) {
   #chatbox-mobile {
     display: none !important;
   }
 }
-
-
