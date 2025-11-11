@@ -2701,8 +2701,13 @@ function mouseMoveHandler(e) {
 }
 
 function updateScoreDisplay() {
-  document.getElementById("scoreDisplay").textContent = score;
+  const desktopScoreEl = document.getElementById('scoreDisplay');
+  const mobileScoreEl  = document.getElementById('mobileScore');
+
+  if (desktopScoreEl) desktopScoreEl.textContent = score;
+  if (mobileScoreEl)  mobileScoreEl.textContent  = 'Score: ' + score;
 }
+
 
 
 function drawBricks() {
