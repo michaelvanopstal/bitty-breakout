@@ -508,14 +508,14 @@ body {
     top: 24px !important;
     right: 10px !important;
     font-size: 14px !important;
-    z-index: 100 !important;
+    z-index: 3000 !important;
   }
   #time-box {
     position: fixed !important;
     top: 24px !important;
     right: 90px !important;
     font-size: 14px !important;
-    z-index: 100 !important;
+    z-index: 3000 !important;
   }
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
