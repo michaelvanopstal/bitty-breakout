@@ -448,7 +448,7 @@ body {
     padding-bottom: 0;
   }
 
-  /* 0ï¸âƒ£ container laag houden zodat andere dingen erover kunnen */
+
   #game-container {
     position: relative;
     width: calc(100vw - (2 * var(--frame-side-space)));
@@ -459,7 +459,7 @@ body {
     background: none;
   }
 
-  /* 1ï¸âƒ£ frame / mobile.png onder alles */
+ 
   #game-container::before {
     content: "";
     position: absolute;
@@ -484,8 +484,7 @@ body {
     z-index: 10 !important;   /* boven frame, onder HUD */
   }
 
-  /* dingen die weg mogen op mobiel
-     (âš ï¸ power panel hier NIET meer verbergen) */
+
   #highscore-overlay,
   #trophy,
   #musicToggle,
@@ -496,7 +495,7 @@ body {
     display: none !important;
   }
 
-  /* 3ï¸âƒ£ HUD boven het spel */
+  
   #login-overlay {
     position: fixed !important;
     top: 10px !important;         /* jouw keuze */
@@ -597,26 +596,21 @@ body {
     padding-bottom: 2px;
   }
 
-  /* ===== âš¡ POWER PANEL â€” MOBIEL ===== */
-  #bonus-power-panel {
-    position: fixed;
-    top: 20px;           /* onderin rechts */
-    right: 10px;
-    transform: scale(0.40); /* kleiner op mobiel */
-    transform-origin: bottom right;
-    z-index: 12000;
-  }
-  #bonus-power-panel img,
-  #bonus-power-panel button {
-    width: 28px;
-    height: 28px;
-  }
-}  /* â† sluit de mobiele media query */
 
-/* =========================
-   â¤ï¸ LIVES / HEARTS â€” TABLET
-   Alleen voor 769â€“1024px
-========================= */
+  /* --- FIX: Power-panel alleen op echt kleine schermen (mobiel) --- */
+@media (max-width: 600px) {
+  #bonus-power-panel {
+    position: fixed !important;
+    top: 40px !important;       /* net onder login */
+    right: 10px !important;     /* rechtsboven */
+    bottom: auto !important;    /* voorkom uitrekken */
+    transform: scale(0.4) !important;
+    transform-origin: top right !important;
+    z-index: 15000 !important;
+  }
+}
+
+
 @media (min-width: 769px) and (max-width: 1024px) {
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
     position: fixed;
@@ -637,10 +631,7 @@ body {
   }
 }
 
-/* =========================
-   â¤ï¸ LIVES / HEARTS â€” MOBIEL
-   Alleen voor â‰¤ 768px
-========================= */
+
 @media (max-width: 768px) {
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
     position: fixed;
@@ -664,22 +655,10 @@ body {
   }
 }
 
-/* =========================
-   âš¡ POWER PANEL â€” TABLET
-   ========================= */
-@media (min-width: 769px) and (max-width: 1024px) {
-  #bonus-power-panel {
-    position: fixed;
-    top: 10px;          /* net onder login/timebox */
-    right: 12px;
-    transform: scale(0.6);
-    transform-origin: top right;
-    z-index: 14000;
-  }
-}
 
 
-/* ======= ðŸ“± MOBIEL tot 600px: chatknop ======= */
+
+
 @media (max-width: 600px) {
   /* vaste chatknop onderaan, volle breedte */
   #chat-mobile-button {
@@ -814,7 +793,6 @@ body {
     cursor: pointer;
   }
 
-  /* ===== ðŸ“± STICKER OVERLAY IN DE CHAT ===== */
   #chatStickerOverlay {
     position: absolute;
     top: 42px;                 /* onder kop */
@@ -847,7 +825,6 @@ body {
   }
 }
 
-/* ======= ðŸ’» DESKTOP extra: verberg mobiele chat-ui ======= */
 @media (min-width: 601px) {
   #chat-mobile-button,
   #chatbox-mobile {
