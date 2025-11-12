@@ -667,7 +667,7 @@ body {
 /* ===== ⚡ POWER PANEL — MOBIEL ===== */
 #bonus-power-panel {
   position: fixed;
-  top: 20px;                 /* zet hem net onder de login */
+  top: 35px;                 /* zet hem net onder de login */
   right: 10px;               /* rechts uitlijnen */
   bottom: auto !important;   /* voorkom vastplakken onderin */
   transform: scale(0.4);     /* iets kleiner */
