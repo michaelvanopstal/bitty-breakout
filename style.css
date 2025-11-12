@@ -502,7 +502,7 @@ body {
     z-index: 12000 !important;     /* boven frame en canvas */
 
     /* verkleinen zonder desktop te raken */
-    transform: translateZ(0) scale(0.85);
+    transform: translateZ(0) scale(0.60);
     transform-origin: top right;
 
     /* compacter uiterlijk */
