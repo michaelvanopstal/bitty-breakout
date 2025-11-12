@@ -670,26 +670,13 @@ body {
 @media (min-width: 769px) and (max-width: 1024px) {
   #bonus-power-panel {
     position: fixed;
-    top: 80px;          /* net onder login/timebox */
+    top: 30px;          /* net onder login/timebox */
     right: 12px;
     transform: scale(0.9);
     transform-origin: top right;
     z-index: 12000;
   }
 }
-
-/* 📱 Extra kleine telefoons (tot 600px) — NIET uitrekken */
-@media (max-width: 600px) {
-  #bonus-power-panel {
-    top: 54px;                 /* anker boven */
-    right: 6px;
-    bottom: auto !important;   /* onderkant UIT, voorkomt uitrekken */
-    height: auto !important;   /* verzeker natuurlijke hoogte */
-    transform: scale(0.65);
-    transform-origin: top right;
-  }
-}
-
 
 
 /* ======= 📱 MOBIEL tot 600px: chatknop ======= */
