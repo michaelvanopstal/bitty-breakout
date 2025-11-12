@@ -892,7 +892,7 @@ body {
     display: flex;
     justify-content: center; /* horizontaal centreren van de box (optioneel) */
     align-items: flex-start; /* verticaal van bovenaf */
-    z-index: 2000;
+    z-index: 4000;
   }
 
   #login-box {
@@ -903,7 +903,7 @@ body {
     transform-origin: top center;
     width: 90%;              /* optioneel iets smaller op mobiel */
     max-width: 320px;        /* cap op grote telefoons */
-    z-index: 2100;
+    z-index: 4100;
   }
 
 
