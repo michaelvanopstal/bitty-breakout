@@ -691,17 +691,6 @@ body {
 }
 
 
-/* Extra kleine telefoons (≤ 600 px) – nog iets compacter */
-@media (max-width: 600px) {
-  #bonus-power-panel {
-    top: 54px;
-    right: 6px;
-    transform: scale(0.65);
-  }
-}
-
-
-
 
 /* ======= 📱 MOBIEL tot 600px: chatknop ======= */
 @media (max-width: 600px) {
