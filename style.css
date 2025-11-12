@@ -497,7 +497,7 @@ body {
   /* 3️⃣ HUD boven het spel */
   #login-overlay {
     position: fixed !important;
-    top: 56px !important;          /* iets lager */
+    top: 10px !important;          /* iets lager */
     right: 8px !important;         /* iets meer naar binnen */
     z-index: 12000 !important;     /* boven frame en canvas */
 
