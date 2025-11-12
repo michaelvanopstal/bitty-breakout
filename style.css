@@ -812,7 +812,7 @@ body {
     object-fit: contain;
     border-radius: 10px;
   }
-
+}
   /* --- FIX: Power-panel alleen op echt kleine schermen (mobiel) --- */
 @media (max-width: 600px) {
   #bonus-power-panel {
