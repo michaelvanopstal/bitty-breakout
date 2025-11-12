@@ -364,7 +364,7 @@ body {
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
 /* =========================================================
-   ✅ PC (hele brede schermen)
+   âœ… PC (hele brede schermen)
    ========================================================= */
 @media (min-width: 1500px) {
   #game-container {
@@ -413,7 +413,7 @@ body {
 }
 
 /* =========================================================
-   📱 Mobiele versie (tot 768px)
+   ðŸ“± Mobiele versie (tot 768px)
    container + pseudo-achtergrond + vaste z-indexen
    ========================================================= */
 @media (max-width: 768px) {
@@ -437,7 +437,7 @@ body {
     padding-bottom: 0;
   }
 
-  /* 0️⃣ container laag houden zodat andere dingen erover kunnen */
+  /* 0ï¸âƒ£ container laag houden zodat andere dingen erover kunnen */
   #game-container {
     position: relative;
     width: calc(100vw - (2 * var(--frame-side-space)));
@@ -448,7 +448,7 @@ body {
     background: none;
   }
 
-  /* 1️⃣ frame / mobile.png onder alles */
+  /* 1ï¸âƒ£ frame / mobile.png onder alles */
   #game-container::before {
     content: "";
     position: absolute;
@@ -460,8 +460,8 @@ body {
     z-index: 1;
   }
 
-  /* 2️⃣ canvas STABIEL in het gele scherm
-         → geen right/bottom meer, alleen left + breedte */
+  /* 2ï¸âƒ£ canvas STABIEL in het gele scherm
+         â†’ geen right/bottom meer, alleen left + breedte */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-inset-top) !important;
@@ -484,12 +484,12 @@ body {
 #chatbox,             /* oude desktopchat uit op mobiel */
 #chat-sticker-panel,  /* oud stickerpaneel ook uit op mobiel */
 #bonus-power-panel,   /* verberg ook Bonus Power Panel */
-#hud {                /* 💖 verberg de desktop-levens op mobiel */
+#hud {                /* ðŸ’– verberg de desktop-levens op mobiel */
   display: none !important;
 }
 
 #login-box {
-  top: 10px;  /* … */
+  top: 10px;  /* â€¦ */
   right: 10px
   transform: translateX(-70%) scale(0.85);
    z-index: 5000 !important;
@@ -522,7 +522,7 @@ body {
     display: none;
   }
 }
-/* ======= 📱 MOBIEL ======= */
+/* ======= ðŸ“± MOBIEL ======= */
 @media (max-width: 600px) {
 
   /* vaste chatknop onderaan, volle breedte */
@@ -663,7 +663,7 @@ body {
     cursor: pointer;
   }
 
-  /* ===== 📱 STICKER OVERLAY IN DE CHAT ===== */
+  /* ===== ðŸ“± STICKER OVERLAY IN DE CHAT ===== */
   #chatStickerOverlay {
     position: absolute;
     top: 42px;                 /* onder kop */
@@ -701,6 +701,13 @@ body {
 
 }
 
+/* ======= ðŸ’» DESKTOP ======= */
+@media (min-width: 601px) {
+  #chat-mobile-button,
+  #chatbox-mobile {
+    display: none;
+  }
+}
 
 #mobile-hud {
   position: fixed;
@@ -712,10 +719,15 @@ body {
   border-radius: 10px;
   font-size: 13px;
   z-index: 9999;
- }
 }
 
-/* ===== 📱 MOBIELE HIGH SCORE PANEL ===== */
+@media (min-width: 601px) {
+  #mobile-hud {
+    display: none; /* alleen op telefoon laten zien */
+  }
+}
+
+/* ===== ðŸ“± MOBIELE HIGH SCORE PANEL ===== */
 #mobile-highscore {
   position: fixed;
   top: 10px;
@@ -768,10 +780,16 @@ body {
   margin: 4px 0;
   border-bottom: 1px solid rgba(255,255,255,0.1);
   padding-bottom: 2px;
- }
 }
 
-/* ===== ❤️ MOBIELE LEVENS ===== */
+/* desktop verbergen */
+@media (min-width: 601px) {
+  #mobile-highscore {
+    display: none;
+  }
+}
+
+/* ===== â¤ï¸ MOBIELE LEVENS ===== */
 #mobile-lives {
   position: fixed;
   top: 70px;              /* afstand van bovenkant scherm */
@@ -784,19 +802,79 @@ body {
 #mobileLivesDisplay img {
   width: 28px;            /* kleinere schaal voor mobiel */
   height: 28px;
- }
 }
 
-/* ===== 📱 BONUS POWER PANEL OP MOBIEL ===== */
+/* desktop verbergen */
+@media (min-width: 601px) {
+  #mobile-lives {
+    display: none;
+  }
+}
+
+/* ===== ðŸ“± BONUS POWER PANEL MOBIEL ===== */
+#bonus-power-mobile {
+  position: fixed;
+  bottom: 120px;         /* standaardpositie */
+  right: 12px;
+  width: 160px;
+  background: linear-gradient(#f6a53b,#e27e22);
+  border: 2px solid #b66414;
+  border-radius: 14px;
+  padding: 6px;
+  color: #5a2700;
+  z-index: 9999;
+  transform: scale(0.85);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.35);
+}
+
+#bonus-power-mobile .bp-header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #fff3d0;
+  margin-bottom: 4px;
+}
+
+#bonus-power-mobile .bp-row {
+  display: flex;
+  align-items: center;
+  margin: 3px 0;
+  gap: 6px;
+}
+
+#bonus-power-mobile .bp-icon {
+  width: 18px;
+  height: 18px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.bp-icon-heart { background-image: url('heart.png'); }
+.bp-icon-star  { background-image: url('star.png'); }
+.bp-icon-bomb  { background-image: url('bomb.png'); }
+
+#bonus-power-mobile .bp-value {
+  color: #fff1c0;
+  font-size: 12px;
+}
+
+/* Desktop: verberg deze versie */
+@media (min-width: 601px) {
+  #bonus-power-mobile {
+    display: none;
+  }
+}
+
+/* ===== ðŸ“± BONUS POWER PANEL OP MOBIEL ===== */
 @media (max-width: 600px) {
   #bonus-power-panel {
     display: block !important;     /* weer zichtbaar op mobiel */
     position: fixed;               /* los van gamecanvas */
-    top: 50px;                     /* afstand vanaf bovenkant */
-    left:80px                   /* centreren horizontaal */
+    top: 35px;                     /* afstand vanaf bovenkant */
+    left: 50%;                     /* centreren horizontaal */
     transform: translateX(-50%) scale(0.30); /* kleiner + in het midden */
     transform-origin: top center;
-    z-index: 11000;
+    z-index: 9999;
     width: 200px;                  /* breedte van paneel */
     box-shadow: 0 4px 12px rgba(0,0,0,.4);
   }
@@ -817,11 +895,4 @@ body {
     z-index: 3500 !important;
    }
   }
-
-/* desktop verbergen */
-@media (min-width: 601px) {
-  #mobile-lives {
-    display: none;
-  }
-}
 
