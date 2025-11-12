@@ -597,18 +597,7 @@ body {
   }
 
 
-  /* --- FIX: Power-panel alleen op echt kleine schermen (mobiel) --- */
-@media (max-width: 600px) {
-  #bonus-power-panel {
-    position: fixed !important;
-    top: 40px !important;       /* net onder login */
-    right: 10px !important;     /* rechtsboven */
-    bottom: auto !important;    /* voorkom uitrekken */
-    transform: scale(0.4) !important;
-    transform-origin: top right !important;
-    z-index: 15000 !important;
-  }
-}
+
 
 
 @media (min-width: 769px) and (max-width: 1024px) {
@@ -823,8 +812,19 @@ body {
     object-fit: contain;
     border-radius: 10px;
   }
-}
 
+  /* --- FIX: Power-panel alleen op echt kleine schermen (mobiel) --- */
+@media (max-width: 600px) {
+  #bonus-power-panel {
+    position: fixed !important;
+    top: 40px !important;       /* net onder login */
+    right: 10px !important;     /* rechtsboven */
+    bottom: auto !important;    /* voorkom uitrekken */
+    transform: scale(0.3) !important;
+    transform-origin: top right !important;
+    z-index: 15000 !important;
+  }
+}
 @media (min-width: 601px) {
   #chat-mobile-button,
   #chatbox-mobile {
