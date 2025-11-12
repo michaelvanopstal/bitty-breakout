@@ -910,7 +910,7 @@ body {
 
   #login-box {
     position: fixed;         /* eigen positie op mobiel */
-    top: 80px;               /* ← VERPLAATS HIER VOOR MOBIEL */
+    top: 10px;               /* ← VERPLAATS HIER VOOR MOBIEL */
     left: 50%;               /* midden op X */
     transform: translateX(-70%) scale(0.85);  /* centreren + kleiner maken */
     transform-origin: top center;
