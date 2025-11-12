@@ -492,7 +492,7 @@ body {
   top: 10px;  /* … */
   right: 10px
   transform: translateX(-70%) scale(0.85);
-   z-index: 100 !important;
+   z-index: 5000 !important;
   }
   #player-display {
     position: fixed !important;
