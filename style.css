@@ -666,32 +666,41 @@ body {
 
 /* =========================
    ⚡ POWER PANEL — TABLET
-   Alleen voor 769–1024px
-========================= */
+   ========================= */
 @media (min-width: 769px) and (max-width: 1024px) {
   #bonus-power-panel {
     position: fixed;
-    top: 80px;
-    right: 20px;
-    transform: scale(0.90);   /* iets kleiner dan desktop */
-    transform-origin: bottom right;
+    top: 80px;          /* net onder login/timebox */
+    right: 12px;
+    transform: scale(0.9);
+    transform-origin: top right;
     z-index: 12000;
-  }
-  #bonus-power-panel img,
-  #bonus-power-panel button {
-    width: 36px;
-    height: 36px;
   }
 }
 
-/* 📱 Extra kleine telefoons (tot 600px) — optioneel nog compacter */
-@media (max-width: 600px) {
+/* =========================
+   ⚡ POWER PANEL — MOBIEL
+   ========================= */
+@media (max-width: 768px) {
   #bonus-power-panel {
-    transform: scale(0.60);
-    bottom: 14px;
+    position: fixed;
+    top: 60px;          /* iets lager dan login */
     right: 8px;
+    transform: scale(0.75);
+    transform-origin: top right;
+    z-index: 12000;
   }
 }
+
+/* Extra kleine telefoons (≤ 600 px) – nog iets compacter */
+@media (max-width: 600px) {
+  #bonus-power-panel {
+    top: 54px;
+    right: 6px;
+    transform: scale(0.65);
+  }
+}
+
 
 
 
