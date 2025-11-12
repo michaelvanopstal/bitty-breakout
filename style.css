@@ -701,13 +701,6 @@ body {
 
 }
 
-/* ======= 💻 DESKTOP ======= */
-@media (min-width: 601px) {
-  #chat-mobile-button,
-  #chatbox-mobile {
-    display: none;
-  }
-}
 
 #mobile-hud {
   position: fixed;
@@ -719,12 +712,7 @@ body {
   border-radius: 10px;
   font-size: 13px;
   z-index: 9999;
-}
-
-@media (min-width: 601px) {
-  #mobile-hud {
-    display: none; /* alleen op telefoon laten zien */
-  }
+ }
 }
 
 /* ===== 📱 MOBIELE HIGH SCORE PANEL ===== */
@@ -780,13 +768,7 @@ body {
   margin: 4px 0;
   border-bottom: 1px solid rgba(255,255,255,0.1);
   padding-bottom: 2px;
-}
-
-/* desktop verbergen */
-@media (min-width: 601px) {
-  #mobile-highscore {
-    display: none;
-  }
+ }
 }
 
 /* ===== ❤️ MOBIELE LEVENS ===== */
@@ -802,13 +784,7 @@ body {
 #mobileLivesDisplay img {
   width: 28px;            /* kleinere schaal voor mobiel */
   height: 28px;
-}
-
-/* desktop verbergen */
-@media (min-width: 601px) {
-  #mobile-lives {
-    display: none;
-  }
+ }
 }
 
 /* ===== 📱 BONUS POWER PANEL MOBIEL ===== */
@@ -896,4 +872,10 @@ body {
    }
   }
 
+/* desktop verbergen */
+@media (min-width: 601px) {
+  #mobile-lives {
+    display: none;
+  }
+}
 
