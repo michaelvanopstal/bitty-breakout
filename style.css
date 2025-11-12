@@ -664,19 +664,22 @@ body {
   }
 }
 
-/* =========================
-   ⚡ POWER PANEL — TABLET
-   ========================= */
-@media (min-width: 769px) and (max-width: 1024px) {
-  #bonus-power-panel {
-    position: fixed;
-    top: 10px;          /* net onder login/timebox */
-    right: 12px;
-    transform: scale(0.6);
-    transform-origin: top right;
-    z-index: 14000;
-  }
+/* ===== ⚡ POWER PANEL — MOBIEL ===== */
+#bonus-power-panel {
+  position: fixed;
+  top: 20px;                 /* zet hem net onder de login */
+  right: 10px;               /* rechts uitlijnen */
+  bottom: auto !important;   /* voorkom vastplakken onderin */
+  transform: scale(0.6);     /* iets kleiner */
+  transform-origin: top right !important; /* veranker aan de bovenhoek */
+  z-index: 15000 !important; /* boven login & score */
 }
+#bonus-power-panel img,
+#bonus-power-panel button {
+  width: 28px;
+  height: 28px;
+}
+
 
 
 /* ======= 📱 MOBIEL tot 600px: chatknop ======= */
