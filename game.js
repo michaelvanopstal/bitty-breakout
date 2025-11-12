@@ -6524,25 +6524,19 @@ function startLevelTransition() {
   triggerLevelCelebration(level, { rockets, confettiCount: 160 });
 }
 
-const livesDisplay       = document.getElementById('livesDisplay');
-const mobileLivesDisplay = document.getElementById('mobileLivesDisplay');
+function updateLivesDisplay() {
+  const display = document.getElementById("livesDisplay");
+  if (!display) return;
 
-if (livesDisplay) livesDisplay.innerHTML = '';
-if (mobileLivesDisplay) mobileLivesDisplay.innerHTML = '';
+  display.innerHTML = "";
 
-for (let i = 0; i < lives; i++) {
-  const img = document.createElement('img');
-  img.src = 'heart.png';
-  img.alt = 'life';
-  img.style.width = '32px';
-  img.style.height = '32px';
-  if (livesDisplay) livesDisplay.appendChild(img);
-  
-  const img2 = img.cloneNode(true);
-  img2.style.width = '28px';
-  img2.style.height = '28px';
-  if (mobileLivesDisplay) mobileLivesDisplay.appendChild(img2);
- }
+  for (let i = 0; i < lives; i++) {
+    const img = document.createElement("img");
+    img.src = "level.png";
+    img.style.width = "28px";
+    img.style.height = "28px";
+    display.appendChild(img);
+  }
 }
 
 function drawElectricBursts() {
