@@ -889,8 +889,8 @@ body {
   }
   #login-box {
     position: absolute;      /* of fixed, wat jij gebruikt op desktop */
-    top: 120px;              /* ← pas aan voor laptop */
-    left: 80px;              /* ← pas aan voor laptop */
+    top: 10px;              /* ← pas aan voor laptop */
+    right: 10px;              /* ← pas aan voor laptop */
     transform: none;         /* geen schaal/center op desktop */
     z-index: 2000;
   }
