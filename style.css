@@ -497,9 +497,9 @@ body {
   /* 3️⃣ HUD boven het spel */
   #login-overlay {
     position: fixed !important;
-    top: 10px !important;          /* iets lager */
-    right: 8px !important;         /* iets meer naar binnen */
-    z-index: 12000 !important;     /* boven frame en canvas */
+    top: 10px !important;          /* jouw keuze */
+    right: 8px !important;
+    z-index: 12000 !important;
 
     /* verkleinen zonder desktop te raken */
     transform: translateZ(0) scale(0.60);
@@ -545,7 +545,6 @@ body {
     right: 90px !important;
     font-size: 14px !important;
     z-index: 100 !important;
-  
   }
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
@@ -554,7 +553,6 @@ body {
   }
 
   /* ===== 📱 MOBIELE HIGH SCORE PANEL ===== */
-  /* toon op mobiel */
   #mobile-highscore { 
     position: fixed;
     top: 10px;
@@ -591,9 +589,8 @@ body {
     display: none; /* standaard dicht */
     box-shadow: 0 6px 15px rgba(0,0,0,0.4);
   }
-  #mobileHighscorePanel.show {
-    display: block;
-  }
+  #mobileHighscorePanel.show { display: block; }
+
   #mobileHighscoreList {
     list-style: none;
     padding: 0;
@@ -606,7 +603,65 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.1);
     padding-bottom: 2px;
   }
+}  /* ← sluit de mobiele media query */
+
+/* =========================
+   ❤️ LIVES / HEARTS — TABLET
+   Alleen voor 769–1024px
+   ========================= */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* container van de levens */
+  #heartsHud, #livesDisplay, #lives, .hearts, .lives {
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    transform: scale(0.90);
+    transform-origin: top left;
+    z-index: 12000;
+  }
+
+  /* individuele hart-iconen (als het <img>’s zijn) */
+  #heartsHud img[src*="heart"],
+  #livesDisplay img[src*="heart"],
+  #lives img[src*="heart"],
+  .hearts img[src*="heart"],
+  .lives img[src*="heart"] {
+    width: 22px;
+    height: 22px;
+    margin-right: 4px;
+  }
 }
+
+/* =========================
+   ❤️ LIVES / HEARTS — MOBIEL
+   Alleen voor ≤ 768px
+   ========================= */
+@media (max-width: 768px) {
+  /* container van de levens */
+  #heartsHud, #livesDisplay, #lives, .hearts, .lives {
+    position: fixed;
+    top: 46px;                   /* positie mobiel (onder je HUD) */
+    left: 12px;
+    transform: scale(0.78);      /* grootte mobiel */
+    transform-origin: top left;
+    z-index: 12000;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  /* individuele hart-iconen (als het <img>’s zijn) */
+  #heartsHud img[src*="heart"],
+  #livesDisplay img[src*="heart"],
+  #lives img[src*="heart"],
+  .hearts img[src*="heart"],
+  .lives img[src*="heart"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 3px;
+  }
+}
+
 
 /* ======= 📱 MOBIEL tot 600px: chatknop ======= */
 @media (max-width: 600px) {
