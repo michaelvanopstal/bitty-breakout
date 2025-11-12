@@ -671,7 +671,7 @@ body {
 @media (min-width: 769px) and (max-width: 1024px) {
   #bonus-power-panel {
     position: fixed;
-    bottom: 40px;
+    top: 80px;
     right: 20px;
     transform: scale(0.90);   /* iets kleiner dan desktop */
     transform-origin: bottom right;
