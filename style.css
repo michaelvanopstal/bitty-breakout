@@ -817,7 +817,7 @@ body {
 @media (max-width: 600px) {
   #bonus-power-panel {
     position: fixed !important;
-    top: 40px !important;       /* net onder login */
+    top: 45px !important;       /* net onder login */
     right: 10px !important;     /* rechtsboven */
     bottom: auto !important;    /* voorkom uitrekken */
     transform: scale(0.3) !important;
