@@ -424,7 +424,6 @@ body {
   }
 }
 
-/* ========================================================= */
 /* ======= 📱 MOBIEL tot 768px ======= */
 @media (max-width: 768px) {
 
@@ -498,10 +497,32 @@ body {
   /* 3️⃣ HUD boven het spel */
   #login-overlay {
     position: fixed !important;
-    top: 10px !important;
-    right: 10px !important;
-    z-index: 100 !important;
+    top: 56px !important;          /* iets lager */
+    right: 8px !important;         /* iets meer naar binnen */
+    z-index: 12000 !important;     /* boven frame en canvas */
+
+    /* verkleinen zonder desktop te raken */
+    transform: translateZ(0) scale(0.85);
+    transform-origin: top right;
+
+    /* compacter uiterlijk */
+    padding: 6px 8px !important;
+    max-width: 260px;
+    width: auto;
+    gap: 6px;
   }
+
+  /* Optioneel: form-elementen compacter maken */
+  #login-overlay input[type="text"],
+  #login-overlay input[type="number"],
+  #login-overlay input[type="email"],
+  #login-overlay button {
+    font-size: 12px;
+    padding: 6px 8px;
+    height: 34px;
+    line-height: 1.2;
+  }
+
   #player-display {
     position: fixed !important;
     top: 12px !important;
@@ -509,6 +530,7 @@ body {
     font-size: 14px !important;
     z-index: 100 !important;
   }
+
   #scoreDisplay {
     position: fixed !important;
     top: 12px !important;
@@ -516,6 +538,7 @@ body {
     font-size: 14px !important;
     z-index: 100 !important;
   }
+
   #time-box {
     position: fixed !important;
     top: 12px !important;
@@ -523,6 +546,7 @@ body {
     font-size: 14px !important;
     z-index: 100 !important;
   }
+}
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
   #chatbox-mobile {
