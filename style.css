@@ -899,7 +899,6 @@ body {
     position: fixed;         /* eigen positie op mobiel */
     top: 10px;  /* ← VERPLAATS HIER VOOR MOBIEL */
     right: 10px
-    left: 50%;               /* midden op X */
     transform: translateX(-70%) scale(0.85);  /* centreren + kleiner maken */
     transform-origin: top center;
     width: 90%;              /* optioneel iets smaller op mobiel */
