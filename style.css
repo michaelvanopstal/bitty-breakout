@@ -600,9 +600,9 @@ body {
   /* ===== ⚡ POWER PANEL — MOBIEL ===== */
   #bonus-power-panel {
     position: fixed;
-    bottom: 20px;           /* onderin rechts */
+    top: 20px;           /* onderin rechts */
     right: 10px;
-    transform: scale(0.70); /* kleiner op mobiel */
+    transform: scale(0.40); /* kleiner op mobiel */
     transform-origin: bottom right;
     z-index: 12000;
   }
