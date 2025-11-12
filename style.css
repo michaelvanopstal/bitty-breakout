@@ -501,16 +501,17 @@ body {
     font-size: 14px !important;
     z-index: 100 !important;
   }
+ 
   #scoreDisplay {
     position: fixed !important;
-    top: 70px !important;
+    top: 12px !important;
     right: 10px !important;
     font-size: 14px !important;
     z-index: 3000 !important;
   }
   #time-box {
     position: fixed !important;
-    top: 70px !important;
+    top: 12px !important;
     right: 90px !important;
     font-size: 14px !important;
     z-index: 3000 !important;
@@ -878,6 +879,21 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,.4);
   }
 }
-
+  @media (max-width: 600px) {
+  #scoreDisplay {
+    position: fixed !important;
+    top: 70px !important;
+    right: 10px !important;
+    font-size: 14px !important;
+    z-index: 3000 !important;
+  }
+  #time-box {
+    position: fixed !important;
+    top: 70px !important;
+    right: 90px !important;
+    font-size: 14px !important;
+    z-index: 3000 !important;
+   }
+  }
 
 
