@@ -653,7 +653,7 @@ body {
     top: 50px !important;     /* iets lager dan login */
     right: 12px !important;   /* tegen rechterrand */
     font-size: 14px !important;
-    z-index: 13000 !important;
+    z-index: 16000 !important;
     color: #fff;              /* goed leesbaar */
   }
 
@@ -663,7 +663,7 @@ body {
     top: 80px !important;     /* iets onder score */
     right: 12px !important;
     font-size: 13px !important;
-    z-index: 13000 !important;
+    z-index: 16000 !important;
     color: #fff;
   }
 }
