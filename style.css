@@ -416,7 +416,18 @@ body {
    📱 Mobiele versie (tot 768px)
    container + pseudo-achtergrond + vaste z-indexen
    ========================================================= */
+
+@media (min-width: 769px) {
+  #mobile-highscore {
+    display: none !important;
+  }
+}
+
+/* Toon mobiele highscore op mobiel */
 @media (max-width: 768px) {
+  #mobile-highscore {
+    display: block !important;
+  }
 
   :root {
     --frame-top-space: 5vh;
