@@ -2701,13 +2701,8 @@ function mouseMoveHandler(e) {
 }
 
 function updateScoreDisplay() {
-  const desktopScoreEl = document.getElementById('scoreDisplay');
-  const mobileScoreEl  = document.getElementById('mobileScore');
-
-  if (desktopScoreEl) desktopScoreEl.textContent = score;
-  if (mobileScoreEl)  mobileScoreEl.textContent  = 'Score: ' + score;
+  document.getElementById("scoreDisplay").textContent = score;
 }
-
 
 
 function drawBricks() {
@@ -6530,33 +6525,19 @@ function startLevelTransition() {
 }
 
 function updateLivesDisplay() {
-  const display = document.getElementById("livesDisplay");          // desktop
-  const mobileDisplay = document.getElementById("mobileLivesDisplay"); // mobiel
+  const display = document.getElementById("livesDisplay");
+  if (!display) return;
 
-  if (display) display.innerHTML = "";
-  if (mobileDisplay) mobileDisplay.innerHTML = "";
+  display.innerHTML = "";
 
   for (let i = 0; i < lives; i++) {
-    // 🎯 desktop levens
-    if (display) {
-      const img = document.createElement("img");
-      img.src = "level.png";
-      img.style.width = "28px";
-      img.style.height = "28px";
-      display.appendChild(img);
-    }
-
-    // 📱 mobiele levens
-    if (mobileDisplay) {
-      const img2 = document.createElement("img");
-      img2.src = "level.png";
-      img2.style.width = "22px";   // iets kleiner voor mobiel
-      img2.style.height = "22px";
-      mobileDisplay.appendChild(img2);
-    }
+    const img = document.createElement("img");
+    img.src = "level.png";
+    img.style.width = "28px";
+    img.style.height = "28px";
+    display.appendChild(img);
   }
 }
-
 
 function drawElectricBursts() {
   for (let i = electricBursts.length - 1; i >= 0; i--) {

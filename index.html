@@ -15,7 +15,7 @@
 </head>
 
 <body>
-  <!-- ===== Chat Box (rechts, desktop) ===== -->
+  <!-- ===== Chat Box (rechts) ===== -->
   <div id="chatbox">
     <div class="chatbox-header">
       <button id="chatToggleBtn" class="chat-icon-btn" type="button" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
@@ -23,7 +23,7 @@
       <button id="chatClearBtn" class="chat-icon-btn" type="button" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
     </div>
 
-    <!-- Sticker popup (desktop) -->
+    <!-- Sticker popup -->
     <div id="chat-sticker-panel" aria-label="Kies een sticker"></div>
 
     <!-- berichtenlijst -->
@@ -33,69 +33,59 @@
     <form id="chatForm" autocomplete="off">
       <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
       <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
+      <!-- 📷 Camera-icoon opent nu de sticker-popup -->
       <button id="chatStickersBtn" class="chat-icon-btn" type="button" title="Kies een plaatje">📷</button>
       <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
     </form>
   </div>
   <!-- ===== /Chat Box ===== -->
 
-  <!-- ===== Mobiele chat knop ===== -->
-  <button id="chat-mobile-button" type="button">
-    <span class="cmb-left">
-      <span class="cmb-dot"></span>
-      <span class="cmb-arrow">▶</span>
-    </span>
-    <span class="cmb-label">CHAT</span>
-    <span class="cmb-close">✕</span>
-  </button>
 
-  <!-- ===== popup-chat mobiel ===== -->
-  <div id="chatbox-mobile">
-    <div class="chatbox-header-mobile">
-      <span>Chat</span>
-      <button id="chatMobileClose" type="button">×</button>
-    </div>
 
-    <!-- overlay voor stickers (komt bovenop messages) -->
-    <div id="chatStickerOverlay"></div>
+<!-- knop onderaan, zelfde breedte als oude chat -->
+<button id="chat-mobile-button" type="button">
+  <span class="cmb-left">
+    <span class="cmb-dot"></span>
+    <span class="cmb-arrow">▶</span>
+  </span>
+  <span class="cmb-label">CHAT</span>
+  <span class="cmb-close">✕</span>
+</button>
 
-    <!-- mobiele berichtenlijst -->
-    <div id="chatMobileMessages"></div>
-
-    <div id="chatMobileForm">
-      <input id="chatMobileInput" type="text" placeholder="Type..." />
-      <button id="chatMobileStickersBtn" type="button">📷</button>
-      <button id="chatMobileSendBtn" type="button">Send</button>
-    </div>
+<!-- popup-chat die moet verschijnen -->
+<div id="chatbox-mobile">
+  <div class="chatbox-header-mobile">
+    <span>Chat</span>
+    <button id="chatMobileClose" type="button">×</button>
   </div>
 
-<!-- 📱 Highscore knop + paneel -->
-<div id="mobile-highscore">
-  <button id="mobileHighscoreBtn">🏆 High Scores</button>
-  <div id="mobileHighscorePanel">
-    <ol id="mobileHighscoreList"></ol>
+  <!-- overlay voor stickers -->
+  <div id="chatStickerOverlay"></div>
+
+  <div id="chatMobileMessages">
+    <!-- hier kun je later je mobiele berichten inladen -->
+  </div>
+  <div id="chatMobileForm">
+    <input id="chatMobileInput" type="text" placeholder="Type..." />
+    <button id="chatMobileStickersBtn" type="button">📷</button>
+    <button id="chatMobileSendBtn" type="button">Send</button>
   </div>
 </div>
 
-  <!-- ❤️ Mobiele levens -->
-<div id="mobile-lives">
-  <div id="mobileLivesDisplay"></div>
-</div>
 
-
-
-
-  
   <!-- 1x STICKERS definieren -->
   <script>
     const STICKERS = [
-      'grumpy (11).png', 'ittybittybaseball (1).png', 'Itty Bitty Flower GIF by herecomesbitcoin (1).gif',
-      'Sandwich (7).png', 'Graffiti (3).png',
-      'jack-mallers (2).png', 'Satoshi (6).png',
-      'Construction (7).png', 'Cat (4).png',
-      'Astronaut (2).png', 'girls-night-out.png',
-      'Bitcoinbahama (3).png', 'Nostrich (3).png',
-      'Queen (8).png', 'UFO (8).png', 'Coder.png',
+      'grumpy (11).png',        'ittybittybaseball (1).png',  'Itty Bitty Flower GIF by herecomesbitcoin (1).gif',
+      'Sandwich (7).png',       'Graffiti (3).png',
+      'jack-mallers (2).png',   'Satoshi (6).png',
+      'Construction (7).png',   'Cat (4).png',
+      'Astronaut (2).png',      'girls-night-out.png',
+      'Bitcoinbahama (3).png',
+      'Nostrich (3).png',
+      'Queen (8).png',
+      'UFO (8).png',
+      'Coder.png',
       'Bitcoin Blockchain GIF by herecomesbitcoin.gif',
       'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (1).gif',
       'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (2).gif',
@@ -110,15 +100,24 @@
       'Hieronymus Bosch Bitcoin Sticker by herecomesbitcoin.gif',
       'Jack Dorsey Bitcoin Sticker by herecomesbitcoin.gif',
       'San Francisco Dancing GIF by herecomesbitcoin.gif',
-      'BITTYbread.gif', 'bittymoney.gif', 'ufobitty.gif',
-      'fallingbitty.gif', 'bird.gif', 'btty.gif',
-      'bttyhead.gif', 'queen.gif', 'satoschi.gif'
+       'BITTYbread.gif',
+      'bittymoney.gif',
+      'ufobitty.gif',
+      'fallingbitty.gif',
+      'bird.gif',
+      'btty.gif',
+      'bttyhead.gif',
+      'queen.gif',
+      'satoschi.gif',
+      
     ];
   </script>
 
   <!-- ===== BONUS POWER los van chat ===== -->
   <div id="bonus-power-panel">
     <div class="bp-header">BONUS POWER</div>
+
+    <!-- ❤️ HARTJES METER -->
     <div class="bp-row" data-type="hearts">
       <div class="bp-icon bp-icon-heart"></div>
       <div class="bp-tube">
@@ -127,6 +126,8 @@
       </div>
       <div class="bp-value" id="bp-hearts-value">0/10</div>
     </div>
+
+    <!-- ⭐ STERREN METER -->
     <div class="bp-row" data-type="stars">
       <div class="bp-icon bp-icon-star"></div>
       <div class="bp-tube">
@@ -135,6 +136,8 @@
       </div>
       <div class="bp-value" id="bp-stars-value">0/10</div>
     </div>
+
+    <!-- 💣 BOM METER -->
     <div class="bp-row" data-type="bombs">
       <div class="bp-icon bp-icon-bomb"></div>
       <div class="bp-tube">
@@ -143,6 +146,8 @@
       </div>
       <div class="bp-value" id="bp-bombs-value">0/10</div>
     </div>
+
+    <!-- ❌ KRUIS METER -->
     <div class="bp-row" data-type="cross">
       <div class="bp-icon bp-icon-cross"></div>
       <div class="bp-tube">
@@ -156,8 +161,6 @@
   <!-- andere elementen die je al had -->
   <span id="player-display">Player</span>
   <span id="scoreDisplay">0</span>
-
-
 
   <!-- Tooltip -->
   <div id="resetTooltip" style="
@@ -194,46 +197,47 @@
       onmouseout="this.style.transform='scale(1)'"
   >
 
-  <!-- Firebase compat libraries -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
-      authDomain: "bitty-brickshift.firebaseapp.com",
-      databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "bitty-brickshift",
-      storageBucket: "bitty-brickshift.appspot.com",
-      messagingSenderId: "823337012487",
-      appId: "1:823337012487:web:1d217b13195f48809389a2"
-    };
+ <!-- Firebase compat libraries -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
+    authDomain: "bitty-brickshift.firebaseapp.com",
+    databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "bitty-brickshift",
+    storageBucket: "bitty-brickshift.appspot.com",
+    messagingSenderId: "823337012487",
+    appId: "1:823337012487:web:1d217b13195f48809389a2"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const db        = firebase.database();
-    const chatRef   = db.ref("chat");
-    const scoresRef = db.ref("scores");
-    window.chatRef   = chatRef;
-    window.scoresRef = scoresRef;
-    console.log("✅ Firebase connected!");
-  </script>
+  // init
+  firebase.initializeApp(firebaseConfig);
 
-  <!-- ✅ CHAT SCRIPT (desktop + mobile weergeven + stickers bouwen) -->
+  // refs
+  const db        = firebase.database();
+  const chatRef   = db.ref("chat");
+  const scoresRef = db.ref("scores");
+
+  // globaal maken
+  window.chatRef   = chatRef;
+  window.scoresRef = scoresRef;
+
+  console.log("✅ Firebase connected!");
+</script>
+
+
+  <!-- ✅ CHAT SCRIPT (nu met Firebase) -->
   <script>
   (() => {
-    // ====== ELEMENTEN DESKTOP ======
     const $msgs   = document.getElementById('chatMessages');
     const $form   = document.getElementById('chatForm');
     const $input  = document.getElementById('chatInput');
     const $name   = document.getElementById('chatName');
     const $clear  = document.getElementById('chatClearBtn');
+
     const stickerPanel = document.getElementById('chat-sticker-panel');
     const stickerBtn   = document.getElementById('chatStickersBtn');
-
-    // ====== ELEMENTEN MOBIEL ======
-    const $mobileMsgs   = document.getElementById('chatMobileMessages');
-    const $mobileInput  = document.getElementById('chatMobileInput');
-    const $mobileSend   = document.getElementById('chatMobileSendBtn');
-    const $mobileStkOv  = document.getElementById('chatStickerOverlay');
 
     const STORE_KEY = 'bb_chat_messages';
     const LIMIT = 100;
@@ -294,8 +298,8 @@
       return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
     }
 
-    function renderMessageInContainer(container, m){
-      if (!container) return;
+    function appendChatMessage(m){
+      if (!$msgs) return;
       const wrap = document.createElement('div');
       wrap.className = 'chat-msg';
 
@@ -308,22 +312,17 @@
       }
 
       wrap.innerHTML = html;
-      container.appendChild(wrap);
-      container.scrollTop = container.scrollHeight;
-    }
-
-    function appendChatMessage(m){
-      renderMessageInContainer($msgs, m);
-      renderMessageInContainer($mobileMsgs, m);
+      $msgs.appendChild(wrap);
+      $msgs.scrollTop = $msgs.scrollHeight;
     }
 
     function render(all){
-      if ($msgs) $msgs.innerHTML = '';
-      if ($mobileMsgs) $mobileMsgs.innerHTML = '';
+      if (!$msgs) return;
+      $msgs.innerHTML = '';
       all.forEach(appendChatMessage);
     }
 
-    // bericht toevoegen
+    // bericht toevoegen -> naar Firebase
     function addMessage(name, text, imgData = null){
       const msg = {
         name: name,
@@ -333,8 +332,16 @@
       };
 
       if (window.chatRef) {
-        window.chatRef.push(msg);
+        console.log('[chat] probeer te pushen naar Firebase:', msg);
+        window.chatRef.push(msg, (err) => {
+          if (err) {
+            console.error('[chat] Firebase push MISLUKT:', err);
+          } else {
+            console.log('[chat] Firebase push GELUKT ✅');
+          }
+        });
       } else {
+        console.warn('[chat] geen chatRef -> gebruik localStorage');
         let all = getStore();
         if(all.length >= LIMIT){
           all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
@@ -344,27 +351,26 @@
         render(all);
       }
     }
-    // beschikbaar maken voor mobiel script
-    window.addMessage = addMessage;
-    window.detectPlayerName = detectPlayerName;
 
     // Firebase luisteraar
     if (window.chatRef) {
       window.chatRef.limitToLast(200).on('child_added', snap => {
         const m = snap.val();
+        console.log('[chat] nieuw bericht uit Firebase:', m);
         appendChatMessage(m);
       });
     } else {
       render(getStore());
     }
 
-    // desktop form
     if ($form) {
       $form.addEventListener('submit', e=>{
         e.preventDefault();
         const name = detectPlayerName();
         const text = $input.value.trim();
+
         if (!text && !selectedSticker) return;
+
         addMessage(name, text, selectedSticker);
 
         $input.value = '';
@@ -395,54 +401,8 @@
       });
     }
 
-    // mobile send
-    if ($mobileSend && $mobileInput) {
-      $mobileSend.addEventListener('click', () => {
-        const name = detectPlayerName();
-        const text = $mobileInput.value.trim();
-        if (!text && !selectedSticker) return;
-        addMessage(name, text, selectedSticker);
-        $mobileInput.value = '';
-        selectedSticker = null;
-      });
-
-      $mobileInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          $mobileSend.click();
-        }
-      });
-    }
-
-    // mobile stickers vullen (maar niet togglen)
-    function buildMobileStickers(){
-      if (!$mobileStkOv) return;
-      $mobileStkOv.innerHTML = '';
-      const list = (typeof STICKERS !== 'undefined' && Array.isArray(STICKERS)) ? STICKERS : [];
-      list.forEach(src => {
-        const item = document.createElement('div');
-        item.className = 'sticker-item';
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = 'sticker';
-        item.appendChild(img);
-
-        item.addEventListener('click', () => {
-          const name = detectPlayerName();
-          const txt = $mobileInput ? $mobileInput.value.trim() : '';
-          addMessage(name, txt, src);
-          if ($mobileInput) $mobileInput.value = '';
-          $mobileStkOv.classList.remove('show');
-        });
-
-        $mobileStkOv.appendChild(item);
-      });
-    }
-    buildMobileStickers();
-
-    // desktop sticker panel
+    // STICKER PANEL
     if (stickerBtn && stickerPanel) {
-      const list = Array.isArray(STICKERS) ? STICKERS : [];
       const imageGrid = document.createElement('div');
       imageGrid.className = 'sticker-grid';
 
@@ -457,6 +417,7 @@
       gifTitle.textContent = 'GIFs';
       gifTitle.className = 'sticker-section-title';
 
+      const list = Array.isArray(STICKERS) ? STICKERS : [];
       list.forEach(src => {
         const item = document.createElement('div');
         item.className = 'sticker-item';
@@ -510,8 +471,8 @@
       stickerPanel.appendChild(gifGrid);
 
       stickerBtn.addEventListener('click', () => {
-        const cur = stickerPanel.style.display;
-        stickerPanel.style.display = (cur === 'block') ? 'none' : 'block';
+        const show = (stickerPanel.style.display === '' || stickerPanel.style.display === 'none');
+        stickerPanel.style.display = show ? 'block' : 'none';
       });
     }
 
@@ -541,11 +502,6 @@
     </div>
   </div>
 
-  <div id="mobile-hud">
-  <span id="mobileScore">Score: 0</span>
-  <span id="mobileTime">00:00</span>
-</div>
-  
   <div id="hud" style="position: absolute; top: 10px; left: 80px; z-index: 1000;">
     <div id="livesDisplay" style="display: flex; gap: 6px;"></div>
   </div>
@@ -555,7 +511,11 @@
   <script src="login.js"></script>
   <script src="game.js"></script>
 
-  <script>
+
+
+
+ 
+   <script>
   let highscores = JSON.parse(localStorage.getItem("highscores")) || [
     { name: "—", score: 0, time: "00:00", level: 1 },
     { name: "—", score: 0, time: "00:00", level: 1 },
@@ -582,7 +542,10 @@
     });
   }
 
+  // 👉 deze wordt door je game aangeroepen
   function checkAndUpdateHighscores(name, score, time, level = 1) {
+    console.log("🏁 checkAndUpdateHighscores aangeroepen met:", name, score, time, level);
+
     const newEntry = { name, score, time, level };
     highscores.push(newEntry);
     highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
@@ -590,23 +553,31 @@
     localStorage.setItem("highscores", JSON.stringify(highscores));
     updateHighscoreBoard();
 
+    // ✨ ook naar Firebase sturen
     if (window.scoresRef) {
+      console.log("📡 scoresRef gevonden, push naar Firebase...");
       window.scoresRef.push({
         name: name,
         score: score,
         time: time,
         level: level,
         created: Date.now()
-      }).catch(err => {
+      })
+      .then(() => {
+        console.log("✅ Score toegevoegd aan Firebase");
+      })
+      .catch(err => {
         console.error("❌ Kon score niet naar Firebase pushen:", err);
       });
+    } else {
+      console.warn("⚠️ window.scoresRef bestaat niet op dit moment, niets naar Firebase gestuurd.");
     }
   }
 
   window.addEventListener("load", () => {
     updateHighscoreBoard();
   });
-  </script>
+</script>
 
   <style>
     #game-container {
@@ -672,9 +643,14 @@
       }, delay);
     }
 
+    // Start eerste run
     animateFlyer("bikeFlyer", 20000, 1000);
+    // Herhaal elke 30 sec
     setInterval(() => animateFlyer("bikeFlyer", 20000, 1000), 30000);
   </script>
+
+  <!-- Externe scripts -->
+  <script src="login.js"></script>
 
   <!-- Muziekalbumscript -->
   <script>
@@ -740,145 +716,124 @@
   });
   </script>
 
-  <!-- 💬 Chat open/dicht (desktop) -->
-  <script>
-  (() => {
-    const chat = document.getElementById('chatbox');
-    const toggleBtn = document.getElementById('chatToggleBtn');
-    const chatInput = document.getElementById('chatInput');
+<!-- 💬 Chat open/dicht -->
+<script>
+(() => {
+  const chat = document.getElementById('chatbox');
+  const toggleBtn = document.getElementById('chatToggleBtn');
+  const chatInput = document.getElementById('chatInput');
 
+  // laatste status terugzetten
+  try {
+    if (localStorage.getItem('chatCollapsed') === '1') {
+      chat.classList.add('collapsed');
+    }
+  } catch (e) {}
+
+  // alleen met de knop open/dicht
+  toggleBtn?.addEventListener('click', () => {
+    chat.classList.toggle('collapsed');
     try {
-      if (localStorage.getItem('chatCollapsed') === '1') {
-        chat.classList.add('collapsed');
-      }
+      localStorage.setItem(
+        'chatCollapsed',
+        chat.classList.contains('collapsed') ? '1' : '0'
+      );
     } catch (e) {}
+  });
 
-    toggleBtn?.addEventListener('click', () => {
-      chat.classList.toggle('collapsed');
+  // ⛔ spatie mag chat NIET meer openen/sluiten
+  window.addEventListener('keydown', (e) => {
+    // laat spatie met rust voor het spel
+    if (e.code === 'Space') return;
+
+    // als je in het chat-inputje zit, gewoon typen
+    if (document.activeElement === chatInput) return;
+
+    // escape mag chat wél dicht gooien
+    if (e.code === 'Escape') {
+      chat.classList.add('collapsed');
       try {
-        localStorage.setItem(
-          'chatCollapsed',
-          chat.classList.contains('collapsed') ? '1' : '0'
-        );
+        localStorage.setItem('chatCollapsed', '1');
       } catch (e) {}
-    });
-
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') return;
-      if (document.activeElement === chatInput) return;
-      if (e.code === 'Escape') {
-        chat.classList.add('collapsed');
-        try {
-          localStorage.setItem('chatCollapsed', '1');
-        } catch (e) {}
-      }
-    });
-  })();
-  </script>
-
-  <!-- 📱 mobiele chat open/dicht + sticker overlay -->
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const btn        = document.getElementById('chat-mobile-button');
-    const box        = document.getElementById('chatbox-mobile');
-    const close      = document.getElementById('chatMobileClose');
-    const overlay    = document.getElementById('chatStickerOverlay');
-    const stickerBtn = document.getElementById('chatMobileStickersBtn');
-
-    if (!box) return;
-
-    // open/dicht de mobiele chat
-    if (btn) {
-      btn.addEventListener('click', () => {
-        const isOpen = box.classList.toggle('open');
-        if (!isOpen && overlay) {
-          overlay.classList.remove('show');
-        }
-      });
-    }
-
-    // kruisje in de mobile chat
-    if (close) {
-      close.addEventListener('click', (e) => {
-        e.stopPropagation();
-        box.classList.remove('open');
-        if (overlay) overlay.classList.remove('show');
-      });
-    }
-
-    // 📷 knop in de mobile chat → alleen overlay tonen/verbergen
-    if (stickerBtn && overlay) {
-      stickerBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (!box.classList.contains('open')) {
-          box.classList.add('open');
-        }
-        overlay.classList.toggle('show');
-      });
     }
   });
-  </script>
+})();
+</script>
 
-  <!-- 📱 auto-fix voor mobiele schermen -->
-  <script>
-    document.addEventListener('DOMContentLoaded', autoPlaceCanvas);
-    window.addEventListener('resize', autoPlaceCanvas);
+<!-- 📱 auto-fix voor mobiele schermen -->
+<script>
+  document.addEventListener('DOMContentLoaded', autoPlaceCanvas);
+  window.addEventListener('resize', autoPlaceCanvas);
 
-    function autoPlaceCanvas() {
-      if (window.innerWidth > 768) return;
+  function autoPlaceCanvas() {
+    // alleen op mobiel
+    if (window.innerWidth > 768) return;
 
-      const c = document.getElementById('gameCanvas');
-      if (!c) return;
+    const c = document.getElementById('gameCanvas');
+    if (!c) return;
 
-      const ratio = 600 / 645;
-      const vw = window.innerWidth;
-      const canvasWidth = Math.min(vw * 0.84, 550);
-      const canvasHeight = canvasWidth * ratio;
+    const ratio = 600 / 645;
+    const vw = window.innerWidth;
+    const canvasWidth = Math.min(vw * 0.84, 550);
+    const canvasHeight = canvasWidth * ratio;
 
-      c.width = canvasWidth;
-      c.height = canvasHeight;
+    c.width = canvasWidth;
+    c.height = canvasHeight;
 
-      const vh = window.innerHeight;
-      const minTop = 180;
-      const centeredTop = (vh - canvasHeight) / 2;
-      const finalTop = Math.max(minTop, centeredTop);
+    const vh = window.innerHeight;
+    const minTop = 180;                 // ← zelfde waarde als in CSS
+    const centeredTop = (vh - canvasHeight) / 2;
+    const finalTop = Math.max(minTop, centeredTop);
 
-      c.style.top = finalTop + 'px';
-    }
-  </script>
+    c.style.top = finalTop + 'px';
+  }
+</script>
 
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const btn   = document.getElementById('mobileHighscoreBtn');
-  const panel = document.getElementById('mobileHighscorePanel');
-  const list  = document.getElementById('mobileHighscoreList');
 
-  if (!btn || !panel || !list) return;
 
-  // toggle open/dicht
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // let op: deze ID's moeten ook zo in je HTML staan
+  const btn        = document.getElementById('chat-mobile-button');
+  const box        = document.getElementById('chatbox-mobile');
+  const close      = document.getElementById('chatMobileClose');
+  const overlay    = document.getElementById('chatStickerOverlay');
+  const stickerBtn = document.getElementById('chatMobileStickersBtn'); // <-- mobiele variant
+
+  // als knop of chat niet bestaat: niks doen
+  if (!btn || !box) return;
+
+  // knop opent / sluit de chat
   btn.addEventListener('click', () => {
-    panel.classList.toggle('show');
+    const isOpen = box.classList.toggle('open');
+    // als je 'm dicht doet: overlay ook dicht
+    if (!isOpen && overlay) {
+      overlay.classList.remove('show');
+    }
   });
 
-  // laad highscores vanuit je bestaande lokale lijst
-  function renderMobileHighscores() {
-    list.innerHTML = '';
-    const highscores = JSON.parse(localStorage.getItem('highscores')) || [];
-    highscores.forEach((entry, i) => {
-      const li = document.createElement('li');
-      li.textContent = `${i + 1}. ${entry.name || '—'} — ${entry.score || 0} (${entry.time || '00:00'})`;
-      list.appendChild(li);
+  // kruisje in de chat
+  if (close) {
+    close.addEventListener('click', (e) => {
+      e.stopPropagation();
+      box.classList.remove('open');
+      if (overlay) overlay.classList.remove('show');
     });
   }
 
-  // 1x laden bij opstart
-  renderMobileHighscores();
-
-  // en elke 5 sec refreshen (optioneel)
-  setInterval(renderMobileHighscores, 5000);
+  // camera/sticker → overlay bovenop de chat
+  if (stickerBtn && overlay) {
+    stickerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // zorg dat chat open is
+      if (!box.classList.contains('open')) {
+        box.classList.add('open');
+      }
+      overlay.classList.toggle('show');
+    });
+  }
 });
 </script>
 
 </body>
 </html>
-
