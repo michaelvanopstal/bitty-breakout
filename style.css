@@ -364,7 +364,7 @@ body {
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
 /* =========================================================
-   ✅ PC (hele brede schermen)
+   âœ… PC (hele brede schermen)
    ========================================================= */
 @media (min-width: 1500px) {
   #game-container {
@@ -412,7 +412,12 @@ body {
   }
 }
 
-/* ======= 💻 DESKTOP: verberg mobiele highscore ======= */
+/* =========================================================
+   ðŸ“± Mobiele versie (tot 768px)
+   container + pseudo-achtergrond + vaste z-indexen
+========================================================= */
+
+/* ======= ðŸ’» DESKTOP: verberg mobiele highscore ======= */
 @media (min-width: 769px) {
   #mobile-highscore {
     display: none !important;
@@ -421,7 +426,7 @@ body {
   }
 }
 
-/* ======= 📱 MOBIEL tot 768px ======= */
+/* ======= ðŸ“± MOBIEL tot 768px ======= */
 @media (max-width: 768px) {
 
   :root {
@@ -443,7 +448,7 @@ body {
     padding-bottom: 0;
   }
 
-  /* 0️⃣ container laag houden zodat andere dingen erover kunnen */
+  /* 0ï¸âƒ£ container laag houden zodat andere dingen erover kunnen */
   #game-container {
     position: relative;
     width: calc(100vw - (2 * var(--frame-side-space)));
@@ -454,7 +459,7 @@ body {
     background: none;
   }
 
-  /* 1️⃣ frame / mobile.png onder alles */
+  /* 1ï¸âƒ£ frame / mobile.png onder alles */
   #game-container::before {
     content: "";
     position: absolute;
@@ -466,7 +471,7 @@ body {
     z-index: 1;
   }
 
-  /* 2️⃣ canvas stabiel in het gele scherm */
+  /* 2ï¸âƒ£ canvas stabiel in het gele scherm */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-inset-top) !important;
@@ -480,7 +485,7 @@ body {
   }
 
   /* dingen die weg mogen op mobiel
-     (⚠️ power panel hier NIET meer verbergen) */
+     (âš ï¸ power panel hier NIET meer verbergen) */
   #highscore-overlay,
   #trophy,
   #musicToggle,
@@ -491,10 +496,10 @@ body {
     display: none !important;
   }
 
-  /* 3️⃣ HUD boven het spel */
+  /* 3ï¸âƒ£ HUD boven het spel */
   #login-overlay {
     position: fixed !important;
-    top: 10px !important;        /* jouw keuze */
+    top: 10px !important;         /* jouw keuze */
     right: 8px !important;
     z-index: 12000 !important;
 
@@ -525,7 +530,6 @@ body {
     font-size: 14px !important;
     z-index: 100 !important;
   }
-
   #scoreDisplay {
     position: fixed !important;
     top: 12px !important;
@@ -533,7 +537,6 @@ body {
     font-size: 14px !important;
     z-index: 100 !important;
   }
-
   #time-box {
     position: fixed !important;
     top: 12px !important;
@@ -543,11 +546,9 @@ body {
   }
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
-  #chatbox-mobile {
-    display: none;
-  }
+  #chatbox-mobile { display: none; }
 
-  /* ===== 📱 MOBIELE HIGH SCORE PANEL ===== */
+  /* ===== ðŸ“± MOBIELE HIGH SCORE PANEL ===== */
   #mobile-highscore {
     position: fixed;
     top: 10px;
@@ -555,7 +556,6 @@ body {
     z-index: 12000;
     display: block !important;
   }
-
   /* de knop zelf */
   #mobileHighscoreBtn {
     background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
@@ -568,7 +568,6 @@ body {
     font-size: 14px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
   }
-
   /* paneeltje dat openklapt */
   #mobileHighscorePanel {
     position: absolute;
@@ -584,11 +583,7 @@ body {
     display: none; /* standaard dicht */
     box-shadow: 0 6px 15px rgba(0,0,0,0.4);
   }
-
-  #mobileHighscorePanel.show {
-    display: block;
-  }
-
+  #mobileHighscorePanel.show { display: block; }
   #mobileHighscoreList {
     list-style: none;
     padding: 0;
@@ -596,33 +591,31 @@ body {
     color: #ffe9c4;
     font-size: 13px;
   }
-
   #mobileHighscoreList li {
     margin: 4px 0;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     padding-bottom: 2px;
   }
 
-  /* ===== ⚡ POWER PANEL — MOBIEL ===== */
+  /* ===== âš¡ POWER PANEL â€” MOBIEL ===== */
   #bonus-power-panel {
     position: fixed;
-    top: 20px;              /* onderin rechts (tekst van je comment) */
+    top: 20px;           /* onderin rechts */
     right: 10px;
     transform: scale(0.40); /* kleiner op mobiel */
     transform-origin: bottom right;
     z-index: 12000;
   }
-
   #bonus-power-panel img,
   #bonus-power-panel button {
     width: 28px;
     height: 28px;
   }
-} /* ← sluit de mobiele media query */
+}  /* â† sluit de mobiele media query */
 
 /* =========================
-   ❤️ LIVES / HEARTS — TABLET
-   Alleen voor 769–1024px
+   â¤ï¸ LIVES / HEARTS â€” TABLET
+   Alleen voor 769â€“1024px
 ========================= */
 @media (min-width: 769px) and (max-width: 1024px) {
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
@@ -633,7 +626,6 @@ body {
     transform-origin: top left;
     z-index: 12000;
   }
-
   #heartsHud img[src*="heart"],
   #livesDisplay img[src*="heart"],
   #lives img[src*="heart"],
@@ -646,8 +638,8 @@ body {
 }
 
 /* =========================
-   ❤️ LIVES / HEARTS — MOBIEL
-   Alleen voor ≤ 768px
+   â¤ï¸ LIVES / HEARTS â€” MOBIEL
+   Alleen voor â‰¤ 768px
 ========================= */
 @media (max-width: 768px) {
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
@@ -661,7 +653,6 @@ body {
     align-items: center;
     gap: 3px;
   }
-
   #heartsHud img[src*="heart"],
   #livesDisplay img[src*="heart"],
   #lives img[src*="heart"],
@@ -673,17 +664,22 @@ body {
   }
 }
 
-/* ===== ⚡ POWER PANEL — MOBIEL ===== */
-#bonus-power-panel {
-  position: fixed;
-  top: 35px;                 /* zet hem net onder de login */
-  right: 10px;               /* rechts uitlijnen */
-  bottom: auto !important;   /* voorkom vastplakken onderin */
-  transform: scale(0.4);     /* iets kleiner */
-  z-index: 15000 !important; /* boven login & score */
+/* =========================
+   âš¡ POWER PANEL â€” TABLET
+   ========================= */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #bonus-power-panel {
+    position: fixed;
+    top: 10px;          /* net onder login/timebox */
+    right: 12px;
+    transform: scale(0.6);
+    transform-origin: top right;
+    z-index: 14000;
+  }
 }
 
-/* ======= 📱 MOBIEL tot 600px: chatknop ======= */
+
+/* ======= ðŸ“± MOBIEL tot 600px: chatknop ======= */
 @media (max-width: 600px) {
   /* vaste chatknop onderaan, volle breedte */
   #chat-mobile-button {
@@ -818,7 +814,7 @@ body {
     cursor: pointer;
   }
 
-  /* ===== 📱 STICKER OVERLAY IN DE CHAT ===== */
+  /* ===== ðŸ“± STICKER OVERLAY IN DE CHAT ===== */
   #chatStickerOverlay {
     position: absolute;
     top: 42px;                 /* onder kop */
@@ -851,7 +847,7 @@ body {
   }
 }
 
-/* ======= 💻 DESKTOP extra: verberg mobiele chat-ui ======= */
+/* ======= ðŸ’» DESKTOP extra: verberg mobiele chat-ui ======= */
 @media (min-width: 601px) {
   #chat-mobile-button,
   #chatbox-mobile {
