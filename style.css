@@ -671,7 +671,6 @@ body {
   right: 10px;               /* rechts uitlijnen */
   bottom: auto !important;   /* voorkom vastplakken onderin */
   transform: scale(0.4);     /* iets kleiner */
-  transform-origin: top right !important; /* veranker aan de bovenhoek */
   z-index: 15000 !important; /* boven login & score */
 }
 #bonus-power-panel img,
