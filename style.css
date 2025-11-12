@@ -883,28 +883,3 @@ body {
 
 
 
-/* =====📱 MOBIEL (≤600px) — eigen positie/maat, tablet blijft met rust ===== */
-@media (max-width: 600px) {
-  #login-overlay {
-    position: fixed;         /* los van de canvas */
-    inset: 0;                /* full-screen overlay */
-    background: transparent; /* doorzichtig laten (zoals nu) */
-    display: flex;
-    justify-content: center; /* horizontaal centreren van de box (optioneel) */
-    align-items: flex-start; /* verticaal van bovenaf */
-    z-index: 4000;
-  }
-
-  #login-box {
-    position: fixed;         /* eigen positie op mobiel */
-    top: 10px;  /* ← VERPLAATS HIER VOOR MOBIEL */
-    right: 10px
-    transform: translateX(-70%) scale(0.85);  /* centreren + kleiner maken */
-    transform-origin: top center;
-    width: 90%;              /* optioneel iets smaller op mobiel */
-    max-width: 320px;        /* cap op grote telefoons */
-    z-index: 4100;
-  }
-
-
-
