@@ -412,11 +412,6 @@ body {
   }
 }
 
-/* =========================================================
-   📱 Mobiele versie (tot 768px)
-   container + pseudo-achtergrond + vaste z-indexen
-========================================================= */
-
 /* ======= 💻 DESKTOP: verberg mobiele highscore ======= */
 @media (min-width: 769px) {
   #mobile-highscore {
@@ -499,7 +494,7 @@ body {
   /* 3️⃣ HUD boven het spel */
   #login-overlay {
     position: fixed !important;
-    top: 10px !important;         /* jouw keuze */
+    top: 10px !important;        /* jouw keuze */
     right: 8px !important;
     z-index: 12000 !important;
 
@@ -530,6 +525,7 @@ body {
     font-size: 14px !important;
     z-index: 100 !important;
   }
+
   #scoreDisplay {
     position: fixed !important;
     top: 12px !important;
@@ -537,6 +533,7 @@ body {
     font-size: 14px !important;
     z-index: 100 !important;
   }
+
   #time-box {
     position: fixed !important;
     top: 12px !important;
@@ -546,7 +543,9 @@ body {
   }
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
-  #chatbox-mobile { display: none; }
+  #chatbox-mobile {
+    display: none;
+  }
 
   /* ===== 📱 MOBIELE HIGH SCORE PANEL ===== */
   #mobile-highscore {
@@ -556,6 +555,7 @@ body {
     z-index: 12000;
     display: block !important;
   }
+
   /* de knop zelf */
   #mobileHighscoreBtn {
     background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
@@ -568,6 +568,7 @@ body {
     font-size: 14px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
   }
+
   /* paneeltje dat openklapt */
   #mobileHighscorePanel {
     position: absolute;
@@ -583,7 +584,11 @@ body {
     display: none; /* standaard dicht */
     box-shadow: 0 6px 15px rgba(0,0,0,0.4);
   }
-  #mobileHighscorePanel.show { display: block; }
+
+  #mobileHighscorePanel.show {
+    display: block;
+  }
+
   #mobileHighscoreList {
     list-style: none;
     padding: 0;
@@ -591,6 +596,7 @@ body {
     color: #ffe9c4;
     font-size: 13px;
   }
+
   #mobileHighscoreList li {
     margin: 4px 0;
     border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -600,18 +606,19 @@ body {
   /* ===== ⚡ POWER PANEL — MOBIEL ===== */
   #bonus-power-panel {
     position: fixed;
-    top: 20px;           /* onderin rechts */
+    top: 20px;              /* onderin rechts (tekst van je comment) */
     right: 10px;
     transform: scale(0.40); /* kleiner op mobiel */
     transform-origin: bottom right;
     z-index: 12000;
   }
+
   #bonus-power-panel img,
   #bonus-power-panel button {
     width: 28px;
     height: 28px;
   }
-}  /* ← sluit de mobiele media query */
+} /* ← sluit de mobiele media query */
 
 /* =========================
    ❤️ LIVES / HEARTS — TABLET
@@ -626,6 +633,7 @@ body {
     transform-origin: top left;
     z-index: 12000;
   }
+
   #heartsHud img[src*="heart"],
   #livesDisplay img[src*="heart"],
   #lives img[src*="heart"],
@@ -653,6 +661,7 @@ body {
     align-items: center;
     gap: 3px;
   }
+
   #heartsHud img[src*="heart"],
   #livesDisplay img[src*="heart"],
   #lives img[src*="heart"],
@@ -672,10 +681,7 @@ body {
   bottom: auto !important;   /* voorkom vastplakken onderin */
   transform: scale(0.4);     /* iets kleiner */
   z-index: 15000 !important; /* boven login & score */
- }
 }
-
-
 
 /* ======= 📱 MOBIEL tot 600px: chatknop ======= */
 @media (max-width: 600px) {
