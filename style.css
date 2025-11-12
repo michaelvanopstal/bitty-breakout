@@ -640,7 +640,7 @@ body {
   /* container van de levens */
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
     position: fixed;
-    top: 46px;                   /* positie mobiel (onder je HUD) */
+    top: 70px;                   /* positie mobiel (onder je HUD) */
     left: 12px;
     transform: scale(0.78);      /* grootte mobiel */
     transform-origin: top left;
