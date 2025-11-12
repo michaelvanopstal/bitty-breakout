@@ -885,14 +885,14 @@ body {
     top: 70px !important;
     right: 10px !important;
     font-size: 14px !important;
-    z-index: 3000 !important;
+    z-index: 3500 !important;
   }
   #time-box {
     position: fixed !important;
     top: 70px !important;
     right: 90px !important;
     font-size: 14px !important;
-    z-index: 3000 !important;
+    z-index: 3500 !important;
    }
   }
 
