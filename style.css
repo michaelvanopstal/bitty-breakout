@@ -648,7 +648,7 @@ body {
     left: 12px;
     transform: scale(0.78);
     transform-origin: top left;
-    z-index: 12000;
+    z-index: 13000;
     display: inline-flex;
     align-items: center;
     gap: 3px;
