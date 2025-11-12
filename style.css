@@ -522,6 +522,27 @@ body {
     line-height: 1.2;
   }
 
+  #player-display {
+    position: fixed !important;
+    top: 12px !important;
+    left: 10px !important;
+    font-size: 14px !important;
+    z-index: 16000 !important;
+  }
+  #scoreDisplay {
+    position: fixed !important;
+    top: 12px !important;
+    right: 10px !important;
+    font-size: 14px !important;
+    z-index: 16000 !important;
+  }
+  #time-box {
+    position: fixed !important;
+    top: 12px !important;
+    right: 90px !important;
+    font-size: 14px !important;
+    z-index: 16000 !important;
+  }
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
   #chatbox-mobile { display: none; }
@@ -620,54 +641,6 @@ body {
     width: 18px;
     height: 18px;
     margin-right: 3px;
-  }
-}
-
-/* ======= 📱 MOBIEL: aparte posities voor player, score en tijd ======= */
-@media (max-width: 768px) {
-
-  /* Naam van speler linksboven */
-  #player-display {
-    position: fixed !important;
-    top: 50px !important;       /* iets onder login */
-    left: 12px !important;      /* links in beeld */
-    font-size: 14px !important;
-    color: white !important;
-    z-index: 14000 !important;
-  }
-
-  /* Score rechtsboven */
-  #scoreDisplay {
-    position: fixed !important;
-    top: 50px !important;
-    right: 12px !important;     /* rechts in beeld */
-    left: auto !important;      /* override desktoppositie */
-    font-size: 14px !important;
-    color: white !important;
-    font-weight: bold !important;
-    z-index: 14000 !important;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  /* Timer direct onder de score */
-  #time-box {
-    position: fixed !important;
-    top: 80px !important;       /* net onder score */
-    right: 12px !important;
-    left: auto !important;
-    width: auto !important;
-    height: auto !important;
-    text-align: right !important;
-    z-index: 14000 !important;
-    pointer-events: none;
-  }
-
-  #timeDisplay {
-    color: white !important;
-    font-size: 13px !important;
-    font-weight: bold !important;
-    font-family: Arial, sans-serif !important;
   }
 }
 
