@@ -882,19 +882,6 @@ body {
 }
 
 
-/* =====💻 DESKTOP (≥1025px) — eigen positie/maat ===== */
-@media (min-width: 1025px) {
-  #login-overlay { 
-    /* laat zoals je nu hebt, of zet je desktop-positie hier */
-  }
-  #login-box {
-    position: absolute;      /* of fixed, wat jij gebruikt op desktop */
-    top: 10px;              /* ← pas aan voor laptop */
-    right: 10px;              /* ← pas aan voor laptop */
-    transform: none;         /* geen schaal/center op desktop */
-    z-index: 2000;
-  }
-}
 
 /* =====📱 MOBIEL (≤600px) — eigen positie/maat, tablet blijft met rust ===== */
 @media (max-width: 600px) {
@@ -919,9 +906,5 @@ body {
     z-index: 2100;
   }
 
-/* =====📱/💻 TABLET (601–1024px) — niets veranderen ===== */
-@media (min-width: 601px) and (max-width: 1024px) {
-  /* leeg laten = tablet gebruikt je bestaande styles */
-}
 
 
