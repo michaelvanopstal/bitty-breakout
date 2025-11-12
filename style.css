@@ -545,8 +545,8 @@ body {
     right: 90px !important;
     font-size: 14px !important;
     z-index: 100 !important;
+  
   }
-}
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
   #chatbox-mobile {
