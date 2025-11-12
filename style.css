@@ -914,7 +914,7 @@ body {
     left: 50%;               /* midden op X */
     transform: translateX(-70%) scale(0.85);  /* centreren + kleiner maken */
     transform-origin: top center;
-    width: 85%;              /* optioneel iets smaller op mobiel */
+    width: 90%;              /* optioneel iets smaller op mobiel */
     max-width: 320px;        /* cap op grote telefoons */
     z-index: 2100;
   }
