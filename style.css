@@ -521,28 +521,52 @@ body {
     height: 24px;
     line-height: 1.2;
   }
+/* ==== HUD fixes: altijd zichtbaar op mobiel ==== */
+@media (max-width: 768px) {
+  #player-display,
+  #scoreDisplay,
+  #time-box,
+  #timeDisplay {
+    display: block !important;
+    color: #fff !important;
+    text-shadow: 0 2px 3px rgba(0,0,0,.45);
+    line-height: 1;
+  }
 
+  /* Zet ze net buiten de knelzone van login/bonus-panel */
   #player-display {
     position: fixed !important;
-    top: 12px !important;
-    left: 10px !important;
-    font-size: 14px !important;
+    top: 10px !important;
+    left: 12px !important;
+    font-size: 15px !important;
     z-index: 16000 !important;
   }
   #scoreDisplay {
     position: fixed !important;
-    top: 12px !important;
-    right: 10px !important;
-    font-size: 14px !important;
+    top: 10px !important;
+    right: 12px !important;
+    font-size: 15px !important;
     z-index: 16000 !important;
   }
   #time-box {
     position: fixed !important;
-    top: 12px !important;
-    right: 90px !important;
-    font-size: 14px !important;
+    top: 10px !important;
+    right: 92px !important; /* ruimte tussen tijd en score */
     z-index: 16000 !important;
   }
+  #timeDisplay { font-weight: 700; font-size: 15px !important; }
+}
+
+/* Bonus-panel wat lager/schaal iets kleiner op extra kleine schermen,
+   zodat het nooit over de tijd/score heen valt */
+@media (max-width: 600px) {
+  #bonus-power-panel {
+    top: 56px !important;     /* iets lager dan jouw 45px */
+    transform: scale(0.28) !important;
+    z-index: 15000 !important; /* onder de HUD (16000) */
+  }
+}
+
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
   #chatbox-mobile { display: none; }
