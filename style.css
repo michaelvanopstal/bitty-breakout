@@ -503,14 +503,14 @@ body {
   }
   #scoreDisplay {
     position: fixed !important;
-    top: 24px !important;
+    top: 70px !important;
     right: 10px !important;
     font-size: 14px !important;
     z-index: 3000 !important;
   }
   #time-box {
     position: fixed !important;
-    top: 24px !important;
+    top: 70px !important;
     right: 90px !important;
     font-size: 14px !important;
     z-index: 3000 !important;
