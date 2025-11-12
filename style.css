@@ -670,7 +670,7 @@ body {
   top: 20px;                 /* zet hem net onder de login */
   right: 10px;               /* rechts uitlijnen */
   bottom: auto !important;   /* voorkom vastplakken onderin */
-  transform: scale(0.6);     /* iets kleiner */
+  transform: scale(0.4);     /* iets kleiner */
   transform-origin: top right !important; /* veranker aan de bovenhoek */
   z-index: 15000 !important; /* boven login & score */
 }
