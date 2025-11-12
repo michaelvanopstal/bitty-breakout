@@ -415,6 +415,8 @@ body {
 /* =========================================================
    📱 Mobiele versie (tot 768px)
    container + pseudo-achtergrond + vaste z-indexen
+========================================================= */
+
 /* ======= 💻 DESKTOP: verberg mobiele highscore ======= */
 @media (min-width: 769px) {
   #mobile-highscore {
@@ -452,7 +454,7 @@ body {
     width: calc(100vw - (2 * var(--frame-side-space)));
     height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
     margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
-    overflow: visible;          /* chat mag erbuiten */
+    overflow: visible;
     z-index: 0;
     background: none;
   }
@@ -482,8 +484,8 @@ body {
     z-index: 10 !important;   /* boven frame, onder HUD */
   }
 
-  /* dingen die weg mogen op mobiel */
-  #bonus-power-panel,
+  /* dingen die weg mogen op mobiel
+     (⚠️ power panel hier NIET meer verbergen) */
   #highscore-overlay,
   #trophy,
   #musicToggle,
@@ -497,22 +499,20 @@ body {
   /* 3️⃣ HUD boven het spel */
   #login-overlay {
     position: fixed !important;
-    top: 10px !important;          /* jouw keuze */
+    top: 10px !important;         /* jouw keuze */
     right: 8px !important;
     z-index: 12000 !important;
 
-    /* verkleinen zonder desktop te raken */
     transform: translateZ(0) scale(0.60);
     transform-origin: top right;
 
-    /* compacter uiterlijk */
     padding: 6px 8px !important;
     max-width: 260px;
     width: auto;
     gap: 6px;
   }
 
-  /* Optioneel: form-elementen compacter maken */
+  /* form-elementen compacter op mobiel */
   #login-overlay input[type="text"],
   #login-overlay input[type="number"],
   #login-overlay input[type="email"],
@@ -530,7 +530,6 @@ body {
     font-size: 14px !important;
     z-index: 100 !important;
   }
-
   #scoreDisplay {
     position: fixed !important;
     top: 12px !important;
@@ -538,7 +537,6 @@ body {
     font-size: 14px !important;
     z-index: 100 !important;
   }
-
   #time-box {
     position: fixed !important;
     top: 12px !important;
@@ -548,19 +546,16 @@ body {
   }
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
-  #chatbox-mobile {
-    display: none;
-  }
+  #chatbox-mobile { display: none; }
 
   /* ===== 📱 MOBIELE HIGH SCORE PANEL ===== */
-  #mobile-highscore { 
+  #mobile-highscore {
     position: fixed;
     top: 10px;
     left: 10px;
     z-index: 12000;
     display: block !important;
   }
-
   /* de knop zelf */
   #mobileHighscoreBtn {
     background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
@@ -573,7 +568,6 @@ body {
     font-size: 14px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
   }
-
   /* paneeltje dat openklapt */
   #mobileHighscorePanel {
     position: absolute;
@@ -590,7 +584,6 @@ body {
     box-shadow: 0 6px 15px rgba(0,0,0,0.4);
   }
   #mobileHighscorePanel.show { display: block; }
-
   #mobileHighscoreList {
     list-style: none;
     padding: 0;
@@ -603,14 +596,28 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.1);
     padding-bottom: 2px;
   }
+
+  /* ===== ⚡ POWER PANEL — MOBIEL ===== */
+  #bonus-power-panel {
+    position: fixed;
+    bottom: 20px;           /* onderin rechts */
+    right: 10px;
+    transform: scale(0.70); /* kleiner op mobiel */
+    transform-origin: bottom right;
+    z-index: 12000;
+  }
+  #bonus-power-panel img,
+  #bonus-power-panel button {
+    width: 28px;
+    height: 28px;
+  }
 }  /* ← sluit de mobiele media query */
 
 /* =========================
    ❤️ LIVES / HEARTS — TABLET
    Alleen voor 769–1024px
-   ========================= */
+========================= */
 @media (min-width: 769px) and (max-width: 1024px) {
-  /* container van de levens */
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
     position: fixed;
     top: 18px;
@@ -619,8 +626,6 @@ body {
     transform-origin: top left;
     z-index: 12000;
   }
-
-  /* individuele hart-iconen (als het <img>’s zijn) */
   #heartsHud img[src*="heart"],
   #livesDisplay img[src*="heart"],
   #lives img[src*="heart"],
@@ -635,22 +640,19 @@ body {
 /* =========================
    ❤️ LIVES / HEARTS — MOBIEL
    Alleen voor ≤ 768px
-   ========================= */
+========================= */
 @media (max-width: 768px) {
-  /* container van de levens */
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
     position: fixed;
-    top: 70px;                   /* positie mobiel (onder je HUD) */
+    top: 70px;                 /* onder je HUD */
     left: 12px;
-    transform: scale(0.78);      /* grootte mobiel */
+    transform: scale(0.78);
     transform-origin: top left;
     z-index: 12000;
     display: inline-flex;
     align-items: center;
     gap: 3px;
   }
-
-  /* individuele hart-iconen (als het <img>’s zijn) */
   #heartsHud img[src*="heart"],
   #livesDisplay img[src*="heart"],
   #lives img[src*="heart"],
@@ -661,6 +663,36 @@ body {
     margin-right: 3px;
   }
 }
+
+/* =========================
+   ⚡ POWER PANEL — TABLET
+   Alleen voor 769–1024px
+========================= */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #bonus-power-panel {
+    position: fixed;
+    bottom: 40px;
+    right: 20px;
+    transform: scale(0.90);   /* iets kleiner dan desktop */
+    transform-origin: bottom right;
+    z-index: 12000;
+  }
+  #bonus-power-panel img,
+  #bonus-power-panel button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* 📱 Extra kleine telefoons (tot 600px) — optioneel nog compacter */
+@media (max-width: 600px) {
+  #bonus-power-panel {
+    transform: scale(0.60);
+    bottom: 14px;
+    right: 8px;
+  }
+}
+
 
 
 /* ======= 📱 MOBIEL tot 600px: chatknop ======= */
