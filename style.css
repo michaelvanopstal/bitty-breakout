@@ -912,13 +912,12 @@ body {
     position: fixed;         /* eigen positie op mobiel */
     top: 80px;               /* ← VERPLAATS HIER VOOR MOBIEL */
     left: 50%;               /* midden op X */
-    transform: translateX(-50%) scale(0.85);  /* centreren + kleiner maken */
+    transform: translateX(-70%) scale(0.85);  /* centreren + kleiner maken */
     transform-origin: top center;
     width: 85%;              /* optioneel iets smaller op mobiel */
     max-width: 320px;        /* cap op grote telefoons */
     z-index: 2100;
   }
-}
 
 /* =====📱/💻 TABLET (601–1024px) — niets veranderen ===== */
 @media (min-width: 601px) and (max-width: 1024px) {
