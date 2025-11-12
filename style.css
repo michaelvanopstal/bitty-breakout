@@ -792,8 +792,8 @@ body {
   #bonus-power-panel {
     display: block !important;     /* weer zichtbaar op mobiel */
     position: fixed;               /* los van gamecanvas */
-    top: 35px;                     /* afstand vanaf bovenkant */
-    left: 50%;                     /* centreren horizontaal */
+    top: 50px;                     /* afstand vanaf bovenkant */
+    left:80px                   /* centreren horizontaal */
     transform: translateX(-50%) scale(0.30); /* kleiner + in het midden */
     transform-origin: top center;
     z-index: 9999;
