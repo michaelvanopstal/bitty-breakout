@@ -500,7 +500,7 @@ body {
   /* naam linksboven IN het frame */
   #player-display {
     position: absolute !important;
-    top: 20px !important;
+    top: 50px !important;
     left: 24px !important;
     font-size: 14px !important;
     color: #ffffff;
@@ -510,8 +510,8 @@ body {
   /* score rechtsboven IN het frame */
   #scoreDisplay {
     position: absolute !important;
-    top: 20px !important;
-    right: 24px !important;
+    top: 50px !important;
+    right: 48px !important;
     font-size: 16px !important;
     color: #ffffff !important;
     z-index: 16000 !important;
@@ -520,14 +520,12 @@ body {
   /* tijd onder de score, gecentreerd */
   #time-box {
     position: absolute !important;
-    top: 52px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    top: 50px !important;
+    left: 70px !important;
     width: auto !important;
     height: auto !important;
-    text-align: center;
+    color: #ffffff !important;
     z-index: 16000 !important;
-    pointer-events: none;
   }
   #timeDisplay {
     color: #ffffff;
@@ -774,7 +772,7 @@ body {
   /* bonus-power-panel kleiner rechtsboven op mobiel */
   #bonus-power-panel {
     position: fixed !important;
-    top: 100px !important;
+    top: 40px !important;
     right: 8px !important;
     bottom: auto !important;
     transform: scale(0.35) !important;
