@@ -418,7 +418,7 @@ body {
 ========================================================= */
 
 /* ======= ðŸ’» DESKTOP: verberg mobiele highscore ======= */
-@media (min-width: 769px) {
+@media (max-width: 601px) {
   #mobile-highscore {
     display: none !important;
     visibility: hidden !important;
@@ -427,7 +427,7 @@ body {
 }
 
 /* ======= ðŸ“± MOBIEL tot 768px ======= */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
 
   :root {
     --frame-top-space: 5vh;
@@ -604,8 +604,7 @@ body {
 
 
 
-
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (max-width: 601px) { and (max-width: 1024px) {
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
     position: fixed;
     top: 18px;
@@ -626,7 +625,7 @@ body {
 }
 
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
     position: fixed;
     top: 70px;                 /* onder je HUD */
