@@ -569,27 +569,24 @@ body {
     font-family: Arial, sans-serif;
   }
 
-  /* Hearts / lives binnen de telefoon */
-  #heartsHud, #livesDisplay, #lives, .hearts, .lives {
+ /* 🎯 Spel-levens (de 3 vaste hearts: ❤️❤️❤️ ) */
+#livesDisplay {
     position: absolute !important;
-    top: 18% !important;                 /* onder je HUD, binnen de telefoon */
-    left: 7% !important;
+    top: 70px; !important;      /* ← HIER verplaats jij de 3 levens */
+    left: 10px; !important;
     transform: scale(0.78);
     transform-origin: top left;
     z-index: 13000;
     display: inline-flex;
     align-items: center;
     gap: 3px;
-  }
-  #heartsHud img[src*="heart"],
-  #livesDisplay img[src*="heart"],
-  #lives img[src*="heart"],
-  .hearts img[src*="heart"],
-  .lives img[src*="heart"] {
+}
+
+#livesDisplay img[src*="heart"] {
     width: 18px;
     height: 18px;
     margin-right: 3px;
-  }
+}
 
   /* mobiele highscore-knop */
   #mobile-highscore {
