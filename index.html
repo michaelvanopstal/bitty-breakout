@@ -807,34 +807,7 @@
   });
   </script>
 
-  <!-- 📱 auto-fix voor mobiele schermen -->
-  <script>
-    document.addEventListener('DOMContentLoaded', autoPlaceCanvas);
-    window.addEventListener('resize', autoPlaceCanvas);
-
-    function autoPlaceCanvas() {
-      if (window.innerWidth > 768) return;
-
-      const c = document.getElementById('gameCanvas');
-      if (!c) return;
-
-      const ratio = 600 / 645;
-      const vw = window.innerWidth;
-      const canvasWidth = Math.min(vw * 0.84, 550);
-      const canvasHeight = canvasWidth * ratio;
-
-      c.width = canvasWidth;
-      c.height = canvasHeight;
-
-      const vh = window.innerHeight;
-      const minTop = 180;
-      const centeredTop = (vh - canvasHeight) / 2;
-      const finalTop = Math.max(minTop, centeredTop);
-
-      c.style.top = finalTop + 'px';
-    }
-  </script>
-
+ 
   <script>
 document.addEventListener('DOMContentLoaded', () => {
   const btn   = document.getElementById('mobileHighscoreBtn');
