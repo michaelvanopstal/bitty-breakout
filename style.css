@@ -572,7 +572,7 @@ body {
   /* Hearts / lives binnen de telefoon */
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
     position: absolute !important;
-    top: 18% !important;                 /* onder je HUD, binnen de telefoon */
+    top: 25% !important;                 /* onder je HUD, binnen de telefoon */
     left: 7% !important;
     transform: scale(0.78);
     transform-origin: top left;
