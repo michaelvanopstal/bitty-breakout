@@ -443,21 +443,24 @@ body {
     --bg-scale: 1;
   }
 
-  body {
-    margin: 0;
-    background: #FF9305;
-    padding: 0;
+  /* binnen @media (max-width: 600px) and (orientation: portrait) */
 
-    /* FIX voor iPhone keyboard + zoom bug */
-    height: auto !important;
-    min-height: 100vh !important;
-
-    /* FLEX MAG NIET op iPhone → veroorzaakt jouw hele bug */
-    display: block !important;
-
-    /* optioneel kleine top-padding zodat mobile.png niet plakt */
-    padding-top: 4px;
+html {
+  overflow: hidden;              /* pagina mag niet meer scrollen */
 }
+
+body {
+  margin: 0;
+  background: #FF9305;
+  padding: 0;
+  height: auto !important;
+  min-height: 100vh !important;
+  display: block !important;
+  padding-top: 4px;
+
+  overflow: hidden;              /* ook op body: geen verticale scroll */
+}
+
 
 
   #game-container {
