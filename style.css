@@ -362,9 +362,8 @@ body {
 .sticker-item.selected {
   outline: 2px solid #ffcf62;
   box-shadow: 0 0 6px rgba(0,0,0,.4);
+ }
 }
-
-
 
 
 
