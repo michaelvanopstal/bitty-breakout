@@ -368,34 +368,32 @@ body {
 
 
 
+/* ======= 📱 MOBIEL tot 768px ======= */
 @media (max-width: 600px) {
 
   :root {
-    --frame-top-space: 5vh;
-    --frame-bottom-space: 15vh;
-    --frame-side-space: 0vw;
-
-    /* gele venster / speelveld binnen het plaatje */
+    /* GEEN vh meer hier */
     --canvas-inset-top: 15%;
     --canvas-inset-left: 5%;
     --canvas-inset-right: 2.6%;
     --canvas-inset-bottom: 18%;
-
     --bg-scale: 1;
   }
 
   body {
     background: #FF9305;
-    padding-bottom: 0;
+    padding: 0;
+    margin: 0;
+    /* geen 100vh / 100dvh hier → iPhone keyboard raakt dit niet meer */
+    overflow: hidden;
   }
 
-
-    #game-container {
+  #game-container {
     position: relative;
-    width: 100vw;         /* volle breedte van het scherm */
-    max-width: 600px;     /* optioneel limiet, zodat het op grotere telefoons niet mega groot wordt */
-    aspect-ratio: 9 / 16; /* vaste verhouding voor je telefoonframe */
-    margin: var(--frame-top-space) auto var(--frame-bottom-space);
+    width: 100vw;
+    max-width: 600px;      /* jouw telefoon-frame breedte */
+    aspect-ratio: 9 / 16;  /* vaste verhouding */
+    margin: 8px auto 56px; /* vaste pixels i.p.v. 5vh / 15vh */
     overflow: visible;
     z-index: 0;
     background: none;
@@ -412,7 +410,7 @@ body {
     z-index: 1;
   }
 
-  /* 2ï¸âƒ£ canvas stabiel in het gele scherm */
+  /* canvas blijft in het gele scherm */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-inset-top) !important;
@@ -422,8 +420,9 @@ body {
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 10 !important;   /* boven frame, onder HUD */
+    z-index: 10 !important;
   }
+
 
 
   #highscore-overlay,
