@@ -412,142 +412,157 @@ body {
   }
 }
 
-/* =========================================================
-   ðŸ“± Mobiele versie (tot 768px)
-   container + pseudo-achtergrond + vaste z-indexen
-========================================================= */
+/* ======= 📱 MOBIEL t/m 600px – SIMPEL EN VAST ======= */
+@media (max-width: 600px) {
 
-/* ======= ðŸ’» DESKTOP: verberg mobiele highscore ======= */
-@media (min-width: 769px) {
-  #mobile-highscore {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-}
-
-/* ======= ðŸ“± MOBIEL tot 768px ======= */
-@media (max-width: 768px) {
-
-  :root {
-    --frame-top-space: 5vh;
-    --frame-bottom-space: 15vh;
-    --frame-side-space: 0vw;
-
-    /* gele venster / speelveld binnen het plaatje */
-    --canvas-inset-top: 15%;
-    --canvas-inset-left: 5%;
-    --canvas-inset-right: 2.6%;
-    --canvas-inset-bottom: 18%;
-
-    --bg-scale: 1;
-  }
-
-  body {
+  /* geen scroll-gedoe, geen 100vh meer */
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
     background: #FF9305;
-    padding-bottom: 0;
+    font-family: Arial, sans-serif;
   }
 
-
+  /* vast frame voor mobile.png – jij kunt 360x720 aanpassen */
   #game-container {
     position: relative;
-    width: calc(100vw - (2 * var(--frame-side-space)));
-    height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
-    margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
-    overflow: visible;
+    width: 360px;          /* breedte van jouw telefoon-frame */
+    height: 720px;         /* hoogte van jouw telefoon-frame */
+    margin: 10px auto 0;   /* gecentreerd */
+    overflow: hidden;
     z-index: 0;
     background: none;
   }
 
- 
   #game-container::before {
     content: "";
     position: absolute;
-    inset: 0;
-    background: url("mobile.png") no-repeat center center;
-    background-size: cover;
-    transform: scale(var(--bg-scale));
-    transform-origin: center center;
-    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 360px;
+    height: 720px;
+    background: url("mobile.png") no-repeat 0 0;
+    background-size: 100% 100%;   /* vult precies het frame */
+    z-index: 1;                   /* onder alles, boven body */
   }
 
-  /* 2ï¸âƒ£ canvas stabiel in het gele scherm */
+  /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
   #gameCanvas {
     position: absolute !important;
-    top: var(--canvas-inset-top) !important;
-    left: var(--canvas-inset-left) !important;
-    width: calc(100% - var(--canvas-inset-left) - var(--canvas-inset-right)) !important;
+    top: 140px !important;        /* afstand vanaf bovenkant frame */
+    left: 30px !important;        /* afstand vanaf linkerkant frame */
+    width: 300px !important;      /* breedte canvas */
     height: auto !important;
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 10 !important;   /* boven frame, onder HUD */
+    z-index: 10 !important;       /* boven mobile.png, onder HUD */
   }
 
-
+  /* desktop-dingen uit op mobiel */
   #highscore-overlay,
   #trophy,
   #musicToggle,
   #resetBallBtn,
   #bikeFlyer,
-  #chatbox,             /* oude desktopchat uit op mobiel */
-  #chat-sticker-panel { /* oud stickerpaneel ook uit op mobiel */
+  #chatbox,
+  #chat-sticker-panel {
     display: none !important;
   }
 
-  
+  /* login klein rechtsboven (los van PNG) */
   #login-overlay {
     position: fixed !important;
-    top: 10px !important;         /* jouw keuze */
+    top: 8px !important;
     right: 8px !important;
+    left: auto !important;
+    text-align: right;
     z-index: 12000 !important;
-
-    transform: translateZ(0) scale(0.60);
+    transform: scale(0.70);
     transform-origin: top right;
-
-    padding: 6px 8px !important;
+    padding: 4px 6px !important;
     max-width: 260px;
     width: auto;
-    gap: 6px;
   }
 
-  /* form-elementen compacter op mobiel */
   #login-overlay input[type="text"],
   #login-overlay input[type="number"],
   #login-overlay input[type="email"],
   #login-overlay button {
-    font-size: 12px;
-    padding: 6px 8px;
-    height: 24px;
+    font-size: 14px;
+    padding: 4px 6px;
+    height: 26px;
     line-height: 1.2;
   }
 
+  /* naam linksboven IN het frame */
   #player-display {
-    position: fixed !important;
-    top: 12px !important;
-    left: 10px !important;
+    position: absolute !important;
+    top: 20px !important;
+    left: 24px !important;
     font-size: 14px !important;
+    color: #ffffff;
     z-index: 16000 !important;
   }
+
+  /* score rechtsboven IN het frame */
   #scoreDisplay {
-    position: fixed !important;
-    top: 12px !important;
-    right: 10px !important;
-    font-size: 14px !important;
+    position: absolute !important;
+    top: 20px !important;
+    right: 24px !important;
+    font-size: 16px !important;
+    color: #ffffff !important;
     z-index: 16000 !important;
   }
+
+  /* tijd onder de score, gecentreerd */
   #time-box {
-    position: fixed !important;
-    top: 12px !important;
-    right: 90px !important;
-    font-size: 14px !important;
+    position: absolute !important;
+    top: 52px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: auto !important;
+    height: auto !important;
+    text-align: center;
     z-index: 16000 !important;
+    pointer-events: none;
+  }
+  #timeDisplay {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: bold;
   }
 
-  /* standaard: mobiele chat uit, die doen we pas in 600px */
-  #chatbox-mobile { display: none; }
+  /* levens / hartjes IN het frame – px makkelijk schuiven */
+  #heartsHud,
+  #livesDisplay,
+  #lives,
+  .hearts,
+  .lives {
+    position: absolute !important;
+    top: 85px !important;
+    left: 24px !important;
+    transform: scale(0.85);
+    transform-origin: top left;
+    z-index: 13000;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
 
-  /* ===== ðŸ“± MOBIELE HIGH SCORE PANEL ===== */
+  #heartsHud img[src*="heart"],
+  #livesDisplay img[src*="heart"],
+  #lives img[src*="heart"],
+  .hearts img[src*="heart"],
+  .lives img[src*="heart"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 3px;
+  }
+
+  /* mobiele highscore-knop linksboven (buiten frame mag ook) */
   #mobile-highscore {
     position: fixed;
     top: 10px;
@@ -555,7 +570,6 @@ body {
     z-index: 12000;
     display: block !important;
   }
-  /* de knop zelf */
   #mobileHighscoreBtn {
     background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
     border: 2px solid #a05c00;
@@ -567,7 +581,6 @@ body {
     font-size: 14px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
   }
-  /* paneeltje dat openklapt */
   #mobileHighscorePanel {
     position: absolute;
     top: 42px;
@@ -579,7 +592,7 @@ body {
     width: 200px;
     max-height: 260px;
     overflow-y: auto;
-    display: none; /* standaard dicht */
+    display: none;
     box-shadow: 0 6px 15px rgba(0,0,0,0.4);
   }
   #mobileHighscorePanel.show { display: block; }
@@ -595,72 +608,20 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.1);
     padding-bottom: 2px;
   }
-}
 
-
-
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  #heartsHud, #livesDisplay, #lives, .hearts, .lives {
-    position: fixed;
-    top: 18px;
-    left: 18px;
-    transform: scale(0.90);
-    transform-origin: top left;
-    z-index: 12000;
-  }
-  #heartsHud img[src*="heart"],
-  #livesDisplay img[src*="heart"],
-  #lives img[src*="heart"],
-  .hearts img[src*="heart"],
-  .lives img[src*="heart"] {
-    width: 22px;
-    height: 22px;
-    margin-right: 4px;
-  }
-}
-
-
-@media (max-width: 768px) {
-  #heartsHud, #livesDisplay, #lives, .hearts, .lives {
-    position: fixed;
-    top: 70px;                 /* onder je HUD */
-    left: 12px;
-    transform: scale(0.78);
-    transform-origin: top left;
-    z-index: 13000;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-  }
-  #heartsHud img[src*="heart"],
-  #livesDisplay img[src*="heart"],
-  #lives img[src*="heart"],
-  .hearts img[src*="heart"],
-  .lives img[src*="heart"] {
-    width: 18px;
-    height: 18px;
-    margin-right: 3px;
-  }
-}
-
-
-
-
-@media (max-width: 600px) {
-  /* vaste chatknop onderaan, volle breedte */
+  /* mobiele chat-knop onderin */
   #chat-mobile-button {
     all: unset;
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 0.5rem;
+    bottom: 8px;
     width: 90vw;
     max-width: 460px;
     height: 44px;
     background: linear-gradient(180deg, #ffe09c 0%, #ffc44b 100%);
     border: 1.5px solid rgba(231, 159, 41, 0.8);
-    border-radius: 10000px;
+    border-radius: 9999px;
     box-shadow: 0 4px 14px rgba(0,0,0,.25);
     display: flex;
     align-items: center;
@@ -710,19 +671,19 @@ body {
     font-size: 13px;
   }
 
-  /* popup chatbox (verstopt tot open) */
+  /* popup chatbox (mobiel) */
   #chatbox-mobile {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 50px;                    /* direct boven de knop */
+    bottom: 56px;
     width: 90vw;
     max-width: 460px;
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 14px 14px;
     box-shadow: 0 6px 18px rgba(0,0,0,.35);
     z-index: 9980;
-    overflow: hidden;                /* alles blijft in de box */
+    overflow: hidden;
     display: none;
   }
   #chatbox-mobile.open { display: block; }
@@ -748,7 +709,6 @@ body {
     line-height: 1;
   }
 
-  /* berichtenvlak */
   #chatMobileMessages {
     height: 280px;
     overflow-y: auto;
@@ -756,10 +716,9 @@ body {
     color: #ffe9c4;
     padding: 8px;
     position: relative;
-    z-index: 1;             /* onder overlay */
+    z-index: 1;
   }
 
-  /* input onderaan */
   #chatMobileForm {
     background: linear-gradient(#ffb545,#f08a25);
     padding: 8px;
@@ -783,12 +742,12 @@ body {
 
   #chatStickerOverlay {
     position: absolute;
-    top: 42px;                 /* onder kop */
-    bottom: 56px;              /* boven input */
+    top: 42px;
+    bottom: 56px;
     left: 0;
     right: 0;
-    background: #7b1e1e;       /* zelfde kleur als chat */
-    z-index: 5;                /* boven messages en form */
+    background: #7b1e1e;
+    z-index: 5;
     display: none;
     overflow-y: auto;
     padding: 10px 6px 12px;
@@ -811,23 +770,17 @@ body {
     object-fit: contain;
     border-radius: 10px;
   }
-}
-  /* --- FIX: Power-panel alleen op echt kleine schermen (mobiel) --- */
-@media (max-width: 600px) {
+
+  /* bonus-power-panel kleiner rechtsboven op mobiel */
   #bonus-power-panel {
     position: fixed !important;
-    top: 45px !important;       /* net onder login */
-    right: 10px !important;     /* rechtsboven */
-    bottom: auto !important;    /* voorkom uitrekken */
-    transform: scale(0.3) !important;
+    top: 100px !important;
+    right: 8px !important;
+    bottom: auto !important;
+    transform: scale(0.35) !important;
     transform-origin: top right !important;
     z-index: 15000 !important;
   }
 }
-@media (min-width: 601px) {
-  #chat-mobile-button,
-  #chatbox-mobile {
-    display: none;
-  }
-}
+
 
