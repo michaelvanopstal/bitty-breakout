@@ -544,49 +544,23 @@ body {
 
 
 
-@media (max-width: 600px) 
-  #heartsHud, #livesDisplay, #lives, .hearts, .lives {
-    position: fixed;
-    top: 18px;
-    left: 18px;
-    transform: scale(0.90);
-    transform-origin: top left;
-    z-index: 12000;
-  }
-  #heartsHud img[src*="heart"],
-  #livesDisplay img[src*="heart"],
-  #lives img[src*="heart"],
-  .hearts img[src*="heart"],
-  .lives img[src*="heart"] {
-    width: 22px;
-    height: 22px;
-    margin-right: 4px;
-  }
+#livesDisplay {
+  position: absolute !important;
+  top: 18% !important;
+  left: 7% !important;
+  transform: scale(0.78);
+  transform-origin: top left;
+  z-index: 13000;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+#livesDisplay img[src*="heart"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 3px;
 }
 
-
-@media (max-width: 600px) {
-  #heartsHud, #livesDisplay, #lives, .hearts, .lives {
-    position: fixed;
-    top: 70px;                 /* onder je HUD */
-    left: 12px;
-    transform: scale(0.78);
-    transform-origin: top left;
-    z-index: 13000;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-  }
-  #heartsHud img[src*="heart"],
-  #livesDisplay img[src*="heart"],
-  #lives img[src*="heart"],
-  .hearts img[src*="heart"],
-  .lives img[src*="heart"] {
-    width: 18px;
-    height: 18px;
-    margin-right: 3px;
-  }
-}
 
 
 
