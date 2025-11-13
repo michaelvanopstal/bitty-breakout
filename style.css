@@ -412,16 +412,6 @@ body {
   }
 }
 
-/* ======= Ã°Å¸â€™Â» DESKTOP: verberg mobiele highscore ======= */
-@media (min-width: 769px) {
-  #mobile-highscore {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-}
-
-
 /* ======= 📱 MOBIEL t/m 600px – SIMPEL EN VAST ======= */
 @media (max-width: 600px) {
 
