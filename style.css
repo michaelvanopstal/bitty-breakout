@@ -449,17 +449,17 @@ body {
   }
 
 
-  #game-container {
+    #game-container {
     position: relative;
-    width: calc(100vw - (2 * var(--frame-side-space)));
-    height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
-    margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
+    width: 100vw;         /* volle breedte van het scherm */
+    max-width: 600px;     /* optioneel limiet, zodat het op grotere telefoons niet mega groot wordt */
+    aspect-ratio: 9 / 16; /* vaste verhouding voor je telefoonframe */
+    margin: var(--frame-top-space) auto var(--frame-bottom-space);
     overflow: visible;
     z-index: 0;
     background: none;
   }
 
- 
   #game-container::before {
     content: "";
     position: absolute;
