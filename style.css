@@ -507,7 +507,8 @@ body {
     z-index: 18000 !important;
   }
 
-  /* score rechtsboven IN het frame */
+  /* mobiel */
+@media (max-width: 600px) {
   #scoreDisplay {
     position: absolute !important;
     top: 50px !important;
