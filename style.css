@@ -362,42 +362,104 @@ body {
 .sticker-item.selected {
   outline: 2px solid #ffcf62;
   box-shadow: 0 0 6px rgba(0,0,0,.4);
- }
+}
+/* =========================================================
+   âœ… PC (hele brede schermen)
+   ========================================================= */
+@media (min-width: 1500px) {
+  #game-container {
+    position: relative;
+    width: 1200px;
+    margin: 15px auto 0 auto;
+  }
+
+  #gameCanvas {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 645 / 600;
+  }
+
+  #player-display {
+    top: 40px;
+    left: 20px;
+  }
+
+  #scoreDisplay {
+    top: 20px;
+    right: 20px;
+    left: auto;
+  }
+
+  #time-box {
+    top: 20px;
+    right: 140px;
+    left: auto;
+  }
+
+  #highscore-overlay {
+    top: 120px;
+    left: 20px;
+  }
+
+  #bonus-power-panel {
+    position: fixed;
+    top: 320px;
+    right: 360px;
+  }
 }
 
+/* =========================================================
+   ðŸ“± Mobiele versie (tot 768px)
+   container + pseudo-achtergrond + vaste z-indexen
+========================================================= */
 
+/* ======= ðŸ’» DESKTOP: verberg mobiele highscore ======= */
+@media (min-width: 769px) {
+  #mobile-highscore {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
 
-/* ======= 📱 MOBIEL tot 768px ======= */
-@media (max-width: 600px) {
+/* ======= ðŸ“± MOBIEL tot 768px ======= */
+@media (max-width: 768px) {
 
   :root {
-    /* GEEN vh meer hier */
+    --frame-top-space: 5vh;
+    --frame-bottom-space: 15vh;
+    --frame-side-space: 0vw;
+
+    /* gele venster / speelveld binnen het plaatje */
     --canvas-inset-top: 15%;
     --canvas-inset-left: 5%;
     --canvas-inset-right: 2.6%;
     --canvas-inset-bottom: 18%;
+
     --bg-scale: 1;
   }
 
   body {
     background: #FF9305;
-    padding: 0;
-    margin: 0;
-    /* geen 100vh / 100dvh hier → iPhone keyboard raakt dit niet meer */
-    overflow: hidden;
+    padding-bottom: 0;
   }
+
 
   #game-container {
     position: relative;
-    width: 100vw;
-    max-width: 600px;      /* jouw telefoon-frame breedte */
-    aspect-ratio: 9 / 16;  /* vaste verhouding */
-    margin: 8px auto 56px; /* vaste pixels i.p.v. 5vh / 15vh */
+    width: calc(100vw - (2 * var(--frame-side-space)));
+    height: calc(100vh - var(--frame-top-space) - var(--frame-bottom-space));
+    margin: var(--frame-top-space) var(--frame-side-space) var(--frame-bottom-space);
     overflow: visible;
     z-index: 0;
     background: none;
   }
 
+ 
   #game-container::before {
     content: "";
     position: absolute;
@@ -409,7 +471,7 @@ body {
     z-index: 1;
   }
 
-  /* canvas blijft in het gele scherm */
+  /* 2ï¸âƒ£ canvas stabiel in het gele scherm */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-inset-top) !important;
@@ -419,9 +481,8 @@ body {
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 10 !important;
+    z-index: 10 !important;   /* boven frame, onder HUD */
   }
-
 
 
   #highscore-overlay,
@@ -468,29 +529,25 @@ body {
     font-size: 14px !important;
     z-index: 16000 !important;
   }
-
   #scoreDisplay {
-  position: absolute !important;
-  top: calc(var(--canvas-inset-top) - 3%) !important;   /* boven canvas → in telefoon */
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  font-size: 16px !important;
-  color: white !important;
-  z-index: 16000 !important;
-}
-
-#time-box {
-  position: absolute !important;
-  top: calc(var(--canvas-inset-top) + 2%) !important;   /* iets onder Score */
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  font-size: 16px !important;
-  z-index: 16000 !important;
-}
+    position: fixed !important;
+    top: 12px !important;
+    right: 10px !important;
+    font-size: 14px !important;
+    z-index: 16000 !important;
+  }
+  #time-box {
+    position: fixed !important;
+    top: 12px !important;
+    right: 90px !important;
+    font-size: 14px !important;
+    z-index: 16000 !important;
+  }
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
   #chatbox-mobile { display: none; }
 
+  /* ===== ðŸ“± MOBIELE HIGH SCORE PANEL ===== */
   #mobile-highscore {
     position: fixed;
     top: 10px;
@@ -542,23 +599,50 @@ body {
 
 
 
-#livesDisplay {
-  position: absolute !important;
-  top: 18% !important;
-  left: 7% !important;
-  transform: scale(0.78);
-  transform-origin: top left;
-  z-index: 13000;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-#livesDisplay img[src*="heart"] {
-  width: 18px;
-  height: 18px;
-  margin-right: 3px;
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  #heartsHud, #livesDisplay, #lives, .hearts, .lives {
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    transform: scale(0.90);
+    transform-origin: top left;
+    z-index: 12000;
+  }
+  #heartsHud img[src*="heart"],
+  #livesDisplay img[src*="heart"],
+  #lives img[src*="heart"],
+  .hearts img[src*="heart"],
+  .lives img[src*="heart"] {
+    width: 22px;
+    height: 22px;
+    margin-right: 4px;
+  }
 }
 
+
+@media (max-width: 768px) {
+  #heartsHud, #livesDisplay, #lives, .hearts, .lives {
+    position: fixed;
+    top: 70px;                 /* onder je HUD */
+    left: 12px;
+    transform: scale(0.78);
+    transform-origin: top left;
+    z-index: 13000;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  #heartsHud img[src*="heart"],
+  #livesDisplay img[src*="heart"],
+  #lives img[src*="heart"],
+  .hearts img[src*="heart"],
+  .lives img[src*="heart"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 3px;
+  }
+}
 
 
 
@@ -740,7 +824,7 @@ body {
     z-index: 15000 !important;
   }
 }
-@media (min-width: 600px) {
+@media (min-width: 601px) {
   #chat-mobile-button,
   #chatbox-mobile {
     display: none;
