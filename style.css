@@ -435,7 +435,7 @@ body {
     --frame-side-space: 0vw;
 
     /* gele venster / speelveld binnen het plaatje */
-    --canvas-inset-top: 15%;
+    --canvas-inset-top: 20%;
     --canvas-inset-left: 5%;
     --canvas-inset-right: 2.6%;
     --canvas-inset-bottom: 18%;
