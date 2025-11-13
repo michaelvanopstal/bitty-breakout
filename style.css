@@ -582,11 +582,6 @@ body {
     gap: 3px;
 }
 
-#livesDisplay img[src*="heart"] {
-    width: 18px;
-    height: 18px;
-    margin-right: 3px;
-}
 
   /* mobiele highscore-knop */
   #mobile-highscore {
