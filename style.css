@@ -443,36 +443,36 @@ body {
     --bg-scale: 1;
   }
 
-  /* binnen @media (max-width: 600px) and (orientation: portrait) */
+  html {
+    overflow: hidden;              /* pagina mag niet meer scrollen */
+  }
 
-html {
-  overflow: hidden;              /* pagina mag niet meer scrollen */
-}
-
-body {
-  margin: 0;
-  background: #FF9305;
-  padding: 0;
-  height: auto !important;
-  min-height: 100vh !important;
-  display: block !important;
-  padding-top: 4px;
-
-  overflow: hidden;              /* ook op body: geen verticale scroll */
-}
-
-
+  body {
+    margin: 0;
+    background: #FF9305;
+    padding: 0;
+    height: auto !important;
+    min-height: 100vh !important;
+    display: block !important;
+    padding-top: 4px;
+    overflow: hidden;              /* ook op body: geen verticale scroll */
+  }
 
   #game-container {
     position: relative;
     width: 100vw;
-    max-width: 600px;                      /* max breedte van je telefoon */
-    aspect-ratio: 9 / 16;                  /* vaste verhouding voor mobile-frame */
+    max-width: 600px;              /* max breedte van je telefoon */
+    aspect-ratio: 9 / 16;          /* vaste verhouding voor mobile-frame */
     margin: 0 auto;
     overflow: visible;
     z-index: 0;
     background: none;
   }
+
+  /* … rest van je mobiele CSS … */
+
+
+
 
  #game-container::before {
     content: "";
