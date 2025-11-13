@@ -532,7 +532,7 @@ body {
   /* Player-naam in de telefoon, linksboven */
   #player-display {
     position: absolute !important;
-    top: 9% !important;
+    top: 7% !important;
     left: 7% !important;
     font-size: clamp(10px, 2.8vw, 16px) !important;
     z-index: 16000 !important;
@@ -542,8 +542,8 @@ body {
   /* Score in het midden bovenin de telefoon */
   #scoreDisplay {
     position: absolute !important;
-    top: 9% !important;
-    left: 50% !important;
+    top: 7% !important;
+    left: 40% !important;
     transform: translateX(-50%) !important;
     font-size: clamp(12px, 3.2vw, 18px) !important;
     color: white !important;
@@ -553,8 +553,8 @@ body {
   /* Time net onder de score */
   #time-box {
     position: absolute !important;
-    top: 14% !important;
-    left: 50% !important;
+    top: 7% !important;
+    left: 70% !important;
     transform: translateX(-50%) !important;
     width: auto !important;
     height: auto !important;
