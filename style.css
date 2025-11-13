@@ -529,20 +529,25 @@ body {
     font-size: 14px !important;
     z-index: 16000 !important;
   }
+
   #scoreDisplay {
-    position: fixed !important;
-    top: 12px !important;
-    right: 10px !important;
-    font-size: 14px !important;
-    z-index: 16000 !important;
-  }
-  #time-box {
-    position: fixed !important;
-    top: 12px !important;
-    right: 90px !important;
-    font-size: 14px !important;
-    z-index: 16000 !important;
-  }
+  position: absolute !important;
+  top: calc(var(--canvas-inset-top) - 3%) !important;   /* boven canvas → in telefoon */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 16px !important;
+  color: white !important;
+  z-index: 16000 !important;
+}
+
+#time-box {
+  position: absolute !important;
+  top: calc(var(--canvas-inset-top) + 2%) !important;   /* iets onder Score */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 16px !important;
+  z-index: 16000 !important;
+}
 
   /* standaard: mobiele chat uit, die doen we pas in 600px */
   #chatbox-mobile { display: none; }
