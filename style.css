@@ -854,4 +854,10 @@ body {
     display: none;
   }
 }
+@media (max-width:768px){
+  #player-display, #scoreDisplay, #time-box{
+    outline: 1px solid magenta !important;
+  }
+}
+
 
