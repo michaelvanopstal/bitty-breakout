@@ -533,32 +533,23 @@ body {
     font-weight: bold;
   }
 
-  /* levens / hartjes IN het frame – px makkelijk schuiven */
-  #heartsHud,
-  #livesDisplay,
-  #lives,
-  .hearts,
-  .lives {
-    position: absolute !important;
-    top: 85px !important;
-    left: 24px !important;
-    transform: scale(0.85);
-    transform-origin: top left;
-    z-index: 13000;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-  }
+ /* === Enkel de 3 vaste levens linksboven === */
+#livesDisplay {
+  position: absolute;
+  top: 75px;      /* pas dit aan zoals jij wil */
+  left: 24px;     /* pas dit aan zoals jij wil */
+  transform: scale(0.85);
+  transform-origin: top left;
+  z-index: 13000;
+  display: inline-flex;
+  gap: 3px;
+}
 
-  #heartsHud img[src*="heart"],
-  #livesDisplay img[src*="heart"],
-  #lives img[src*="heart"],
-  .hearts img[src*="heart"],
-  .lives img[src*="heart"] {
-    width: 18px;
-    height: 18px;
-    margin-right: 3px;
-  }
+#livesDisplay img[src*="heart"] {
+  width: 18px;
+  height: 18px;
+}
+
 
   /* mobiele highscore-knop linksboven (buiten frame mag ook) */
   #mobile-highscore {
