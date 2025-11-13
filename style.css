@@ -507,50 +507,46 @@ body {
     z-index: 18000 !important;
   }
 
-  /* mobiel */
-@media (max-width: 600px) {
-  #scoreDisplay {
-    position: absolute !important;
-    top: 50px !important;
-    right: 80px !important;
-    font-size: 16px !important;
-    color: #ffffff !important;
-    z-index: 16000 !important;
-  }
-
+  
 
  
+ /* tijd onder de score, gecentreerd */
+  #time-box {
+    position: absolute !important;
+    top: 52px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: auto !important;
+    height: auto !important;
+    text-align: center;
+    z-index: 16000 !important;
+    pointer-events: none;
+  }
   #timeDisplay {
     color: #ffffff;
     font-size: 14px;
     font-weight: bold;
-     z-index: 17000 !important;
   }
 
+
+  
  /* === Enkel de 3 vaste levens linksboven === */
-@media (max-width: 600px) {
-
-  #hud {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 13000;
-  }
-
-  #livesDisplay {
-    position: absolute;
-    top: 75px;     /* schuif omhoog/omlaag */
-    left: 12px;    /* schuif meer naar links/rechts */
-    transform: scale(0.85);
-    transform-origin: top left;
-    z-index: 13000;
-  }
-
-  #livesDisplay img[src*="heart"] {
-    width: 18px;
-    height: 18px;
-  }
+#livesDisplay {
+  position: absolute;
+  top: 85px;      /* pas dit aan zoals jij wil */
+  left: 24px;     /* pas dit aan zoals jij wil */
+  transform: scale(0.85);
+  transform-origin: top left;
+  z-index: 13000;
+  display: inline-flex;
+  gap: 3px;
 }
+
+#livesDisplay img[src*="heart"] {
+  width: 18px;
+  height: 18px;
+}
+
 
 
   /* mobiele highscore-knop linksboven (buiten frame mag ook) */
