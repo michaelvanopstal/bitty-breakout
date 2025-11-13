@@ -363,55 +363,6 @@ body {
   outline: 2px solid #ffcf62;
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
-/* =========================================================
-   âœ… PC (hele brede schermen)
-   ========================================================= */
-@media (min-width: 1500px) {
-  #game-container {
-    position: relative;
-    width: 1200px;
-    margin: 15px auto 0 auto;
-  }
-
-  #gameCanvas {
-    position: relative;
-    top: 0;
-    left: 0;
-    transform: none;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 645 / 600;
-  }
-
-  #player-display {
-    top: 40px;
-    left: 20px;
-  }
-
-  #scoreDisplay {
-    top: 20px;
-    right: 20px;
-    left: auto;
-  }
-
-  #time-box {
-    top: 20px;
-    right: 140px;
-    left: auto;
-  }
-
-  #highscore-overlay {
-    top: 120px;
-    left: 20px;
-  }
-
-  #bonus-power-panel {
-    position: fixed;
-    top: 320px;
-    right: 360px;
-  }
-}
-
 
 
 
