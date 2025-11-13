@@ -364,7 +364,7 @@ body {
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
 /* =========================================================
-   ✅ PC (hele brede schermen)
+   âœ… PC (hele brede schermen)
    ========================================================= */
 @media (min-width: 1500px) {
   #game-container {
@@ -413,28 +413,29 @@ body {
 }
 
 /* =========================================================
-   📱 Mobiele versie (tot 768px)
-   één basislayout
+   ðŸ“± Mobiele versie (tot 768px)
+   container + pseudo-achtergrond + vaste z-indexen
 ========================================================= */
 
-/* ======= 💻 DESKTOP: verberg mobiele highscore ======= */
-@media (min-width: 601px) {
+/* ======= ðŸ’» DESKTOP: verberg mobiele highscore ======= */
+@media (min-width: 769px) {
   #mobile-highscore {
     display: none !important;
     visibility: hidden !important;
     pointer-events: none !important;
   }
 }
-/* ======= 📱 MOBIEL tot 600px – BASISLAYOUT ======= */
-@media (max-width: 600px) {
+
+/* ======= ðŸ“± MOBIEL tot 768px ======= */
+@media (max-width: 768px) {
 
   :root {
     --frame-top-space: 5vh;
-    --frame-bottom-space: 5vh;
+    --frame-bottom-space: 15vh;
     --frame-side-space: 0vw;
 
-    /* positie van het canvas binnen mobile.png */
-    --canvas-inset-top: 15%;    /* wil je lager? maak hier 18% of 20% van */
+    /* gele venster / speelveld binnen het plaatje */
+    --canvas-inset-top: 15%;
     --canvas-inset-left: 5%;
     --canvas-inset-right: 2.6%;
     --canvas-inset-bottom: 18%;
@@ -442,15 +443,12 @@ body {
     --bg-scale: 1;
   }
 
-  /* simpele body, geen flex, geen rare overflow */
   body {
-    margin: 0;
     background: #FF9305;
-    padding: 0;
-    font-family: Arial, sans-serif;
+    padding-bottom: 0;
   }
 
-  /* container waar de telefoon in zit */
+
   #game-container {
     position: relative;
     width: calc(100vw - (2 * var(--frame-side-space)));
@@ -461,48 +459,47 @@ body {
     background: none;
   }
 
-  /* hier wordt mobile.png getekend als frame */
+ 
   #game-container::before {
     content: "";
     position: absolute;
     inset: 0;
     background: url("mobile.png") no-repeat center center;
-    background-size: contain;        /* hele telefoon zichtbaar */
+    background-size: cover;
     transform: scale(var(--bg-scale));
     transform-origin: center center;
     z-index: 1;
   }
 
-  /* canvas netjes in het gele scherm, zonder vervorming */
+  /* 2ï¸âƒ£ canvas stabiel in het gele scherm */
   #gameCanvas {
     position: absolute !important;
     top: var(--canvas-inset-top) !important;
     left: var(--canvas-inset-left) !important;
-    width: calc(
-      100% - var(--canvas-inset-left) - var(--canvas-inset-right)
-    ) !important;
-    height: auto !important;         /* verhouding blijft gelijk → blokjes normaal */
+    width: calc(100% - var(--canvas-inset-left) - var(--canvas-inset-right)) !important;
+    height: auto !important;
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 10 !important;          /* boven frame, onder HUD */
+    z-index: 10 !important;   /* boven frame, onder HUD */
   }
 
-  /* desktop-highscore + desktop-chat weg op mobiel */
+
   #highscore-overlay,
   #trophy,
-  #chatbox,
-  #chat-sticker-panel {
+  #musicToggle,
+  #resetBallBtn,
+  #bikeFlyer,
+  #chatbox,             /* oude desktopchat uit op mobiel */
+  #chat-sticker-panel { /* oud stickerpaneel ook uit op mobiel */
     display: none !important;
   }
 
-  /* login rechtsboven */
+  
   #login-overlay {
     position: fixed !important;
-    top: 10px !important;
+    top: 10px !important;         /* jouw keuze */
     right: 8px !important;
-    left: auto !important;
-    text-align: right;
     z-index: 12000 !important;
 
     transform: translateZ(0) scale(0.60);
@@ -514,61 +511,126 @@ body {
     gap: 6px;
   }
 
+  /* form-elementen compacter op mobiel */
   #login-overlay input[type="text"],
   #login-overlay input[type="number"],
   #login-overlay input[type="email"],
   #login-overlay button {
-    font-size: 16px;           /* min 16px → geen zoom op iPhone */
+    font-size: 12px;
     padding: 6px 8px;
-    height: 28px;
+    height: 24px;
     line-height: 1.2;
   }
 
-  /* Player linksboven in de telefoon */
   #player-display {
-    position: absolute !important;
-    top: 9% !important;
-    left: 7% !important;
+    position: fixed !important;
+    top: 12px !important;
+    left: 10px !important;
     font-size: 14px !important;
     z-index: 16000 !important;
-    color: #ffffff;
   }
 
-  /* Score bovenin, gecentreerd */
   #scoreDisplay {
-    position: absolute !important;
-    top: 9% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    font-size: 16px !important;
-    color: white !important;
-    z-index: 16000 !important;
-  }
+  position: absolute !important;
+  top: calc(var(--canvas-inset-top) - 3%) !important;   /* boven canvas → in telefoon */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 16px !important;
+  color: white !important;
+  z-index: 16000 !important;
+}
 
-  /* Tijd onder de score */
-  #time-box {
-    position: absolute !important;
-    top: 14% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: auto !important;
-    height: auto !important;
-    text-align: center;
-    z-index: 16000 !important;
-    pointer-events: none;
+#time-box {
+  position: absolute !important;
+  top: calc(var(--canvas-inset-top) + 2%) !important;   /* iets onder Score */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 16px !important;
+  z-index: 16000 !important;
+}
+
+  /* standaard: mobiele chat uit, die doen we pas in 600px */
+  #chatbox-mobile { display: none; }
+
+  /* ===== ðŸ“± MOBIELE HIGH SCORE PANEL ===== */
+  #mobile-highscore {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 12000;
+    display: block !important;
   }
-  #timeDisplay {
-    color: white;
-    font-size: 16px;
+  /* de knop zelf */
+  #mobileHighscoreBtn {
+    background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
+    border: 2px solid #a05c00;
+    border-radius: 12px;
+    color: #5a2700;
     font-weight: bold;
-    font-family: Arial, sans-serif;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
   }
+  /* paneeltje dat openklapt */
+  #mobileHighscorePanel {
+    position: absolute;
+    top: 42px;
+    left: 0;
+    background: #7b1e1e;
+    border: 2px solid #b66414;
+    border-radius: 10px;
+    padding: 8px;
+    width: 200px;
+    max-height: 260px;
+    overflow-y: auto;
+    display: none; /* standaard dicht */
+    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+  }
+  #mobileHighscorePanel.show { display: block; }
+  #mobileHighscoreList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    color: #ffe9c4;
+    font-size: 13px;
+  }
+  #mobileHighscoreList li {
+    margin: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 2px;
+  }
+}
 
-  /* levens / hartjes onder HUD */
+
+
+
+@media (min-width: 769px) and (max-width: 1024px) {
   #heartsHud, #livesDisplay, #lives, .hearts, .lives {
-    position: absolute !important;
-    top: 18% !important;
-    left: 7% !important;
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    transform: scale(0.90);
+    transform-origin: top left;
+    z-index: 12000;
+  }
+  #heartsHud img[src*="heart"],
+  #livesDisplay img[src*="heart"],
+  #lives img[src*="heart"],
+  .hearts img[src*="heart"],
+  .lives img[src*="heart"] {
+    width: 22px;
+    height: 22px;
+    margin-right: 4px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  #heartsHud, #livesDisplay, #lives, .hearts, .lives {
+    position: fixed;
+    top: 70px;                 /* onder je HUD */
+    left: 12px;
     transform: scale(0.78);
     transform-origin: top left;
     z-index: 13000;
@@ -585,17 +647,13 @@ body {
     height: 18px;
     margin-right: 3px;
   }
+}
 
-  /* mobiele highscoreknop linksboven */
-  #mobile-highscore {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 12000;
-    display: block !important;
-  }
 
-  /* chat-knop onderaan + popup-chat zoals je die al had */
+
+
+@media (max-width: 600px) {
+  /* vaste chatknop onderaan, volle breedte */
   #chat-mobile-button {
     all: unset;
     position: fixed;
@@ -618,47 +676,163 @@ body {
     font-family: system-ui, Arial, sans-serif;
   }
 
+  #chat-mobile-button .cmb-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 179, 31, 0.26);
+    border-radius: 9990px;
+    padding: 3px 6px 3px 3px;
+  }
+
+  #chat-mobile-button .cmb-dot {
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle, #ffa423 0%, #e57611 80%);
+    border-radius: 50%;
+  }
+
+  #chat-mobile-button .cmb-arrow {
+    font-size: 11px;
+    color: #5f3001;
+  }
+
+  #chat-mobile-button .cmb-label {
+    font-weight: 700;
+    color: #5f3001;
+    font-size: 14px;
+  }
+
+  #chat-mobile-button .cmb-close {
+    margin-left: auto;
+    background: rgba(0,0,0,.08);
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: #5f3001;
+    font-size: 13px;
+  }
+
+  /* popup chatbox (verstopt tot open) */
   #chatbox-mobile {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 50px;
+    bottom: 50px;                    /* direct boven de knop */
     width: 90vw;
     max-width: 460px;
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 14px 14px;
     box-shadow: 0 6px 18px rgba(0,0,0,.35);
     z-index: 9980;
-    overflow: hidden;
+    overflow: hidden;                /* alles blijft in de box */
     display: none;
   }
   #chatbox-mobile.open { display: block; }
 
-  /* BONUS POWER klein rechtsboven */
+  .chatbox-header-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(#ffd56a,#ffb12b);
+    color: #7a2b00;
+    padding: 6px 12px;
+    font-weight: 700;
+  }
+
+  #chatMobileClose {
+    background: rgba(0,0,0,.08);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    color: #7a2b00;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  /* berichtenvlak */
+  #chatMobileMessages {
+    height: 280px;
+    overflow-y: auto;
+    background: #7b1e1e;
+    color: #ffe9c4;
+    padding: 8px;
+    position: relative;
+    z-index: 1;             /* onder overlay */
+  }
+
+  /* input onderaan */
+  #chatMobileForm {
+    background: linear-gradient(#ffb545,#f08a25);
+    padding: 8px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    z-index: 1;
+  }
+  #chatMobileForm input {
+    flex: 1;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 8px;
+  }
+  #chatMobileForm button {
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  #chatStickerOverlay {
+    position: absolute;
+    top: 42px;                 /* onder kop */
+    bottom: 56px;              /* boven input */
+    left: 0;
+    right: 0;
+    background: #7b1e1e;       /* zelfde kleur als chat */
+    z-index: 5;                /* boven messages en form */
+    display: none;
+    overflow-y: auto;
+    padding: 10px 6px 12px;
+  }
+  #chatStickerOverlay.show { display: block; }
+
+  #chatStickerOverlay .sticker-item {
+    display: inline-block;
+    width: 72px;
+    height: 72px;
+    margin: 4px;
+    background: rgba(0,0,0,0.12);
+    border-radius: 10px;
+    text-align: center;
+    vertical-align: top;
+  }
+  #chatStickerOverlay .sticker-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+  }
+}
+  /* --- FIX: Power-panel alleen op echt kleine schermen (mobiel) --- */
+@media (max-width: 600px) {
   #bonus-power-panel {
     position: fixed !important;
-    top: 45px !important;
-    right: 10px !important;
-    bottom: auto !important;
+    top: 45px !important;       /* net onder login */
+    right: 10px !important;     /* rechtsboven */
+    bottom: auto !important;    /* voorkom uitrekken */
     transform: scale(0.3) !important;
     transform-origin: top right !important;
     z-index: 15000 !important;
   }
 }
-
-/* boven 600px geen mobiele chat */
 @media (min-width: 601px) {
   #chat-mobile-button,
   #chatbox-mobile {
-    display: none !important;
-  }
-
-  #mobile-highscore {
-    display: none !important;
+    display: none;
   }
 }
-
-
-
-
 
