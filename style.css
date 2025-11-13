@@ -578,12 +578,13 @@ body {
   /* Time net onder de score */
   #time-box {
     position: absolute !important;
-    top: 25px; !important;
-    right: 80px; !important;
+    top: 4% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
     width: auto !important;
     height: auto !important;
     text-align: center;
-    z-index: 17000 !important;
+    z-index: 16000 !important;
     pointer-events: none;
   }
   #timeDisplay {
