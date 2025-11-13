@@ -364,7 +364,7 @@ body {
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
 /* =========================================================
-   âœ… PC (hele brede schermen)
+   Ã¢Å“â€¦ PC (hele brede schermen)
    ========================================================= */
 @media (min-width: 1500px) {
   #game-container {
@@ -411,6 +411,7 @@ body {
     right: 360px;
   }
 }
+
 
 /* ======= 📱 MOBIEL t/m 600px – SIMPEL EN VAST ======= */
 @media (max-width: 600px) {
