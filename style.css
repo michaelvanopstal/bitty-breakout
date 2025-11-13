@@ -412,12 +412,8 @@ body {
   }
 }
 
-/* =========================================================
-   ðŸ“± Mobiele versie (tot 768px)
-   container + pseudo-achtergrond + vaste z-indexen
-========================================================= */
 
-/* ======= ðŸ’» DESKTOP: verberg mobiele highscore ======= */
+
 @media (max-width: 601px) {
   #mobile-highscore {
     display: none !important;
@@ -426,7 +422,7 @@ body {
   }
 }
 
-/* ======= ðŸ“± MOBIEL tot 768px ======= */
+
 @media (max-width: 600px) {
 
   :root {
@@ -552,7 +548,6 @@ body {
   /* standaard: mobiele chat uit, die doen we pas in 600px */
   #chatbox-mobile { display: none; }
 
-  /* ===== ðŸ“± MOBIELE HIGH SCORE PANEL ===== */
   #mobile-highscore {
     position: fixed;
     top: 10px;
