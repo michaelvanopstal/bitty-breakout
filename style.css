@@ -793,4 +793,13 @@ body {
   }
 }
 
+/* Desktop: alles wat mobiel is verstoppen */
+@media (min-width: 601px) {
+  #chat-mobile-button,
+  #chatbox-mobile,
+  #mobile-highscore {
+    display: none !important;
+  }
+}
+
 
