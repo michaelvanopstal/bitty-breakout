@@ -465,16 +465,17 @@ body {
     background: none;
   }
 
-  #game-container::before {
+ #game-container::before {
     content: "";
     position: absolute;
     inset: 0;
     background: url("mobile.png") no-repeat center center;
-    background-size: contain;              /* hele telefoon in beeld, niet afsnijden */
-    transform: scale(var(--bg-scale));
+    background-size: contain;
+    transform: translateY(-3%) scale(var(--bg-scale)); /* 3% omhoog */
     transform-origin: center center;
     z-index: 1;
-  }
+}
+
 
   /* canvas stabiel in het gele scherm */
   #gameCanvas {
