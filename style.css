@@ -418,7 +418,7 @@ body {
 ========================================================= */
 
 /* ======= ðŸ’» DESKTOP: verberg mobiele highscore ======= */
-@media (min-width: 769px) {
+@media (max-width: 768px) {
   #mobile-highscore {
     display: none !important;
     visibility: hidden !important;
@@ -652,7 +652,7 @@ body {
 
 
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   /* vaste chatknop onderaan, volle breedte */
   #chat-mobile-button {
     all: unset;
@@ -818,7 +818,7 @@ body {
   }
 }
   /* --- FIX: Power-panel alleen op echt kleine schermen (mobiel) --- */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   #bonus-power-panel {
     position: fixed !important;
     top: 45px !important;       /* net onder login */
@@ -829,7 +829,7 @@ body {
     z-index: 15000 !important;
   }
 }
-@media (min-width: 601px) {
+@media (max-width: 768px) {
   #chat-mobile-button,
   #chatbox-mobile {
     display: none;
