@@ -518,16 +518,16 @@ body {
     gap: 6px;
   }
 
-  /* form-elementen compacter op mobiel */
-  #login-overlay input[type="text"],
-  #login-overlay input[type="number"],
-  #login-overlay input[type="email"],
-  #login-overlay button {
-    font-size: 12px;
-    padding: 6px 8px;
-    height: 24px;
-    line-height: 1.2;
-  }
+#login-overlay input[type="text"],
+#login-overlay input[type="number"],
+#login-overlay input[type="email"],
+#login-overlay button {
+  font-size: 16px;           /* min 16px -> geen zoom */
+  padding: 6px 8px;
+  height: 28px;
+  line-height: 1.2;
+}
+
 
   /* Player-naam in de telefoon, linksboven */
   #player-display {
