@@ -418,7 +418,7 @@ body {
 ========================================================= */
 
 /* ======= 💻 DESKTOP: verberg mobiele highscore ======= */
-@media (min-width: 769px) {
+@media (min-width: 601px) {
   #mobile-highscore {
     display: none !important;
     visibility: hidden !important;
@@ -426,8 +426,8 @@ body {
   }
 }
 
-/* ======= 📱 MOBIEL tot 768px ======= */
-@media (max-width: 768px) {
+/* ======= 📱 MOBIEL tot 600px ======= */
+@media (max-width: 600px) and (orientation: portrait) {
 
   :root {
     --frame-top-space: 5vh;
@@ -810,7 +810,7 @@ body {
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 601px) {
   #chat-mobile-button,
   #chatbox-mobile {
     display: none !important;
