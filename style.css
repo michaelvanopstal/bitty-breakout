@@ -477,7 +477,7 @@ body {
     inset: 0;
     background: url("mobile.png") no-repeat center center;
     background-size: contain;
-    transform: translateY(-5%) scale(var(--bg-scale)); /* 3% omhoog */
+    transform: translateY(-0%) scale(var(--bg-scale)); /* 3% omhoog */
     transform-origin: center center;
     z-index: 1;
 }
