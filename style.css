@@ -504,7 +504,7 @@ body {
     left: 24px !important;
     font-size: 14px !important;
     color: #ffffff;
-    z-index: 16000 !important;
+    z-index: 18000 !important;
   }
 
   /* score rechtsboven IN het frame */
@@ -521,11 +521,11 @@ body {
   #time-box {
     position: absolute !important;
     top: 50px !important;
-    left: 70px !important;
+    left: 160px !important;
     width: auto !important;
     height: auto !important;
     color: #ffffff !important;
-    z-index: 16000 !important;
+    z-index: 17000 !important;
   }
   #timeDisplay {
     color: #ffffff;
