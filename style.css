@@ -500,33 +500,52 @@ body {
     display: none !important;
   }
 
-  /* login bovenin scherm (mag los staan) */
-  #login-overlay {
-    position: fixed !important;
-    top: 10px !important;
-    right: 12px !important;
-    left: auto !important;
-    text-align: right;
-    z-index: 12000 !important;
+ /* login bovenin scherm (mag los staan) */
+#login-overlay {
+  position: fixed !important;
+  top: 10px !important;
+  right: 12px !important;
+  left: auto !important;
+  z-index: 12000 !important;
 
-    transform: translateZ(0) scale(0.60);
-    transform-origin: top right;
+  /* FLEX: knop + veldje netjes naast elkaar */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;              /* ruimte tussen knop en input */
+  justify-content: flex-end;
 
-    padding: 6px 8px !important;
-    max-width: 260px;
-    width: auto;
-    gap: 6px;
-  }
+  transform: translateZ(0) scale(0.60);
+  transform-origin: top right;
 
+  padding: 6px 8px !important;
+  max-width: 260px;      /* niet te breed */
+  width: auto;
+}
+
+/* formulier-elementen compacter op mobiel + geen zoom */
 #login-overlay input[type="text"],
 #login-overlay input[type="number"],
 #login-overlay input[type="email"],
 #login-overlay button {
-  font-size: 16px;           /* min 16px -> geen zoom */
+  font-size: 16px;       /* min 16px -> iPhone zoomt niet in */
   padding: 6px 8px;
   height: 28px;
   line-height: 1.2;
 }
+
+/* zorg dat het inputje niet 100% breed wordt */
+#login-overlay input[type="text"],
+#login-overlay input[type="number"],
+#login-overlay input[type="email"] {
+  width: 140px;          /* stel gerust anders in (bijv. 120 / 160) */
+}
+
+/* knop tekst niet laten afbreken */
+#login-overlay button {
+  white-space: nowrap;
+}
+
 
 
   /* Player-naam in de telefoon, linksboven */
