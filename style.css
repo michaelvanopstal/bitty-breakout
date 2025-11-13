@@ -541,8 +541,6 @@ body {
   transform: scale(0.85);
   transform-origin: top left;
   z-index: 13000;
-  display: inline-flex;
-  gap: 3px;
 }
 
 #livesDisplay img[src*="heart"] {
