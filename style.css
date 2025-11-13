@@ -447,12 +447,18 @@ body {
     margin: 0;
     background: #FF9305;
     padding: 0;
-    height: 100dvh;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+
+    /* FIX voor iPhone keyboard + zoom bug */
+    height: auto !important;
+    min-height: 100vh !important;
+
+    /* FLEX MAG NIET op iPhone → veroorzaakt jouw hele bug */
+    display: block !important;
+
+    /* optioneel kleine top-padding zodat mobile.png niet plakt */
+    padding-top: 4px;
+}
+
 
   #game-container {
     position: relative;
