@@ -537,7 +537,7 @@ body {
 #livesDisplay {
   position: absolute;
   top: 75px;      /* pas dit aan zoals jij wil */
-  left: 24px;     /* pas dit aan zoals jij wil */
+  left: 12px;     /* pas dit aan zoals jij wil */
   transform: scale(0.85);
   transform-origin: top left;
   z-index: 13000;
