@@ -810,5 +810,13 @@ body {
   }
 }
 
+@media (min-width: 769px) {
+  #chat-mobile-button,
+  #chatbox-mobile {
+    display: none !important;
+  }
+}
+
+
 
 
