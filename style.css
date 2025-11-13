@@ -528,18 +528,28 @@ body {
   }
 
  /* === Enkel de 3 vaste levens linksboven === */
-#livesDisplay {
-  position: absolute;
-  top: 75px;      /* pas dit aan zoals jij wil */
-  left: 12px;     /* pas dit aan zoals jij wil */
-  transform: scale(0.85);
-  transform-origin: top left;
-  z-index: 13000;
-}
+@media (max-width: 600px) {
 
-#livesDisplay img[src*="heart"] {
-  width: 18px;
-  height: 18px;
+  #hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 13000;
+  }
+
+  #livesDisplay {
+    position: absolute;
+    top: 75px;     /* schuif omhoog/omlaag */
+    left: 12px;    /* schuif meer naar links/rechts */
+    transform: scale(0.85);
+    transform-origin: top left;
+    z-index: 13000;
+  }
+
+  #livesDisplay img[src*="heart"] {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 
