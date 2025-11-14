@@ -466,7 +466,7 @@ body {
     position: absolute !important;
     top: 118px !important;        /* afstand vanaf bovenkant frame */
     left: 18px !important;        /* afstand vanaf linkerkant frame */
-    width: 322px !important;      /* breedte canvas */
+    width: 330px !important;      /* breedte canvas */
     height: auto !important;
     transform: none !important;
     border: none !important;
