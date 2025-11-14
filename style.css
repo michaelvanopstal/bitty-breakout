@@ -513,7 +513,7 @@ body {
   /* naam linksboven IN het frame */
   #player-display {
     position: absolute !important;
-    top: 50px !important;
+    top: 65px !important;
     left: 24px !important;
     font-size: 14px !important;
     color: #ffffff;
@@ -526,7 +526,7 @@ body {
  /* tijd onder de score, gecentreerd */
   #time-box {
     position: absolute !important;
-    top: 52px !important;
+    top: 70x !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: auto !important;
