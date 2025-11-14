@@ -441,7 +441,7 @@ body {
   
   #game-container {
   position: relative;
-  width: 340px;
+  width: 360px;
   height: 600px; /* onderkant omhoog  */
   overflow: hidden;
   z-index: 0;
@@ -460,18 +460,18 @@ body {
   z-index: 1;
 }
 
-  /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
-  #gameCanvas {
-    position: absolute !important;
-    top: 140px !important;        /* afstand vanaf bovenkant frame */
-    left: 10px !important;     /* 10px van links */
-    width: 340px !important;   /* zodat rechts óók 10px overblijft */
-    height: auto !important;
-    transform: none !important;
-    border: none !important;
-    background: transparent !important;
-    z-index: 10 !important;       /* boven mobile.png, onder HUD */
-  }
+ #gameCanvas {
+  position: absolute !important;
+  top: 140px !important;
+  left: 10px !important;       /* 10px van links */
+  width: 320px !important;     /* zodat rechts óók 10px overblijft */
+  height: auto !important;
+  transform: none !important;
+  border: none !important;
+  background: transparent !important;
+  z-index: 10 !important;
+}
+
 
   /* desktop-dingen uit op mobiel */
   #highscore-overlay,
