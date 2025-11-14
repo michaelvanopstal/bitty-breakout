@@ -438,41 +438,41 @@ body {
     font-family: Arial, sans-serif;
   }
 
- /* Dynamisch mobiel frame */
-#game-container {
+  /* vast frame voor mobile.png – jij kunt 360x720 aanpassen */
+  #game-container {
     position: relative;
-    width: 100vw;        /* vult je hele breedscherm */
-    max-width: 430px;    /* iPhone max breedte */
-    margin: 0 auto;
-    padding-top: 70px;    /* ruimte onder levens */
-    padding-bottom: 20px; /* ruimte boven chat */
-    overflow: visible;    /* BELANGRIJK */
-}
+    width: 360px;          /* breedte van jouw telefoon-frame */
+    height: 720px;         /* hoogte van jouw telefoon-frame */
+    margin: 10px auto 0;   /* gecentreerd */
+    overflow: hidden;
+    z-index: 0;
+    background: none;
+  }
 
-/* mobi.png automatisch passend om canvas */
-#game-container::before {
+  #game-container::before {
     content: "";
     position: absolute;
-    top: 0;
+    top: -23px;
     left: 0;
-    width: 100%;
-    height: calc(100% - 20px);
-    background: url("mobile.png") no-repeat center top;
-    background-size: contain;   /* schaal mee zonder afsnijden */
-    z-index: 1;
-}
+    width: 360px;
+    height: 720px;
+    background: url("mobile.png") no-repeat 0 0;
+    background-size: 100% 100%;   /* vult precies het frame */
+    z-index: 1;                   /* onder alles, boven body */
+  }
 
-/* canvas logisch centreren in mobiel frame */
-#gameCanvas {
-    position: relative !important;
-    margin: 0 auto !important;
-    display: block !important;
-    width: 90% !important;      /* responsief */
+  /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
+  #gameCanvas {
+    position: absolute !important;
+    top: 140px !important;        /* afstand vanaf bovenkant frame */
+    left: 30px !important;        /* afstand vanaf linkerkant frame */
+    width: 300px !important;      /* breedte canvas */
     height: auto !important;
-    z-index: 10 !important;
-}
-
-
+    transform: none !important;
+    border: none !important;
+    background: transparent !important;
+    z-index: 10 !important;       /* boven mobile.png, onder HUD */
+  }
 
   /* desktop-dingen uit op mobiel */
   #highscore-overlay,
