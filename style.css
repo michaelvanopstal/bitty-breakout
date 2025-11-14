@@ -452,10 +452,10 @@ body {
 #game-container::before {
     content: "";
     position: absolute;
-    top: 80px;
+    top: 90px;
     left: 0;
     width: 360px;     /* zelfde als PNG */
-    height: 550px;    /* zelfde als PNG */
+    height: 500px;    /* zelfde als PNG */
     background: url("mobile.png") no-repeat center top;
     background-size: 100% 100%;  /* exacte pasvorm */
     z-index: 1;
