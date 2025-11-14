@@ -557,7 +557,7 @@ body {
 
   #livesDisplay {
     position: absolute;
-    top: 70px;
+    top: 80px;
     left: 12px;
     transform: scale(0.85);
     gap: 3px;
