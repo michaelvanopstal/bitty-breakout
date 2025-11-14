@@ -428,15 +428,17 @@ body {
 /* ======= 📱 MOBIEL t/m 600px – SIMPEL EN VAST ======= */
 @media (max-width: 600px) {
 
-  /* geen scroll-gedoe, geen 100vh meer */
+
   html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;
+    overflow: hidden;          /* ⬅ geen scroll meer */
     background: #FF9305;
     font-family: Arial, sans-serif;
+    overscroll-behavior: none; /* ⬅ geen “bounce” effect */
   }
+
 
  /* Frame container (100% intact, niet croppen) */
 #game-container {
