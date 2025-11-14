@@ -439,24 +439,23 @@ body {
   }
 
   
-  #game-container {
+
+#game-container {
   position: relative;
-  width: 360px;
-  height: 600px; /* onderkant omhoog  */
-  overflow: hidden;
+  width: 100vw;              /* vult 100% van de telefoon */
+  height: auto;              /* geen vaste hoogte = nooit afsnijden */
+  aspect-ratio: 360 / 650;   /* JOUW PNG VERHOUDING → blijft perfect */
+  overflow: visible;         /* niets wordt ooit nog afgesneden */
+  margin: 0 auto;
   z-index: 0;
-  background: none;
 }
 
 #game-container::before {
   content: "";
   position: absolute;
-  top: -10px;         /* ⇐ DIT verplaatst je PNG omhoog/omlaag */
-  left: 0;
-  width: 100%;        /* zelfde als container */
-  height: 100%;       /* zelfde als container */
-  background: url("mobile.png") no-repeat;
-  background-position-y: 90px;  /* bovenkant omlaag */
+  inset: 0;                  /* top/left/right/bottom = 0 */
+  background: url("mobile.png") no-repeat center center;
+  background-size: contain;  /* PNG schaalt PERFECT mee, nooit afsnijden */
   z-index: 1;
 }
 
