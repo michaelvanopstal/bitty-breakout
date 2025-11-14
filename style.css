@@ -523,7 +523,7 @@ body {
    /* === SCORE – MOBIEL === */
   #scoreDisplay {
     position: absolute;
-    top: 60px;      /* kies een plek in je telefoon-frame */
+    top: 65px;      /* kies een plek in je telefoon-frame */
     left: 165px;     /* deze kun je zelf fine-tunen */
     font-size: 14px; /* vaak iets kleiner op mobiel */
     color: #ffffff;
