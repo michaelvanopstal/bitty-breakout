@@ -113,6 +113,19 @@ body {
   font-family: Arial, sans-serif;
 }
 
+/* ===== HUD & levens – DESKTOP / LAPTOP ===== */
+#hud {
+  position: absolute;
+  top: 10px;
+  left: 80px;
+  z-index: 1000;
+}
+
+#livesDisplay {
+  display: flex;
+  gap: 6px;
+}
+
 #bikeFlyer {
   position: absolute;
   width: 150px;
@@ -528,26 +541,12 @@ body {
     font-weight: bold;
   }
 
-
-  
- /* === Enkel de 3 vaste levens linksboven === */
-#livesDisplay {
-  position: absolute;
-  top: 85px;      /* pas dit aan zoals jij wil */
-  left: 24px;     /* pas dit aan zoals jij wil */
-  transform: scale(0.85);
-  transform-origin: top left;
-  z-index: 13000;
-  display: inline-flex;
-  gap: 3px;
-}
-
-#livesDisplay img[src*="heart"] {
-  width: 18px;
-  height: 18px;
-}
-
-
+  #livesDisplay {
+    position: absolute;
+    top: 85px;   /* verander voor mobile */
+    left: 24px;  /* verander voor mobile */
+    ...
+  }
 
   /* mobiele highscore-knop linksboven (buiten frame mag ook) */
   #mobile-highscore {
