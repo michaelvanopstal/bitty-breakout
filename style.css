@@ -452,7 +452,7 @@ body {
 #game-container::before {
   content: "";
   position: absolute;
-  top: -100px;         /* ⇐ DIT verplaatst je PNG omhoog/omlaag */
+  top: 50px;         /* ⇐ DIT verplaatst je PNG omhoog/omlaag */
   left: 0;
   width: 100%;        /* zelfde als container */
   height: 100%;       /* zelfde als container */
