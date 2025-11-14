@@ -466,8 +466,8 @@ body {
   #gameCanvas {
     position: absolute !important;
     top: 140px !important;        /* afstand vanaf bovenkant frame */
-    left: 30px !important;        /* afstand vanaf linkerkant frame */
-    width: 300px !important;      /* breedte canvas */
+    left: 18px !important;        /* afstand vanaf linkerkant frame */
+    width: 324px !important;      /* breedte canvas */
     height: auto !important;
     transform: none !important;
     border: none !important;
