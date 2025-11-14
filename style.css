@@ -443,7 +443,7 @@ body {
     position: relative;
     width: 360px;     /* originele PNG breedte */
     height: 720px;    /* originele PNG hoogte */
-    margin: 120px auto 0;   /* ← VERPLAATST OMHOOG / OMLAAG */
+    margin: 60px auto 0;   /* ← VERPLAATST OMHOOG / OMLAAG */
     overflow: visible; 
     z-index: 0;
 }
@@ -541,7 +541,7 @@ body {
   width: 80px;      /* zodat centreren klopt */
   height: 20px;
   text-align: center;
-  z-index: 16000;
+  z-index: 17686;
 }
 
 #timeDisplay {
