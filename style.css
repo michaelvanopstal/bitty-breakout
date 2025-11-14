@@ -535,7 +535,7 @@ body {
 /* ==== TIJD – MOBIEL, SIMPEL & PERFECT GECENTREERD ==== */
 #time-box {
   position: absolute;
-  top: 100px;       /* staat boven het canvas → jij mag fine-tunen */
+  top: 50px;       /* staat boven het canvas → jij mag fine-tunen */
   left: 140px;      /* exact gecalculeerd midden */
   width: 80px;      /* zodat centreren klopt */
   height: 20px;
