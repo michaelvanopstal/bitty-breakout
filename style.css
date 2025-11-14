@@ -444,8 +444,8 @@ body {
     width: 100vw;        /* vult je hele breedscherm */
     max-width: 430px;    /* iPhone max breedte */
     margin: 0 auto;
-    padding-top: 40px;    /* ruimte onder levens */
-    padding-bottom: 80px; /* ruimte boven chat */
+    padding-top: 70px;    /* ruimte onder levens */
+    padding-bottom: 20px; /* ruimte boven chat */
     overflow: visible;    /* BELANGRIJK */
 }
 
