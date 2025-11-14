@@ -520,7 +520,17 @@ body {
     z-index: 18000 !important;
   }
 
-  
+   /* === SCORE – MOBIEL === */
+  #scoreDisplay {
+    position: absolute;
+    top: 52px;      /* kies een plek in je telefoon-frame */
+    left: 210px;     /* deze kun je zelf fine-tunen */
+    font-size: 14px; /* vaak iets kleiner op mobiel */
+    color: #ffffff;
+    z-index: 13000;  /* hoog genoeg zodat het boven het mobile-frame staat */
+    pointer-events: none;
+    user-select: none;
+  }
 
  
  /* tijd onder de score, gecentreerd */
