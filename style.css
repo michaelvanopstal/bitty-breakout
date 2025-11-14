@@ -452,7 +452,7 @@ body {
   #game-container::before {
     content: "";
     position: absolute;
-    top: 0;
+    top: -20px;
     left: 0;
     width: 360px;
     height: 720px;
