@@ -441,7 +441,7 @@ body {
   
   #game-container {
   position: relative;
-  width: 360px;
+  width: 340px;
   height: 600px; /* onderkant omhoog  */
   overflow: hidden;
   z-index: 0;
@@ -456,7 +456,7 @@ body {
   width: 100%;        /* zelfde als container */
   height: 100%;       /* zelfde als container */
   background: url("mobile.png") no-repeat;
-  background-position-y: 80px;  /* bovenkant omlaag */
+  background-position-y: 95px;  /* bovenkant omlaag */
   z-index: 1;
 }
 
