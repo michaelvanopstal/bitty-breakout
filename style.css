@@ -442,8 +442,7 @@ body {
   #game-container {
   position: relative;
   width: 360px;
-  height: 650px;
-  margin: 30px auto 60px;
+  height: 600px; /* onderkant omhoog  */
   overflow: hidden;
   z-index: 0;
   background: none;
@@ -452,12 +451,12 @@ body {
 #game-container::before {
   content: "";
   position: absolute;
-  top: 50px;         /* ⇐ DIT verplaatst je PNG omhoog/omlaag */
+  top: 0px;         /* ⇐ DIT verplaatst je PNG omhoog/omlaag */
   left: 0;
   width: 100%;        /* zelfde als container */
   height: 100%;       /* zelfde als container */
   background: url("mobile.png") no-repeat;
-  background-size: 100% 100%;
+  background-position-y: 80px;  /* bovenkant omlaag */
   z-index: 1;
 }
 
