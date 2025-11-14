@@ -569,7 +569,7 @@ body {
     position: fixed;
     top: 10px;
     left: 10px;
-    z-index: 12000;
+    z-index: 19000;
     display: block !important;
   }
   #mobileHighscoreBtn {
