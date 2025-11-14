@@ -806,6 +806,24 @@
     }
   });
  
+<!-- 📱 eenvoudige canvas-scale voor mobiel -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.innerWidth > 768) return;   // alleen mobiel
+
+    const c = document.getElementById('gameCanvas');
+    if (!c) return;
+
+    const ratio = 600 / 645;              // verhouding van je game
+    const vw = window.innerWidth;
+
+    const canvasWidth  = Math.min(vw * 0.84, 550);
+    const canvasHeight = canvasWidth * ratio;
+
+    c.width  = canvasWidth;               // interne resolutie (gameblokjes)
+    c.height = canvasHeight;
+  });
+</script>
 
  
   <script>
