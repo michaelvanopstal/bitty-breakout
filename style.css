@@ -452,7 +452,7 @@ body {
   #game-container::before {
     content: "";
     position: absolute;
-    top: -20px;
+    top: -23px;
     left: 0;
     width: 360px;
     height: 720px;
@@ -617,7 +617,7 @@ body {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 8px;
+    bottom: 6px;
     width: 90vw;
     max-width: 460px;
     height: 44px;
