@@ -452,15 +452,14 @@ body {
   #game-container::before {
     content: "";
     position: absolute;
-    top: 90px;         /* ← VERPLAATS BOVENKANT */
-    bottom: 40px;      /* ← VERPLAATS ONDERKANT */
+    top: -23px;
     left: 0;
-    right: 0;
-    background: url("mobile.png") no-repeat center top;
-    background-size: cover;
-    z-index: 1;
-}
-
+    width: 360px;
+    height: 720px;
+    background: url("mobile.png") no-repeat 0 0;
+    background-size: 100% 100%;   /* vult precies het frame */
+    z-index: 1;                   /* onder alles, boven body */
+  }
 
   /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
   #gameCanvas {
