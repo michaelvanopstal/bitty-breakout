@@ -438,28 +438,28 @@ body {
     font-family: Arial, sans-serif;
   }
 
-  /* vast frame voor mobile.png – jij kunt 360x720 aanpassen */
-  #game-container {
-    position: relative;
-    width: 360px;          /* breedte van jouw telefoon-frame */
-    height: 720px;         /* hoogte van jouw telefoon-frame */
-    margin: 10px auto 0;   /* gecentreerd */
-    overflow: hidden;
-    z-index: 0;
-    background: none;
-  }
+  /* vast frame voor mobile.png */
+#game-container {
+  position: relative;
+  width: 360px;
+  height: 650px;          /* was 720px → onderkant komt hoger */
+  margin: 10px auto 60px; /* 60px ruimte boven je chat-knop */
+  overflow: hidden;
+  z-index: 0;
+  background: none;
+}
 
-  #game-container::before {
-    content: "";
-    position: absolute;
-    top: -23px;
-    left: 0;
-    width: 360px;
-    height: 720px;
-    background: url("mobile.png") no-repeat 0 0;
-    background-size: 100% 100%;   /* vult precies het frame */
-    z-index: 1;                   /* onder alles, boven body */
-  }
+#game-container::before {
+  content: "";
+  position: absolute;
+  top: -10px;             /* was -23px → frame iets omlaag */
+  left: 0;
+  width: 360px;
+  height: 650px;          /* zelfde als container */
+  background: url("mobile.png") no-repeat 0 0;
+  background-size: 100% 100%;
+  z-index: 1;
+}
 
   /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
   #gameCanvas {
