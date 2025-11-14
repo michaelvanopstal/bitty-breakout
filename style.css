@@ -438,28 +438,40 @@ body {
     font-family: Arial, sans-serif;
   }
 
-  /* vast frame voor mobile.png – jij kunt 360x720 aanpassen */
-  #game-container {
+ /* Dynamisch mobiel frame */
+#game-container {
     position: relative;
-    width: 360px;          /* breedte van jouw telefoon-frame */
-    height: 720px;         /* hoogte van jouw telefoon-frame */
-    margin: 10px auto 0;   /* gecentreerd */
-    overflow: hidden;
-    z-index: 0;
-    background: none;
-  }
+    width: 100vw;        /* vult je hele breedscherm */
+    max-width: 430px;    /* iPhone max breedte */
+    margin: 0 auto;
+    padding-top: 40px;    /* ruimte onder levens */
+    padding-bottom: 80px; /* ruimte boven chat */
+    overflow: visible;    /* BELANGRIJK */
+}
 
-  #game-container::before {
+/* mobi.png automatisch passend om canvas */
+#game-container::before {
     content: "";
     position: absolute;
-    top: 0px;
+    top: 0;
     left: 0;
-    width: 360px;
-    height: 720px;
-    background: url("mobile.png") no-repeat 0 0;
-     background-size: 100% 100%;   /* vult precies het frame */
-    z-index: 1;                   /* onder alles, boven body */
-  }
+    width: 100%;
+    height: calc(100% - 20px);
+    background: url("mobile.png") no-repeat center top;
+    background-size: contain;   /* schaal mee zonder afsnijden */
+    z-index: 1;
+}
+
+/* canvas logisch centreren in mobiel frame */
+#gameCanvas {
+    position: relative !important;
+    margin: 0 auto !important;
+    display: block !important;
+    width: 90% !important;      /* responsief */
+    height: auto !important;
+    z-index: 10 !important;
+}
+
 
   /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
   #gameCanvas {
