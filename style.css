@@ -443,7 +443,7 @@ body {
     position: relative;
     width: 360px;     /* originele PNG breedte */
     height: 600px;    /* originele PNG hoogte */
-    margin: 60px auto 0;   /* ← VERPLAATST OMHOOG / OMLAAG */
+    margin: 0px auto 0;   /* ← VERPLAATST OMHOOG / OMLAAG */
     overflow: visible; 
     z-index: 0;
 }
@@ -452,7 +452,7 @@ body {
 #game-container::before {
     content: "";
     position: absolute;
-    top: 100px;
+    top: 90px;
     left: 0;
     width: 360px;     /* zelfde als PNG */
     height: 600px;    /* zelfde als PNG */
