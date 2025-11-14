@@ -425,10 +425,8 @@ body {
   }
 }
 
-/* ======= ðŸ“± MOBIEL t/m 600px â€“ SIMPEL EN VAST ======= */
 @media (max-width: 600px) {
 
-  /* geen scroll-gedoe, geen 100vh meer */
   html, body {
     margin: 0;
     padding: 0;
@@ -438,33 +436,41 @@ body {
     font-family: Arial, sans-serif;
   }
 
-#game-container {
-  position: relative;
-  width: 100vw;      /* 100% schermbreedte */
-  height: auto;      /* hoogte gaat mee met de PNG */
-  overflow: hidden;
-  margin: 0 auto;
-  background: none;
-}
+  /* container = hele telefoonbreedte, vaste hoogte */
+  #game-container {
+    position: relative;
+    width: 100vw;          /* pakt de breedte van de telefoon */
+    max-width: 430px;      /* optioneel: niet breder dan typische phone */
+    height: 720px;         /* hier bepaal je hoe hoog je frame is */
+    margin: 10px auto 0;   /* centreren */
+    overflow: hidden;
+    z-index: 0;
+    background: none;
+  }
 
-#game-container::before {
-  content: "";
-  position: absolute;
-  inset: 0; 
-  background: url("mobile.png") no-repeat center top;
-  background-size: contain;   /* schaalt mooi zonder snijden */
-  z-index: 1;
-}
+  #game-container::before {
+    content: "";
+    position: absolute;
+    top: -10px;            /* iets omhoog/omlaag schuiven van je PNG */
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("mobile.png") no-repeat 0 0;
+    background-size: 100% 100%;   /* PNG vult precies het frame */
+    z-index: 1;
+  }
 
-
- #gameCanvas {
-  position: absolute !important;
-  top: 140px !important;
-  left: 10px !important;
-  width: calc(100vw - 20px) !important;   /* 10px links, 10px rechts */
-  height: auto !important;
-  z-index: 10 !important;
-}
+  #gameCanvas {
+    position: absolute !important;
+    top: 140px !important;            /* afstand vanaf bovenkant frame */
+    left: 10px !important;           /* 10px van links */
+    width: calc(100% - 20px) !important; /* 10px links + 10px rechts */
+    height: auto !important;
+    transform: none !important;
+    border: none !important;
+    background: transparent !important;
+    z-index: 10 !important;          /* boven mobile.png, onder HUD */
+  }
 
 
 
