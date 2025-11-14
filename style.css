@@ -452,7 +452,7 @@ body {
 #game-container::before {
     content: "";
     position: absolute;
-    top: 100;
+    top: 100px;
     left: 0;
     width: 360px;     /* zelfde als PNG */
     height: 720px;    /* zelfde als PNG */
