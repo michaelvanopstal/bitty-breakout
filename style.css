@@ -427,48 +427,39 @@ body {
 
 @media (max-width: 600px) {
 html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    background: #FF9305;
-    font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #FF9305;
+  font-family: Arial, sans-serif;
 }
 
-/* container = volledige breedte telefoonscherm,
-   met vaste hoogte zodat PNG zichtbaar blijft */
+/* container = breedte telefoon */
 #game-container {
-    position: relative;
-    width: 100vw;           /* TRUE fullscreen breedte */
-    max-width: 430px;       /* optioneel: limiet voor grote telefoons */
-    height: 1100px;          /* <-- HIER bepaal je hoe groot je PNG-frame is */
-    margin: 0 auto;
-    overflow: hidden;
-    z-index: 0;
-    background: none;
+  position: relative;
+  width: 100vw;        /* altijd volle telefoonbreedte */
+  max-width: 430px;    /* optioneel limiet */
+  margin: 0 auto;
 }
 
-/* PNG-frame, netjes schaalbaar en nooit afgesneden */
-#game-container::before {
-    content: "";
-    position: absolute;
-    inset: 0;               /* top:0; left:0; right:0; bottom:0 */
-    background: url("mobile.png") no-repeat top center;
-    background-size: contain;  /* <-- beste voor perfecte schaal zonder vervorming */
-    z-index: 1;
+/* het PNG-frame zelf */
+#frame-img {
+  display: block;
+  width: 100%;         /* pakt 100% van game-container */
+  height: auto;        /* verhouding blijft perfect */
 }
 
-/* canvas perfect binnen het frame met 10px ruimte links & rechts */
+/* canvas bovenop het frame */
 #gameCanvas {
-    position: absolute !important;
-    top: 140px !important;                    /* verschuif blokken naar beneden */
-    left: 10px !important;                    /* 10px van links */
-    width: calc(100% - 20px) !important;      /* altijd binnen frame */
-    height: auto !important;
-    transform: none !important;
-    border: none !important;
-    background: transparent !important;
-    z-index: 10 !important;                   /* boven PNG */
+  position: absolute;
+  top: 140px;                      /* verschuif je blokken omlaag/boven */
+  left: 10px;                      /* 10px vanaf linker binnenrand */
+  width: calc(100% - 20px);        /* 10px links + 10px rechts ruimte */
+  height: auto;
+  border: none;
+  background: transparent;
+  z-index: 10;                     /* boven het frame-plaatje */
 }
 
 
