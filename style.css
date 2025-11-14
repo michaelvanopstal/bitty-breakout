@@ -438,29 +438,29 @@ body {
     font-family: Arial, sans-serif;
   }
 
-  /* vast frame voor mobile.png – jij kunt 360x720 aanpassen */
-  #game-container {
+ /* Frame container (100% intact, niet croppen) */
+#game-container {
     position: relative;
-    width: 360px;          /* breedte van jouw telefoon-frame */
-    height: 720px;         /* hoogte van jouw telefoon-frame */
-    margin: 10px auto 0;   /* gecentreerd */
-    overflow: hidden;
+    width: 360px;     /* originele PNG breedte */
+    height: 720px;    /* originele PNG hoogte */
+    margin: 120px auto 0;   /* ← VERPLAATST OMHOOG / OMLAAG */
+    overflow: visible; 
     z-index: 0;
-    background: none;
-  }
+}
 
-  #game-container::before {
+/* De PNG zelf, exact passend */
+#game-container::before {
     content: "";
     position: absolute;
-    top: 100px;
-    bottom: 100px;    
+    top: 100;
     left: 0;
-    width: 360px;
-    height: 720px;
-    background: url("mobile.png") no-repeat 0 0;
-    background-size: 100% 100%;   /* vult precies het frame */
-    z-index: 1;                   /* onder alles, boven body */
-  }
+    width: 360px;     /* zelfde als PNG */
+    height: 720px;    /* zelfde als PNG */
+    background: url("mobile.png") no-repeat center top;
+    background-size: 100% 100%;  /* exacte pasvorm */
+    z-index: 1;
+}
+
 
   /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
   #gameCanvas {
