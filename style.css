@@ -461,15 +461,15 @@ body {
 
  #gameCanvas {
   position: absolute !important;
-  top: 140px !important;
-  left: 10px !important;       /* 10px van links */
-  width: 320px !important;     /* zodat rechts óók 10px overblijft */
+  top: 140px !important;      /* hiermee schuif je de blokken omlaag/omhoog */
+  left: 30px !important;      /* hiermee schuif je links/rechts */
   height: auto !important;
   transform: none !important;
   border: none !important;
   background: transparent !important;
   z-index: 10 !important;
 }
+
 
 
   /* desktop-dingen uit op mobiel */
