@@ -473,18 +473,6 @@ body {
 }
 
 
-  /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
-  #gameCanvas {
-    position: absolute !important;
-    top: 140px !important;        /* afstand vanaf bovenkant frame */
-    left: 30px !important;        /* afstand vanaf linkerkant frame */
-    width: 300px !important;      /* breedte canvas */
-    height: auto !important;
-    transform: none !important;
-    border: none !important;
-    background: transparent !important;
-    z-index: 10 !important;       /* boven mobile.png, onder HUD */
-  }
 
   /* desktop-dingen uit op mobiel */
   #highscore-overlay,
