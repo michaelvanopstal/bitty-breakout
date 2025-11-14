@@ -549,7 +549,6 @@ body {
   font-weight: bold;
 }
 
- @media (max-width: 600px) {
   #hud {
     position: absolute;
     top: 0;
