@@ -679,7 +679,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     bottom: 56px;
-    width: 90vw;
+    width: 85vw;
     max-width: 460px;
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 14px 14px;
