@@ -441,7 +441,7 @@ body {
   /* vast frame voor mobile.png – jij kunt 360x720 aanpassen */
   #game-container {
     position: relative;
-    width: 360px;          /* breedte van jouw telefoon-frame */
+    width: 400px;          /* breedte van jouw telefoon-frame */
     height: 720px;         /* hoogte van jouw telefoon-frame */
     margin: 10px auto 0;   /* gecentreerd */
     overflow: hidden;
