@@ -789,7 +789,7 @@ body {
 }
 
 /* Desktop: alles wat mobiel is verstoppen */
-@media (max-width: 769px) {
+@media (min-width: 769px) {
   #chat-mobile-button,
   #chatbox-mobile,
   #mobile-highscore {
