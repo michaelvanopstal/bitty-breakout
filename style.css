@@ -549,13 +549,20 @@ body {
   font-weight: bold;
 }
 
+ @media (max-width: 600px) {
+  #hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
   #livesDisplay {
     position: absolute;
-    top: 70px;   /* verander voor mobile */
-    left: 12px;  /* verander voor mobile */
+    top: 70px;
+    left: 12px;
     transform: scale(0.85);
-    transform-origin: top left;
-    z-index: 18500 !important;
+    gap: 3px;
+     z-index: 18500;
   }
 
   /* mobiele highscore-knop linksboven (buiten frame mag ook) */
