@@ -438,41 +438,33 @@ body {
     font-family: Arial, sans-serif;
   }
 
-  /* vast frame voor mobile.png â€“ jij kunt 360x720 aanpassen */
-  #game-container {
-    position: relative;
-    width: 360px;          /* breedte van jouw telefoon-frame */
-    height: 720px;         /* hoogte van jouw telefoon-frame */
-    margin: 10px auto 0;   /* gecentreerd */
-    overflow: hidden;
-    z-index: 0;
-    background: none;
-  }
+#game-container {
+  position: relative;
+  width: 100vw;      /* 100% schermbreedte */
+  height: auto;      /* hoogte gaat mee met de PNG */
+  overflow: hidden;
+  margin: 0 auto;
+  background: none;
+}
 
-  #game-container::before {
-    content: "";
-    position: absolute;
-    top: -23px;
-    left: 0;
-    width: 360px;
-    height: 720px;
-    background: url("mobile.png") no-repeat 0 0;
-    background-size: 100% 100%;   /* vult precies het frame */
-    z-index: 1;                   /* onder alles, boven body */
-  }
+#game-container::before {
+  content: "";
+  position: absolute;
+  inset: 0; 
+  background: url("mobile.png") no-repeat center top;
+  background-size: contain;   /* schaalt mooi zonder snijden */
+  z-index: 1;
+}
 
-  /* canvas in het gele speelveld â€“ px-waardes kun jij aanpassen */
-  #gameCanvas {
-    position: absolute !important;
-    top: 140px !important;        /* afstand vanaf bovenkant frame */
-    left: 30px !important;        /* afstand vanaf linkerkant frame */
-    width: 300px !important;      /* breedte canvas */
-    height: auto !important;
-    transform: none !important;
-    border: none !important;
-    background: transparent !important;
-    z-index: 10 !important;       /* boven mobile.png, onder HUD */
-  }
+
+ #gameCanvas {
+  position: absolute !important;
+  top: 140px !important;
+  left: 10px !important;
+  width: calc(100vw - 20px) !important;   /* 10px links, 10px rechts */
+  height: auto !important;
+  z-index: 10 !important;
+}
 
 
 
