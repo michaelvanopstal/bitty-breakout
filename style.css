@@ -555,7 +555,7 @@ body {
     left: 12px;  /* verander voor mobile */
     transform: scale(0.85);
     transform-origin: top left;
-    z-index: 16500 !important;
+    z-index: 18500 !important;
   }
 
   /* mobiele highscore-knop linksboven (buiten frame mag ook) */
