@@ -425,45 +425,54 @@ body {
   }
 }
 
+/* ======= 📱 MOBIEL t/m 600px – SIMPEL EN VAST ======= */
 @media (max-width: 600px) {
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
-  background: #FF9305;
-  font-family: Arial, sans-serif;
-}
 
-/* container = breedte telefoon */
-#game-container {
-  position: relative;
-  width: 100vw;        /* altijd volle telefoonbreedte */
-  max-width: 430px;    /* optioneel limiet */
-  margin: 0 auto;
-}
+  /* geen scroll-gedoe, geen 100vh meer */
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #FF9305;
+    font-family: Arial, sans-serif;
+  }
 
-/* het PNG-frame zelf */
-#frame-img {
-  display: block;
-  width: 100%;         /* pakt 100% van game-container */
-  height: auto;        /* verhouding blijft perfect */
-}
+  /* vast frame voor mobile.png – jij kunt 360x720 aanpassen */
+  #game-container {
+    position: relative;
+    width: 360px;          /* breedte van jouw telefoon-frame */
+    height: 720px;         /* hoogte van jouw telefoon-frame */
+    margin: 10px auto 0;   /* gecentreerd */
+    overflow: hidden;
+    z-index: 0;
+    background: none;
+  }
 
-/* canvas bovenop het frame */
-#gameCanvas {
-  position: absolute;
-  top: 140px;                      /* verschuif je blokken omlaag/boven */
-  left: 10px;                      /* 10px vanaf linker binnenrand */
-  width: calc(100% - 20px);        /* 10px links + 10px rechts ruimte */
-  height: auto;
-  border: none;
-  background: transparent;
-  z-index: 10;                     /* boven het frame-plaatje */
-}
+  #game-container::before {
+    content: "";
+    position: absolute;
+    top: -23px;
+    left: 0;
+    width: 360px;
+    height: 720px;
+    background: url("mobile.png") no-repeat 0 0;
+    background-size: 100% 100%;   /* vult precies het frame */
+    z-index: 1;                   /* onder alles, boven body */
+  }
 
-
-
+  /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
+  #gameCanvas {
+    position: absolute !important;
+    top: 140px !important;        /* afstand vanaf bovenkant frame */
+    left: 30px !important;        /* afstand vanaf linkerkant frame */
+    width: 300px !important;      /* breedte canvas */
+    height: auto !important;
+    transform: none !important;
+    border: none !important;
+    background: transparent !important;
+    z-index: 10 !important;       /* boven mobile.png, onder HUD */
+  }
 
   /* desktop-dingen uit op mobiel */
   #highscore-overlay,
