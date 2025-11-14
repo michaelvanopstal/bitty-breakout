@@ -553,9 +553,9 @@ body {
 
   #livesDisplay {
     position: absolute;
-    top: 85px;   /* verander voor mobile */
-    left: 24px;  /* verander voor mobile */
-    ...
+    top: 70px;   /* verander voor mobile */
+    left: 12px;  /* verander voor mobile */
+    z-index: 16500 !important;
   }
 
   /* mobiele highscore-knop linksboven (buiten frame mag ook) */
