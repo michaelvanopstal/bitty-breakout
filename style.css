@@ -442,7 +442,7 @@ body {
 #game-container {
     position: relative;
     width: 360px;     /* originele PNG breedte */
-    height: 720px;    /* originele PNG hoogte */
+    height: 600px;    /* originele PNG hoogte */
     margin: 60px auto 0;   /* ← VERPLAATST OMHOOG / OMLAAG */
     overflow: visible; 
     z-index: 0;
@@ -455,7 +455,7 @@ body {
     top: 100px;
     left: 0;
     width: 360px;     /* zelfde als PNG */
-    height: 720px;    /* zelfde als PNG */
+    height: 600px;    /* zelfde als PNG */
     background: url("mobile.png") no-repeat center top;
     background-size: 100% 100%;  /* exacte pasvorm */
     z-index: 1;
