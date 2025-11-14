@@ -441,7 +441,7 @@ html, body {
     position: relative;
     width: 100vw;           /* TRUE fullscreen breedte */
     max-width: 430px;       /* optioneel: limiet voor grote telefoons */
-    height: 900px;          /* <-- HIER bepaal je hoe groot je PNG-frame is */
+    height: 1100px;          /* <-- HIER bepaal je hoe groot je PNG-frame is */
     margin: 0 auto;
     overflow: hidden;
     z-index: 0;
