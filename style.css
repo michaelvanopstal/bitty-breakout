@@ -523,8 +523,8 @@ body {
    /* === SCORE – MOBIEL === */
   #scoreDisplay {
     position: absolute;
-    top: 50px;      /* kies een plek in je telefoon-frame */
-    left: 140px;     /* deze kun je zelf fine-tunen */
+    top: 60px;      /* kies een plek in je telefoon-frame */
+    left: 165px;     /* deze kun je zelf fine-tunen */
     font-size: 14px; /* vaak iets kleiner op mobiel */
     color: #ffffff;
     z-index: 13000;  /* hoog genoeg zodat het boven het mobile-frame staat */
@@ -536,7 +536,7 @@ body {
 #time-box {
   position: absolute;
   top: 50px;       /* staat boven het canvas → jij mag fine-tunen */
-  left: 180px;      /* exact gecalculeerd midden */
+  left: 200px;      /* exact gecalculeerd midden */
   width: 80px;      /* zodat centreren klopt */
   height: 20px;
   text-align: center;
