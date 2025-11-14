@@ -426,51 +426,51 @@ body {
 }
 
 @media (max-width: 600px) {
-
-  html, body {
+html, body {
     margin: 0;
     padding: 0;
     height: 100%;
     overflow: hidden;
     background: #FF9305;
     font-family: Arial, sans-serif;
-  }
+}
 
-  /* container = hele telefoonbreedte, vaste hoogte */
-  #game-container {
+/* container = volledige breedte telefoonscherm,
+   met vaste hoogte zodat PNG zichtbaar blijft */
+#game-container {
     position: relative;
-    width: 100vw;          /* pakt de breedte van de telefoon */
-    max-width: 430px;      /* optioneel: niet breder dan typische phone */
-    height: 720px;         /* hier bepaal je hoe hoog je frame is */
-    margin: 10px auto 0;   /* centreren */
+    width: 100vw;           /* TRUE fullscreen breedte */
+    max-width: 430px;       /* optioneel: limiet voor grote telefoons */
+    height: 900px;          /* <-- HIER bepaal je hoe groot je PNG-frame is */
+    margin: 0 auto;
     overflow: hidden;
     z-index: 0;
     background: none;
-  }
+}
 
-  #game-container::before {
+/* PNG-frame, netjes schaalbaar en nooit afgesneden */
+#game-container::before {
     content: "";
     position: absolute;
-    top: -10px;            /* iets omhoog/omlaag schuiven van je PNG */
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: url("mobile.png") no-repeat 0 0;
-    background-size: 100% 100%;   /* PNG vult precies het frame */
+    inset: 0;               /* top:0; left:0; right:0; bottom:0 */
+    background: url("mobile.png") no-repeat top center;
+    background-size: contain;  /* <-- beste voor perfecte schaal zonder vervorming */
     z-index: 1;
-  }
+}
 
-  #gameCanvas {
+/* canvas perfect binnen het frame met 10px ruimte links & rechts */
+#gameCanvas {
     position: absolute !important;
-    top: 140px !important;            /* afstand vanaf bovenkant frame */
-    left: 10px !important;           /* 10px van links */
-    width: calc(100% - 20px) !important; /* 10px links + 10px rechts */
+    top: 140px !important;                    /* verschuif blokken naar beneden */
+    left: 10px !important;                    /* 10px van links */
+    width: calc(100% - 20px) !important;      /* altijd binnen frame */
     height: auto !important;
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 10 !important;          /* boven mobile.png, onder HUD */
-  }
+    z-index: 10 !important;                   /* boven PNG */
+}
+
 
 
 
