@@ -150,9 +150,10 @@
     </div>
   </div>
 
-  <!-- andere elementen die je al had -->
-  <span id="player-display">Player</span>
-  <span id="scoreDisplay">0</span>
+ <!-- andere elementen die je al had -->
+<img id="player-avatar-small" alt="avatar" />
+<span id="player-display">Player</span>
+<span id="scoreDisplay">0</span>
 
   <!-- Tooltip -->
   <div id="resetTooltip" style="
@@ -523,12 +524,20 @@
     </div>
 
     <div id="login-overlay">
-      <div id="login-box">
-        <input type="text" id="player-name" placeholder="Voer je naam in" />
-        <button id="login-btn">Login</button>
-        <button id="logout-btn" style="display: none;">Logout</button>
-      </div>
-    </div>
+  <div id="login-box">
+    <input type="text" id="player-name" placeholder="Voer je naam in" />
+
+    <!-- ⭐ NIEUW: kleine avatar-upload -->
+    <input type="file"
+           id="player-avatar"
+           accept="image/*"
+           style="max-width: 90px; font-size: 11px;" />
+
+    <button id="login-btn">Login</button>
+    <button id="logout-btn" style="display: none;">Logout</button>
+  </div>
+</div>
+
     <img id="musicToggle" src="playmusic button.png" alt="Play Music" style="cursor: pointer; width: 180px;" />
     <div id="highscore-overlay">
       <ol id="highscore-list">
