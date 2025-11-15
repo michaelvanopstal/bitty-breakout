@@ -802,11 +802,11 @@ body {
     --musicScale: 0.75;          /* 👉 PAS ALLEEN DEZE WAARDE AAN */
     
     position: absolute;
-    bottom: calc(50px * var(--musicScale));
-    left: calc(100px * var(--musicScale));
+    bottom: calc(60px * var(--musicScale));
+    left: calc(120px * var(--musicScale));
     
     width: calc(30px * var(--musicScale));  
-    height: calc(60px * var(--musicScale));
+    height: calc(70px * var(--musicScale));
 
     transform: scale(var(--musicScale));
     transform-origin: center center;
