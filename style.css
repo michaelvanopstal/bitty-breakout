@@ -29,6 +29,18 @@ body {
   color: white;
   z-index: 999;
 }
+/* Klein avatar-icoontje naast de naam */
+#player-avatar-small {
+  position: absolute;
+  top: 50px;     /* bij desktop zelf finetunen */
+  left: 80px;    /* iets links van "Player" */
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  z-index: 1000;
+  display: none; /* alleen tonen als er echt een foto is */
+}
 
 #scoreDisplay {
   position: absolute;
@@ -401,6 +413,11 @@ body {
     left: 20px;
   }
 
+    #player-avatar-small {
+    top: 40px;   /* lijn met jouw player-display daar */
+    left: 20px;  /* net vóór de tekst "Player" */
+  }
+
   #scoreDisplay {
     top: 20px;
     right: 20px;
@@ -524,6 +541,18 @@ body {
     color: #ffffff;
     z-index: 12000 !important;
   }
+    #player-avatar-small {
+    position: absolute !important;
+    top: 60px !important;   /* ongeveer gelijk met de naam */
+    left: 6px !important;   /* voor de tekst "Player" */
+    width: 16px !important;
+    height: 16px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    z-index: 12000 !important;
+    display: none;
+  }
+
     /* zorg dat input + knop altijd netjes naast elkaar blijven op mobiel */
   #login-box {
     display: inline-flex;
