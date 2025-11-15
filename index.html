@@ -571,17 +571,31 @@
   ];
 
   function updateHighscoreBoard() {
-    const highscoreList = document.getElementById("highscore-list");
-    if (!highscoreList) return;
+  const highscoreList = document.getElementById("highscore-list");
+  if (!highscoreList) return;
 
-    highscoreList.innerHTML = "";
-    highscores.forEach((entry, index) => {
-      const levelText = entry.level ? `— Level ${entry.level}` : "";
-      const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} ${levelText}`;
-      highscoreList.appendChild(li);
-    });
-  }
+  highscoreList.innerHTML = "";
+  highscores.forEach((entry, index) => {
+    const levelText = entry.level ? `— Level ${entry.level}` : "";
+
+    const li = document.createElement("li");
+    li.className = "hs-entry";
+
+    if (entry.avatar) {
+      const img = document.createElement("img");
+      img.className = "hs-avatar";
+      img.src = entry.avatar;
+      img.alt = entry.name || "avatar";
+      li.appendChild(img);
+    }
+
+    const span = document.createElement("span");
+    span.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} ${levelText}`;
+    li.appendChild(span);
+
+    highscoreList.appendChild(li);
+  });
+}
 
   function checkAndUpdateHighscores(name, score, time, level = 1) {
     const newEntry = { name, score, time, level };
