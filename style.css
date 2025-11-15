@@ -809,7 +809,7 @@ body {
 #bittyStrip {
     position: fixed;          /* blijft op vaste plek staan */
     width: 90vw;              /* schaal → zelf aanpassen */
-    bottom: 120px;            /* positie → zelf aanpassen */
+    bottom: 40px;            /* positie → zelf aanpassen */
     left: 50%;                /* in het midden */
     transform: translateX(-50%);
     z-index: 18000;            /* boven achtergrond, onder HUD */
@@ -825,7 +825,7 @@ body {
     bottom: auto !important;
     transform: scale(0.35) !important;
     transform-origin: top right !important;
-    z-index: 15000 !important;
+    z-index: 20000 !important;
   }
 }
 
