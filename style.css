@@ -477,15 +477,17 @@ body {
     z-index: 10 !important;       /* boven mobile.png, onder HUD */
   }
 
-  /* desktop-dingen uit op mobiel */
-  #highscore-overlay,
-  #trophy,
-  #resetBallBtn,
-  #bikeFlyer,
-  #chatbox,
-  #chat-sticker-panel {
+ /* desktop-dingen uit op mobiel */
+#highscore-overlay,
+#trophy,
+#resetBallBtn,
+#bikeFlyer,
+#chatbox,
+#chat-sticker-panel,
+#bittyStrip {
     display: none !important;
-  }
+}
+
 
   /* login klein rechtsboven (los van PNG) */
   #login-overlay {
