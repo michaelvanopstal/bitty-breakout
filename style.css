@@ -805,6 +805,18 @@ body {
     transform: none !important;
 }
 
+  /* 🎨 Bitty strip – mobiel only */
+#bittyStrip {
+    position: fixed;          /* blijft op vaste plek staan */
+    width: 90vw;              /* schaal → zelf aanpassen */
+    bottom: 120px;            /* positie → zelf aanpassen */
+    left: 50%;                /* in het midden */
+    transform: translateX(-50%);
+    z-index: 5000;            /* boven achtergrond, onder HUD */
+    pointer-events: none;     /* blokkeert geen klikken */
+    display: block;
+}
+
   /* bonus-power-panel kleiner rechtsboven op mobiel */
   #bonus-power-panel {
     position: fixed !important;
