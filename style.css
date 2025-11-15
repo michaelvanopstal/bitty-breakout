@@ -404,8 +404,9 @@ body {
   outline: 2px solid #ffcf62;
   box-shadow: 0 0 6px rgba(0,0,0,.4);
 }
+
 /* =========================================================
-   Ã¢Å“â€¦ PC (hele brede schermen)
+   💻 PC (hele brede schermen)
    ========================================================= */
 @media (min-width: 1500px) {
   #game-container {
@@ -429,7 +430,7 @@ body {
     left: 20px;
   }
 
-    #player-avatar-small {
+  #player-avatar-small {
     top: 40px;   /* lijn met jouw player-display daar */
     left: 20px;  /* net vóór de tekst "Player" */
   }
@@ -450,22 +451,6 @@ body {
     top: 120px;
     left: 20px;
   }
-/* Highscore entries met avatar */
-.hs-entry {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-.hs-entry .hs-avatar,
-#highscore-overlay .hs-avatar {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
 
   #bonus-power-panel {
     position: fixed;
@@ -474,11 +459,8 @@ body {
   }
 }
 
-/* ======= 📱 MOBIEL t/m 600px – SIMPEL EN VAST ======= */
-/* Alle telefoons + tablets */
+/* ======= 📱 MOBIEL – alle touch devices ======= */
 @media (hover: none) and (pointer: coarse) {
-
-
 
   html, body {
     margin: 0;
@@ -490,54 +472,51 @@ body {
     overscroll-behavior: none; /* ⬅ geen “bounce” effect */
   }
 
-
- /* Frame container (100% intact, niet croppen) */
-#game-container {
+  /* Frame container (100% intact, niet croppen) */
+  #game-container {
     position: relative;
     width: 360px;     /* originele PNG breedte */
     height: 600px;    /* originele PNG hoogte */
-    margin: 0px auto 0;   /* ← VERPLAATST OMHOOG / OMLAAG */
+    margin: 0px auto 0;
     overflow: visible; 
     z-index: 0;
-}
+  }
 
-/* De PNG zelf, exact passend */
-#game-container::before {
+  /* De PNG zelf, exact passend */
+  #game-container::before {
     content: "";
     position: absolute;
     top: 110px;
     left: 0;
-    width: 360px;     /* zelfde als PNG */
-    height: 440px;    /* zelfde als PNG */
+    width: 360px;
+    height: 440px;
     background: url("mobile.png") no-repeat center top;
     background-size: 100% 100%;  /* exacte pasvorm */
     z-index: 8;
-}
-
+  }
 
   /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
   #gameCanvas {
     position: absolute !important;
-    top: 130px !important;        /* afstand vanaf bovenkant frame */
-    left: 18px !important;        /* afstand vanaf linkerkant frame */
-    width: 326px !important;      /* breedte canvas */
+    top: 130px !important;
+    left: 18px !important;
+    width: 326px !important;
     height: auto !important;
     transform: none !important;
     border: none !important;
     background: transparent !important;
-    z-index: 10 !important;       /* boven mobile.png, onder HUD */
+    z-index: 10 !important;
   }
 
- /* desktop-dingen uit op mobiel */
-#highscore-overlay,
-#trophy,
-#resetBallBtn,
-#bikeFlyer,
-#chatbox,
-#chat-sticker-panel {
+  /* desktop-dingen uit op mobiel */
+  #highscore-overlay,
+  #trophy,
+  #resetBallBtn,
+  #bikeFlyer,
+  #chatbox,
+  #chat-sticker-panel {
     display: none !important;
-}
-
+  }
 
   /* login klein rechtsboven (los van PNG) */
   #login-overlay {
@@ -573,7 +552,8 @@ body {
     color: #ffffff;
     z-index: 12000 !important;
   }
-    #player-avatar-small {
+
+  #player-avatar-small {
     position: absolute !important;
     top: 60px !important;   /* ongeveer gelijk met de naam */
     left: 6px !important;   /* voor de tekst "Player" */
@@ -585,7 +565,7 @@ body {
     display: none;
   }
 
-    /* zorg dat input + knop altijd netjes naast elkaar blijven op mobiel */
+  /* zorg dat input + knop altijd netjes naast elkaar blijven op mobiel */
   #login-box {
     display: inline-flex;
     align-items: center;
@@ -594,46 +574,45 @@ body {
   }
 
   #login-overlay input[type="text"] {
-    width: 160px;      /* kun je nog finetunen */
+    width: 160px;
     flex: 0 0 auto;
   }
 
   #login-btn,
   #logout-btn {
     flex: 0 0 auto;
-    width: auto;       /* voorkomt uitrekken op Samsung */
+    width: auto;
     display: inline-block;
   }
 
-
-   /* === SCORE – MOBIEL === */
+  /* === SCORE – MOBIEL === */
   #scoreDisplay {
     position: absolute;
-    top: 62px;      /* kies een plek in je telefoon-frame */
-    left: 165px;     /* deze kun je zelf fine-tunen */
-    font-size: 14px; /* vaak iets kleiner op mobiel */
+    top: 62px;
+    left: 165px;
+    font-size: 14px;
     color: #ffffff;
-    z-index: 12600;  /* hoog genoeg zodat het boven het mobile-frame staat */
+    z-index: 12600;
     pointer-events: none;
     user-select: none;
   }
 
-/* ==== TIJD – MOBIEL, SIMPEL & PERFECT GECENTREERD ==== */
-#time-box {
-  position: absolute;
-  top: 60px;       /* staat boven het canvas → jij mag fine-tunen */
-  left: 200px;      /* exact gecalculeerd midden */
-  width: 80px;      /* zodat centreren klopt */
-  height: 20px;
-  text-align: center;
-  z-index: 17686;
-}
+  /* ==== TIJD – MOBIEL ==== */
+  #time-box {
+    position: absolute;
+    top: 60px;
+    left: 200px;
+    width: 80px;
+    height: 20px;
+    text-align: center;
+    z-index: 17686;
+  }
 
-#timeDisplay {
-  color: #fff;
-  font-size: 14px;
-  font-weight: bold;
-}
+  #timeDisplay {
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+  }
 
   #hud {
     position: absolute;
@@ -647,79 +626,79 @@ body {
     left: 12px;
     transform: scale(0.85);
     gap: 3px;
-     z-index: 18500;
+    z-index: 18500;
   }
 
-/* 📱 mobiele highscore-knop linksboven */
-#mobile-highscore {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 15500;
-  display: block !important;
-}
+  /* 📱 mobiele highscore-knop linksboven */
+  #mobile-highscore {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 15500;
+    display: block !important;
+  }
 
-#mobileHighscoreBtn {
-  background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
-  border: 2px solid #a05c00;
-  border-radius: 12px;
-  color: #5a2700;
-  font-weight: bold;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 14px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-}
+  #mobileHighscoreBtn {
+    background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
+    border: 2px solid #a05c00;
+    border-radius: 12px;
+    color: #5a2700;
+    font-weight: bold;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  }
 
-#mobileHighscorePanel {
-  position: absolute;
-  top: 42px;
-  left: 0;
-  background: #7b1e1e;
-  border: 2px solid #b66414;
-  border-radius: 10px;
-  padding: 8px;
-  width: 200px;
-  max-height: 260px;
-  overflow-y: auto;
-  display: none;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-}
+  #mobileHighscorePanel {
+    position: absolute;
+    top: 42px;
+    left: 0;
+    background: #7b1e1e;
+    border: 2px solid #b66414;
+    border-radius: 10px;
+    padding: 8px;
+    width: 200px;
+    max-height: 260px;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+  }
 
-#mobileHighscorePanel.show { 
-  display: block; 
-}
+  #mobileHighscorePanel.show {
+    display: block;
+  }
 
-#mobileHighscoreList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  color: #ffe9c4;
-  font-size: 13px;
-}
+  #mobileHighscoreList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    color: #ffe9c4;
+    font-size: 13px;
+  }
 
-#mobileHighscoreList li {
-  margin: 4px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  padding-bottom: 2px;
-}
+  #mobileHighscoreList li {
+    margin: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 2px;
+  }
 
-/* ⭐ NIEUW – AVATARS + FLEXBOX LAYOUT VOOR MOBILE HIGHSCORE ⭐ */
-#mobileHighscoreList .hs-entry {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
+  /* ⭐ AVATARS + FLEXBOX LAYOUT VOOR MOBILE HIGHSCORE ⭐ */
+  #mobileHighscoreList .hs-entry {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
 
-#mobileHighscoreList .hs-avatar {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,0.3);
-}
+  #mobileHighscoreList .hs-avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
 
   /* mobiele chat-knop onderin */
   #chat-mobile-button {
@@ -882,8 +861,9 @@ body {
     object-fit: contain;
     border-radius: 10px;
   }
-/* 🎵 Muziekknop – mobiele versie (100% schaalbaar) */
-#musicToggle {
+
+  /* 🎵 Muziekknop – mobiele versie (100% schaalbaar) */
+  #musicToggle {
     --musicScale: 0.75;          /* 👉 PAS ALLEEN DEZE WAARDE AAN */
     
     position: absolute;
@@ -897,21 +877,17 @@ body {
     transform-origin: center center;
 
     z-index: 18500;
-}
+  }
 
-
-}
- /* 🎨 Bitty strip – mobiel only */
-#bittyStrip {
-    position: fixed;          /* blijft op vaste plek staan */
-    width: 85vw;  /* schaal → zelf aanpassen */
-    bottom: 24px;            /* positie → zelf aanpassen */
-    left: 50%;                /* in het midden */
+  /* 🎨 Bitty strip – mobiel only */
+  #bittyStrip {
+    position: fixed;
+    width: 85vw;
+    bottom: 24px;
+    left: 50%;
     transform: translateX(-50%);
-    z-index: 1;        /* boven achtergrond, onder HUD */
-    
-}
- 
+    z-index: 1;
+  }
 
   /* bonus-power-panel kleiner rechtsboven op mobiel */
   #bonus-power-panel {
@@ -925,6 +901,7 @@ body {
   }
 }
 
+/* 💻 Desktop / laptop: mobiele UI verbergen */
 @media (hover: hover) and (pointer: fine) {
   #chat-mobile-button,
   #chatbox-mobile,
