@@ -801,7 +801,7 @@ body {
     left: 12px !important;     /* afstand van links → zelf instellen */
     width: 60px !important;    /* GROOTTE van de knop → hier aanpassen */
     height: auto !important;
-    z-index: 9999 !important;
+    z-index: 18500 !important;
     transform: none !important;
 }
 
