@@ -519,7 +519,7 @@ body {
     left: 24px !important;
     font-size: 14px !important;
     color: #ffffff;
-    z-index: 18000 !important;
+    z-index: 12000 !important;
   }
     /* zorg dat input + knop altijd netjes naast elkaar blijven op mobiel */
   #login-box {
@@ -549,7 +549,7 @@ body {
     left: 165px;     /* deze kun je zelf fine-tunen */
     font-size: 14px; /* vaak iets kleiner op mobiel */
     color: #ffffff;
-    z-index: 19000;  /* hoog genoeg zodat het boven het mobile-frame staat */
+    z-index: 12600;  /* hoog genoeg zodat het boven het mobile-frame staat */
     pointer-events: none;
     user-select: none;
   }
