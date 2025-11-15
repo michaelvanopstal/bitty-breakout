@@ -3891,32 +3891,38 @@ function checkFlyingCoinHits() {
   });
 }
 
-
 function saveHighscore() {
   const playerName = window.currentPlayer || "Unknown";
+
+  // haal avatar uit login (of uit localStorage als fallback)
+  const avatarData =
+    window.currentPlayerAvatar ||
+    localStorage.getItem("playerAvatar") ||
+    null;
 
   // tijd uit je timer omzetten naar mm:ss
   const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
   const seconds = String(elapsedTime % 60).padStart(2, '0');
   const timeFormatted = `${minutes}:${seconds}`;
 
-  // score-object zoals jij ’m al had
+  // score-object + avatar
   const newScore = {
     name: playerName,
     score: score,
     time: timeFormatted,
-    level: level || 1  // fallback naar level 1
+    level: level || 1,  // fallback naar level 1
+    avatar: avatarData
   };
 
-  // ===== 1) LOKAAL (zoals je al deed) =====
+  // ===== 1) LOKAAL =====
   let highscores = JSON.parse(localStorage.getItem("highscores")) || [];
 
-  // dubbel voorkomen
+  // dubbel voorkomen voorkomen
   const isDuplicate = highscores.some(h =>
-    h.name === newScore.name &&
-    h.score === newScore.score &&
-    h.time === newScore.time &&
-    h.level === newScore.level
+    h.name   === newScore.name &&
+    h.score  === newScore.score &&
+    h.time   === newScore.time &&
+    h.level  === newScore.level
   );
 
   if (!isDuplicate) {
@@ -3937,28 +3943,40 @@ function saveHighscore() {
   highscores = highscores.slice(0, 10);
   localStorage.setItem("highscores", JSON.stringify(highscores));
 
-  // op je pagina tonen
+  // op je pagina tonen (desktop lijst)
   const list = document.getElementById("highscore-list");
   if (list) {
     list.innerHTML = "";
     highscores.forEach((entry, index) => {
       const lvl = entry.level || 1;
+
       const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} — Level ${lvl}`;
+      li.className = "hs-entry";
+
+      if (entry.avatar) {
+        const img = document.createElement("img");
+        img.className = "hs-avatar";
+        img.src = entry.avatar;
+        img.alt = entry.name || "avatar";
+        li.appendChild(img);
+      }
+
+      const span = document.createElement("span");
+      span.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} — Level ${lvl}`;
+      li.appendChild(span);
+
       list.appendChild(li);
     });
   }
 
-  // ===== 2) FIREBASE (nieuw) =====
-  // in index.html heb je al:
-  //   window.scoresRef = db.ref("scores");
-  // dus hier kunnen we die gebruiken
+  // ===== 2) FIREBASE =====
   if (window.scoresRef) {
     window.scoresRef.push({
       name: newScore.name,
       score: newScore.score,
       time: newScore.time,
       level: newScore.level,
+      avatar: newScore.avatar || null,
       created: Date.now()
     })
     .then(() => console.log("[score] naar Firebase gestuurd ✅"))
@@ -3967,6 +3985,8 @@ function saveHighscore() {
     console.warn("[score] geen window.scoresRef gevonden – alleen lokaal opgeslagen");
   }
 }
+
+
 
 
 // === Coin afbeelding ===
