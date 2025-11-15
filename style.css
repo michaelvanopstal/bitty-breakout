@@ -684,7 +684,7 @@ body {
   text-transform: uppercase;
   text-shadow: 0 1px 2px rgba(0,0,0,0.7);
 
-  z-index: 18510;            /* eventueel hoger/lager zetten als nodig */
+  z-index: 14000;            /* eventueel hoger/lager zetten als nodig */
 }
 
 #mobileShootBtn:active {
