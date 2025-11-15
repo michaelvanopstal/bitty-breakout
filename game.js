@@ -2492,6 +2492,64 @@ resetBtn.addEventListener("mouseleave", () => {
 });
 
 
+// 🔫 CENTRALE SCHIETFUNCTIE (bal + raket + vlaggetjes)
+function handleMobileShoot() {
+  // 1️⃣ Eerst proberen de bal af te vuren als hij nog op de paddle ligt
+  if (!ballLaunched && !ballMoving && balls && balls.length > 0) {
+    ballLaunched   = true;
+    ballMoving     = true;
+    paddleFreeMove = true;
+
+    // geluid
+    if (typeof shootSound !== "undefined" && shootSound) {
+      shootSound.currentTime = 0;
+      shootSound.play();
+    }
+
+    // snelheid: default + level boost (met getScaledBallSpeed als die bestaat)
+    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+    const lvl = LEVELS[lvlIndex];
+
+    const boost =
+      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+        ? lvl.params.ballSpeedBoost
+        : 0;
+
+    const launchSpeed = (typeof getScaledBallSpeed === "function")
+      ? getScaledBallSpeed(boost)
+      : (DEFAULT_BALL_SPEED + boost);
+
+    if (balls[0]) {
+      balls[0].dx = 0;
+      balls[0].dy = -launchSpeed;
+    }
+
+    // timer starten
+    if (!timerRunning && typeof startTimer === "function") {
+      startTimer();
+    }
+
+    // ✅ we hebben net de bal gelanceerd, dan hier stoppen
+    return;
+  }
+
+  // 2️⃣ Raket afvuren (als actief & ammo)
+  if (rocketActive && rocketAmmo > 0 && !rocketFired) {
+    rocketFired = true;
+    rocketAmmo--;
+
+    if (typeof rocketLaunchSound !== "undefined" && rocketLaunchSound) {
+      rocketLaunchSound.currentTime = 0;
+      rocketLaunchSound.play();
+    }
+  }
+
+  // 3️⃣ Vlaggetjes-schot
+  if (flagsOnPaddle && typeof shootFromFlags === "function") {
+    shootFromFlags();
+  }
+}
+
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
@@ -2511,86 +2569,43 @@ function keyDownHandler(e) {
     downPressed = true;
   }
 
-  // 🎯 1. EERST: bal afvuren met spatie als hij nog niet gelanceerd is
-  if (e.code === "Space" && !ballLaunched) {
-    ballLaunched   = true;
-    ballMoving     = true;
-    paddleFreeMove = true;
+  // 🎯 SPATIE → centrale schietactie + eventueel reset bij game over
+  if (e.code === "Space") {
+    // 1️⃣ Altijd eerst proberen te schieten (bal/raket/vlaggen)
+    handleMobileShoot();
 
-    // geluid
-    if (typeof shootSound !== "undefined") {
-      shootSound.currentTime = 0;
-      shootSound.play();
-    }
+    // 2️⃣ Als de bal niet beweegt, dan ook reset-gedrag zoals je had
+    if (!ballMoving) {
+      if (lives <= 0) {
+        lives = 3;
+        score = 0;
+        level = 1;
+        resetBricks();
+        resetBall();
+        resetPaddle();
+        startTime = new Date();
+        gameOver = false;
 
-    // snelheid: default + level boost
-    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
-    const lvl = LEVELS[lvlIndex];
+        if (typeof updateScoreDisplay === "function") {
+          updateScoreDisplay();
+        }
 
-    const baseSpeed = DEFAULT_BALL_SPEED;
-    const boost =
-      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
-        ? lvl.params.ballSpeedBoost
-        : 0;
+        const timeEl = document.getElementById("timeDisplay");
+        if (timeEl) timeEl.textContent = "00:00";
 
-    const launchSpeed = baseSpeed + boost;
-
-    if (balls && balls[0]) {
-      balls[0].dx = 0;
-      balls[0].dy = -launchSpeed;
-    }
-
-    if (!timerRunning && typeof startTimer === "function") {
-      startTimer();
-    }
-
-    // heel belangrijk: hier returnen zodat de rest van de spatie-code (raket/reset) niet óók afgaat
-    return;
-  }
-
-  // 🔫 2. RAKET afvuren met spatie (alleen als er al een bal is)
-  if (e.code === "Space" && rocketActive && rocketAmmo > 0 && !rocketFired) {
-    rocketFired = true;
-    rocketAmmo--;
-    if (typeof rocketLaunchSound !== "undefined") {
-      rocketLaunchSound.currentTime = 0;
-      rocketLaunchSound.play();
-    }
-  }
-
-  // 🎯 3. vlaggetjes-schot
-  if (flagsOnPaddle && e.code === "Space") {
-    if (typeof shootFromFlags === "function") {
-      shootFromFlags();
-    }
-  }
-
-  // 🧪 4. reset na game over met spatie
-  if (!ballMoving && e.code === "Space") {
-    if (lives <= 0) {
-      lives = 3;
-      score = 0;
-      level = 1;
-      resetBricks();
-      resetBall();
-      resetPaddle();
-      startTime = new Date();
-      gameOver = false;
-
-      if (typeof updateScoreDisplay === "function") {
-        updateScoreDisplay();
+        flagsOnPaddle = false;
+        flyingCoins   = [];
       }
 
-      const timeEl = document.getElementById("timeDisplay");
-      if (timeEl) timeEl.textContent = "00:00";
-
-      flagsOnPaddle = false;
-      flyingCoins   = [];
+      // oude gedrag: bal weer laten bewegen na spatie
+      ballMoving = true;
     }
 
-    ballMoving = true;
+    // heel belangrijk: hier stoppen zodat spatie maar één keer per druk behandeld wordt
+    return;
   }
 }
+
 /* ==============================
    📱 TOUCH CONTROLS (mobiel/tablet)
    ============================== */
@@ -2631,43 +2646,17 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
   window.addEventListener("touchend", (e) => {
     if (e.target.tagName !== "CANVAS") return;
 
-    // 🔥 snelheid halen via schaal
-    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
-    const lvl = LEVELS[lvlIndex];
-    const boost =
-      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
-        ? lvl.params.ballSpeedBoost
-        : 0;
-
-    // 👇 dit is de enige echte wijziging
-    const launchSpeed = typeof getScaledBallSpeed === "function"
-      ? getScaledBallSpeed(boost)
-      : (DEFAULT_BALL_SPEED + boost);
-
-    if (!ballLaunched && !ballMoving && balls.length > 0) {
-      ballLaunched = true;
-      ballMoving = true;
-      paddleFreeMove = true;
-
-      if (typeof shootSound !== "undefined") {
-        shootSound.currentTime = 0;
-        shootSound.play();
-      }
-
-      // center-launch, alleen snelheid anders
-      balls[0].dx = 0;
-      balls[0].dy = -launchSpeed;
-
-      if (!timerRunning && typeof startTimer === "function") {
-        startTimer();
-      }
-    }
-
     touchActive = false;
+
+    // 🟢 Bal (of raket / vlaggen) afschieten als hij nog op de paddle ligt
+    if (!ballLaunched && !ballMoving && balls && balls.length > 0) {
+      handleMobileShoot(); // 🔥 zelfde logica als knop & spatie
+    }
   });
 
   console.log("✅ Touch controls geactiveerd");
 }
+
 
 function keyUpHandler(e) {
   if (
