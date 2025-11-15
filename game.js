@@ -2610,44 +2610,68 @@ function keyDownHandler(e) {
 /* ==============================
    📱 TOUCH CONTROLS (mobiel/tablet)
    ============================== */
+// 🔍 Zoek de touch die boven het canvas zit
+function getCanvasTouch(e) {
+  if (!canvas) return null;
+  const rect = canvas.getBoundingClientRect();
 
+  // gebruik e.touches als ze er zijn, anders changedTouches (bij touchend)
+  const list = (e.touches && e.touches.length > 0) ? e.touches : e.changedTouches;
+
+  for (let i = 0; i < list.length; i++) {
+    const t = list[i];
+    const x = t.clientX;
+    const y = t.clientY;
+
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      return t; // ✅ deze vinger zit boven het canvas
+    }
+  }
+  return null;
+}
+/* ==============================
+   📱 TOUCH CONTROLS (mobiel/tablet)
+   ============================== */
 if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
   let touchActive = false;
 
   window.addEventListener('touchstart', (e) => {
     if (!canvas) return;
 
-    // ❌ voorkom dubbel-tap zoom / pinch-zoom / scroll
+    // voorkom zoom/scroll op canvas & shoot-knop
     if (e.target === canvas || e.target.id === "mobileShootBtn") {
       e.preventDefault();
     }
 
-    if (e.touches.length > 0) {
-      touchActive = true;
-      const touch = e.touches[0];
-      const rect  = canvas.getBoundingClientRect();
-      const x     = touch.clientX - rect.left;
+    // ✅ pak alleen de touch die boven het canvas zit
+    const touch = getCanvasTouch(e);
+    if (!touch) return; // bv. alleen een vinger op de knop → paddle negeren
 
-      paddleX = x - paddleWidth / 2;
+    touchActive = true;
 
-      if (paddleX < 0) paddleX = 0;
-      if (paddleX + paddleWidth > canvas.width) {
-        paddleX = canvas.width - paddleWidth;
-      }
+    const rect = canvas.getBoundingClientRect();
+    const x    = touch.clientX - rect.left;
+
+    paddleX = x - paddleWidth / 2;
+
+    if (paddleX < 0) paddleX = 0;
+    if (paddleX + paddleWidth > canvas.width) {
+      paddleX = canvas.width - paddleWidth;
     }
-  }, { passive: false }); // ⬅ belangrijk: NIET meer passive: true
+  }, { passive: false });
 
   window.addEventListener('touchmove', (e) => {
     if (!touchActive || !canvas) return;
 
-    // ❌ hier ook standaard gedrag blokkeren
     if (e.target === canvas || e.target.id === "mobileShootBtn") {
       e.preventDefault();
     }
 
-    const touch = e.touches[0];
-    const rect  = canvas.getBoundingClientRect();
-    const x     = touch.clientX - rect.left;
+    const touch = getCanvasTouch(e);
+    if (!touch) return; // geen vinger meer op het canvas → paddle niet bewegen
+
+    const rect = canvas.getBoundingClientRect();
+    const x    = touch.clientX - rect.left;
 
     paddleX = x - paddleWidth / 2;
 
@@ -2658,20 +2682,28 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
   }, { passive: false });
 
   window.addEventListener("touchend", (e) => {
-    if (e.target.tagName !== "CANVAS" && e.target.id !== "mobileShootBtn") return;
+    if (!canvas) return;
 
-    // ook hier kun je standaard gedrag blokkeren, voor de zekerheid
-    e.preventDefault();
+    if (e.target === canvas || e.target.id === "mobileShootBtn") {
+      e.preventDefault();
+    }
+
+    // check of er een vinger van het canvas afkomt
+    const touch = getCanvasTouch(e);
+    // let op: bij touchend zal getCanvasTouch meestal null zijn (touch is net weg),
+    // dus gebruik touchActive om te resetten
     touchActive = false;
 
-    // 🟢 Bal (of raket / vlaggen) afschieten als hij nog op de paddle ligt
-    if (!ballLaunched && !ballMoving && balls && balls.length > 0) {
+    // 🟢 Alleen via loslaten op CANVAS de bal afschieten (niet via knop-touch hier)
+    // → wil je ALLEEN de knop laten schieten? haal dit stuk dan weg.
+    if (!ballLaunched && !ballMoving && balls && balls.length > 0 && e.target === canvas) {
       handleMobileShoot(); // 🔥 zelfde logica als knop & spatie
     }
   });
 
-  console.log("✅ Touch controls geactiveerd");
+  console.log("✅ Touch controls geactiveerd (canvas-only movement)");
 }
+
 
 
 function keyUpHandler(e) {
