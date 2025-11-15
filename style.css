@@ -29,6 +29,7 @@ body {
   color: white;
   z-index: 999;
 }
+
 /* Klein avatar-icoontje naast de naam */
 #player-avatar-small {
   position: absolute;
@@ -113,16 +114,119 @@ body {
   margin-top: 15px;
 }
 
-#login-overlay {
-  position: absolute;
-  top: 90px;
-  right: 30px;
-  left: auto;
-  text-align: right;
-  z-index: 999;
+/* 🔒 Nieuwe login-popup styles */
+/* Kleine login-knop (altijd zichtbaar) */
+#login-toggle {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 16000;
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 999px;
+  border: 1px solid #b66414;
+  background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
+  color: #5a2700;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
 
-#login-box { display: inline-block; }
+/* Login popup-overlay (verborgen tot .show) */
+#login-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;                 /* default VERBORGEN */
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.55);
+  z-index: 17000;
+}
+
+#login-overlay.show {
+  display: flex;                 /* popup tonen */
+}
+
+/* Het paneeltje zelf */
+#login-box {
+  background: #7b1e1e;
+  border-radius: 14px;
+  border: 2px solid #b66414;
+  padding: 10px 12px 12px;
+  width: 260px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  color: #ffe9c4;
+  font-family: Arial, sans-serif;
+}
+
+/* header bovenin popup */
+#login-box .login-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+#login-close {
+  border: none;
+  background: rgba(0,0,0,0.15);
+  color: #ffe9c4;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* binnenkant */
+.login-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.login-label {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+#player-name,
+#player-avatar {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #b66414;
+  background: #ffe9c4;
+  color: #5a2700;
+}
+
+#player-avatar {
+  padding: 3px;
+  background: #fff4dd;
+}
+
+/* knoppen onderaan popup */
+.login-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+#login-btn,
+#logout-btn {
+  background-color: #701C1A;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
 
 #time-box {
   position: absolute;
@@ -518,31 +622,6 @@ body {
     display: none !important;
   }
 
-  /* login klein rechtsboven (los van PNG) */
-  #login-overlay {
-    position: fixed !important;
-    top: 8px !important;
-    right: 8px !important;
-    left: auto !important;
-    text-align: right;
-    z-index: 12000 !important;
-    transform: scale(0.70);
-    transform-origin: top right;
-    padding: 4px 6px !important;
-    max-width: 260px;
-    width: auto;
-  }
-
-  #login-overlay input[type="text"],
-  #login-overlay input[type="number"],
-  #login-overlay input[type="email"],
-  #login-overlay button {
-    font-size: 14px;
-    padding: 4px 6px;
-    height: 26px;
-    line-height: 1.2;
-  }
-
   /* naam linksboven IN het frame */
   #player-display {
     position: absolute !important;
@@ -565,24 +644,9 @@ body {
     display: none;
   }
 
-  /* zorg dat input + knop altijd netjes naast elkaar blijven op mobiel */
+  /* optioneel: popup iets kleiner op mobiel */
   #login-box {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-  }
-
-  #login-overlay input[type="text"] {
-    width: 160px;
-    flex: 0 0 auto;
-  }
-
-  #login-btn,
-  #logout-btn {
-    flex: 0 0 auto;
-    width: auto;
-    display: inline-block;
+    transform: scale(0.95);
   }
 
   /* === SCORE – MOBIEL === */
@@ -910,6 +974,7 @@ body {
     display: none !important;
   }
 }
+
 
 
 
