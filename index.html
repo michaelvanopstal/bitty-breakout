@@ -696,7 +696,7 @@
     });
   </script>  
   
-  <script>
+   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const musicBtn = document.getElementById('musicToggle');
     if (!musicBtn) return;
@@ -731,7 +731,7 @@
   <!-- 💬 Chat open/dicht (desktop) -->
   <script>
   (() => {
-    const chat = document.getElementById('chatbox');
+    const chat      = document.getElementById('chatbox');
     const toggleBtn = document.getElementById('chatToggleBtn');
     const chatInput = document.getElementById('chatInput');
 
@@ -749,6 +749,14 @@
           chat.classList.contains('collapsed') ? '1' : '0'
         );
       } catch (e) {}
+
+      // 👉 als desktop-chat nu open is: scroll naar laatste bericht
+      if (!chat.classList.contains('collapsed')) {
+        const msgs = document.getElementById('chatMessages');
+        if (msgs) {
+          msgs.scrollTop = msgs.scrollHeight;
+        }
+      }
     });
 
     window.addEventListener('keydown', (e) => {
@@ -772,20 +780,27 @@
     const close      = document.getElementById('chatMobileClose');
     const overlay    = document.getElementById('chatStickerOverlay');
     const stickerBtn = document.getElementById('chatMobileStickersBtn');
+    const mobileMsgs = document.getElementById('chatMobileMessages');
 
     if (!box) return;
 
-    // open/dicht de mobiele chat
+    // 📱 open/dicht de mobiele chat
     if (btn) {
       btn.addEventListener('click', () => {
         const isOpen = box.classList.toggle('open');
+
+        // 👉 als mobile chat open gaat: scroll naar laatste bericht
+        if (isOpen && mobileMsgs) {
+          mobileMsgs.scrollTop = mobileMsgs.scrollHeight;
+        }
+
         if (!isOpen && overlay) {
           overlay.classList.remove('show');
         }
       });
     }
 
-    // kruisje in de mobile chat
+    // ❌ kruisje in de mobile chat
     if (close) {
       close.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -794,21 +809,27 @@
       });
     }
 
-    // 📷 knop in de mobile chat → alleen overlay tonen/verbergen
+    // 📷 knop in de mobile chat → overlay tonen/verbergen + naar onder scrollen
     if (stickerBtn && overlay) {
       stickerBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (!box.classList.contains('open')) {
           box.classList.add('open');
         }
+
+        // 👉 ook hier: altijd naar laatste bericht
+        if (mobileMsgs) {
+          mobileMsgs.scrollTop = mobileMsgs.scrollHeight;
+        }
+
         overlay.classList.toggle('show');
       });
     }
   });
- 
   </script>
-<!-- 📱 eenvoudige canvas-scale voor mobiel, zonder springen -->
-<script>
+
+  <!-- 📱 eenvoudige canvas-scale voor mobiel, zonder springen -->
+  <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (window.innerWidth > 768) return;   // alleen mobiel
 
@@ -825,41 +846,41 @@
     c.height = canvasHeight;              // interne resolutie
 
   });
-</script>
+  </script>
 
- 
   <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const btn   = document.getElementById('mobileHighscoreBtn');
-  const panel = document.getElementById('mobileHighscorePanel');
-  const list  = document.getElementById('mobileHighscoreList');
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn   = document.getElementById('mobileHighscoreBtn');
+    const panel = document.getElementById('mobileHighscorePanel');
+    const list  = document.getElementById('mobileHighscoreList');
 
-  if (!btn || !panel || !list) return;
+    if (!btn || !panel || !list) return;
 
-  // toggle open/dicht
-  btn.addEventListener('click', () => {
-    panel.classList.toggle('show');
-  });
-
-  // laad highscores vanuit je bestaande lokale lijst
-  function renderMobileHighscores() {
-    list.innerHTML = '';
-    const highscores = JSON.parse(localStorage.getItem('highscores')) || [];
-    highscores.forEach((entry, i) => {
-      const li = document.createElement('li');
-      li.textContent = `${i + 1}. ${entry.name || '—'} — ${entry.score || 0} (${entry.time || '00:00'})`;
-      list.appendChild(li);
+    // toggle open/dicht
+    btn.addEventListener('click', () => {
+      panel.classList.toggle('show');
     });
-  }
 
-  // 1x laden bij opstart
-  renderMobileHighscores();
+    // laad highscores vanuit je bestaande lokale lijst
+    function renderMobileHighscores() {
+      list.innerHTML = '';
+      const highscores = JSON.parse(localStorage.getItem('highscores')) || [];
+      highscores.forEach((entry, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${i + 1}. ${entry.name || '—'} — ${entry.score || 0} (${entry.time || '00:00'})`;
+        list.appendChild(li);
+      });
+    }
 
-  // en elke 5 sec refreshen (optioneel)
-  setInterval(renderMobileHighscores, 5000);
-});
-</script>
+    // 1x laden bij opstart
+    renderMobileHighscores();
+
+    // en elke 5 sec refreshen (optioneel)
+    setInterval(renderMobileHighscores, 5000);
+  });
+  </script>
 
 </body>
 </html>
+
 
