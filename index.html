@@ -598,25 +598,39 @@
 }
 
   function checkAndUpdateHighscores(name, score, time, level = 1) {
-    const newEntry = { name, score, time, level };
-    highscores.push(newEntry);
-    highscores.sort((a, b) => b.score - a.score || a.time.localeCompare(b.time));
-    highscores = highscores.slice(0, 10);
-    localStorage.setItem("highscores", JSON.stringify(highscores));
-    updateHighscoreBoard();
+  const avatar =
+    window.currentPlayerAvatar ||
+    localStorage.getItem("playerAvatar") ||
+    null;
 
-    if (window.scoresRef) {
-      window.scoresRef.push({
-        name: name,
-        score: score,
-        time: time,
-        level: level,
-        created: Date.now()
-      }).catch(err => {
-        console.error("❌ Kon score niet naar Firebase pushen:", err);
-      });
+  const newEntry = { name, score, time, level, avatar };
+  highscores.push(newEntry);
+
+  highscores.sort((a, b) => {
+    if (b.score === a.score) {
+      return (a.time || "00:00").localeCompare(b.time || "00:00");
     }
+    return b.score - a.score;
+  });
+
+  highscores = highscores.slice(0, 10);
+  localStorage.setItem("highscores", JSON.stringify(highscores));
+  updateHighscoreBoard();
+
+  if (window.scoresRef) {
+    window.scoresRef.push({
+      name,
+      score,
+      time,
+      level,
+      avatar,
+      created: Date.now()
+    }).catch(err => {
+      console.error("❌ Kon score niet naar Firebase pushen:", err);
+    });
   }
+}
+
 
   window.addEventListener("load", () => {
     updateHighscoreBoard();
