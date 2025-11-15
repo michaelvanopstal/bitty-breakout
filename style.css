@@ -483,8 +483,7 @@ body {
 #resetBallBtn,
 #bikeFlyer,
 #chatbox,
-#chat-sticker-panel,
-#bittyStrip {
+#chat-sticker-panel {
     display: none !important;
 }
 
