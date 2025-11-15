@@ -467,7 +467,7 @@ body {
   /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
   #gameCanvas {
     position: absolute !important;
-    top: 132px !important;        /* afstand vanaf bovenkant frame */
+    top: 130px !important;        /* afstand vanaf bovenkant frame */
     left: 18px !important;        /* afstand vanaf linkerkant frame */
     width: 326px !important;      /* breedte canvas */
     height: auto !important;
