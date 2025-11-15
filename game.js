@@ -5,10 +5,14 @@ const paddleCanvas = document.createElement("canvas");
 const paddleCtx = paddleCanvas.getContext("2d");
 
 const baseCanvasWidth = 645;
+let currentScale = canvas.width / baseCanvasWidth;   // 👈 eerst currentScale
+const scaleFactor = currentScale;                    // dan pas scaleFactor
+
+// Paddle-ruimte onderkant — mobiel = lager, desktop = hoger
 const PADDLE_MARGIN_BOTTOM =
   (window.innerWidth <= 768 ? 2 * scaleFactor : 8 * scaleFactor);
-let currentScale = canvas.width / baseCanvasWidth; // 👈 nieuwe globale
-const scaleFactor = currentScale; // als je ‘scaleFactor’ nog overal gebruikt
+// ≤ 768px = mobiele layout
+// > 768px  = desktop layout
 
 let elapsedTime = 0;
 let timerInterval = null;
@@ -19,6 +23,7 @@ let ballLaunched = false;
 let paddleHeight = 20 * scaleFactor;
 let paddleWidth = 120 * scaleFactor;
 let paddleX = (canvas.width - paddleWidth) / 2;
+
 let rightPressed = false;
 let leftPressed = false;
 let flagsOnPaddle = false;
