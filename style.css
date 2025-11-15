@@ -812,7 +812,7 @@ body {
     bottom: 120px;            /* positie → zelf aanpassen */
     left: 50%;                /* in het midden */
     transform: translateX(-50%);
-    z-index: 5000;            /* boven achtergrond, onder HUD */
+    z-index: 18000;            /* boven achtergrond, onder HUD */
     pointer-events: none;     /* blokkeert geen klikken */
     display: block;
 }
