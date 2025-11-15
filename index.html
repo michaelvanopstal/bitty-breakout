@@ -517,25 +517,38 @@
 
   <div id="game-container">
     <canvas id="gameCanvas" width="645" height="650"></canvas>
-  
+<button id="login-toggle" type="button">Login</button>
+
     <div id="time-box">
       <span id="timeDisplay">00:00</span>
     </div>
 
+       <!-- 🔒 LOGIN POPUP -->
     <div id="login-overlay">
-  <div id="login-box">
-    <input type="text" id="player-name" placeholder="Voer je naam in" />
+      <div id="login-box">
+        <div class="login-header">
+          <span>Login</span>
+          <button id="login-close" type="button">✕</button>
+        </div>
 
-    <!-- ⭐ NIEUW: kleine avatar-upload -->
-    <input type="file"
-           id="player-avatar"
-           accept="image/*"
-           style="max-width: 90px; font-size: 11px;" />
+        <div class="login-body">
+          <label class="login-label">Name</label>
+          <input type="text" id="player-name" placeholder="Voer je naam in" />
 
-    <button id="login-btn">Login</button>
-    <button id="logout-btn" style="display: none;">Logout</button>
-  </div>
-</div>
+          <label class="login-label">Avatar</label>
+          <input type="file"
+                 id="player-avatar"
+                 accept="image/*" />
+        </div>
+
+        <div class="login-actions">
+          <button id="login-btn" type="button">Login</button>
+          <button id="logout-btn" type="button" style="display: none;">Logout</button>
+        </div>
+      </div>
+    </div>
+    <!-- /LOGIN POPUP -->
+
 
 
     <img id="musicToggle" src="playmusic button.png" alt="Play Music" style="cursor: pointer; width: 180px;" />
