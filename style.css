@@ -797,7 +797,7 @@ body {
 /* 🎵 Muziekknop – mobiele versie */
 #musicToggle {
     position: fixed !important;
-    bottom: 20px !important;   /* afstand tot onderkant → zelf instellen */
+    bottom: 22px !important;   /* afstand tot onderkant → zelf instellen */
     left: 125px !important;     /* afstand van links → zelf instellen */
     width: 120px !important;    /* GROOTTE van de knop → hier aanpassen */
     height: auto !important;
