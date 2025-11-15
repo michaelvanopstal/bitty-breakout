@@ -801,14 +801,14 @@ body {
     bottom: 40px;   /* afstand tot onderkant → zelf instellen */
     left: 125px;     /* afstand van links → zelf instellen */
     width: 40px;    /* GROOTTE van de knop → hier aanpassen */
-    height: auto;
+    height: 20px;
     z-index: 18500;
     transform: none;
 }
  /* 🎨 Bitty strip – mobiel only */
 #bittyStrip {
     position: fixed;          /* blijft op vaste plek staan */
-    width: 85vw;              /* schaal → zelf aanpassen */
+    width: 85vw;  /* schaal → zelf aanpassen */
     bottom: 24px;            /* positie → zelf aanpassen */
     left: 50%;                /* in het midden */
     transform: translateX(-50%);
