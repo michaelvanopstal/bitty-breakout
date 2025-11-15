@@ -2492,65 +2492,6 @@ resetBtn.addEventListener("mouseleave", () => {
 });
 
 
-// 🔫 CENTRALE SCHIETFUNCTIE (bal + raket + vlaggetjes)
-function handleMobileShoot() {
-  // 1️⃣ Eerst proberen de bal af te vuren als hij nog op de paddle ligt
-  if (!ballLaunched && !ballMoving && balls && balls.length > 0) {
-    ballLaunched   = true;
-    ballMoving     = true;
-    paddleFreeMove = true;
-
-    // geluid
-    if (typeof shootSound !== "undefined" && shootSound) {
-      shootSound.currentTime = 0;
-      shootSound.play();
-    }
-
-    // snelheid: default + level boost (met getScaledBallSpeed als die bestaat)
-   // snelheid: zelfde als vroeger → DEFAULT_BALL_SPEED + level-boost
-const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
-const lvl = LEVELS[lvlIndex];
-
-const baseSpeed = DEFAULT_BALL_SPEED;
-const boost =
-  (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
-    ? lvl.params.ballSpeedBoost
-    : 0;
-
-const launchSpeed = baseSpeed + boost;
-
-
-    if (balls[0]) {
-      balls[0].dx = 0;
-      balls[0].dy = -launchSpeed;
-    }
-
-    // timer starten
-    if (!timerRunning && typeof startTimer === "function") {
-      startTimer();
-    }
-
-    // ✅ we hebben net de bal gelanceerd, dan hier stoppen
-    return;
-  }
-
-  // 2️⃣ Raket afvuren (als actief & ammo)
-  if (rocketActive && rocketAmmo > 0 && !rocketFired) {
-    rocketFired = true;
-    rocketAmmo--;
-
-    if (typeof rocketLaunchSound !== "undefined" && rocketLaunchSound) {
-      rocketLaunchSound.currentTime = 0;
-      rocketLaunchSound.play();
-    }
-  }
-
-  // 3️⃣ Vlaggetjes-schot
-  if (flagsOnPaddle && typeof shootFromFlags === "function") {
-    shootFromFlags();
-  }
-}
-
 function keyDownHandler(e) {
   console.log("Toets ingedrukt:", e.key);
 
@@ -2570,64 +2511,85 @@ function keyDownHandler(e) {
     downPressed = true;
   }
 
-  // 🎯 SPATIE → centrale schietactie + eventueel reset bij game over
-  if (e.code === "Space") {
-    // 1️⃣ Altijd eerst proberen te schieten (bal/raket/vlaggen)
-    handleMobileShoot();
+  // 🎯 1. EERST: bal afvuren met spatie als hij nog niet gelanceerd is
+  if (e.code === "Space" && !ballLaunched) {
+    ballLaunched   = true;
+    ballMoving     = true;
+    paddleFreeMove = true;
 
-    // 2️⃣ Als de bal niet beweegt, dan ook reset-gedrag zoals je had
-    if (!ballMoving) {
-      if (lives <= 0) {
-        lives = 3;
-        score = 0;
-        level = 1;
-        resetBricks();
-        resetBall();
-        resetPaddle();
-        startTime = new Date();
-        gameOver = false;
-
-        if (typeof updateScoreDisplay === "function") {
-          updateScoreDisplay();
-        }
-
-        const timeEl = document.getElementById("timeDisplay");
-        if (timeEl) timeEl.textContent = "00:00";
-
-        flagsOnPaddle = false;
-        flyingCoins   = [];
-      }
-
-      // oude gedrag: bal weer laten bewegen na spatie
-      ballMoving = true;
+    // geluid
+    if (typeof shootSound !== "undefined") {
+      shootSound.currentTime = 0;
+      shootSound.play();
     }
 
-    // heel belangrijk: hier stoppen zodat spatie maar één keer per druk behandeld wordt
+    // snelheid: default + level boost
+    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+    const lvl = LEVELS[lvlIndex];
+
+    const baseSpeed = DEFAULT_BALL_SPEED;
+    const boost =
+      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+        ? lvl.params.ballSpeedBoost
+        : 0;
+
+    const launchSpeed = baseSpeed + boost;
+
+    if (balls && balls[0]) {
+      balls[0].dx = 0;
+      balls[0].dy = -launchSpeed;
+    }
+
+    if (!timerRunning && typeof startTimer === "function") {
+      startTimer();
+    }
+
+    // heel belangrijk: hier returnen zodat de rest van de spatie-code (raket/reset) niet óók afgaat
     return;
   }
-}
 
-/* ==============================
-   📱 TOUCH CONTROLS (mobiel/tablet)
-   ============================== */
-// 🔍 Zoek de touch die boven het canvas zit
-function getCanvasTouch(e) {
-  if (!canvas) return null;
-  const rect = canvas.getBoundingClientRect();
-
-  // gebruik e.touches als ze er zijn, anders changedTouches (bij touchend)
-  const list = (e.touches && e.touches.length > 0) ? e.touches : e.changedTouches;
-
-  for (let i = 0; i < list.length; i++) {
-    const t = list[i];
-    const x = t.clientX;
-    const y = t.clientY;
-
-    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-      return t; // ✅ deze vinger zit boven het canvas
+  // 🔫 2. RAKET afvuren met spatie (alleen als er al een bal is)
+  if (e.code === "Space" && rocketActive && rocketAmmo > 0 && !rocketFired) {
+    rocketFired = true;
+    rocketAmmo--;
+    if (typeof rocketLaunchSound !== "undefined") {
+      rocketLaunchSound.currentTime = 0;
+      rocketLaunchSound.play();
     }
   }
-  return null;
+
+  // 🎯 3. vlaggetjes-schot
+  if (flagsOnPaddle && e.code === "Space") {
+    if (typeof shootFromFlags === "function") {
+      shootFromFlags();
+    }
+  }
+
+  // 🧪 4. reset na game over met spatie
+  if (!ballMoving && e.code === "Space") {
+    if (lives <= 0) {
+      lives = 3;
+      score = 0;
+      level = 1;
+      resetBricks();
+      resetBall();
+      resetPaddle();
+      startTime = new Date();
+      gameOver = false;
+
+      if (typeof updateScoreDisplay === "function") {
+        updateScoreDisplay();
+      }
+
+      const timeEl = document.getElementById("timeDisplay");
+      if (timeEl) timeEl.textContent = "00:00";
+
+      flagsOnPaddle = false;
+      flyingCoins   = [];
+    }
+
+    ballMoving = true;
+  }
 }
 /* ==============================
    📱 TOUCH CONTROLS (mobiel/tablet)
@@ -2637,41 +2599,26 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
 
   window.addEventListener('touchstart', (e) => {
     if (!canvas) return;
+    if (e.touches.length > 0) {
+      touchActive = true;
+      const touch = e.touches[0];
+      const rect  = canvas.getBoundingClientRect();
+      const x     = touch.clientX - rect.left;
 
-    // voorkom zoom/scroll op canvas & shoot-knop
-    if (e.target === canvas || e.target.id === "mobileShootBtn") {
-      e.preventDefault();
+      paddleX = x - paddleWidth / 2;
+
+      if (paddleX < 0) paddleX = 0;
+      if (paddleX + paddleWidth > canvas.width) {
+        paddleX = canvas.width - paddleWidth;
+      }
     }
-
-    // ✅ pak alleen de touch die boven het canvas zit
-    const touch = getCanvasTouch(e);
-    if (!touch) return; // bv. alleen een vinger op de knop → paddle negeren
-
-    touchActive = true;
-
-    const rect = canvas.getBoundingClientRect();
-    const x    = touch.clientX - rect.left;
-
-    paddleX = x - paddleWidth / 2;
-
-    if (paddleX < 0) paddleX = 0;
-    if (paddleX + paddleWidth > canvas.width) {
-      paddleX = canvas.width - paddleWidth;
-    }
-  }, { passive: false });
+  }, { passive: true });
 
   window.addEventListener('touchmove', (e) => {
     if (!touchActive || !canvas) return;
-
-    if (e.target === canvas || e.target.id === "mobileShootBtn") {
-      e.preventDefault();
-    }
-
-    const touch = getCanvasTouch(e);
-    if (!touch) return; // geen vinger meer op het canvas → paddle niet bewegen
-
-    const rect = canvas.getBoundingClientRect();
-    const x    = touch.clientX - rect.left;
+    const touch = e.touches[0];
+    const rect  = canvas.getBoundingClientRect();
+    const x     = touch.clientX - rect.left;
 
     paddleX = x - paddleWidth / 2;
 
@@ -2679,32 +2626,48 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     if (paddleX + paddleWidth > canvas.width) {
       paddleX = canvas.width - paddleWidth;
     }
-  }, { passive: false });
+  }, { passive: true });
 
   window.addEventListener("touchend", (e) => {
-    if (!canvas) return;
+    if (e.target.tagName !== "CANVAS") return;
 
-    if (e.target === canvas || e.target.id === "mobileShootBtn") {
-      e.preventDefault();
+    // 🔥 snelheid halen via schaal
+    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+    const lvl = LEVELS[lvlIndex];
+    const boost =
+      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+        ? lvl.params.ballSpeedBoost
+        : 0;
+
+    // 👇 dit is de enige echte wijziging
+    const launchSpeed = typeof getScaledBallSpeed === "function"
+      ? getScaledBallSpeed(boost)
+      : (DEFAULT_BALL_SPEED + boost);
+
+    if (!ballLaunched && !ballMoving && balls.length > 0) {
+      ballLaunched = true;
+      ballMoving = true;
+      paddleFreeMove = true;
+
+      if (typeof shootSound !== "undefined") {
+        shootSound.currentTime = 0;
+        shootSound.play();
+      }
+
+      // center-launch, alleen snelheid anders
+      balls[0].dx = 0;
+      balls[0].dy = -launchSpeed;
+
+      if (!timerRunning && typeof startTimer === "function") {
+        startTimer();
+      }
     }
 
-    // check of er een vinger van het canvas afkomt
-    const touch = getCanvasTouch(e);
-    // let op: bij touchend zal getCanvasTouch meestal null zijn (touch is net weg),
-    // dus gebruik touchActive om te resetten
     touchActive = false;
-
-    // 🟢 Alleen via loslaten op CANVAS de bal afschieten (niet via knop-touch hier)
-    // → wil je ALLEEN de knop laten schieten? haal dit stuk dan weg.
-    if (!ballLaunched && !ballMoving && balls && balls.length > 0 && e.target === canvas) {
-      handleMobileShoot(); // 🔥 zelfde logica als knop & spatie
-    }
   });
 
-  console.log("✅ Touch controls geactiveerd (canvas-only movement)");
+  console.log("✅ Touch controls geactiveerd");
 }
-
-
 
 function keyUpHandler(e) {
   if (
@@ -2747,60 +2710,6 @@ function mouseMoveHandler(e) {
 
 function updateScoreDisplay() {
   document.getElementById("scoreDisplay").textContent = score;
-}
-
-  // 📱 Centrale schiet-actie voor de mobiele knop
-function handleMobileShoot() {
-  // 1️⃣ Als de bal nog op de paddle "rust" → eerst de bal afvuren
-  if (!ballLaunched && !ballMoving && balls && balls.length > 0) {
-    ballLaunched   = true;
-    ballMoving     = true;
-    paddleFreeMove = true;
-
-    // geluid
-    if (typeof shootSound !== "undefined" && shootSound) {
-      shootSound.currentTime = 0;
-      shootSound.play();
-    }
-
-    // snelheid: zelfde logica als bij spatie/muisklik
-    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
-    const lvl = LEVELS[lvlIndex];
-
-    const baseSpeed = DEFAULT_BALL_SPEED;
-    const boost =
-      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
-        ? lvl.params.ballSpeedBoost
-        : 0;
-
-    const launchSpeed = baseSpeed + boost;
-
-    balls[0].dx = 0;
-    balls[0].dy = -launchSpeed;
-
-    if (!timerRunning && typeof startTimer === "function") {
-      startTimer();
-    }
-
-    // ✅ als we de bal hebben afgevuurd, hier stoppen (geen raket/vlaggen)
-    return;
-  }
-
-  // 2️⃣ Raket afvuren (als hij actief is en ammo heeft)
-  if (rocketActive && rocketAmmo > 0 && !rocketFired) {
-    rocketFired = true;
-    rocketAmmo--;
-
-    if (typeof rocketLaunchSound !== "undefined" && rocketLaunchSound) {
-      rocketLaunchSound.currentTime = 0;
-      rocketLaunchSound.play();
-    }
-  }
-
-  // 3️⃣ Vlaggetjes laten schieten als ze op de paddle staan
-  if (flagsOnPaddle && typeof shootFromFlags === "function") {
-    shootFromFlags();
-  }
 }
 
 
@@ -6803,8 +6712,6 @@ function triggerSilverExplosion(x, y) {
 
 function triggerBallReset() {
   const btn = document.getElementById("resetBallBtn");
-  if (!btn) return;
-
   btn.disabled = true;
   btn.textContent = "RESETTING...";
 
@@ -6826,22 +6733,23 @@ function triggerBallReset() {
     paddleExplodeSound.currentTime = 0;
     paddleExplodeSound.play();
 
-    const s = getScale(); // schaal voor debris
+   const s = getScale(); // 👈 voeg dit toe boven de loop
 
-    balls.forEach(ball => {
-      for (let i = 0; i < 30; i++) {
-        const angle = Math.random() * Math.PI * 2;
+balls.forEach(ball => {
+  for (let i = 0; i < 30; i++) {
+    const speed = ((Math.random() - 0.5) * 8) * s; // 👈 snelheid schalen
+    const angle = Math.random() * Math.PI * 2;
 
-        stoneDebris.push({
-          x: ball.x + ball.radius,
-          y: ball.y + ball.radius,
-          dx: Math.cos(angle) * (Math.random() * 4 + 2) * s, // richting & snelheid
-          dy: Math.sin(angle) * (Math.random() * 4 + 2) * s,
-          radius: (Math.random() * 4 + 2) * s,               // grootte schalen
-          alpha: 1
-        });
-      }
+    stoneDebris.push({
+      x: ball.x + ball.radius,
+      y: ball.y + ball.radius,
+      dx: Math.cos(angle) * (Math.random() * 4 + 2) * s, // 👈 richting & snelheid
+      dy: Math.sin(angle) * (Math.random() * 4 + 2) * s,
+      radius: (Math.random() * 4 + 2) * s,               // 👈 grootte schalen
+      alpha: 1
     });
+  }
+});
 
     balls = [];
   }, 6500);
@@ -6856,15 +6764,11 @@ function triggerBallReset() {
       radius: ballRadius,
       isMain: true
     }];
-
     ballLaunched = false;
     ballMoving = false;
     resetOverlayActive = false;
-
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "RESET\nBALL";
-    }
+    btn.disabled = false;
+    btn.textContent = "RESET\nBALL";
 
     // 🧠 Zet leven weer terug als het tijdelijk op 2 stond
     if (originalLives === 1) {
@@ -6875,23 +6779,6 @@ function triggerBallReset() {
   }, 10000);
 }
 
-// 🟢 BELANGRIJK: reset-knop koppelen aan functie
-const resetBallBtn = document.getElementById("resetBallBtn");
-if (resetBallBtn) {
-  resetBallBtn.addEventListener("click", triggerBallReset);
-}
+// 🟢 BELANGRIJK: knop koppelen aan functie
+document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
 
-// 📱 Mobiele schiet-knop koppelen (bal + raket + vlaggetjes)
-const mobileShootBtn = document.getElementById("mobileShootBtn");
-if (mobileShootBtn) {
-  // extra safety: verstoppen op desktop
-  if (window.innerWidth > 1200) {
-    mobileShootBtn.style.display = "none";
-  } else {
-    mobileShootBtn.addEventListener("click", () => {
-      // 👉 deze functie moet je hoger in game.js hebben staan
-      // hij regelt: bal afvuren, raket schieten, vlaggetjes schieten
-      handleMobileShoot();
-    });
-  }
-}

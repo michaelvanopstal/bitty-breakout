@@ -657,47 +657,6 @@ body {
     font-family: system-ui, Arial, sans-serif;
   }
 
-  /* 📱 Ronde schiet-knop (bal + raket + vlaggetjes) */
-#mobileShootBtn {
-  position: fixed;
-  left: 20px;                 /* midden onderin, eventueel aanpassen */
-  transform: translateX(-50%);
-  bottom: 100px;              /* afstand tot onderkant, mag je aanpassen */
-
-  width: 50px;               /* ⬅ grootte van de knop */
-  height: 50px;              /* ⬅ zelfde als width = cirkel */
-  border-radius: 50%;        /* ⬅ maakt 'm echt rond */
-
-  background: radial-gradient(circle at 30% 30%, #aaa, #555);
-  border: 3px solid #222;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-
-  display: flex;             /* tekst netjes in het midden */
-  align-items: center;
-  justify-content: center;
-
-  color: #fff;
-  font-weight: bold;
-  font-size: 8px;           /* klein zodat "SHOOT" past */
-  letter-spacing: 1px;
-  text-align: center;
-  text-transform: uppercase;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
-
-  z-index: 14000;            /* eventueel hoger/lager zetten als nodig */
-}
-
-#mobileShootBtn:active {
-  transform: translateX(-50%) translateY(2px);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-}
-/* 📱 Geen pinch-zoom / scroll via canvas en schiet-knop */
-#gameCanvas,
-#mobileShootBtn {
-  touch-action: none; /* zegt tegen browser: geen pinch-zoom / pannen hier */
-}
-
-  
   #chat-mobile-button .cmb-left {
     display: flex;
     align-items: center;
@@ -840,8 +799,8 @@ body {
 #musicToggle {
     position: absolute;
     top: 60px;   /* afstand tot onderkant → zelf instellen */
-    left: 100px;     /* afstand van links → zelf instellen */
-    width: 20px;    /* GROOTTE van de knop → hier aanpassen */
+    left: 125px;     /* afstand van links → zelf instellen */
+    width: 40px;    /* GROOTTE van de knop → hier aanpassen */
     height: auto;
     z-index: 18500;
     transform: none;
@@ -871,18 +830,17 @@ body {
   }
 }
 
-  @media (min-width: 1201px) {
-    #chat-mobile-button,
-    #chatbox-mobile,
-    #mobile-highscore,
-    #mobileShootBtn {           /* ⬅ toegevoegd */
-      display: none !important;
-    }
-
-    #bittyStrip {
-      display: none !important;
-    }
+@media (min-width: 1201px) {
+  #chat-mobile-button,
+  #chatbox-mobile,
+  #mobile-highscore {
+    display: none !important;
   }
+
+  #bittyStrip {
+    display: none !important;
+  }
+}
 
 
 
