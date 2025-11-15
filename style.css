@@ -809,11 +809,11 @@ body {
   /* 🎨 Bitty strip – mobiel only */
 #bittyStrip {
     position: fixed;          /* blijft op vaste plek staan */
-    width: 90vw;              /* schaal → zelf aanpassen */
-    bottom: 22px;            /* positie → zelf aanpassen */
+    width: 85vw;              /* schaal → zelf aanpassen */
+    bottom: 23px;            /* positie → zelf aanpassen */
     left: 50%;                /* in het midden */
     transform: translateX(-50%);
-    z-index: 16000;            /* boven achtergrond, onder HUD */
+    z-index: 1;            /* boven achtergrond, onder HUD */
     pointer-events: none;     /* blokkeert geen klikken */
     display: block;
 }
