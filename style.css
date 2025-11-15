@@ -522,6 +522,26 @@ body {
     color: #ffffff;
     z-index: 18000 !important;
   }
+    /* zorg dat input + knop altijd netjes naast elkaar blijven op mobiel */
+  #login-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  #login-overlay input[type="text"] {
+    width: 160px;      /* kun je nog finetunen */
+    flex: 0 0 auto;
+  }
+
+  #login-btn,
+  #logout-btn {
+    flex: 0 0 auto;
+    width: auto;       /* voorkomt uitrekken op Samsung */
+    display: inline-block;
+  }
+
 
    /* === SCORE – MOBIEL === */
   #scoreDisplay {
