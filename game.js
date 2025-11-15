@@ -5,6 +5,8 @@ const paddleCanvas = document.createElement("canvas");
 const paddleCtx = paddleCanvas.getContext("2d");
 
 const baseCanvasWidth = 645;
+const PADDLE_MARGIN_BOTTOM =
+  (window.innerWidth <= 768 ? 2 * scaleFactor : 8 * scaleFactor);
 let currentScale = canvas.width / baseCanvasWidth; // 👈 nieuwe globale
 const scaleFactor = currentScale; // als je ‘scaleFactor’ nog overal gebruikt
 
@@ -52,7 +54,8 @@ const paddleSpeed = 8 * scaleFactor;
 let downPressed = false;
 let upPressed = false;
 let paddleFreeMove = false;
-let paddleY = canvas.height - paddleHeight - (8 * scaleFactor); // beginpositie onderaan
+let paddleY = canvas.height - paddleHeight - PADDLE_MARGIN_BOTTOM;
+
 // 🪨 Stonefall
 let fallingStones = [];
 let stoneHitOverlayTimer = 0;
