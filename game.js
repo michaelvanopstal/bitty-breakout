@@ -2610,11 +2610,18 @@ function keyDownHandler(e) {
 /* ==============================
    📱 TOUCH CONTROLS (mobiel/tablet)
    ============================== */
+
 if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
   let touchActive = false;
 
   window.addEventListener('touchstart', (e) => {
     if (!canvas) return;
+
+    // ❌ voorkom dubbel-tap zoom / pinch-zoom / scroll
+    if (e.target === canvas || e.target.id === "mobileShootBtn") {
+      e.preventDefault();
+    }
+
     if (e.touches.length > 0) {
       touchActive = true;
       const touch = e.touches[0];
@@ -2628,10 +2635,16 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
         paddleX = canvas.width - paddleWidth;
       }
     }
-  }, { passive: true });
+  }, { passive: false }); // ⬅ belangrijk: NIET meer passive: true
 
   window.addEventListener('touchmove', (e) => {
     if (!touchActive || !canvas) return;
+
+    // ❌ hier ook standaard gedrag blokkeren
+    if (e.target === canvas || e.target.id === "mobileShootBtn") {
+      e.preventDefault();
+    }
+
     const touch = e.touches[0];
     const rect  = canvas.getBoundingClientRect();
     const x     = touch.clientX - rect.left;
@@ -2642,11 +2655,13 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     if (paddleX + paddleWidth > canvas.width) {
       paddleX = canvas.width - paddleWidth;
     }
-  }, { passive: true });
+  }, { passive: false });
 
   window.addEventListener("touchend", (e) => {
-    if (e.target.tagName !== "CANVAS") return;
+    if (e.target.tagName !== "CANVAS" && e.target.id !== "mobileShootBtn") return;
 
+    // ook hier kun je standaard gedrag blokkeren, voor de zekerheid
+    e.preventDefault();
     touchActive = false;
 
     // 🟢 Bal (of raket / vlaggen) afschieten als hij nog op de paddle ligt
