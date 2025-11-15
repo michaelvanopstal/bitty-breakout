@@ -2507,17 +2507,18 @@ function handleMobileShoot() {
     }
 
     // snelheid: default + level boost (met getScaledBallSpeed als die bestaat)
-    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
-    const lvl = LEVELS[lvlIndex];
+   // snelheid: zelfde als vroeger → DEFAULT_BALL_SPEED + level-boost
+const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+const lvl = LEVELS[lvlIndex];
 
-    const boost =
-      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
-        ? lvl.params.ballSpeedBoost
-        : 0;
+const baseSpeed = DEFAULT_BALL_SPEED;
+const boost =
+  (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+    ? lvl.params.ballSpeedBoost
+    : 0;
 
-    const launchSpeed = (typeof getScaledBallSpeed === "function")
-      ? getScaledBallSpeed(boost)
-      : (DEFAULT_BALL_SPEED + boost);
+const launchSpeed = baseSpeed + boost;
+
 
     if (balls[0]) {
       balls[0].dx = 0;
