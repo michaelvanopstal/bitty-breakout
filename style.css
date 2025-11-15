@@ -664,8 +664,8 @@ body {
   transform: translateX(-50%);
   bottom: 80px;              /* afstand tot onderkant, mag je aanpassen */
 
-  width: 40px;               /* ⬅ grootte van de knop */
-  height: 40px;              /* ⬅ zelfde als width = cirkel */
+  width: 50px;               /* ⬅ grootte van de knop */
+  height: 50px;              /* ⬅ zelfde als width = cirkel */
   border-radius: 50%;        /* ⬅ maakt 'm echt rond */
 
   background: radial-gradient(circle at 30% 30%, #aaa, #555);
@@ -678,7 +678,7 @@ body {
 
   color: #fff;
   font-weight: bold;
-  font-size: 11px;           /* klein zodat "SHOOT" past */
+  font-size: 8px;           /* klein zodat "SHOOT" past */
   letter-spacing: 1px;
   text-align: center;
   text-transform: uppercase;
