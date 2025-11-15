@@ -460,7 +460,7 @@ body {
     height: 440px;    /* zelfde als PNG */
     background: url("mobile.png") no-repeat center top;
     background-size: 100% 100%;  /* exacte pasvorm */
-    z-index: 3;
+    z-index: 8;
 }
 
 
@@ -805,7 +805,17 @@ body {
     z-index: 18500 !important;
     transform: none !important;
 }
-
+ /* 🎨 Bitty strip – mobiel only */
+#bittyStrip {
+    position: fixed;          /* blijft op vaste plek staan */
+    width: 85vw;              /* schaal → zelf aanpassen */
+    bottom: 24px;            /* positie → zelf aanpassen */
+    left: 50%;                /* in het midden */
+    transform: translateX(-50%);
+    z-index: 1 !important;          /* boven achtergrond, onder HUD */
+    pointer-events: none;     /* blokkeert geen klikken */
+    display: block;
+}
  
 
   /* bonus-power-panel kleiner rechtsboven op mobiel */
