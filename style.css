@@ -809,8 +809,8 @@ body {
   /* 🎨 Bitty strip – mobiel only */
 #bittyStrip {
     position: fixed;          /* blijft op vaste plek staan */
-    width: 70vw;              /* schaal → zelf aanpassen */
-    bottom: 70px;            /* positie → zelf aanpassen */
+    width: 40vw;              /* schaal → zelf aanpassen */
+    bottom: 100px;            /* positie → zelf aanpassen */
     left: 50%;                /* in het midden */
     transform: translateX(-50%);
     z-index: 16000;            /* boven achtergrond, onder HUD */
