@@ -2712,6 +2712,60 @@ function updateScoreDisplay() {
   document.getElementById("scoreDisplay").textContent = score;
 }
 
+  // 📱 Centrale schiet-actie voor de mobiele knop
+function handleMobileShoot() {
+  // 1️⃣ Als de bal nog op de paddle "rust" → eerst de bal afvuren
+  if (!ballLaunched && !ballMoving && balls && balls.length > 0) {
+    ballLaunched   = true;
+    ballMoving     = true;
+    paddleFreeMove = true;
+
+    // geluid
+    if (typeof shootSound !== "undefined" && shootSound) {
+      shootSound.currentTime = 0;
+      shootSound.play();
+    }
+
+    // snelheid: zelfde logica als bij spatie/muisklik
+    const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+    const lvl = LEVELS[lvlIndex];
+
+    const baseSpeed = DEFAULT_BALL_SPEED;
+    const boost =
+      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+        ? lvl.params.ballSpeedBoost
+        : 0;
+
+    const launchSpeed = baseSpeed + boost;
+
+    balls[0].dx = 0;
+    balls[0].dy = -launchSpeed;
+
+    if (!timerRunning && typeof startTimer === "function") {
+      startTimer();
+    }
+
+    // ✅ als we de bal hebben afgevuurd, hier stoppen (geen raket/vlaggen)
+    return;
+  }
+
+  // 2️⃣ Raket afvuren (als hij actief is en ammo heeft)
+  if (rocketActive && rocketAmmo > 0 && !rocketFired) {
+    rocketFired = true;
+    rocketAmmo--;
+
+    if (typeof rocketLaunchSound !== "undefined" && rocketLaunchSound) {
+      rocketLaunchSound.currentTime = 0;
+      rocketLaunchSound.play();
+    }
+  }
+
+  // 3️⃣ Vlaggetjes laten schieten als ze op de paddle staan
+  if (flagsOnPaddle && typeof shootFromFlags === "function") {
+    shootFromFlags();
+  }
+}
+
 
 function drawBricks() {
   const totalBricksWidth = brickColumnCount * brickWidth;
