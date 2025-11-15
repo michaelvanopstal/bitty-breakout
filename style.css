@@ -813,8 +813,7 @@ body {
     left: 50%;                /* in het midden */
     transform: translateX(-50%);
     z-index: 1;        /* boven achtergrond, onder HUD */
-    pointer-events: none;     /* blokkeert geen klikken */
-    display: block;
+    
 }
  
 
