@@ -593,7 +593,8 @@ function addMessage(name, text, imgData = null){
   <script src="game.js"></script>
 
   <script>
-  let highscores = JSON.parse(localStorage.getItem("highscores")) || [
+  // 🌍 Eén globale highscorelijst voor ALLE apparaten
+  const DEFAULT_HIGHSCORES = [
     { name: "—", score: 0, time: "00:00", level: 1 },
     { name: "—", score: 0, time: "00:00", level: 1 },
     { name: "—", score: 0, time: "00:00", level: 1 },
@@ -606,72 +607,132 @@ function addMessage(name, text, imgData = null){
     { name: "—", score: 0, time: "00:00", level: 1 }
   ];
 
-  function updateHighscoreBoard() {
-  const highscoreList = document.getElementById("highscore-list");
-  if (!highscoreList) return;
+  // wordt gevuld vanuit Firebase of localStorage
+  let highscores = DEFAULT_HIGHSCORES.slice();
 
-  highscoreList.innerHTML = "";
-  highscores.forEach((entry, index) => {
-    const levelText = entry.level ? `— Level ${entry.level}` : "";
-
-    const li = document.createElement("li");
-    li.className = "hs-entry";
-
-    if (entry.avatar) {
-      const img = document.createElement("img");
-      img.className = "hs-avatar";
-      img.src = entry.avatar;
-      img.alt = entry.name || "avatar";
-      li.appendChild(img);
-    }
-
-    const span = document.createElement("span");
-    span.textContent = `${index + 1}. ${entry.name} — ${entry.score} — ${entry.time} ${levelText}`;
-    li.appendChild(span);
-
-    highscoreList.appendChild(li);
-  });
-}
-
-  function checkAndUpdateHighscores(name, score, time, level = 1) {
-  const avatar =
-    window.currentPlayerAvatar ||
-    localStorage.getItem("playerAvatar") ||
-    null;
-
-  const newEntry = { name, score, time, level, avatar };
-  highscores.push(newEntry);
-
-  highscores.sort((a, b) => {
-    if (b.score === a.score) {
-      return (a.time || "00:00").localeCompare(b.time || "00:00");
-    }
-    return b.score - a.score;
-  });
-
-  highscores = highscores.slice(0, 10);
-  localStorage.setItem("highscores", JSON.stringify(highscores));
-  updateHighscoreBoard();
-
-  if (window.scoresRef) {
-    window.scoresRef.push({
-      name,
-      score,
-      time,
-      level,
-      avatar,
-      created: Date.now()
-    }).catch(err => {
-      console.error("❌ Kon score niet naar Firebase pushen:", err);
+  function sortHighscores(list) {
+    return list.sort((a, b) => {
+      const sa = Number(a.score) || 0;
+      const sb = Number(b.score) || 0;
+      if (sb === sa) {
+        // bij gelijke score: kortste tijd wint
+        return (a.time || "00:00").localeCompare(b.time || "00:00");
+      }
+      return sb - sa;
     });
   }
-}
 
+  function updateHighscoreBoard() {
+    const highscoreList = document.getElementById("highscore-list");
+    if (!highscoreList) return;
 
-  window.addEventListener("load", () => {
+    highscoreList.innerHTML = "";
+    highscores.forEach((entry, index) => {
+      const levelText = entry.level ? `— Level ${entry.level}` : "";
+
+      const li = document.createElement("li");
+      li.className = "hs-entry";
+
+      if (entry.avatar) {
+        const img = document.createElement("img");
+        img.className = "hs-avatar";
+        img.src = entry.avatar;
+        img.alt = entry.name || "avatar";
+        li.appendChild(img);
+      }
+
+      const span = document.createElement("span");
+      span.textContent =
+        `${index + 1}. ${entry.name || "—"} — ${entry.score || 0} — ` +
+        `${entry.time || "00:00"} ${levelText}`;
+      li.appendChild(span);
+
+      highscoreList.appendChild(li);
+    });
+  }
+
+  function applyHighscoresFromArray(arr) {
+    if (!Array.isArray(arr) || !arr.length) {
+      highscores = DEFAULT_HIGHSCORES.slice();
+    } else {
+      highscores = sortHighscores(arr).slice(0, 10);
+    }
+    // lokaal bewaren als cache
+    localStorage.setItem("highscores", JSON.stringify(highscores));
     updateHighscoreBoard();
-  });
-  </script>
+    if (typeof window.renderMobileHighscores === "function") {
+      window.renderMobileHighscores();
+    }
+  }
+
+  function loadHighscores() {
+    // ✅ eerst proberen via Firebase (gedeelde lijst)
+    if (window.scoresRef) {
+      window.scoresRef.on(
+        "value",
+        (snap) => {
+          const arr = [];
+          snap.forEach((child) => {
+            const v = child.val() || {};
+            arr.push({
+              name: v.name || "—",
+              score: v.score || 0,
+              time: v.time || "00:00",
+              level: v.level || 1,
+              avatar: v.avatar || null
+            });
+          });
+          applyHighscoresFromArray(arr);
+        },
+        (err) => {
+          console.error("❌ Fout bij laden highscores Firebase:", err);
+          // fallback: localStorage
+          const local = JSON.parse(localStorage.getItem("highscores") || "null");
+          applyHighscoresFromArray(local);
+        }
+      );
+    } else {
+      // geen Firebase → alleen localStorage
+      const local = JSON.parse(localStorage.getItem("highscores") || "null");
+      applyHighscoresFromArray(local);
+    }
+  }
+
+  // wordt door game.js aangeroepen aan het einde van een run
+  function checkAndUpdateHighscores(name, score, time, level = 1) {
+    const avatar =
+      window.currentPlayerAvatar ||
+      localStorage.getItem("playerAvatar") ||
+      null;
+
+    const entry = {
+      name: name || "—",
+      score: Number(score) || 0,
+      time: time || "00:00",
+      level: level || 1,
+      avatar: avatar,
+      created: Date.now()
+    };
+
+    if (window.scoresRef) {
+      // 🔥 push naar centrale Firebase-lijst
+      window.scoresRef.push(entry).catch((err) => {
+        console.error("❌ Kon score niet naar Firebase pushen:", err);
+        // fallback: lokaal updaten
+        highscores.push(entry);
+        applyHighscoresFromArray(highscores);
+      });
+    } else {
+      // geen Firebase → alleen lokaal
+      highscores.push(entry);
+      applyHighscoresFromArray(highscores);
+    }
+  }
+
+  window.addEventListener("load", loadHighscores);
+  window.checkAndUpdateHighscores = checkAndUpdateHighscores;
+</script>
+
 
   <style>
     #game-container {
@@ -933,41 +994,60 @@ function addMessage(name, text, imgData = null){
 
     if (!btn || !panel || !list) return;
 
-    // toggle open/dicht
+    // open/dicht klappen
     btn.addEventListener('click', () => {
       panel.classList.toggle('show');
     });
 
-   function renderMobileHighscores() {
-  list.innerHTML = '';
-  const highscores = JSON.parse(localStorage.getItem('highscores')) || [];
-  highscores.forEach((entry, i) => {
-    const li = document.createElement('li');
-    li.className = "hs-entry";
+    function renderMobileHighscores() {
+      list.innerHTML = '';
 
-    if (entry.avatar) {
-      const img = document.createElement('img');
-      img.className = "hs-avatar";
-      img.src = entry.avatar;
-      img.alt = entry.name || 'avatar';
-      li.appendChild(img);
+      // gebruik dezelfde globale lijst als desktop
+      let arr = Array.isArray(window.highscores) ? window.highscores : null;
+
+      // kleine fallback als global nog niet gevuld is
+      if (!arr || !arr.length) {
+        try {
+          const fromLocal = JSON.parse(localStorage.getItem('highscores') || '[]');
+          if (Array.isArray(fromLocal) && fromLocal.length) {
+            arr = fromLocal;
+          } else {
+            arr = [];
+          }
+        } catch(e) {
+          arr = [];
+        }
+      }
+
+      arr.forEach((entry, i) => {
+        const li = document.createElement('li');
+        li.className = "hs-entry";
+
+        if (entry.avatar) {
+          const img = document.createElement('img');
+          img.className = "hs-avatar";
+          img.src = entry.avatar;
+          img.alt = entry.name || 'avatar';
+          li.appendChild(img);
+        }
+
+        const span = document.createElement('span');
+        span.textContent =
+          `${i + 1}. ${entry.name || '—'} — ${entry.score || 0} (${entry.time || '00:00'})`;
+        li.appendChild(span);
+
+        list.appendChild(li);
+      });
     }
 
-    const span = document.createElement('span');
-    span.textContent = `${i + 1}. ${entry.name || '—'} — ${entry.score || 0} (${entry.time || '00:00'})`;
-    li.appendChild(span);
+    // beschikbaar voor het andere script
+    window.renderMobileHighscores = renderMobileHighscores;
 
-    list.appendChild(li);
-  });
-}
-
-    // 1x laden bij opstart
+    // eerste keer vullen
     renderMobileHighscores();
-
-    // en elke 5 sec refreshen (optioneel)
-    setInterval(renderMobileHighscores, 5000);
   });
-  </script>
+</script>
+
 
 </body>
 </html>
