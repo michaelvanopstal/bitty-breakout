@@ -795,6 +795,16 @@ body {
     object-fit: contain;
     border-radius: 10px;
   }
+/* 🎵 Muziekknop – mobiele versie */
+#musicToggle {
+    position: fixed !important;
+    bottom: 70px !important;   /* afstand tot onderkant → zelf instellen */
+    left: 12px !important;     /* afstand van links → zelf instellen */
+    width: 60px !important;    /* GROOTTE van de knop → hier aanpassen */
+    height: auto !important;
+    z-index: 9999 !important;
+    transform: none !important;
+}
 
   /* bonus-power-panel kleiner rechtsboven op mobiel */
   #bonus-power-panel {
