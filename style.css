@@ -78,6 +78,22 @@ body {
   margin-bottom: 10px;
   white-space: nowrap;
 }
+/* Highscore entries met avatar */
+.hs-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.hs-entry .hs-avatar,
+#highscore-overlay .hs-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
 
 #trophy {
   position: absolute;
@@ -434,6 +450,22 @@ body {
     top: 120px;
     left: 20px;
   }
+/* Highscore entries met avatar */
+.hs-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.hs-entry .hs-avatar,
+#highscore-overlay .hs-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
 
   #bonus-power-panel {
     position: fixed;
@@ -618,52 +650,76 @@ body {
      z-index: 18500;
   }
 
-  /* mobiele highscore-knop linksboven (buiten frame mag ook) */
-  #mobile-highscore {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 15500;
-    display: block !important;
-  }
-  #mobileHighscoreBtn {
-    background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
-    border: 2px solid #a05c00;
-    border-radius: 12px;
-    color: #5a2700;
-    font-weight: bold;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 14px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-  }
-  #mobileHighscorePanel {
-    position: absolute;
-    top: 42px;
-    left: 0;
-    background: #7b1e1e;
-    border: 2px solid #b66414;
-    border-radius: 10px;
-    padding: 8px;
-    width: 200px;
-    max-height: 260px;
-    overflow-y: auto;
-    display: none;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-  }
-  #mobileHighscorePanel.show { display: block; }
-  #mobileHighscoreList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    color: #ffe9c4;
-    font-size: 13px;
-  }
-  #mobileHighscoreList li {
-    margin: 4px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding-bottom: 2px;
-  }
+/* 📱 mobiele highscore-knop linksboven */
+#mobile-highscore {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 15500;
+  display: block !important;
+}
+
+#mobileHighscoreBtn {
+  background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
+  border: 2px solid #a05c00;
+  border-radius: 12px;
+  color: #5a2700;
+  font-weight: bold;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+#mobileHighscorePanel {
+  position: absolute;
+  top: 42px;
+  left: 0;
+  background: #7b1e1e;
+  border: 2px solid #b66414;
+  border-radius: 10px;
+  padding: 8px;
+  width: 200px;
+  max-height: 260px;
+  overflow-y: auto;
+  display: none;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+}
+
+#mobileHighscorePanel.show { 
+  display: block; 
+}
+
+#mobileHighscoreList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: #ffe9c4;
+  font-size: 13px;
+}
+
+#mobileHighscoreList li {
+  margin: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 2px;
+}
+
+/* ⭐ NIEUW – AVATARS + FLEXBOX LAYOUT VOOR MOBILE HIGHSCORE ⭐ */
+#mobileHighscoreList .hs-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+#mobileHighscoreList .hs-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.3);
+}
 
   /* mobiele chat-knop onderin */
   #chat-mobile-button {
