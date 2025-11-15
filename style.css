@@ -652,7 +652,7 @@ body {
     align-items: center;
     gap: 10px;
     padding: 0 14px;
-    z-index: 250;
+    z-index: 17998;
     cursor: pointer;
     font-family: system-ui, Arial, sans-serif;
   }
@@ -707,7 +707,7 @@ body {
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 14px 14px;
     box-shadow: 0 6px 18px rgba(0,0,0,.35);
-    z-index: 9980;
+    z-index: 17999;
     overflow: hidden;
     display: none;
   }
@@ -750,7 +750,7 @@ body {
     display: flex;
     gap: 6px;
     align-items: center;
-    z-index: 1;
+    z-index: 18001;
   }
   #chatMobileForm input {
     flex: 1;
@@ -813,7 +813,7 @@ body {
     bottom: 70px;            /* positie → zelf aanpassen */
     left: 50%;                /* in het midden */
     transform: translateX(-50%);
-    z-index: 18000;            /* boven achtergrond, onder HUD */
+    z-index: 16000;            /* boven achtergrond, onder HUD */
     pointer-events: none;     /* blokkeert geen klikken */
     display: block;
 }
