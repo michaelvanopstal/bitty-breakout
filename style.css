@@ -837,6 +837,10 @@ body {
   #mobile-highscore {
     display: none !important;
   }
+
+  #bittyStrip {
+    display: none !important;
+  }
 }
 
 
