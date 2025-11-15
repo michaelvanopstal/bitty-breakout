@@ -10,7 +10,7 @@ const scaleFactor = currentScale;                    // dan pas scaleFactor
 
 // Paddle-ruimte onderkant — mobiel = lager, desktop = hoger
 const PADDLE_MARGIN_BOTTOM =
-  (window.innerWidth <= 768 ? 2 * scaleFactor : 8 * scaleFactor);
+  (window.innerWidth <= 768 ? 1 * scaleFactor : 8 * scaleFactor);
 // ≤ 768px = mobiele layout
 // > 768px  = desktop layout
 
