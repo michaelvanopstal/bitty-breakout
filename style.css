@@ -657,6 +657,38 @@ body {
     font-family: system-ui, Arial, sans-serif;
   }
 
+  /* 📱 Mobiele schiet-knop (bal, raket, vlaggetjes) */
+  #mobileShootBtn {
+    position: fixed;
+    left: 50%;              /* ⬅ horizontale positie (verstelbaar) */
+    transform: translateX(-50%);
+    bottom: 70px;           /* ⬅ afstand tot onderkant (verstelbaar) */
+
+    width: 60vw;            /* ⬅ breedte (verstelbaar) */
+    max-width: 260px;       /* ⬅ max-breedte */
+    height: 52px;           /* ⬅ hoogte (verstelbaar) */
+
+    background: linear-gradient(180deg, #888, #444);
+    border: 2px solid #222;
+    border-radius: 9999px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-align: center;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+
+    z-index: 18510;         /* ⬅ z-index (verstelbaar) */
+  }
+
+  #mobileShootBtn:active {
+    transform: translateX(-50%) translateY(1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  }
+
+  
   #chat-mobile-button .cmb-left {
     display: flex;
     align-items: center;
@@ -830,17 +862,18 @@ body {
   }
 }
 
-@media (min-width: 1201px) {
-  #chat-mobile-button,
-  #chatbox-mobile,
-  #mobile-highscore {
-    display: none !important;
-  }
+  @media (min-width: 1201px) {
+    #chat-mobile-button,
+    #chatbox-mobile,
+    #mobile-highscore,
+    #mobileShootBtn {           /* ⬅ toegevoegd */
+      display: none !important;
+    }
 
-  #bittyStrip {
-    display: none !important;
+    #bittyStrip {
+      display: none !important;
+    }
   }
-}
 
 
 
