@@ -1,36 +1,30 @@
 document.addEventListener("DOMContentLoaded", function () {
+  const loginToggle   = document.getElementById("login-toggle");
+  const loginOverlay  = document.getElementById("login-overlay");
+  const loginCloseBtn = document.getElementById("login-close");
+
   const loginBtn       = document.getElementById("login-btn");
   const logoutBtn      = document.getElementById("logout-btn");
   const nameInput      = document.getElementById("player-name");
   const playerDisplay  = document.getElementById("player-display");
-  const avatarInput    = document.getElementById("player-avatar");       // <input type="file">
-  const avatarImgSmall = document.getElementById("player-avatar-small"); // klein icoontje HUD
-
-  // ========== STYLING KNOPPEN (zoals jij al had) ==========
-  if (loginBtn) {
-    loginBtn.style.backgroundColor = "#701C1A";
-    loginBtn.style.color = "white";
-    loginBtn.style.border = "none";
-    loginBtn.style.borderRadius = "6px";
-    loginBtn.style.padding = "6px 12px";
-    loginBtn.style.fontSize = "14px";
-    loginBtn.style.cursor = "pointer";
-    loginBtn.style.marginTop = "5px";
-  }
-
-  if (logoutBtn) {
-    logoutBtn.style.backgroundColor = "#701C1A";
-    logoutBtn.style.color = "white";
-    logoutBtn.style.border = "none";
-    logoutBtn.style.borderRadius = "6px";
-    logoutBtn.style.padding = "6px 12px";
-    logoutBtn.style.fontSize = "14px";
-    logoutBtn.style.cursor = "pointer";
-    logoutBtn.style.marginTop = "5px";
-  }
+  const avatarInput    = document.getElementById("player-avatar");
+  const avatarImgSmall = document.getElementById("player-avatar-small");
 
   // tijdelijk geheugen voor gekozen avatar (dataURL) vóór login
   let tempAvatarData = null;
+
+  // ===== helpers voor popup =====
+  function showLoginPopup() {
+    if (loginOverlay) {
+      loginOverlay.classList.add("show");
+    }
+  }
+
+  function hideLoginPopup() {
+    if (loginOverlay) {
+      loginOverlay.classList.remove("show");
+    }
+  }
 
   // ===== helper: alles toepassen op UI + globals + storage =====
   function applyLogin(name, avatarData) {
@@ -41,13 +35,12 @@ document.addEventListener("DOMContentLoaded", function () {
     window.currentPlayer       = finalName;
     window.currentPlayerAvatar = finalAvatar;
 
-    // player label
+    // HUD: Player + naam
     if (playerDisplay) {
-      // jij had "Player: naam"
       playerDisplay.textContent = "Player: " + finalName;
     }
 
-    // klein icoontje naast Player
+    // Klein avatar-icoontje links van Player
     if (avatarImgSmall) {
       if (finalAvatar) {
         avatarImgSmall.src = finalAvatar;
@@ -60,11 +53,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // opslaan
     try {
-      // jouw oude gedrag: naam in sessionStorage
       sessionStorage.setItem("currentPlayer", finalName);
-
-      // extra: ook naam + avatar in localStorage (voor highscores / later)
       localStorage.setItem("playerName", finalName);
+
       if (finalAvatar) {
         localStorage.setItem("playerAvatar", finalAvatar);
       } else {
@@ -86,17 +77,15 @@ document.addEventListener("DOMContentLoaded", function () {
     applyLogin(initialName, savedAvatar);
     if (nameInput) {
       nameInput.value = initialName;
-      nameInput.style.display = "none"; // zoals jij deed na login
     }
-    if (loginBtn)  loginBtn.style.display  = "none";
+    window.readyToLaunch = true;
     if (logoutBtn) logoutBtn.style.display = "inline-block";
-
-    // avatar Input mag zichtbaar blijven, maar kan ook verstopt worden:
-    // if (avatarInput) avatarInput.style.display = "none";
+    if (loginBtn)  loginBtn.style.display  = "inline-block"; // mag zichtbaar blijven in popup
   } else {
-    // Default: nog geen player → label op "Player"
     window.currentPlayer       = null;
     window.currentPlayerAvatar = null;
+    window.readyToLaunch       = false;
+
     if (playerDisplay) playerDisplay.textContent = "Player";
     if (avatarImgSmall) {
       avatarImgSmall.src = "";
@@ -104,7 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (logoutBtn) logoutBtn.style.display = "none";
     if (loginBtn)  loginBtn.style.display  = "inline-block";
-    if (nameInput) nameInput.style.display = "inline-block";
   }
 
   // ===== Avatar kiezen (voor login) =====
@@ -132,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // ===== Login-knop =====
+  // ===== Login-knop in popup =====
   if (loginBtn) {
     loginBtn.addEventListener("click", function () {
       if (!nameInput) return;
@@ -143,53 +131,69 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      // naam + (tijdelijk gekozen) avatar toepassen
       applyLogin(name, tempAvatarData);
+      window.readyToLaunch = true;
 
-      nameInput.style.display = "none";
-      loginBtn.style.display = "none";
       if (logoutBtn) logoutBtn.style.display = "inline-block";
 
-      // jouw oude flag
-      window.readyToLaunch = true;
+      hideLoginPopup();
     });
   }
 
-  // ===== Logout-knop =====
+  // ===== Logout-knop in popup =====
   if (logoutBtn) {
     logoutBtn.addEventListener("click", function () {
       window.currentPlayer       = null;
       window.currentPlayerAvatar = null;
       window.readyToLaunch       = false;
 
-      // storage leegmaken
       try {
         sessionStorage.removeItem("currentPlayer");
         localStorage.removeItem("playerName");
         localStorage.removeItem("playerAvatar");
       } catch (e) {}
 
-      // UI reset
       if (playerDisplay) playerDisplay.textContent = "Player";
-      if (nameInput) {
-        nameInput.value = "";
-        nameInput.style.display = "inline-block";
-      }
-      if (loginBtn)  loginBtn.style.display  = "inline-block";
-      if (logoutBtn) logoutBtn.style.display = "none";
-
       if (avatarImgSmall) {
         avatarImgSmall.src = "";
         avatarImgSmall.style.display = "none";
       }
 
+      if (nameInput) {
+        nameInput.value = "";
+      }
+
+      if (logoutBtn) logoutBtn.style.display = "none";
+      if (loginBtn)  loginBtn.style.display  = "inline-block";
+
       tempAvatarData = null;
 
-      // avatar-input kun je weer tonen
-      if (avatarInput) {
-        avatarInput.value = "";
-        // avatarInput.style.display = "inline-block"; // als je hem had verstopt
-      }
+      hideLoginPopup();
     });
   }
+
+  // ===== Login-toggle knop (kleine knop rechtsboven) =====
+  if (loginToggle) {
+    loginToggle.addEventListener("click", () => {
+      // als er al een naam is, toon die gewoon in het veld
+      if (nameInput && window.currentPlayer) {
+        nameInput.value = window.currentPlayer;
+      }
+      showLoginPopup();
+    });
+  }
+
+  // ===== X-knopje in popup =====
+  if (loginCloseBtn) {
+    loginCloseBtn.addEventListener("click", () => {
+      hideLoginPopup();
+    });
+  }
+
+  // Optioneel: ESC sluit popup
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      hideLoginPopup();
+    }
+  });
 });
