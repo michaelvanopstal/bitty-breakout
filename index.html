@@ -289,23 +289,32 @@
       return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
     }
 
-    function renderMessageInContainer(container, m){
-      if (!container) return;
-      const wrap = document.createElement('div');
-      wrap.className = 'chat-msg';
+   function renderMessageInContainer(container, m){
+  if (!container) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-msg';
 
-      let html = `<div class="chat-meta">${m.time || '--:--'} — <b>${escapeHTML(m.name || 'Anon')}</b></div>`;
-      if (m.text) {
-        html += `<div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
-      }
-      if (m.img) {
-        html += `<img src="${m.img}" class="chat-thumb" alt="image">`;
-      }
+  let html = `<div class="chat-meta">`;
 
-      wrap.innerHTML = html;
-      container.appendChild(wrap);
-      container.scrollTop = container.scrollHeight;
-    }
+  // 🔸 avatar uit bericht (als die bestaat)
+  if (m.avatar) {
+    html += `<img src="${m.avatar}" class="chat-avatar" alt="avatar">`;
+  }
+
+  html += `${m.time || '--:--'} — <b>${escapeHTML(m.name || 'Anon')}</b></div>`;
+
+  if (m.text) {
+    html += `<div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
+  }
+  if (m.img) {
+    html += `<img src="${m.img}" class="chat-thumb" alt="image">`;
+  }
+
+  wrap.innerHTML = html;
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+}
+
 
     function appendChatMessage(m){
       renderMessageInContainer($msgs, m);
@@ -319,26 +328,40 @@
     }
 
     // bericht toevoegen
-    function addMessage(name, text, imgData = null){
-      const msg = {
-        name: name,
-        text: text,
-        img: imgData,
-        time: nowTime()
-      };
+function addMessage(name, text, imgData = null){
+  // 🔸 avatar ophalen uit login (globaal of localStorage)
+  const avatar =
+    (typeof window.currentPlayerAvatar !== "undefined" && window.currentPlayerAvatar) ||
+    localStorage.getItem("playerAvatar") ||
+    null;
 
-      if (window.chatRef) {
-        window.chatRef.push(msg);
-      } else {
-        let all = getStore();
-        if(all.length >= LIMIT){
-          all = [{name:'System', text:'Chat automatisch geleegd (100 berichten).', time:nowTime()}];
-        }
-        all.push(msg);
-        setStore(all);
-        render(all);
-      }
+  const msg = {
+    name: name,
+    text: text,
+    img: imgData,
+    time: nowTime(),
+    avatar: avatar
+  };
+
+  // 👉 naar Firebase (online chat)
+  if (window.chatRef) {
+    window.chatRef.push(msg);
+  } else {
+    // 👉 lokale fallback
+    let all = getStore();
+    if(all.length >= LIMIT){
+      all = [{
+        name:'System',
+        text:'Chat automatisch geleegd (100 berichten).',
+        time:nowTime()
+      }];
     }
+    all.push(msg);
+    setStore(all);
+    render(all);
+  }
+}
+
     // beschikbaar maken voor mobiel script
     window.addMessage = addMessage;
     window.detectPlayerName = detectPlayerName;
