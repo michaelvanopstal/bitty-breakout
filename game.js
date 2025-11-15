@@ -2594,16 +2594,38 @@ function keyDownHandler(e) {
 /* ==============================
    📱 TOUCH CONTROLS (mobiel/tablet)
    ============================== */
-if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
   let touchActive = false;
 
-  window.addEventListener('touchstart', (e) => {
-    if (!canvas) return;
-    if (e.touches.length > 0) {
-      touchActive = true;
+  // 🔹 Paddle volgen met je vinger
+  window.addEventListener(
+    "touchstart",
+    (e) => {
+      if (!canvas) return;
+      if (e.touches.length > 0) {
+        touchActive = true;
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+
+        paddleX = x - paddleWidth / 2;
+
+        if (paddleX < 0) paddleX = 0;
+        if (paddleX + paddleWidth > canvas.width) {
+          paddleX = canvas.width - paddleWidth;
+        }
+      }
+    },
+    { passive: true }
+  );
+
+  window.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!touchActive || !canvas) return;
       const touch = e.touches[0];
-      const rect  = canvas.getBoundingClientRect();
-      const x     = touch.clientX - rect.left;
+      const rect = canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
 
       paddleX = x - paddleWidth / 2;
 
@@ -2611,38 +2633,49 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
       if (paddleX + paddleWidth > canvas.width) {
         paddleX = canvas.width - paddleWidth;
       }
-    }
-  }, { passive: true });
-
-  window.addEventListener('touchmove', (e) => {
-    if (!touchActive || !canvas) return;
-    const touch = e.touches[0];
-    const rect  = canvas.getBoundingClientRect();
-    const x     = touch.clientX - rect.left;
-
-    paddleX = x - paddleWidth / 2;
-
-    if (paddleX < 0) paddleX = 0;
-    if (paddleX + paddleWidth > canvas.width) {
-      paddleX = canvas.width - paddleWidth;
-    }
-  }, { passive: true });
+    },
+    { passive: true }
+  );
 
   window.addEventListener("touchend", (e) => {
-    if (e.target.tagName !== "CANVAS") return;
+    if (!canvas) return;
+    // alleen reageren als de touch op / vlakbij het canvas was
+    if (e.target !== canvas && e.target.tagName !== "CANVAS") return;
 
-    // 🔥 snelheid halen via schaal
+    // 🔫 RAKET afvuren via tik (zelfde mechanisme als muis)
+    if (typeof rocketActive !== "undefined" &&
+        rocketActive &&
+        typeof rocketAmmo !== "undefined" &&
+        rocketAmmo > 0 &&
+        typeof rocketFired !== "undefined" &&
+        !rocketFired) {
+      rocketFired = true;
+      rocketAmmo--;
+      if (typeof rocketLaunchSound !== "undefined" && rocketLaunchSound) {
+        rocketLaunchSound.currentTime = 0;
+        rocketLaunchSound.play();
+      }
+    }
+
+    // 🏁 SHOOTING FLAGS – muntjes schieten bij elke tik
+    if (typeof flagsOnPaddle !== "undefined" &&
+        flagsOnPaddle &&
+        typeof shootFromFlags === "function") {
+      shootFromFlags();
+    }
+
+    // 🎯 BAL afschieten bij eerste tik (jouw bestaande logica)
     const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
     const lvl = LEVELS[lvlIndex];
     const boost =
-      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+      lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number"
         ? lvl.params.ballSpeedBoost
         : 0;
 
-    // 👇 dit is de enige echte wijziging
-    const launchSpeed = typeof getScaledBallSpeed === "function"
-      ? getScaledBallSpeed(boost)
-      : (DEFAULT_BALL_SPEED + boost);
+    const launchSpeed =
+      typeof getScaledBallSpeed === "function"
+        ? getScaledBallSpeed(boost)
+        : DEFAULT_BALL_SPEED + boost;
 
     if (!ballLaunched && !ballMoving && balls.length > 0) {
       ballLaunched = true;
@@ -2654,7 +2687,6 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
         shootSound.play();
       }
 
-      // center-launch, alleen snelheid anders
       balls[0].dx = 0;
       balls[0].dy = -launchSpeed;
 
@@ -2666,8 +2698,9 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     touchActive = false;
   });
 
-  console.log("✅ Touch controls geactiveerd");
+  console.log("✅ Touch controls geactiveerd (paddle + raket + shooting flags)");
 }
+
 
 function keyUpHandler(e) {
   if (
