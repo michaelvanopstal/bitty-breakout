@@ -888,16 +888,28 @@
       panel.classList.toggle('show');
     });
 
-    // laad highscores vanuit je bestaande lokale lijst
-    function renderMobileHighscores() {
-      list.innerHTML = '';
-      const highscores = JSON.parse(localStorage.getItem('highscores')) || [];
-      highscores.forEach((entry, i) => {
-        const li = document.createElement('li');
-        li.textContent = `${i + 1}. ${entry.name || '—'} — ${entry.score || 0} (${entry.time || '00:00'})`;
-        list.appendChild(li);
-      });
+   function renderMobileHighscores() {
+  list.innerHTML = '';
+  const highscores = JSON.parse(localStorage.getItem('highscores')) || [];
+  highscores.forEach((entry, i) => {
+    const li = document.createElement('li');
+    li.className = "hs-entry";
+
+    if (entry.avatar) {
+      const img = document.createElement('img');
+      img.className = "hs-avatar";
+      img.src = entry.avatar;
+      img.alt = entry.name || 'avatar';
+      li.appendChild(img);
     }
+
+    const span = document.createElement('span');
+    span.textContent = `${i + 1}. ${entry.name || '—'} — ${entry.score || 0} (${entry.time || '00:00'})`;
+    li.appendChild(span);
+
+    list.appendChild(li);
+  });
+}
 
     // 1x laden bij opstart
     renderMobileHighscores();
