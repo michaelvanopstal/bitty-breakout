@@ -662,7 +662,7 @@ body {
   position: fixed;
   left: 20px;                 /* midden onderin, eventueel aanpassen */
   transform: translateX(-50%);
-  bottom: 80px;              /* afstand tot onderkant, mag je aanpassen */
+  bottom: 100px;              /* afstand tot onderkant, mag je aanpassen */
 
   width: 50px;               /* ⬅ grootte van de knop */
   height: 50px;              /* ⬅ zelfde als width = cirkel */
