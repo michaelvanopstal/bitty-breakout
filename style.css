@@ -799,8 +799,8 @@ body {
 #musicToggle {
     position: absolute;
     bottom: 70px;   /* afstand tot onderkant → zelf instellen */
-    left: 100px;     /* afstand van links → zelf instellen */
-    width: 20px;    /* GROOTTE van de knop → hier aanpassen */
+    left: 80px;     /* afstand van links → zelf instellen */
+    width: 10px;    /* GROOTTE van de knop → hier aanpassen */
     height: 60px;
     z-index: 18500;
     transform: none;
