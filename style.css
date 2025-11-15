@@ -802,8 +802,8 @@ body {
     --musicScale: 0.75;          /* 👉 PAS ALLEEN DEZE WAARDE AAN */
     
     position: absolute;
-    bottom: calc(35px * var(--musicScale));
-    left: calc(80px * var(--musicScale));
+    bottom: calc(50px * var(--musicScale));
+    left: calc(100px * var(--musicScale));
     
     width: calc(30px * var(--musicScale));  
     height: calc(60px * var(--musicScale));
