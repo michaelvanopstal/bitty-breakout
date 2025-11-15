@@ -6198,42 +6198,65 @@ document.addEventListener("mousedown", function (e) {
   // 🛡️ Alleen reageren als er op het canvas geklikt wordt
   if (e.target.tagName !== "CANVAS") return;
 
-  // 🔫 Raket afvuren
-  if (rocketActive && rocketAmmo > 0 && !rocketFired) {
+  // 🔫 RAKET AFVUREN (zelfde mechanisme als mobiel)
+  if (
+    typeof rocketActive !== "undefined" &&
+    rocketActive &&
+    typeof rocketAmmo !== "undefined" &&
+    rocketAmmo > 0 &&
+    typeof rocketFired !== "undefined" &&
+    !rocketFired
+  ) {
     rocketFired = true;
     rocketAmmo--;
-    rocketLaunchSound.currentTime = 0;
-    rocketLaunchSound.play();
+
+    if (typeof rocketLaunchSound !== "undefined" && rocketLaunchSound) {
+      rocketLaunchSound.currentTime = 0;
+      rocketLaunchSound.play();
+    }
   }
 
-  // 🎯 Bal afschieten met muisklik (trackpad)
+  // 🏁 SHOOTING FLAGS – muntjes schieten bij elke muisklik
+  if (
+    typeof flagsOnPaddle !== "undefined" &&
+    flagsOnPaddle &&
+    typeof shootFromFlags === "function"
+  ) {
+    shootFromFlags();
+  }
+
+  // 🎯 BAL AFSCHIETEN MET MUIS (zoals jouw bestaande logica)
   if (!ballLaunched && !ballMoving) {
     ballLaunched = true;
     ballMoving = true;
-    paddleFreeMove = true; // ✅ Na eerste schot mag paddle omhoog bewegen
+    paddleFreeMove = true; // mag hierna omhoog/omlaag bewegen
 
-    shootSound.currentTime = 0;
-    shootSound.play();
+    if (typeof shootSound !== "undefined") {
+      shootSound.currentTime = 0;
+      shootSound.play();
+    }
 
-    // 🔥 snelheid bepalen zoals bij spatie: default + level boost
+    // 🔥 snelheid bepalen per level
     const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
     const lvl = LEVELS[lvlIndex];
 
     const baseSpeed = DEFAULT_BALL_SPEED;
     const boost =
-      (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+      lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number"
         ? lvl.params.ballSpeedBoost
         : 0;
 
     const launchSpeed = baseSpeed + boost;
 
+    // neutrale launch
     balls[0].dx = 0;
     balls[0].dy = -launchSpeed;
 
-    if (!timerRunning) startTimer(); // ✅ Start timer bij eerste schot
+    if (!timerRunning && typeof startTimer === "function") {
+      startTimer();
+    }
   }
 });
-
 
 
 function startTimer() {
