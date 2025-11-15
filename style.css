@@ -797,14 +797,23 @@ body {
     object-fit: contain;
     border-radius: 10px;
   }
-/* 🎵 Muziekknop – mobiele versie */
+/* 🎵 Muziekknop – mobiele versie (100% schaalbaar) */
 #musicToggle {
+    --musicScale: 0.75;          /* 👉 PAS ALLEEN DEZE WAARDE AAN */
+    
     position: absolute;
-    bottom: 35px;   /* afstand tot onderkant → zelf instellen */
-    left: 80px;     /* afstand van links → zelf instellen */
-    width: 30px;    /* GROOTTE van de knop → hier aanpassen */
-    height: 60px;
+    bottom: calc(35px * var(--musicScale));
+    left: calc(80px * var(--musicScale));
+    
+    width: calc(30px * var(--musicScale));  
+    height: calc(60px * var(--musicScale));
+
+    transform: scale(var(--musicScale));
+    transform-origin: center center;
+
     z-index: 18500;
+}
+
 
 }
  /* 🎨 Bitty strip – mobiel only */
