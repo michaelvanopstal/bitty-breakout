@@ -426,7 +426,7 @@ body {
 }
 
 /* ======= 📱 MOBIEL t/m 600px – SIMPEL EN VAST ======= */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
 
 
   html, body {
@@ -817,13 +817,13 @@ body {
   }
 }
 
-/* Desktop: alles wat mobiel is verstoppen */
-@media (min-width: 769px) {
+@media (min-width: 1201px) {
   #chat-mobile-button,
   #chatbox-mobile,
   #mobile-highscore {
     display: none !important;
   }
 }
+
 
 
