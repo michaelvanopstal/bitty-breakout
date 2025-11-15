@@ -3098,10 +3098,16 @@ function resetBricks(opts = {}) {
   
 
   // ✨ extra: ook bal- en paddle-maten opnieuw zetten
-  ballRadius   = 8  * currentScale;
-  paddleHeight = 20 * currentScale;
-  // paddleY opnieuw net boven de onderkant
-  paddleY = canvas.height - paddleHeight - (8 * currentScale);
+  // ✨ extra: ook bal- en paddle-maten opnieuw zetten
+ballRadius   = 8  * currentScale;
+paddleHeight = 20 * currentScale;
+
+// zelfde logica als boven: mobiel lager dan desktop
+const bottomMargin =
+  (window.innerWidth <= 768 ? 2 * currentScale : 8 * currentScale);
+
+// paddleY opnieuw net boven de onderkant
+paddleY = canvas.height - paddleHeight - bottomMargin;
 
   // 2) level-def ophalen
   const def = LEVELS[Math.max(0, Math.min(TOTAL_LEVELS - 1, (level - 1)))];
