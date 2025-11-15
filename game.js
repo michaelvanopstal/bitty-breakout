@@ -6766,6 +6766,8 @@ function triggerSilverExplosion(x, y) {
 
 function triggerBallReset() {
   const btn = document.getElementById("resetBallBtn");
+  if (!btn) return;
+
   btn.disabled = true;
   btn.textContent = "RESETTING...";
 
@@ -6787,23 +6789,22 @@ function triggerBallReset() {
     paddleExplodeSound.currentTime = 0;
     paddleExplodeSound.play();
 
-   const s = getScale(); // 👈 voeg dit toe boven de loop
+    const s = getScale(); // schaal voor debris
 
-balls.forEach(ball => {
-  for (let i = 0; i < 30; i++) {
-    const speed = ((Math.random() - 0.5) * 8) * s; // 👈 snelheid schalen
-    const angle = Math.random() * Math.PI * 2;
+    balls.forEach(ball => {
+      for (let i = 0; i < 30; i++) {
+        const angle = Math.random() * Math.PI * 2;
 
-    stoneDebris.push({
-      x: ball.x + ball.radius,
-      y: ball.y + ball.radius,
-      dx: Math.cos(angle) * (Math.random() * 4 + 2) * s, // 👈 richting & snelheid
-      dy: Math.sin(angle) * (Math.random() * 4 + 2) * s,
-      radius: (Math.random() * 4 + 2) * s,               // 👈 grootte schalen
-      alpha: 1
+        stoneDebris.push({
+          x: ball.x + ball.radius,
+          y: ball.y + ball.radius,
+          dx: Math.cos(angle) * (Math.random() * 4 + 2) * s, // richting & snelheid
+          dy: Math.sin(angle) * (Math.random() * 4 + 2) * s,
+          radius: (Math.random() * 4 + 2) * s,               // grootte schalen
+          alpha: 1
+        });
+      }
     });
-  }
-});
 
     balls = [];
   }, 6500);
@@ -6818,11 +6819,15 @@ balls.forEach(ball => {
       radius: ballRadius,
       isMain: true
     }];
+
     ballLaunched = false;
     ballMoving = false;
     resetOverlayActive = false;
-    btn.disabled = false;
-    btn.textContent = "RESET\nBALL";
+
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "RESET\nBALL";
+    }
 
     // 🧠 Zet leven weer terug als het tijdelijk op 2 stond
     if (originalLives === 1) {
@@ -6833,6 +6838,23 @@ balls.forEach(ball => {
   }, 10000);
 }
 
-// 🟢 BELANGRIJK: knop koppelen aan functie
-document.getElementById("resetBallBtn").addEventListener("click", triggerBallReset);
+// 🟢 BELANGRIJK: reset-knop koppelen aan functie
+const resetBallBtn = document.getElementById("resetBallBtn");
+if (resetBallBtn) {
+  resetBallBtn.addEventListener("click", triggerBallReset);
+}
 
+// 📱 Mobiele schiet-knop koppelen (bal + raket + vlaggetjes)
+const mobileShootBtn = document.getElementById("mobileShootBtn");
+if (mobileShootBtn) {
+  // extra safety: verstoppen op desktop
+  if (window.innerWidth > 1200) {
+    mobileShootBtn.style.display = "none";
+  } else {
+    mobileShootBtn.addEventListener("click", () => {
+      // 👉 deze functie moet je hoger in game.js hebben staan
+      // hij regelt: bal afvuren, raket schieten, vlaggetjes schieten
+      handleMobileShoot();
+    });
+  }
+}
