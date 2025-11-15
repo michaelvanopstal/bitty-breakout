@@ -660,12 +660,12 @@ body {
   /* 📱 Ronde schiet-knop (bal + raket + vlaggetjes) */
 #mobileShootBtn {
   position: fixed;
-  left: 50%;                 /* midden onderin, eventueel aanpassen */
+  left: 20px;                 /* midden onderin, eventueel aanpassen */
   transform: translateX(-50%);
   bottom: 80px;              /* afstand tot onderkant, mag je aanpassen */
 
-  width: 70px;               /* ⬅ grootte van de knop */
-  height: 70px;              /* ⬅ zelfde als width = cirkel */
+  width: 40px;               /* ⬅ grootte van de knop */
+  height: 40px;              /* ⬅ zelfde als width = cirkel */
   border-radius: 50%;        /* ⬅ maakt 'm echt rond */
 
   background: radial-gradient(circle at 30% 30%, #aaa, #555);
