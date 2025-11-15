@@ -3085,7 +3085,7 @@ function resetBricks(opts = {}) {
   if (typeof rescaleStarsSystems === "function") {
     rescaleStarsSystems(currentScale);
   }
-   if (window.innerWidth <= 768) {
+   if (window.innerWidth <= 1200) {
   // 1️⃣ Canvas vult volledige breedte
   canvas.width  = window.innerWidth * 0.91;  // iets kleiner dan totaal, zodat gele rand zichtbaar blijft
   canvas.height = window.innerHeight * 0.55; // stel hoogte naar verhouding in
@@ -3109,7 +3109,7 @@ paddleHeight = 20 * currentScale;
 
 // zelfde logica als boven: mobiel lager dan desktop
 const bottomMargin =
-  (window.innerWidth <= 768 ? 2 * currentScale : 8 * currentScale);
+  (window.innerWidth <= 1200 ? 2 * currentScale : 8 * currentScale);
 
 // paddleY opnieuw net boven de onderkant
 paddleY = canvas.height - paddleHeight - bottomMargin;
