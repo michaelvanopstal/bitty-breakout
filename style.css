@@ -672,10 +672,14 @@ body {
     display: none;
   }
 
-  /* optioneel: popup iets kleiner op mobiel */
+    /* popup kleiner maken zonder transform (veilig voor file input) */
   #login-box {
-    transform: scale(0.95);
+    /* GEEN transform meer */
+    font-size: 13px;
+    padding: 8px 10px 10px;
+    width: 240px;
   }
+
 
   /* === SCORE – MOBIEL === */
   #scoreDisplay {
