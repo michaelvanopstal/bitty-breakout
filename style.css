@@ -591,20 +591,33 @@ body {
   }
 }
 
+/* 📏 Samsung / Xiaomi viewport fix */
+@supports (height: 100dvh) {
+  :root {
+    --safe-height: 100dvh;
+  }
+}
+@supports not (height: 100dvh) {
+  :root {
+    --safe-height: 100vh;
+  }
+}
+
 /* ======= 📱 MOBIEL – alle touch devices ======= */
 @media (hover: none) and (pointer: coarse) {
 
   html, body {
     margin: 0;
     padding: 0;
-    height: 100%;
-    overflow: hidden;          /* ⬅ geen scroll meer */
+    height: var(--safe-height);       /* ✅ veilige hoogte */
+    min-height: var(--safe-height);
+    overflow: hidden;                 /* ⬅ geen scroll meer */
     background: #FF9305;
     font-family: Arial, sans-serif;
-    overscroll-behavior: none; /* ⬅ geen “bounce” effect */
+    overscroll-behavior: none;        /* ⬅ geen “bounce” effect */
   }
 
-   /* Frame container – nu altijd zo breed als het scherm */
+  /* Frame container – nu altijd zo breed als het scherm */
   #game-container {
     position: relative;
     width: 100vw;          /* volle breedte */
@@ -641,7 +654,6 @@ body {
     z-index: 10 !important;
   }
 
-
   /* desktop-dingen uit op mobiel */
   #highscore-overlay,
   #trophy,
@@ -674,14 +686,13 @@ body {
     display: none;
   }
 
-    /* popup kleiner maken zonder transform (veilig voor file input) */
+  /* popup kleiner maken zonder transform (veilig voor file input) */
   #login-box {
     /* GEEN transform meer */
     font-size: 13px;
     padding: 8px 10px 10px;
     width: 240px;
   }
-
 
   /* === SCORE – MOBIEL === */
   #scoreDisplay {
@@ -977,17 +988,16 @@ body {
     z-index: 18500;
   }
 
- /* 🎨 Bitty strip – mobiel only */
-#bittyStrip {
-  position: fixed;
-  width: 85vw;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: -1;        /* 🔹 achter het game-frame */
-  pointer-events: none; /* 🔹 raakt geen taps / clicks */
-}
-
+  /* 🎨 Bitty strip – mobiel only */
+  #bittyStrip {
+    position: fixed;
+    width: 85vw;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: -1;              /* achter het game-frame */
+    pointer-events: none;     /* geen taps */
+  }
 
   /* bonus-power-panel kleiner rechtsboven op mobiel */
   #bonus-power-panel {
@@ -999,7 +1009,8 @@ body {
     transform-origin: top right !important;
     z-index: 20000 !important;
   }
- /* 📱 Geen blauwe selectiebalk / kopie-menu op HUD & game */
+
+  /* 📱 Geen blauwe selectiebalk / kopie-menu op HUD & game */
   #game-container,
   #gameCanvas,
   #hud,
@@ -1048,6 +1059,7 @@ body {
     bottom: auto !important;
   }
 }
+
 /* Mobiel login button */
 @media (hover: none) and (pointer: coarse) {
   #login-toggle {
@@ -1058,6 +1070,7 @@ body {
     transform: scale(0.9);
   }
 }
+
 
 
 
