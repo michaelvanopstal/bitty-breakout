@@ -977,15 +977,17 @@ body {
     z-index: 18500;
   }
 
-  /* 🎨 Bitty strip – mobiel only */
-  #bittyStrip {
-    position: fixed;
-    width: 85vw;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-  }
+ /* 🎨 Bitty strip – mobiel only */
+#bittyStrip {
+  position: fixed;
+  width: 85vw;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: -1;        /* 🔹 achter het game-frame */
+  pointer-events: none; /* 🔹 raakt geen taps / clicks */
+}
+
 
   /* bonus-power-panel kleiner rechtsboven op mobiel */
   #bonus-power-panel {
