@@ -6323,6 +6323,16 @@ function spawnStoneDebris(x, y) {
 
 
 function triggerPaddleExplosion() {
+  // 🔹 alle vallende icoontjes van de huidige beurt direct opruimen
+  function clearFallingItems() {
+    if (Array.isArray(fallingHearts))      fallingHearts.length = 0;
+    if (Array.isArray(fallingStars))       fallingStars.length = 0;
+    if (Array.isArray(fallingBombs))       fallingBombs.length = 0;
+    if (Array.isArray(fallingBadCrosses))  fallingBadCrosses.length = 0;
+    if (Array.isArray(fallingDrops))       fallingDrops.length = 0;
+    if (Array.isArray(fallingPowerups))    fallingPowerups.length = 0;
+  }
+
   // 🛡️ STAR-bonus actief: geen life loss, geen pauze, alleen bal terug op paddle
   if (invincibleActive) {
     resetBall?.();   // centreer/park de bal op de paddle (jouw bestaande functie)
@@ -6336,6 +6346,9 @@ function triggerPaddleExplosion() {
       updateLivesDisplay?.();
       // 💖 Hartjes blijven behouden – reset alleen bij game over
     }
+
+    // ❌ alle vallende icons van deze beurt weggooien
+    clearFallingItems();
 
     pauseTimer();
 
@@ -6367,40 +6380,40 @@ function triggerPaddleExplosion() {
     stopMagnet();
 
     setTimeout(() => {
-  paddleExploding = false;
-  paddleExplosionParticles = [];
+      paddleExploding = false;
+      paddleExplosionParticles = [];
 
-  // 👉 actuele level-snelheid bepalen
-  const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
-  const lvl = LEVELS[lvlIndex];
+      // 👉 actuele level-snelheid bepalen
+      const lvlIndex = Math.max(0, Math.min(TOTAL_LEVELS - 1, level - 1));
+      const lvl = LEVELS[lvlIndex];
 
-  const boost =
-    (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
-      ? lvl.params.ballSpeedBoost
-      : 0;
+      const boost =
+        (lvl && lvl.params && typeof lvl.params.ballSpeedBoost === "number")
+          ? lvl.params.ballSpeedBoost
+          : 0;
 
-  // ✅ altijd via de geschaalde snelheid
-  const launchSpeed = (typeof getScaledBallSpeed === "function")
-    ? getScaledBallSpeed(boost)
-    : (DEFAULT_BALL_SPEED + boost);
+      // ✅ altijd via de geschaalde snelheid
+      const launchSpeed = (typeof getScaledBallSpeed === "function")
+        ? getScaledBallSpeed(boost)
+        : (DEFAULT_BALL_SPEED + boost);
 
-  // ✅ bal resetten (center-based!)
-  balls = [{
-    x: paddleX + paddleWidth / 2,
-    y: paddleY - ballRadius,
-    dx: 0,
-    dy: -launchSpeed,
-    radius: ballRadius,
-    isMain: true
-  }];
+      // ✅ bal resetten (center-based!)
+      balls = [{
+        x: paddleX + paddleWidth / 2,
+        y: paddleY - ballRadius,
+        dx: 0,
+        dy: -launchSpeed,
+        radius: ballRadius,
+        isMain: true
+      }];
 
-  ballLaunched   = false;
-  ballMoving     = false;
-  paddleFreeMove = false; // ⛓️ paddle weer vergrendeld
+      ballLaunched   = false;
+      ballMoving     = false;
+      paddleFreeMove = false; // ⛓️ paddle weer vergrendeld
 
-  resetTriggered = false;
-  resetPaddle();
-}, 1000);
+      resetTriggered = false;
+      resetPaddle();
+    }, 1000);
 
   } else {
     // 🔴 Laatste leven → GAME OVER
@@ -6408,6 +6421,9 @@ function triggerPaddleExplosion() {
 
     machineGunActive = false;
     machineGunCooldownActive = false;
+
+    // ❌ ook hier: alle vallende icons meteen weg
+    clearFallingItems();
 
     // 🔇 TNT direct stilzetten bij GAME OVER
     try {
@@ -6533,6 +6549,7 @@ function triggerPaddleExplosion() {
     }, 1000);
   }
 }
+
 
 
 function startLevelTransition() {
