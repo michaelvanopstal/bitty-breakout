@@ -534,17 +534,32 @@ function addMessage(name, text, imgData = null){
     }
 
   })();
-  </script>
+ </script>
 
-  <img id="bittyStrip" src="bittys.png" alt="bitty characters">
+<!-- 🎨 Bitty strip (achtergrond-characters — mobiel & desktop) -->
+<img id="bittyStrip" src="bittys.png" alt="Bitty Characters">
 
+<!-- 📱 Wrapper voor de mobile scaling -->
+<div class="mobile-wrapper">
+
+  <!-- 🎮 Game Frame Container -->
   <div id="game-container">
-    <canvas id="gameCanvas" width="645" height="650"></canvas>
-<button id="login-toggle" type="button">Login</button>
 
+    <!-- 🟦 Canvas (game) -->
+    <canvas id="gameCanvas" width="645" height="650"></canvas>
+
+    <!-- 🔐 Login knop -->
+    <button id="login-toggle" type="button">Login</button>
+
+    <!-- ⏱️ Timer -->
     <div id="time-box">
       <span id="timeDisplay">00:00</span>
     </div>
+
+  </div><!-- einde game-container -->
+
+</div><!-- einde mobile-wrapper -->
+
 
        <!-- 🔒 LOGIN POPUP -->
     <div id="login-overlay">
