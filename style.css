@@ -1010,7 +1010,7 @@ body {
 /* Desktop / laptop login button */
 @media (hover: hover) and (pointer: fine) {
   #login-toggle {
-    top: 100px !important;
+    top: 120px !important;
     right: 24px !important;
     left: auto !important;
     bottom: auto !important;
