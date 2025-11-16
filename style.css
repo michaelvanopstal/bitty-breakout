@@ -604,31 +604,31 @@ body {
     overscroll-behavior: none; /* ⬅ geen “bounce” effect */
   }
 
-    /* Frame container schaalt nu met scherm mee */
+   /* Frame container – nu altijd zo breed als het scherm */
   #game-container {
     position: relative;
-    width: 100vw;          /* altijd zo breed als het scherm */
-    max-width: 420px;      /* niet groter dan ~420px */
+    width: 100vw;          /* volle breedte */
+    max-width: 100vw;      /* geen beperking meer */
     margin: 0 auto 0;
     overflow: visible;
     z-index: 0;
-    aspect-ratio: 360 / 600;   /* zelfde verhouding als jouw mobile frame */
+    aspect-ratio: 360 / 600;   /* zelfde verhouding als je PNG */
   }
 
   /* De PNG zelf, meeschalend met container */
   #game-container::before {
     content: "";
     position: absolute;
-    top: 18.3%;              /* 110 / 600 ≈ 18.3% */
+    top: 18.3%;              /* 110 / 600 */
     left: 0;
     width: 100%;
-    height: 73.3%;           /* 440 / 600 ≈ 73.3% */
+    height: 73.3%;           /* 440 / 600 */
     background: url("mobile.png") no-repeat center top;
     background-size: 100% 100%;
     z-index: 8;
   }
 
-  /* canvas in het gele speelveld – nu ook in % */
+  /* Canvas binnen het gele veld – ook in % */
   #gameCanvas {
     position: absolute !important;
     top: 21.7% !important;   /* 130 / 600 */
@@ -640,6 +640,7 @@ body {
     background: transparent !important;
     z-index: 10 !important;
   }
+
 
   /* desktop-dingen uit op mobiel */
   #highscore-overlay,
