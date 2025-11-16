@@ -995,6 +995,34 @@ body {
     transform-origin: top right !important;
     z-index: 20000 !important;
   }
+ /* 📱 Geen blauwe selectiebalk / kopie-menu op HUD & game */
+  #game-container,
+  #gameCanvas,
+  #hud,
+  #player-display,
+  #scoreDisplay,
+  #time-box,
+  #livesDisplay,
+  #bonus-power-panel,
+  #mobile-highscore,
+  #mobileHighscoreBtn {
+    -webkit-touch-callout: none; /* geen copy/zoek popup */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* ✅ Chat mag wél selecteerbaar blijven */
+  #chatbox-mobile,
+  #chatMobileMessages,
+  #chatMobileForm input {
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
 }
 
 /* 💻 Desktop / laptop: mobiele UI verbergen */
