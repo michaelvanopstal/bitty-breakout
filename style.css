@@ -1007,6 +1007,26 @@ body {
   }
 }
 
+/* Desktop / laptop login button */
+@media (hover: hover) and (pointer: fine) {
+  #login-toggle {
+    top: 70px !important;
+    right: 24px !important;
+    left: auto !important;
+    bottom: auto !important;
+  }
+}
+/* Mobiel login button */
+@media (hover: none) and (pointer: coarse) {
+  #login-toggle {
+    top: 12px !important;
+    right: 12px !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: scale(0.9);
+  }
+}
+
 
 
 
