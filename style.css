@@ -1,4 +1,4 @@
- {
+* {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   user-select: none;
@@ -123,7 +123,7 @@ body {
 /* Kleine login-knop (altijd zichtbaar) */
 #login-toggle {
   position: fixed;
-  top: 12px;
+  top: 90px;
   right: 12px;
   z-index: 16000;
   padding: 4px 10px;
@@ -684,6 +684,15 @@ body {
     font-size: 13px;
     padding: 8px 10px 10px;
     width: 240px;
+  }
+  /* 🔒 Login-knop – MOBIEL POSITIE */
+  #login-toggle {
+    position: absolute;   /* of fixed, als je hem aan scherm wilt kleven */
+    top: 12px;            /* ← HIER bepaal je de plek in je gele frame */
+    right: 12;       
+    z-index: 20000;       /* boven alles */
+    font-size: 12px;
+    padding: 3px 8px;
   }
 
 
