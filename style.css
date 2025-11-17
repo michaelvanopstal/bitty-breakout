@@ -62,8 +62,8 @@ body {
 
 #highscore-overlay {
   position: absolute;
-  top: 270px;
-  left: 40px;
+  top: 300px;
+  left: 25px;
   width: 200px;
   border-radius: 10px;
   padding: 10px;
