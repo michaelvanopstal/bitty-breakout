@@ -16,7 +16,7 @@ body {
 
 #gameCanvas {
   position: absolute;
-  top: 7px;
+  top: 6px;
   left: 50%;
   transform: translateX(calc(-50% - 1px)); /* jouw kleine correctie */
   width: 640px;
@@ -284,6 +284,8 @@ body {
   cursor: pointer;
   z-index: 777;
   transition: transform 0.2s ease;
+  transform: scale(1.0); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
+  transform-origin: center center; /* blijft netjes vanaf het midden schalen */
 }
 #musicToggle:hover { transform: scale(1.05); }
 
