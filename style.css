@@ -591,62 +591,48 @@ body {
   }
 }
 
-/* 📏 Samsung / Xiaomi viewport fix */
-@supports (height: 100dvh) {
-  :root {
-    --safe-height: 100dvh;
-  }
-}
-@supports not (height: 100dvh) {
-  :root {
-    --safe-height: 100vh;
-  }
-}
-
 /* ======= 📱 MOBIEL – alle touch devices ======= */
 @media (hover: none) and (pointer: coarse) {
 
   html, body {
     margin: 0;
     padding: 0;
-    height: var(--safe-height);       /* ✅ veilige hoogte */
-    min-height: var(--safe-height);
-    overflow: hidden;                 /* ⬅ geen scroll meer */
+    height: 100%;
+    overflow: hidden;          /* ⬅ geen scroll meer */
     background: #FF9305;
     font-family: Arial, sans-serif;
-    overscroll-behavior: none;        /* ⬅ geen “bounce” effect */
+    overscroll-behavior: none; /* ⬅ geen “bounce” effect */
   }
 
-  /* Frame container – nu altijd zo breed als het scherm */
+  /* Frame container (100% intact, niet croppen) */
   #game-container {
     position: relative;
-    width: 100vw;          /* volle breedte */
-    max-width: 100vw;      /* geen beperking meer */
-    margin: 0 auto 0;
-    overflow: visible;
+    width: 360px;     /* originele PNG breedte */
+    height: 600px;    /* originele PNG hoogte */
+    margin: 0px auto 0;
+    overflow: visible; 
     z-index: 0;
-    aspect-ratio: 360 / 600;   /* zelfde verhouding als je PNG */
   }
 
-  /* De PNG zelf, meeschalend met container */
+  /* De PNG zelf, exact passend */
   #game-container::before {
     content: "";
     position: absolute;
-    top: 18.3%;              /* 110 / 600 */
+    top: 110px;
     left: 0;
-    width: 100%;
-    height: 73.3%;           /* 440 / 600 */
+    width: 360px;
+    height: 440px;
     background: url("mobile.png") no-repeat center top;
-    background-size: 100% 100%;
+    background-size: 100% 100%;  /* exacte pasvorm */
     z-index: 8;
   }
 
-  /* Canvas binnen het gele veld – ook in % */
+  /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
   #gameCanvas {
     position: absolute !important;
-    top: 21.7% !important;   /* 130 / 600 */
-    left: 5% !important;     /* 18 / 360 */
-    width: 90.6% !important; /* 326 / 360 */
+    top: 130px !important;
+    left: 18px !important;
+    width: 326px !important;
     height: auto !important;
     transform: none !important;
     border: none !important;
@@ -686,13 +672,14 @@ body {
     display: none;
   }
 
-  /* popup kleiner maken zonder transform (veilig voor file input) */
+    /* popup kleiner maken zonder transform (veilig voor file input) */
   #login-box {
     /* GEEN transform meer */
     font-size: 13px;
     padding: 8px 10px 10px;
     width: 240px;
   }
+
 
   /* === SCORE – MOBIEL === */
   #scoreDisplay {
@@ -995,8 +982,7 @@ body {
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: -1;              /* achter het game-frame */
-    pointer-events: none;     /* geen taps */
+    z-index: 1;
   }
 
   /* bonus-power-panel kleiner rechtsboven op mobiel */
@@ -1009,35 +995,6 @@ body {
     transform-origin: top right !important;
     z-index: 20000 !important;
   }
-
-  /* 📱 Geen blauwe selectiebalk / kopie-menu op HUD & game */
-  #game-container,
-  #gameCanvas,
-  #hud,
-  #player-display,
-  #scoreDisplay,
-  #time-box,
-  #livesDisplay,
-  #bonus-power-panel,
-  #mobile-highscore,
-  #mobileHighscoreBtn {
-    -webkit-touch-callout: none; /* geen copy/zoek popup */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-
-  /* ✅ Chat mag wél selecteerbaar blijven */
-  #chatbox-mobile,
-  #chatMobileMessages,
-  #chatMobileForm input {
-    -webkit-touch-callout: default;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-  }
 }
 
 /* 💻 Desktop / laptop: mobiele UI verbergen */
@@ -1049,28 +1006,6 @@ body {
     display: none !important;
   }
 }
-
-/* Desktop / laptop login button */
-@media (hover: hover) and (pointer: fine) {
-  #login-toggle {
-    top: 120px !important;
-    right: 24px !important;
-    left: auto !important;
-    bottom: auto !important;
-  }
-}
-
-/* Mobiel login button */
-@media (hover: none) and (pointer: coarse) {
-  #login-toggle {
-    top: 12px !important;
-    right: 12px !important;
-    left: auto !important;
-    bottom: auto !important;
-    transform: scale(0.9);
-  }
-}
-
 
 
 
