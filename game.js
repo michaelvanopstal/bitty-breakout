@@ -6330,12 +6330,19 @@ function triggerPaddleExplosion() {
   }
 
   // ✅ er zijn nog levens over
-  if (lives > 1) {
-    if (!resetTriggered) {
+      if (!resetTriggered) {
       lives--;
       updateLivesDisplay?.();
       // 💖 Hartjes blijven behouden – reset alleen bij game over
     }
+
+    // 🧹 ALLE vallende items van de vorige beurt opruimen
+    try { fallingDrops = []; } catch (e) {}
+    try { fallingHearts = []; } catch (e) {}
+    try { coins = []; } catch (e) {}
+    try { pxpBags = []; } catch (e) {}
+    try { flyingCoins = []; } catch (e) {}
+    try { bombRain = []; } catch (e) {}
 
     pauseTimer();
 
