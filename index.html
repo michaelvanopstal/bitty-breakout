@@ -966,6 +966,23 @@ function addMessage(name, text, imgData = null){
   });
   </script>
 
+    <!-- ⭐ Extra veiligheid: als mobiele chat dicht is, stickeroverlay altijd dicht -->
+  <script>
+  document.addEventListener('click', () => {
+    const box = document.getElementById('chatbox-mobile');
+    const overlay = document.getElementById('chatStickerOverlay');
+
+    if (!box || !overlay) return;
+
+    // Als de chatbox niet open is, zorg dat de overlay nooit zichtbaar blijft
+    if (!box.classList.contains('open')) {
+      overlay.classList.remove('show');
+    }
+  });
+  </script>
+
+  
+
   <!-- 📱 eenvoudige canvas-scale voor mobiel, zonder springen -->
   <script>
   document.addEventListener('DOMContentLoaded', () => {
