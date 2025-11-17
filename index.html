@@ -1048,8 +1048,23 @@ function addMessage(name, text, imgData = null){
   });
 </script>
 
+  <script>
+  (function () {
+    var canvas = document.getElementById('gameCanvas');
+    if (!canvas) return;
+
+    function blockDefault(e) {
+      e.preventDefault();
+    }
+
+    canvas.addEventListener('touchstart', blockDefault, { passive: false });
+    canvas.addEventListener('touchend', blockDefault, { passive: false });
+    canvas.addEventListener('touchmove', blockDefault, { passive: false });
+  })();
+</script>
 
 </body>
 </html>
+
 
 
