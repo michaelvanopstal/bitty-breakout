@@ -103,7 +103,7 @@ body {
 
 #trophy {
   position: absolute;
-  top: 120px;
+  top: 110px;
   left: 160px;
   width: 100px;
   z-index: 1000;
@@ -278,8 +278,8 @@ body {
 
 #musicToggle {
   position: fixed;
-  left: 100px;
-  bottom: 1px;
+  left: 50px;
+  top: 110px;
   width: 180px;
   cursor: pointer;
   z-index: 777;
