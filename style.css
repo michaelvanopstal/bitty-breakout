@@ -103,11 +103,14 @@ body {
 
 #trophy {
   position: absolute;
-  top: 70px;
+  top: 90px;
   left: 140px;
   width: 100px;
   z-index: 1000;
+  transform: scale(1.0); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
+  transform-origin: center center; /* blijft netjes vanaf het midden schalen */
 }
+
 
 #game-container {
   position: relative;
