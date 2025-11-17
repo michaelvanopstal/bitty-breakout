@@ -103,11 +103,11 @@ body {
 
 #trophy {
   position: absolute;
-  top: 90px;
-  left: 140px;
+  top: 120px;
+  left: 160px;
   width: 100px;
   z-index: 1000;
-  transform: scale(0.5); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
+  transform: scale(0.7); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
   transform-origin: center center; /* blijft netjes vanaf het midden schalen */
 }
 
@@ -278,13 +278,13 @@ body {
 
 #musicToggle {
   position: fixed;
-  left: 70px;
-  bottom: 10px;
+  left: 100px;
+  bottom: 1px;
   width: 180px;
   cursor: pointer;
   z-index: 777;
   transition: transform 0.2s ease;
-  transform: scale(0.5); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
+  transform: scale(0.7); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
   transform-origin: center center; /* blijft netjes vanaf het midden schalen */
 }
 #musicToggle:hover { transform: scale(1.05); }
