@@ -62,8 +62,8 @@ body {
 
 #highscore-overlay {
   position: absolute;
-  top: 300px;
-  left: 25px;
+  top: 305px;
+  left: 20px;
   width: 200px;
   border-radius: 10px;
   padding: 10px;
@@ -107,7 +107,7 @@ body {
   left: 140px;
   width: 100px;
   z-index: 1000;
-  transform: scale(1.0); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
+  transform: scale(0.5); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
   transform-origin: center center; /* blijft netjes vanaf het midden schalen */
 }
 
@@ -284,7 +284,7 @@ body {
   cursor: pointer;
   z-index: 777;
   transition: transform 0.2s ease;
-  transform: scale(1.0); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
+  transform: scale(0.5); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
   transform-origin: center center; /* blijft netjes vanaf het midden schalen */
 }
 #musicToggle:hover { transform: scale(1.05); }
