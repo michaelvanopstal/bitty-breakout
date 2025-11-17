@@ -592,7 +592,8 @@ body {
 }
 
 /* ======= 📱 MOBIEL – alle touch devices ======= */
-@media (hover: none) and (pointer: coarse) {
+@media (max-width: 1200px), (hover: none) and (pointer: coarse) {
+
 
   html, body {
     margin: 0;
@@ -997,13 +998,19 @@ body {
   }
 }
 
-/* 💻 Desktop / laptop: mobiele UI verbergen */
+/* 💻 Desktop / laptop ONLY  
+   Apparaten met echte muis & hover → mobiele UI verbergen */
 @media (hover: hover) and (pointer: fine) {
   #chat-mobile-button,
   #chatbox-mobile,
   #mobile-highscore,
   #bittyStrip {
     display: none !important;
+  }
+
+  /* En: desktop login blijft zichtbaar */
+  #login-toggle {
+    display: block !important;
   }
 }
 
