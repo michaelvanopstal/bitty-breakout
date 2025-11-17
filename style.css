@@ -278,8 +278,8 @@ body {
 
 #musicToggle {
   position: fixed;
-  left: 40px;
-  bottom: 20px;
+  left: 70px;
+  bottom: 10px;
   width: 180px;
   cursor: pointer;
   z-index: 777;
