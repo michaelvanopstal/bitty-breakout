@@ -984,7 +984,7 @@ body {
     --musicScale: 0.75;              /* eventueel aanpassen voor grootte */
 
     position: absolute;             /* nu t.o.v. #game-container */
-    top: 520px;                     /* schuif omhoog/omlaag naar smaak */
+    top: 515px;                     /* schuif omhoog/omlaag naar smaak */
     left: 50%;                      /* midden van het gele frame */
     transform: translateX(-50%) scale(var(--musicScale));
 
