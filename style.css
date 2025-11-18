@@ -607,23 +607,24 @@ body {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;          /* ⬅ geen scroll meer */
-     background: #00ff00; /* FEL GROEN, alleen test *
+    overflow: hidden;
+    background: #FF9305;           /* groen weer terug naar oranje */
     font-family: Arial, sans-serif;
-    overscroll-behavior: none; /* ⬅ geen “bounce” effect */
+    overscroll-behavior: none;
   }
 
-  /* Frame container (100% intact, niet croppen) */
+  /* FRAME altijd exact in het midden van het scherm */
   #game-container {
     position: relative;
-    width: 360px;     /* originele PNG breedte */
-    height: 600px;    /* originele PNG hoogte */
-    margin: 0 auto 0;
-    overflow: visible; 
+    width: 360px;      /* vaste breedte van jouw mobile frame */
+    height: 600px;
+    left: 50%;
+    transform: translateX(-50%); /* PERFECT centreren */
+    margin: 0;         /* geen margin auto meer nodig */
+    overflow: visible;
     z-index: 0;
   }
 
-  /* De PNG zelf, exact passend */
   #game-container::before {
     content: "";
     position: absolute;
@@ -632,11 +633,11 @@ body {
     width: 360px;
     height: 440px;
     background: url("mobile.png") no-repeat center top;
-    background-size: 100% 100%;  /* exacte pasvorm */
+    background-size: 100% 100%;
     z-index: 8;
   }
 
-  /* canvas in het gele speelveld – px-waardes kun jij aanpassen */
+  /* canvas in het gele speelveld */
   #gameCanvas {
     position: absolute !important;
     top: 130px !important;
@@ -647,9 +648,8 @@ body {
     border: none !important;
     background: transparent !important;
     z-index: 10 !important;
-    margin-left: auto;
-    margin-right: auto;
   }
+
 
   /* desktop-dingen uit op mobiel */
   #highscore-overlay,
