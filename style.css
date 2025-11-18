@@ -979,17 +979,20 @@ body {
   }
 
  
+   /* 🎵 Muziekknop – MOBIEL: in het gele frame, onder "BITTY BRICKSHIFT" */
   #musicToggle {
-  --musicScale: 0.75;
-  
-  position: fixed;
-  bottom: 45px;             /* altijd 45px boven onderkant scherm */
-  left: 50%;                /* centeren */
-  transform: translateX(-50%) scale(var(--musicScale));
-  width: calc(30px * var(--musicScale));
-  height: calc(70px * var(--musicScale));
-  z-index: 18500;
-}
+    --musicScale: 0.75;              /* eventueel aanpassen voor grootte */
+
+    position: absolute;             /* nu t.o.v. #game-container */
+    top: 520px;                     /* schuif omhoog/omlaag naar smaak */
+    left: 50%;                      /* midden van het gele frame */
+    transform: translateX(-50%) scale(var(--musicScale));
+
+    width: 140px;                   /* breedte van de knop */
+    height: auto;
+    z-index: 12000;
+  }
+
 
 
   /* 🎨 Bitty strip – mobiel only */
