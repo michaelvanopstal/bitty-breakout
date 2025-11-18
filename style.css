@@ -981,8 +981,8 @@ body {
   #musicToggle {
   --musicScale: 0.6;
   position: absolute !important;
-  left: 50%; !important;      /* jij bepaalt links/rechts */
-  bottom: 40px !important;    /* jij bepaalt hoe laag */
+  left: 80px; !important;      /* jij bepaalt links/rechts */
+  bottom: 60px; !important;    /* jij bepaalt hoe laag */
   transform: scale(var(--musicScale)) !important;
   transform-origin: center center !important;
   width: auto !important;
