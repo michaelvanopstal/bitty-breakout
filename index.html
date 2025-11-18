@@ -966,20 +966,25 @@ function addMessage(name, text, imgData = null){
   });
   </script>
 
-    <!-- ⭐ Extra veiligheid: als mobiele chat dicht is, stickeroverlay altijd dicht -->
   <script>
-  document.addEventListener('click', () => {
-    const box = document.getElementById('chatbox-mobile');
-    const overlay = document.getElementById('chatStickerOverlay');
+document.addEventListener('click', () => {
+  const box = document.getElementById('chatbox-mobile');
+  const overlay = document.getElementById('chatStickerOverlay');
 
-    if (!box || !overlay) return;
+  if (!box || !overlay) return;
 
-    // Als de chatbox niet open is, zorg dat de overlay nooit zichtbaar blijft
-    if (!box.classList.contains('open')) {
-      overlay.classList.remove('show');
-    }
-  });
-  </script>
+  // Chat is zichtbaar → overlay mag blijven
+  const chatVisible =
+    box.classList.contains("open") &&
+    box.style.display !== "none";
+
+  // Chat is niet zichtbaar → overlay moet weg
+  if (!chatVisible) {
+    overlay.classList.remove('show');
+    overlay.style.display = "none";
+  }
+});
+</script>
 
   
 
