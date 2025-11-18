@@ -979,20 +979,26 @@ body {
   }
 
  
-   /* 🎵 Muziekknop – MOBIEL: in het gele frame, onder "BITTY BRICKSHIFT" */
-  #musicToggle {
-    --musicScale: 0.75;              /* eventueel aanpassen voor grootte */
 
-    position: absolute;             /* nu t.o.v. #game-container */
-    top: 515px;                     /* schuif omhoog/omlaag naar smaak */
-    left: 50%;                      /* midden van het gele frame */
-    transform: translateX(-50%) scale(var(--musicScale));
+/* 🎵 Muziekknop – mobiele versie (blijft netjes op z’n plek) */
+#musicToggle {
+  --musicScale: 0.75;               /* hier kun je hem groter/kleiner maken */
 
-    width: 140px;                   /* breedte van de knop */
-    height: auto;
-    z-index: 12000;
-  }
+  position: fixed;
+  top: 515px;   /* hoogte onder BITTY BRICKSHIFT, beetje tunen mag */
+  left: 50%;
+  transform: translateX(-50%) scale(var(--musicScale));
+  transform-origin: center center;
+  width:  auto;                   /* breedte van de knop */
+  height: auto;
+  z-index: 18500;
+}
 
+/* op mobiel GEEN grotere hover meer */
+#musicToggle:hover,
+#musicToggle:active {
+  transform: translateX(-50%) scale(var(--musicScale));
+}
 
 
   
