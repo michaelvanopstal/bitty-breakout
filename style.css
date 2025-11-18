@@ -978,23 +978,26 @@ body {
     border-radius: 10px;
   }
 
- #musicToggle {
-  --musicScale: 0.6;
-  
-  position: fixed !important;
+/* ðŸŽµ Muziekknop â€“ mobiele versie (blijft netjes op zâ€™n plek) */
+#musicToggle {
+  --musicScale: 0.75;               /* hier kun je hem groter/kleiner maken */
 
-  /* HORIZONTAAL MIDDEN */
-  left: 50% !important;
-  transform: translateX(-50%) scale(var(--musicScale)) !important;
-
-  /* JIJ BEPAALT HOE HOOG / LAAG */
-  bottom: 90px !important; /* ← verander dit getal naar wens */
-
-  transform-origin: center center !important;
-  width: auto !important;
-  height: auto !important;
-  z-index: 18500 !important;
+  position: fixed;
+  top: 515px;   /* hoogte onder BITTY BRICKSHIFT, beetje tunen mag */
+  left: 50%;
+  transform: translateX(-50%) scale(var(--musicScale));
+  transform-origin: center center;
+  width:  auto;                   /* breedte van de knop */
+  height: auto;
+  z-index: 18500;
 }
+
+/* op mobiel GEEN grotere hover meer */
+#musicToggle:hover,
+#musicToggle:active {
+  transform: translateX(-50%) scale(var(--musicScale));
+}
+
 
   /* bonus-power-panel rechtsboven, iets geschaald */
   #bonus-power-panel {
