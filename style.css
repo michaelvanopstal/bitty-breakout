@@ -995,16 +995,7 @@ body {
 
 
 
-  /* 🎨 Bitty strip – mobiel only */
-  #bittyStrip {
-    position: fixed;
-    width: 85vw;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-  }
-
+  
   /* bonus-power-panel kleiner rechtsboven op mobiel */
   #bonus-power-panel {
     position: fixed !important;
