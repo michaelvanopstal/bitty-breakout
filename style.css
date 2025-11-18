@@ -613,42 +613,45 @@ body {
     overscroll-behavior: none;
   }
 
-  /* FRAME altijd exact in het midden van het scherm */
-  #game-container {
-    position: relative;
-    width: 360px;      /* vaste breedte van jouw mobile frame */
-    height: 600px;
-    left: 50%;
-    transform: translateX(-50%); /* PERFECT centreren */
-    margin: 0;         /* geen margin auto meer nodig */
-    overflow: visible;
-    z-index: 0;
-  }
+  /* FRAME altijd exact in het midden, iets kleiner dan het scherm */
+#game-container {
+  position: relative;
+  width: 94vw;           /* iets smaller dan het scherm */
+  max-width: 360px;      /* nooit groter dan jouw origineel */
+  aspect-ratio: 360 / 600;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  overflow: visible;
+  z-index: 0;
+}
 
-  #game-container::before {
-    content: "";
-    position: absolute;
-    top: 110px;
-    left: 0;
-    width: 360px;
-    height: 440px;
-    background: url("mobile.png") no-repeat center top;
-    background-size: 100% 100%;
-    z-index: 8;
-  }
 
-  /* canvas in het gele speelveld */
-  #gameCanvas {
-    position: absolute !important;
-    top: 130px !important;
-    left: 18px !important;
-    width: 326px !important;
-    height: auto !important;
-    transform: none !important;
-    border: none !important;
-    background: transparent !important;
-    z-index: 10 !important;
-  }
+ #game-container::before {
+  content: "";
+  position: absolute;
+  top: 18.3%;            /* 110 / 600 ≈ 18.3% */
+  left: 0;
+  width: 100%;
+  height: 73.3%;         /* 440 / 600 ≈ 73.3% */
+  background: url("mobile.png") no-repeat center top;
+  background-size: 100% 100%;
+  z-index: 8;
+}
+
+
+#gameCanvas {
+  position: absolute !important;
+  top: 21.7% !important;   /* 130 / 600 ≈ 21.7% */
+  left: 5% !important;     /* 18 / 360 = 5% */
+  width: 90.5% !important; /* 326 / 360 ≈ 90.5% */
+  height: auto !important;
+  transform: none !important;
+  border: none !important;
+  background: transparent !important;
+  z-index: 10 !important;
+}
+
 
 
   /* desktop-dingen uit op mobiel */
