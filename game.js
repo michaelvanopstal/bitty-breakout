@@ -4049,6 +4049,14 @@ function drawCoins() {
       score += earned;
       updateScoreDisplay?.();
 
+      // 💰 geld-geluid
+      try {
+        if (typeof coinSound !== "undefined" && coinSound) {
+          coinSound.currentTime = 0;
+          coinSound.play();
+        }
+      } catch (e) {}
+
       // 🔸 schaalbare popup, gecentreerd op de coin
       pushPointPopup(coin.x + coin.size / 2, coin.y, "+" + earned);
 
