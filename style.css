@@ -1007,7 +1007,7 @@ body {
     bottom: auto !important;
     transform: scale(0.35) !important;
     transform-origin: top right !important;
-    z-index: 14000 !important;
+    z-index: 20000 !important;
   }
 }
 
