@@ -746,273 +746,268 @@ body {
     gap: 3px;
     z-index: 18500;
   }
-
-  /* 📱 mobiele highscore-knop linksboven */
-  #mobile-highscore {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 15500;
-    display: block !important;
-  }
-
-  #mobileHighscoreBtn {
-    background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
-    border: 2px solid #a05c00;
-    border-radius: 12px;
-    color: #5a2700;
-    font-weight: bold;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 14px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-  }
-
-  #mobileHighscorePanel {
-    position: absolute;
-    top: 42px;
-    left: 0;
-    background: #7b1e1e;
-    border: 2px solid #b66414;
-    border-radius: 10px;
-    padding: 8px;
-    width: 200px;
-    max-height: 260px;
-    overflow-y: auto;
-    display: none;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-  }
-
-  #mobileHighscorePanel.show {
-    display: block;
-  }
-
-  #mobileHighscoreList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    color: #ffe9c4;
-    font-size: 13px;
-  }
-
-  #mobileHighscoreList li {
-    margin: 4px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding-bottom: 2px;
-  }
-
-  /* ⭐ AVATARS + FLEXBOX LAYOUT VOOR MOBILE HIGHSCORE ⭐ */
-  #mobileHighscoreList .hs-entry {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-  }
-
-  #mobileHighscoreList .hs-avatar {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.3);
-  }
-
-  /* mobiele chat-knop onderin */
-  #chat-mobile-button {
-    all: unset;
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 1px;
-    width: 90vw;
-    max-width: 460px;
-    height: 38px;
-    background: linear-gradient(180deg, #ffe09c 0%, #ffc44b 100%);
-    border: 1.5px solid rgba(231, 159, 41, 0.8);
-    border-radius: 9999px;
-    box-shadow: 0 4px 14px rgba(0,0,0,.25);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 14px;
-    z-index: 17998;
-    cursor: pointer;
-    font-family: system-ui, Arial, sans-serif;
-  }
-
-  #chat-mobile-button .cmb-left {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(255, 179, 31, 0.26);
-    border-radius: 9990px;
-    padding: 3px 6px 3px 3px;
-  }
-
-  #chat-mobile-button .cmb-dot {
-    width: 16px;
-    height: 16px;
-    background: radial-gradient(circle, #ffa423 0%, #e57611 80%);
-    border-radius: 50%;
-  }
-
-  #chat-mobile-button .cmb-arrow {
-    font-size: 11px;
-    color: #5f3001;
-  }
-
-  #chat-mobile-button .cmb-label {
-    font-weight: 700;
-    color: #5f3001;
-    font-size: 14px;
-  }
-
-  #chat-mobile-button .cmb-close {
-    margin-left: auto;
-    background: rgba(0,0,0,.08);
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    display: grid;
-    place-items: center;
-    color: #5f3001;
-    font-size: 13px;
-  }
-
-  /* popup chatbox (mobiel) */
-  #chatbox-mobile {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 56px;
-    width: 90vw;
-    max-width: 460px;
-    background: linear-gradient(#f6a53b,#e27e22);
-    border-radius: 18px 18px 14px 14px;
-    box-shadow: 0 6px 18px rgba(0,0,0,.35);
-    z-index: 17999;
-    overflow: hidden;
-    display: none;
-  }
-  #chatbox-mobile.open { display: block; }
-
-  .chatbox-header-mobile {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: linear-gradient(#ffd56a,#ffb12b);
-    color: #7a2b00;
-    padding: 6px 12px;
-    font-weight: 700;
-  }
-
-  #chatMobileClose {
-    background: rgba(0,0,0,.08);
-    border: none;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    color: #7a2b00;
-    font-size: 18px;
-    line-height: 1;
-  }
-
-  #chatMobileMessages {
-    height: 280px;
-    overflow-y: auto;
-    background: #7b1e1e;
-    color: #ffe9c4;
-    padding: 8px;
-    position: relative;
-    z-index: 1;
-  }
-
-  #chatMobileForm {
-    background: linear-gradient(#ffb545,#f08a25);
-    padding: 8px;
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    z-index: 18001;
-  }
-
-  #chatMobileForm input {
-    flex: 1;
-    border: none;
-    border-radius: 10px;
-    padding: 6px 8px;
-  }
-
-  #chatMobileForm button {
-    border: none;
-    background: transparent;
-    font-size: 18px;
-    cursor: pointer;
-  }
-
-  #chatStickerOverlay {
-    position: absolute;
-    top: 42px;
-    bottom: 56px;
-    left: 0;
-    right: 0;
-    background: #7b1e1e;
-    z-index: 5;
-    display: none;
-    overflow-y: auto;
-    padding: 10px 6px 12px;
-  }
-  #chatStickerOverlay.show { display: block; }
-
-  #chatStickerOverlay .sticker-item {
-    display: inline-block;
-    width: 72px;
-    height: 72px;
-    margin: 4px;
-    background: rgba(0,0,0,0.12);
-    border-radius: 10px;
-    text-align: center;
-    vertical-align: top;
-  }
-
-  #chatStickerOverlay .sticker-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 10px;
-  }
-
-  /* 🎵 Muziekknop – mobiele versie */
-  #musicToggle {
-    --musicScale: 0.6;
-    position: fixed;
-    top: 490px;   /* evt. nog fine-tunen */
-    left: 50%;
-    transform: translateX(-50%) scale(var(--musicScale));
-    transform-origin: center center;
-    width: auto;
-    height: auto;
-    z-index: 18500;
-  }
-
-  #musicToggle:hover,
-  #musicToggle:active {
-    transform: translateX(-50%) scale(var(--musicScale));
-  }
-
-  /* bonus-power-panel kleiner rechtsboven op mobiel */
-  #bonus-power-panel {
-    position: fixed !important;
-    top: 40px !important;
-    right: 8px !important;
-    bottom: auto !important;
-    transform: scale(0.35) !important;
-    transform-origin: top right !important;
-    z-index: 20000 !important;
-  }
+/* 📱 mobiele highscore-knop linksboven */
+#mobile-highscore {
+  position: fixed;
+  top: 10px;
+  left: 4vw;             /* mee schalen met schermbreedte */
+  z-index: 15500;
+  display: block !important;
 }
 
+#mobileHighscoreBtn {
+  background: linear-gradient(180deg, #ffd87c 0%, #e48f21 100%);
+  border: 2px solid #a05c00;
+  border-radius: 12px;
+  color: #5a2700;
+  font-weight: bold;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+#mobileHighscorePanel {
+  position: absolute;
+  top: 42px;
+  left: 0;
+  background: #7b1e1e;
+  border: 2px solid #b66414;
+  border-radius: 10px;
+  padding: 8px;
+  width: min(70vw, 260px);   /* schaalt mee, maar niet mega groot */
+  max-height: 260px;
+  overflow-y: auto;
+  display: none;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+}
+
+#mobileHighscorePanel.show {
+  display: block;
+}
+
+#mobileHighscoreList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: #ffe9c4;
+  font-size: 13px;
+}
+
+#mobileHighscoreList li {
+  margin: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 2px;
+}
+
+/* ⭐ AVATARS + FLEXBOX LAYOUT VOOR MOBILE HIGHSCORE ⭐ */
+#mobileHighscoreList .hs-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+#mobileHighscoreList .hs-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* mobiele chat-knop onderin */
+#chat-mobile-button {
+  all: unset;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 4px;
+  width: min(94vw, 460px);        /* zelfde breedte-range als game-frame */
+  height: 38px;
+  background: linear-gradient(180deg, #ffe09c 0%, #ffc44b 100%);
+  border: 1.5px solid rgba(231, 159, 41, 0.8);
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  z-index: 17998;
+  cursor: pointer;
+  font-family: system-ui, Arial, sans-serif;
+}
+
+#chat-mobile-button .cmb-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 179, 31, 0.26);
+  border-radius: 9990px;
+  padding: 3px 6px 3px 3px;
+}
+
+#chat-mobile-button .cmb-dot {
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(circle, #ffa423 0%, #e57611 80%);
+  border-radius: 50%;
+}
+
+#chat-mobile-button .cmb-arrow {
+  font-size: 11px;
+  color: #5f3001;
+}
+
+#chat-mobile-button .cmb-label {
+  font-weight: 700;
+  color: #5f3001;
+  font-size: 14px;
+}
+
+#chat-mobile-button .cmb-close {
+  margin-left: auto;
+  background: rgba(0,0,0,.08);
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #5f3001;
+  font-size: 13px;
+}
+
+/* popup chatbox (mobiel) */
+#chatbox-mobile {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 48px;                    /* net boven de chat-knop */
+  width: min(94vw, 460px);         /* zelfde breedte als knop & frame */
+  background: linear-gradient(#f6a53b,#e27e22);
+  border-radius: 18px 18px 14px 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  z-index: 17999;
+  overflow: hidden;
+  display: none;
+}
+#chatbox-mobile.open { display: block; }
+
+.chatbox-header-mobile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(#ffd56a,#ffb12b);
+  color: #7a2b00;
+  padding: 6px 12px;
+  font-weight: 700;
+}
+
+#chatMobileClose {
+  background: rgba(0,0,0,.08);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: #7a2b00;
+  font-size: 18px;
+  line-height: 1;
+}
+
+#chatMobileMessages {
+  height: min(45vh, 280px);         /* op kleine schermen niet te hoog */
+  overflow-y: auto;
+  background: #7b1e1e;
+  color: #ffe9c4;
+  padding: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+#chatMobileForm {
+  background: linear-gradient(#ffb545,#f08a25);
+  padding: 8px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  z-index: 18001;
+}
+
+#chatMobileForm input {
+  flex: 1;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 8px;
+}
+
+#chatMobileForm button {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+#chatStickerOverlay {
+  position: absolute;
+  top: 42px;
+  bottom: 56px;
+  left: 0;
+  right: 0;
+  background: #7b1e1e;
+  z-index: 5;
+  display: none;
+  overflow-y: auto;
+  padding: 10px 6px 12px;
+}
+#chatStickerOverlay.show { display: block; }
+
+#chatStickerOverlay .sticker-item {
+  display: inline-block;
+  width: 72px;
+  height: 72px;
+  margin: 4px;
+  background: rgba(0,0,0,0.12);
+  border-radius: 10px;
+  text-align: center;
+  vertical-align: top;
+}
+
+#chatStickerOverlay .sticker-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+/* 🎵 Muziekknop – mobiele versie */
+#musicToggle {
+  --musicScale: 0.6;
+  position: fixed;
+  bottom: 94px;                    /* tussen frame en chat-knop */
+  left: 50%;
+  transform: translateX(-50%) scale(var(--musicScale));
+  transform-origin: center center;
+  width: auto;
+  height: auto;
+  z-index: 18500;
+}
+
+#musicToggle:hover,
+#musicToggle:active {
+  transform: translateX(-50%) scale(var(--musicScale));
+}
+
+/* bonus-power-panel kleiner rechtsboven op mobiel */
+#bonus-power-panel {
+  position: fixed !important;
+  top: 40px !important;
+  right: 4vw !important;
+  bottom: auto !important;
+  transform: scale(0.35) !important;
+  transform-origin: top right !important;
+  z-index: 20000 !important;
+}
 /* 💻 DESKTOP / LAPTOP ONLY */
 @media (min-width: 821px) {
   #chat-mobile-button,
@@ -1022,11 +1017,11 @@ body {
     display: none !important;
   }
 
-  /* desktop login zichtbaar houden */
   #login-toggle {
     display: block !important;
   }
 }
+
 
 
 
