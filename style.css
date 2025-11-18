@@ -1010,6 +1010,20 @@ body {
   }
 }
 
+/* 💻 DESKTOP / LAPTOP ONLY */
+@media (min-width: 821px) {
+  #chat-mobile-button,
+  #chatbox-mobile,
+  #mobile-highscore,
+  #bittyStrip {
+    display: none !important;
+  }
+
+  #login-toggle {
+    display: block !important;
+  }
+}
+
 
 
 
