@@ -996,12 +996,6 @@ body {
   z-index: 18500 !important;
 }
 
-
-  #musicToggle:hover,
-  #musicToggle:active {
-    transform: translateX(-50%) scale(var(--musicScale));
-  }
-
   /* bonus-power-panel rechtsboven, iets geschaald */
   #bonus-power-panel {
     position: fixed !important;
