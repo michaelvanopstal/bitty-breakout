@@ -664,7 +664,7 @@ body {
   /* Player-tekst */
   #player-display {
     position: absolute !important;
-    top: 55px !important;
+    top: 50px !important;
     left: 11vw !important;
     font-size: 14px !important;
     color: #ffffff;
@@ -673,7 +673,7 @@ body {
 
   #player-avatar-small {
     position: absolute !important;
-    top: 55px !important;
+    top: 50px !important;
     left: 6vw !important;
     width: 16px !important;
     height: 16px !important;
