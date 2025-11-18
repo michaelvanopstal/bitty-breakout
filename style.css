@@ -664,7 +664,7 @@ body {
   /* Player-tekst */
   #player-display {
     position: absolute !important;
-    top: 65px !important;
+    top: 55px !important;
     left: 11vw !important;
     font-size: 14px !important;
     color: #ffffff;
@@ -673,7 +673,7 @@ body {
 
   #player-avatar-small {
     position: absolute !important;
-    top: 65px !important;
+    top: 55px !important;
     left: 6vw !important;
     width: 16px !important;
     height: 16px !important;
@@ -704,7 +704,7 @@ body {
   #scoreDisplay {
     position: absolute;
     top: 65px;
-    left: 24vw;
+    left: 20vw;
     font-size: 14px;
     color: #ffffff;
     z-index: 12600;
@@ -716,7 +716,7 @@ body {
   #time-box {
     position: absolute;
     top: 65px;
-    left: 50vw;
+    left: 40vw;
     width: 20vw;
     max-width: 80px;
     height: 20px;
@@ -882,7 +882,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     bottom: 48px;                      /* net boven de chat-knop */
-    width: min(80vw, 360px);
+    width: min(96vw, 360px);
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 14px 14px;
     box-shadow: 0 6px 18px rgba(0,0,0,.35);
