@@ -982,9 +982,9 @@ body {
 
   /* 🎵 Muziekknop – mobiele versie */
   #musicToggle {
-    --musicScale: 0.75;
+    --musicScale: 0.6;
     position: fixed;
-    top: 515px;   /* evt. nog fine-tunen */
+    top: 490px;   /* evt. nog fine-tunen */
     left: 50%;
     transform: translateX(-50%) scale(var(--musicScale));
     transform-origin: center center;
