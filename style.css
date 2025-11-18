@@ -600,7 +600,7 @@ body {
     right: 360px;
   }
 }
-/* ======= 📱 MOBIEL ======= */
+
 /* ======= 📱 MOBIEL ======= */
 @media (max-width: 820px) {
 
@@ -627,7 +627,7 @@ body {
     z-index: 0;
   }
 
-  /* PNG-frame in % zodat het meeschuift */
+  /* PNG-frame */
   #game-container::before {
     content: "";
     position: absolute;
@@ -640,7 +640,7 @@ body {
     z-index: 8;
   }
 
-  /* canvas binnen het gele vlak in % */
+  /* canvas binnen gele vlak */
   #gameCanvas {
     position: absolute !important;
     top: 21.7% !important;   /* 130 / 600 ≈ 21.7% */
@@ -663,11 +663,11 @@ body {
     display: none !important;
   }
 
-  /* Player-tekst – uitgelijnd boven frame, met vw */
+  /* Player-tekst */
   #player-display {
     position: absolute !important;
     top: 60px !important;
-    left: 7vw !important;          /* ipv vaste px */
+    left: 7vw !important;
     font-size: 14px !important;
     color: #ffffff;
     z-index: 12000 !important;
@@ -692,7 +692,7 @@ body {
     width: 240px;
   }
 
-  /* Login-knop – rechtsboven mee met breedte */
+  /* Login-knop rechtsboven */
   #login-toggle {
     position: fixed;
     top: 12px;
@@ -706,7 +706,7 @@ body {
   #scoreDisplay {
     position: absolute;
     top: 62px;
-    left: 44vw;              /* was 165px */
+    left: 44vw;
     font-size: 14px;
     color: #ffffff;
     z-index: 12600;
@@ -714,11 +714,11 @@ body {
     user-select: none;
   }
 
-  /* TIJD – iets rechts van score, in vw */
+  /* TIJD – rechts van score */
   #time-box {
     position: absolute;
     top: 60px;
-    left: 60vw;              /* was 200px */
+    left: 60vw;
     width: 20vw;
     max-width: 80px;
     height: 20px;
@@ -817,14 +817,14 @@ body {
     border: 1px solid rgba(255,255,255,0.3);
   }
 
-  /* mobiele chat-knop onderin – zelfde breedte als frame */
+  /* mobiele chat-knop – zelfde breedte als frame */
   #chat-mobile-button {
     all: unset;
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
     bottom: 4px;
-    width: min(94vw, 360px);     /* match #game-container */
+    width: min(94vw, 360px);
     height: 38px;
     background: linear-gradient(180deg, #ffe09c 0%, #ffc44b 100%);
     border: 1.5px solid rgba(231, 159, 41, 0.8);
@@ -884,7 +884,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     bottom: 48px;                      /* net boven de chat-knop */
-    width: min(94vw, 360px);           /* match #game-container */
+    width: min(94vw, 360px);
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 14px 14px;
     box-shadow: 0 6px 18px rgba(0,0,0,.35);
@@ -984,7 +984,7 @@ body {
   #musicToggle {
     --musicScale: 0.6;
     position: fixed;
-    bottom: 94px;                    /* tussen frame en chat-knop */
+    bottom: 94px;
     left: 50%;
     transform: translateX(-50%) scale(var(--musicScale));
     transform-origin: center center;
@@ -1007,20 +1007,6 @@ body {
     transform: scale(0.35) !important;
     transform-origin: top right !important;
     z-index: 20000 !important;
-  }
-}
-
-/* 💻 DESKTOP / LAPTOP ONLY */
-@media (min-width: 821px) {
-  #chat-mobile-button,
-  #chatbox-mobile,
-  #mobile-highscore,
-  #bittyStrip {
-    display: none !important;
-  }
-
-  #login-toggle {
-    display: block !important;
   }
 }
 
