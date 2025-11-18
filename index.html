@@ -1071,6 +1071,24 @@ document.addEventListener('click', () => {
 </script>
 
   <script>
+setInterval(() => {
+  const box = document.getElementById('chatbox-mobile');
+  const overlay = document.getElementById('chatStickerOverlay');
+
+  if (!box || !overlay) return;
+
+  const chatIsVisible =
+    box.classList.contains("open") &&
+    getComputedStyle(box).display !== "none";
+
+  if (!chatIsVisible) {
+    overlay.classList.remove('show');
+    overlay.style.display = "none";
+  }
+}, 120);
+</script>
+
+  <script>
   (function () {
     var canvas = document.getElementById('gameCanvas');
     if (!canvas) return;
