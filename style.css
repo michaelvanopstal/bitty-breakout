@@ -627,31 +627,29 @@ body {
     z-index: 0;
   }
 
-  /* PNG-frame */
-  #game-container::before {
+ #game-container::before {
     content: "";
     position: absolute;
-    top: 18.3%;            /* 110 / 600 ≈ 18.3% */
+    top: 21.63%;
     left: 0;
     width: 100%;
-    height: 73.3%;         /* 440 / 600 ≈ 73.3% */
+    height: 73.3%;
     background: url("mobile.png") no-repeat center top;
     background-size: 100% 100%;
     z-index: 8;
-  }
+}
 
-  /* canvas binnen gele vlak */
-  #gameCanvas {
+#gameCanvas {
     position: absolute !important;
-    top: 21.7% !important;   /* 130 / 600 ≈ 21.7% */
-    left: 5% !important;     /* 18 / 360 ≈ 5% */
-    width: 90.5% !important; /* 326 / 360 ≈ 90.5% */
+    top: 25.03% !important;
+    left: 5% !important;
+    width: 90.5% !important;
     height: auto !important;
     transform: none !important;
     border: none !important;
     background: transparent !important;
     z-index: 10 !important;
-  }
+}
 
   /* desktop-dingen uit op mobiel */
   #highscore-overlay,
@@ -706,7 +704,7 @@ body {
   #scoreDisplay {
     position: absolute;
     top: 62px;
-    left: 44vw;
+    left: 34vw;
     font-size: 14px;
     color: #ffffff;
     z-index: 12600;
@@ -718,7 +716,7 @@ body {
   #time-box {
     position: absolute;
     top: 60px;
-    left: 60vw;
+    left: 50vw;
     width: 20vw;
     max-width: 80px;
     height: 20px;
@@ -983,7 +981,7 @@ body {
   /* 🎵 Muziekknop – gecentreerd tussen frame en chat */
   #musicToggle {
     --musicScale: 0.6;
-    position: fixed;
+    position:absolute;
     bottom: 94px;
     left: 50%;
     transform: translateX(-50%) scale(var(--musicScale));
