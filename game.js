@@ -2757,107 +2757,113 @@ function drawBricks() {
         const brickX = offsetX + c * brickWidth;
         const brickY = r * brickHeight + (levelTransitionActive ? transitionOffsetY : 0);
 
+        // logische positie voor collision
         b.x = brickX;
         b.y = brickY;
 
+        // ⬇️ tekenpositie met heel kleine overlap om kiertjes te sluiten
+        const drawX = brickX - 0.5;
+        const drawY = brickY - 0.5;
+        const drawW = brickWidth + 1;
+        const drawH = brickHeight + 1;
+
         switch (b.type) {
           case "2x":
-            ctx.drawImage(doublePointsImg, brickX, brickY, brickWidth, brickHeight);
+            ctx.drawImage(doublePointsImg, drawX, drawY, drawW, drawH);
             break;
 
           case "rocket":
-            ctx.drawImage(powerBlock2Img, brickX, brickY, brickWidth, brickHeight);
+            ctx.drawImage(powerBlock2Img, drawX, drawY, drawW, drawH);
             break;
 
           case "power":
-            ctx.drawImage(powerBlockImg, brickX, brickY, brickWidth, brickHeight);
+            ctx.drawImage(powerBlockImg, drawX, drawY, drawW, drawH);
             break;
 
           case "doubleball":
-            ctx.drawImage(doubleBallImg, brickX, brickY, brickWidth, brickHeight);
+            ctx.drawImage(doubleBallImg, drawX, drawY, drawW, drawH);
             break;
 
-            case "tenhit":
-            ctx.drawImage(tenHitImg, brickX, brickY, brickWidth, brickHeight);
+          case "tenhit":
+            ctx.drawImage(tenHitImg, drawX, drawY, drawW, drawH);
             break;
 
-            
           case "machinegun":
-            ctx.drawImage(machinegunBlockImg, brickX, brickY, brickWidth, brickHeight);
+            ctx.drawImage(machinegunBlockImg, drawX, drawY, drawW, drawH);
             break;
 
           case "speed":
-            ctx.drawImage(speedImg, brickX, brickY, brickWidth, brickHeight);
+            ctx.drawImage(speedImg, drawX, drawY, drawW, drawH);
             break;
 
-            case "magnet":
-            ctx.drawImage(magnetImg, brickX, brickY, brickWidth, brickHeight);
+          case "magnet":
+            ctx.drawImage(magnetImg, drawX, drawY, drawW, drawH);
             break;
 
-            case "paddle_long":
-            ctx.drawImage(paddleLongBlockImg, brickX, brickY, brickWidth, brickHeight);
+          case "paddle_long":
+            ctx.drawImage(paddleLongBlockImg, drawX, drawY, drawW, drawH);
             break;
 
-            case "paddle_small":
-            ctx.drawImage(paddleSmallBlockImg, brickX, brickY, brickWidth, brickHeight);
+          case "paddle_small":
+            ctx.drawImage(paddleSmallBlockImg, drawX, drawY, drawW, drawH);
             break;
 
           case "silver":
             if (!b.hits || b.hits === 0) {
-              ctx.drawImage(silver1Img, brickX, brickY, brickWidth, brickHeight);
+              ctx.drawImage(silver1Img, drawX, drawY, drawW, drawH);
             } else if (b.hits === 1) {
-              ctx.drawImage(silver2Img, brickX, brickY, brickWidth, brickHeight);
+              ctx.drawImage(silver2Img, drawX, drawY, drawW, drawH);
             }
             break;
 
           case "stone":
             if (b.hits === 0) {
-              ctx.drawImage(stone1Img, brickX, brickY, brickWidth, brickHeight);
+              ctx.drawImage(stone1Img, drawX, drawY, drawW, drawH);
             } else if (b.hits === 1) {
-              ctx.drawImage(stone2Img, brickX, brickY, brickWidth, brickHeight);
+              ctx.drawImage(stone2Img, drawX, drawY, drawW, drawH);
             } else {
-              ctx.drawImage(dollarPxpImg, brickX, brickY, brickWidth, brickHeight);
+              ctx.drawImage(dollarPxpImg, drawX, drawY, drawW, drawH);
             }
             break;
 
-              case "stonefall":
-  if (stoneBlockImg && stoneBlockImg.complete) {
-    ctx.drawImage(stoneBlockImg, brickX, brickY, brickWidth, brickHeight);
-  } else {
-    ctx.fillStyle = "#6f6b66";
-    ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-    ctx.strokeStyle = "#5a554f";
-    ctx.strokeRect(brickX + 0.5, brickY + 0.5, brickWidth - 1, brickHeight - 1);
-  }
-  break;
+          case "stonefall":
+            if (stoneBlockImg && stoneBlockImg.complete) {
+              ctx.drawImage(stoneBlockImg, drawX, drawY, drawW, drawH);
+            } else {
+              ctx.fillStyle = "#6f6b66";
+              ctx.fillRect(drawX, drawY, drawW, drawH);
+              ctx.strokeStyle = "#5a554f";
+              ctx.strokeRect(drawX + 0.5, drawY + 0.5, drawW - 1, drawH - 1);
+            }
+            break;
 
-            case "tnt": {
-  const armed = !!b.tntArmed;
-  const blink = armed && (Math.floor(performance.now() / 200) % 2 === 0);
-  const img = blink ? tntBlinkImg : tntImg;
+          case "tnt": {
+            const armed = !!b.tntArmed;
+            const blink = armed && (Math.floor(performance.now() / 200) % 2 === 0);
+            const img = blink ? tntBlinkImg : tntImg;
 
-  if (img.complete) {
-    ctx.drawImage(img, brickX, brickY, brickWidth, brickHeight);
-  } else {
-    ctx.fillStyle = blink ? "#ff5555" : "#bb0000";
-    ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 13px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("TNT", brickX + brickWidth / 2, brickY + brickHeight / 2 + 4);
-  }
-  break;
-}
+            if (img.complete) {
+              ctx.drawImage(img, drawX, drawY, drawW, drawH);
+            } else {
+              ctx.fillStyle = blink ? "#ff5555" : "#bb0000";
+              ctx.fillRect(drawX, drawY, drawW, drawH);
+              ctx.fillStyle = "#fff";
+              ctx.font = "bold 13px Arial";
+              ctx.textAlign = "center";
+              ctx.fillText("TNT", drawX + drawW / 2, drawY + drawH / 2 + 4);
+            }
+            break;
+          }
 
-            
           default:
-            ctx.drawImage(blockImg, brickX, brickY, brickWidth, brickHeight);
+            ctx.drawImage(blockImg, drawX, drawY, drawW, drawH);
             break;
         }
       }
     }
   }
 }
+
 
 function startDrops(config) {
   // veilige schaal ophalen
