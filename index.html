@@ -864,31 +864,39 @@ function addMessage(name, text, imgData = null){
     });
   });
   </script>
-
-  <!-- 💬 Chat open/dicht (desktop) -->
+  <!-- 💬 Chat open/dicht (desktop) + stickerpanel sluiten -->
+ 
   <script>
   (() => {
     const chat      = document.getElementById('chatbox');
     const toggleBtn = document.getElementById('chatToggleBtn');
     const chatInput = document.getElementById('chatInput');
+    const stickerPanel = document.getElementById('chat-sticker-panel');
 
+    if (!chat) return;
+
+    // beginstand (ingeklapt of niet) uit localStorage
     try {
       if (localStorage.getItem('chatCollapsed') === '1') {
         chat.classList.add('collapsed');
       }
     } catch (e) {}
 
+    // pijltje linksboven in de chat
     toggleBtn?.addEventListener('click', () => {
-      chat.classList.toggle('collapsed');
+      const isCollapsed = chat.classList.toggle('collapsed');
+
       try {
-        localStorage.setItem(
-          'chatCollapsed',
-          chat.classList.contains('collapsed') ? '1' : '0'
-        );
+        localStorage.setItem('chatCollapsed', isCollapsed ? '1' : '0');
       } catch (e) {}
 
-      // 👉 als desktop-chat nu open is: scroll naar laatste bericht
-      if (!chat.classList.contains('collapsed')) {
+      // 🔒 als we de chat dichtklappen: stickerpanel altijd weg
+      if (isCollapsed && stickerPanel) {
+        stickerPanel.style.display = 'none';
+      }
+
+      // als we 'm openen: naar laatste bericht scrollen
+      if (!isCollapsed) {
         const msgs = document.getElementById('chatMessages');
         if (msgs) {
           msgs.scrollTop = msgs.scrollHeight;
@@ -896,6 +904,7 @@ function addMessage(name, text, imgData = null){
       }
     });
 
+    // ESC → chat dicht + desktop-stickerpanel dicht
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space') return;
       if (document.activeElement === chatInput) return;
@@ -904,10 +913,14 @@ function addMessage(name, text, imgData = null){
         try {
           localStorage.setItem('chatCollapsed', '1');
         } catch (e) {}
+        if (stickerPanel) {
+          stickerPanel.style.display = 'none';
+        }
       }
     });
   })();
   </script>
+
 
   <!-- 📱 mobiele chat open/dicht + sticker overlay -->
   <script>
@@ -1069,24 +1082,7 @@ document.addEventListener('click', () => {
   });
 </script>
 
-  <script>
-setInterval(() => {
-  const box = document.getElementById('chatbox-mobile');
-  const overlay = document.getElementById('chatStickerOverlay');
-
-  if (!box || !overlay) return;
-
-  const chatIsVisible =
-    box.classList.contains("open") &&
-    getComputedStyle(box).display !== "none";
-
-  if (!chatIsVisible) {
-    overlay.classList.remove('show');
-    overlay.style.display = "none";
-  }
-}, 120);
-</script>
-
+ 
   <script>
   (function () {
     var canvas = document.getElementById('gameCanvas');
