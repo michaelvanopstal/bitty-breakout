@@ -664,8 +664,8 @@ body {
   /* Player-tekst */
   #player-display {
     position: absolute !important;
-    top: 60px !important;
-    left: 7vw !important;
+    top: 65px !important;
+    left: 11vw !important;
     font-size: 14px !important;
     color: #ffffff;
     z-index: 12000 !important;
@@ -673,8 +673,8 @@ body {
 
   #player-avatar-small {
     position: absolute !important;
-    top: 60px !important;
-    left: 3vw !important;
+    top: 65px !important;
+    left: 6vw !important;
     width: 16px !important;
     height: 16px !important;
     border-radius: 50%;
@@ -703,8 +703,8 @@ body {
   /* SCORE – gecentreerd boven frame */
   #scoreDisplay {
     position: absolute;
-    top: 62px;
-    left: 34vw;
+    top: 65px;
+    left: 24vw;
     font-size: 14px;
     color: #ffffff;
     z-index: 12600;
@@ -715,7 +715,7 @@ body {
   /* TIJD – rechts van score */
   #time-box {
     position: absolute;
-    top: 60px;
+    top: 65px;
     left: 50vw;
     width: 20vw;
     max-width: 80px;
@@ -822,7 +822,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     bottom: 4px;
-    width: min(94vw, 360px);
+    width: min(80vw, 360px);
     height: 38px;
     background: linear-gradient(180deg, #ffe09c 0%, #ffc44b 100%);
     border: 1.5px solid rgba(231, 159, 41, 0.8);
@@ -882,7 +882,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     bottom: 48px;                      /* net boven de chat-knop */
-    width: min(94vw, 360px);
+    width: min(80vw, 360px);
     background: linear-gradient(#f6a53b,#e27e22);
     border-radius: 18px 18px 14px 14px;
     box-shadow: 0 6px 18px rgba(0,0,0,.35);
@@ -982,7 +982,7 @@ body {
   #musicToggle {
     --musicScale: 0.6;
     position:absolute;
-    bottom: 94px;
+    bottom: 40px;
     left: 50%;
     transform: translateX(-50%) scale(var(--musicScale));
     transform-origin: center center;
