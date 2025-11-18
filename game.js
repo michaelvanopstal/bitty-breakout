@@ -4823,6 +4823,7 @@ function checkCoinCollision() {
 }
 
 
+
 function collisionDetection() {
   // 🔧 Instelling: hoe vaak moet hij "watch out..." zeggen (1x per X hits)
   const stonefallVoiceEvery = 5; // ← verander dit getal naar wens
@@ -4843,19 +4844,16 @@ function collisionDetection() {
   const RWS = window.rockWarnState;
 
   balls.forEach(ball => {
-    // 🔍 kleine marge rond elk blokje zodat er geen “pixel-gaten” zijn
-    const hitMargin = (ball.radius || 6) * 0.4; // ca. 2–3px extra aan alle kanten
-
     for (let c = 0; c < brickColumnCount; c++) {
       for (let r = 0; r < brickRowCount; r++) {
         const b = bricks[c][r];
 
         if (
           b.status === 1 &&
-          ball.x > (b.x - hitMargin) &&
-          ball.x < (b.x + brickWidth + hitMargin) &&
-          ball.y > (b.y - hitMargin) &&
-          ball.y < (b.y + brickHeight + hitMargin)
+          ball.x > b.x &&
+          ball.x < b.x + brickWidth &&
+          ball.y > b.y &&
+          ball.y < b.y + brickHeight
         ) {
           blockSound.currentTime = 0;
           blockSound.play();
@@ -4896,67 +4894,142 @@ function collisionDetection() {
                 spawnPxpBag(b.x + brickWidth / 2, b.y + brickHeight);
                 b.hasDroppedBag = true;
               }
+
+              const earned = doublePointsActive ? 120 : 60;
+              score += earned;
+              updateScoreDisplay();
+
+              pointPopups.push({
+                x: b.x + brickWidth / 2,
+                y: b.y,
+                value: "+" + earned,
+                alpha: 1
+              });
             }
 
-            // klaar voor deze bal/brick – ga verder met volgende brick
-            continue;
+            return; // klaar met deze hit
           }
 
-          // ⚡ Silver / electric blokken
+          // 🪙 Gedrag voor silver blokken
           if (b.type === "silver") {
             b.hits = (b.hits || 0) + 1;
 
-            // elke hit: klein elektriciteitseffect
-            spawnElectricBurst(
-              b.x + brickWidth / 2,
-              b.y + brickHeight / 2,
-              10 + Math.random() * 6,
-              6 + Math.floor(Math.random() * 6)
-            );
-
-            if (b.hits >= 3) {
+            if (b.hits === 1) {
+              // silver2.png tekenen gebeurt in drawBricks()
+            } else if (b.hits >= 2) {
               b.status = 0;
-              score += doublePointsActive ? 40 : 20;
+
+              triggerSilverExplosion(b.x + brickWidth / 2, b.y + brickHeight / 2);
+
+              const earned = doublePointsActive ? 150 : 75;
+              score += earned;
               updateScoreDisplay();
-            }
-            continue;
-          }
 
-          // 💣 TNT direct afhandelen
-          if (b.type === "tnt") {
-            explodeTNT(c, r);
-            continue;
-          }
-
-          // 🌧️ Stonefall blok
-          if (b.type === "stonefall") {
-            // ✨ Direct bij hit: laat stenen vallen
-            const midX = b.x + brickWidth / 2;
-            const midY = b.y + brickHeight / 2;
-            triggerStonefall(midX, midY);
-
-            // ✅ Voice 1× per X stonefall-hits (instelbaar bovenaan)
-            RWS.hits++;
-            if (RWS.hits >= stonefallVoiceEvery) {
-              try {
-                const a = new Audio("bitty_watch_out.mp3");
-                a.volume = 0.9;
-                a.play().catch(() => {});
-              } catch (e) {}
-              RWS.hits = 0; // reset teller
+              pointPopups.push({
+                x: b.x + brickWidth / 2,
+                y: b.y,
+                value: "+" + earned,
+                alpha: 1
+              });
             }
 
-            // 🔒 Eigen cleanup + punten en daarna STOPPEN (geen gedeelde cleanup!)
-            b.status = 0;                                // blok meteen weg
-            const earned = doublePointsActive ? 20 : 10; // punten
-            score += earned;
+            return; // klaar met deze hit
+          }
+
+          // ⭐️ NIEUW: ten-hit blok
+          if (b.type === "tenhit") {
+            // tel de hit
+            b.hits = (b.hits || 0) + 1;
+
+            // elke hit = +10 (of 20 bij 2x)
+            const perHit = doublePointsActive ? 20 : 10;
+            score += perHit;
             updateScoreDisplay();
-            spawnCoin(b.x, b.y);                         // beloning
-            return; // <<< voorkomt dat andere cases/cleanup nog lopen
+
+            // popup bij het blokje zelf
+            pointPopups.push({
+              x: b.x + brickWidth / 2,
+              y: b.y,
+              value: "+" + perHit,
+              alpha: 1
+            });
+
+            // klein effectje
+            for (let i = 0; i < 3; i++) {
+              stoneDebris.push({
+                x: b.x + brickWidth / 2,
+                y: b.y + brickHeight / 2,
+                dx: (Math.random() - 0.5) * 2,
+                dy: (Math.random() - 0.5) * 2,
+                radius: Math.random() * 1.5 + 0.5,
+                alpha: 1
+              });
+            }
+
+            // bij de 10e keer echt slopen +100
+            const needed = b.hitsNeeded || 10;
+            if (b.hits >= needed) {
+              b.status = 0;
+
+              const finalEarned = doublePointsActive ? 200 : 100;
+              score += finalEarned;
+              updateScoreDisplay();
+
+              // hier jouw “100 +”
+              pointPopups.push({
+                x: b.x + brickWidth / 2,
+                y: b.y,
+                value: "+100 +",
+                alpha: 1
+              });
+
+              // evt. coin droppen
+              spawnCoin(b.x + brickWidth / 2, b.y);
+            }
+
+            return; // klaar met deze hit
           }
 
-          // 👉 normale bonus-cases (flags, rocket, magnet, etc.)
+          // 🎁 Bonusacties
           switch (b.type) {
+
+            // 🧨 TNT — arm bij 1e hit, laat staan (knipper/beep via updateTNTs), geen cleanup hieronder
+            case "tnt": {
+              if (!b.tntArmed) {
+                b.tntArmed    = true;
+                b.tntStart    = performance.now();
+                b.tntBeepNext = b.tntStart; // als je beeps gebruikt
+                try { tntBeepSound.currentTime = 0; tntBeepSound.play(); } catch (e) {}
+              }
+              return; // ➜ heel belangrijk: voorkom gedeelde cleanup
+            }
+
+            case "stonefall": {
+              // ✨ Direct bij hit: laat stenen vallen
+              const midX = b.x + brickWidth / 2;
+              const midY = b.y + brickHeight / 2;
+              triggerStonefall(midX, midY);
+
+              // ✅ Voice 1× per X stonefall-hits (instelbaar bovenaan)
+              RWS.hits++;
+              if (RWS.hits >= stonefallVoiceEvery) {
+                try {
+                  const a = new Audio("bitty_watch_out.mp3");
+                  a.volume = 0.9;
+                  a.play().catch(() => {});
+                } catch (e) {}
+                RWS.hits = 0; // reset teller
+              }
+
+              // 🔒 Eigen cleanup + punten en daarna STOPPEN (geen gedeelde cleanup!)
+              b.status = 0;                                // blok meteen weg
+              const earned = doublePointsActive ? 20 : 10; // punten
+              score += earned;
+              updateScoreDisplay();
+              spawnCoin(b.x, b.y);                         // beloning
+              return; // <<< voorkomt dat andere cases/cleanup nog lopen
+            }
+
             case "power":
             case "flags":
               flagsOnPaddle = true;
@@ -5027,7 +5100,6 @@ function collisionDetection() {
     } // <-- einde for c
   }); // <-- einde balls.forEach
 } // <-- einde function
-
 
 // === BITTY BOMB VFX (enige set, geen duplicaten!) ===
 function drawBolt(ctx, x1, y1, x2, y2, opts = {}) {
