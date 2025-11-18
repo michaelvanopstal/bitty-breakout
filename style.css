@@ -608,7 +608,7 @@ body {
     padding: 0;
     height: 100%;
     overflow: hidden;          /* ⬅ geen scroll meer */
-    background: #FF9305;
+     background: #00ff00; /* FEL GROEN, alleen test *
     font-family: Arial, sans-serif;
     overscroll-behavior: none; /* ⬅ geen “bounce” effect */
   }
