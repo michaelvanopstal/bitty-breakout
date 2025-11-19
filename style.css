@@ -268,7 +268,7 @@ body {
 
 #musicToggle {
   position: fixed;
-  left: 50px;
+  left: 100px;
   top: 140px;
   width: 180px;
   cursor: pointer;
