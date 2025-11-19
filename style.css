@@ -101,16 +101,6 @@ body {
   flex-shrink: 0;
 }
 
-#trophy {
-  position: absolute;
-  top: 110px;
-  left: 160px;
-  width: 100px;
-  z-index: 1000;
-  transform: scale(0.6); /* 1.0 = normaal, 1.5 = 150%, 2.0 = 200% */
-  transform-origin: center center; /* blijft netjes vanaf het midden schalen */
-}
-
 
 #game-container {
   position: relative;
