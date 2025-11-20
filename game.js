@@ -249,6 +249,10 @@ let levelMessageAlpha = 0;
 let levelMessageTimer = 0;
 const LEVEL_MESSAGE_DURATION = 180;
 
+// 🎵 Album-muziek tijdelijk pauzeren tijdens level-intro
+let musicPausedForLevelIntro = false;
+
+
 // 🧱 Paddle-size bonus
 let paddleSizeEffect = null; // { type: "long"|"small", end: timestamp, multiplier: number }
 let paddleBaseWidth = 100 * scaleFactor;   // actuele 'basis' breedte voor dit level (zonder tijdelijke bonus)
