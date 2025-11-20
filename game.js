@@ -6593,13 +6593,24 @@ function triggerPaddleExplosion() {
       coins = [];
       pxpBags = [];
 
-      // 🎉 NIEUW: level-celebration volledig stoppen bij Game Over
+      // 🎉 Level-celebration volledig stoppen bij Game Over
       try { confetti = []; } catch (e) {}
       try { fireworksRockets = []; } catch (e) {}
       try { fireworksParticles = []; } catch (e) {}
       levelMessageVisible = false;
       levelMessageAlpha   = 0;
       levelMessageText    = "";
+
+      // 🧹 EXTRA: ook alle stones/drops/bombRain weggooien bij Game Over
+      try { fallingStones = []; } catch (e) {}
+      try { fallingDrops  = []; } catch (e) {}
+      try { fallingHearts = []; } catch (e) {}
+      try { bombRain      = []; } catch (e) {}
+      try { stoneDebris   = []; } catch (e) {}
+      try { pointPopups   = []; } catch (e) {}
+      if (typeof stoneClearRequested !== "undefined") {
+        stoneClearRequested = false;
+      }
 
       showGameOver = true;
       gameOverAlpha = 0;
