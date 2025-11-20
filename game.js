@@ -6570,6 +6570,11 @@ function startLevelTransition() {
     saveHighscore();
     pauseTimer?.();
 
+    // 🔇 Zeker weten: alle TNT stil en ontladen
+    if (typeof stopAndDisarmAllTNT === "function") {
+      stopAndDisarmAllTNT();
+    }
+
     // Korte win-overlay (optioneel; laat staan als je explosions gebruikt)
     explosions?.push({
       x: canvas.width / 2,
@@ -6641,6 +6646,11 @@ function startLevelTransition() {
   // 👇 Volgend level
   level++;
 
+  // 🔇 TNT volledig stilzetten & timers resetten bij level-overgang
+  if (typeof stopAndDisarmAllTNT === "function") {
+    stopAndDisarmAllTNT();
+  }
+
   // 🧹 Alles van het vorige level opruimen (vallende stenen, drops, regen, etc.)
   if (typeof fallingStones !== "undefined") fallingStones = [];
   if (typeof fallingDrops  !== "undefined") fallingDrops  = [];
@@ -6693,7 +6703,6 @@ function updateLivesDisplay() {
     display.appendChild(img);
   }
 }
-
 
 function drawElectricBursts() {
   for (let i = electricBursts.length - 1; i >= 0; i--) {
