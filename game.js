@@ -6343,6 +6343,11 @@ function triggerPaddleExplosion() {
     return;
   }
 
+  // 🔇 Extra: ALTIJD alle TNT stilzetten + disarmen bij paddle-explosie
+  if (typeof stopAndDisarmAllTNT === "function") {
+    stopAndDisarmAllTNT();
+  }
+
   // ✅ er zijn nog levens over
   if (lives > 1) {
 
@@ -6433,7 +6438,7 @@ function triggerPaddleExplosion() {
     machineGunActive = false;
     machineGunCooldownActive = false;
 
-    // 🔇 TNT direct stilzetten bij GAME OVER
+    // 🔇 TNT direct stilzetten bij GAME OVER (extra safeguard)
     try {
       if (typeof tntBeepSound !== "undefined" && tntBeepSound) {
         tntBeepSound.pause();
@@ -6557,8 +6562,6 @@ function triggerPaddleExplosion() {
     }, 1000);
   }
 }
-
-
 
 function startLevelTransition() {
   // ✅ Wincheck vóór level++ (we zitten aan het einde van het laatste level)
