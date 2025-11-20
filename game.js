@@ -6538,6 +6538,15 @@ function triggerPaddleExplosion() {
       explosions = [];
       coins = [];
       pxpBags = [];
+
+      // 🎉 NIEUW: level-celebration volledig stoppen bij Game Over
+      try { confetti = []; } catch (e) {}
+      try { fireworksRockets = []; } catch (e) {}
+      try { fireworksParticles = []; } catch (e) {}
+      levelMessageVisible = false;
+      levelMessageAlpha   = 0;
+      levelMessageText    = "";
+
       showGameOver = true;
       gameOverAlpha = 0;
       gameOverTimer = 0;
@@ -6562,6 +6571,7 @@ function triggerPaddleExplosion() {
     }, 1000);
   }
 }
+
 
 function startLevelTransition() {
   // ✅ Wincheck vóór level++ (we zitten aan het einde van het laatste level)
