@@ -6568,7 +6568,13 @@ function startLevelTransition() {
     pauseTimer?.();
 
     // Korte win-overlay (optioneel; laat staan als je explosions gebruikt)
-    explosions?.push({ x: canvas.width / 2, y: canvas.height / 2, radius: 10, alpha: 1, color: "white" });
+    explosions?.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      radius: 10,
+      alpha: 1,
+      color: "white"
+    });
 
     // Reset naar beginstaat
     lives = 3;
@@ -6598,6 +6604,17 @@ function startLevelTransition() {
     coins = [];
     pxpBags = [];
 
+    // 🔁 extra: ook alle vallende dingen & debris opruimen
+    if (typeof fallingStones !== "undefined") fallingStones = [];
+    if (typeof fallingDrops  !== "undefined") fallingDrops  = [];
+    if (typeof fallingHearts !== "undefined") fallingHearts = [];
+    if (typeof bombRain      !== "undefined") bombRain      = [];
+    if (typeof stoneDebris   !== "undefined") stoneDebris   = [];
+    if (typeof pointPopups   !== "undefined") pointPopups   = [];
+    if (typeof stoneClearRequested !== "undefined") {
+      stoneClearRequested = true;
+    }
+
     paddleFreeMove = false;
 
     resetBricks();
@@ -6609,7 +6626,11 @@ function startLevelTransition() {
     if (timeEl) timeEl.textContent = "00:00";
 
     // 🔔 Terug op Level 1: klein momentje (geen vuurwerk, geen raketten)
-    triggerLevelCelebration(level, { skipFireworks: true, confettiCount: 120, rockets: 0 });
+    triggerLevelCelebration(level, {
+      skipFireworks: true,
+      confettiCount: 120,
+      rockets: 0
+    });
 
     return;
   }
@@ -6617,11 +6638,27 @@ function startLevelTransition() {
   // 👇 Volgend level
   level++;
 
+  // 🧹 Alles van het vorige level opruimen (vallende stenen, drops, regen, etc.)
+  if (typeof fallingStones !== "undefined") fallingStones = [];
+  if (typeof fallingDrops  !== "undefined") fallingDrops  = [];
+  if (typeof fallingHearts !== "undefined") fallingHearts = [];
+  if (typeof coins         !== "undefined") coins         = [];
+  if (typeof pxpBags       !== "undefined") pxpBags       = [];
+  if (typeof bombRain      !== "undefined") bombRain      = [];
+  if (typeof flyingCoins   !== "undefined") flyingCoins   = [];
+  if (typeof smokeParticles!== "undefined") smokeParticles= [];
+  if (typeof explosions    !== "undefined") explosions    = [];
+  if (typeof stoneDebris   !== "undefined") stoneDebris   = [];
+  if (typeof pointPopups   !== "undefined") pointPopups   = [];
+  if (typeof stoneClearRequested !== "undefined") {
+    stoneClearRequested = true;
+  }
+
   // Alle tijdelijke bonussen/cooldowns resetten als je daar een helper voor hebt
   if (typeof resetAllBonuses === "function") {
-  // als de ster nog bezig was op het moment van overgang, niet uitzetten
-  resetAllBonuses({ keepStar: invincibleActive });
-}
+    // als de ster nog bezig was op het moment van overgang, niet uitzetten
+    resetAllBonuses({ keepStar: invincibleActive });
+  }
 
   // Bricks voor het nieuwe level klaarzetten
   resetBricks();
@@ -6653,6 +6690,7 @@ function updateLivesDisplay() {
     display.appendChild(img);
   }
 }
+
 
 function drawElectricBursts() {
   for (let i = electricBursts.length - 1; i >= 0; i--) {
