@@ -6003,8 +6003,37 @@ if (levelMessageVisible) {
 
   if (levelMessageTimer >= visibleTime + fadeTime) {
     levelMessageVisible = false;
+
+    // 🎵 Intro klaar → album-muziek weer door laten lopen (als speler 'm aan had)
+    try {
+      if (
+        musicPausedForLevelIntro &&
+        typeof musicPlaying !== "undefined" &&
+        musicPlaying &&
+        typeof albumTracks !== "undefined" &&
+        Array.isArray(albumTracks) &&
+        albumTracks.length > 0
+      ) {
+        musicPausedForLevelIntro = false;
+
+        const idx =
+          typeof currentTrackIndex === "number"
+            ? (currentTrackIndex % albumTracks.length + albumTracks.length) % albumTracks.length
+            : 0;
+
+        const track = albumTracks[idx] || albumTracks[0];
+
+        const p = track.play();
+        if (p && typeof p.catch === "function") {
+          p.catch(() => {
+            // als browser moeilijk doet, laten we het gewoon stil
+          });
+        }
+      }
+    } catch (e) {}
   }
 }
+
 
 // 🎬 Level overgang
 if (levelTransitionActive) {
