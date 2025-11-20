@@ -992,13 +992,34 @@ function triggerLevelCelebration(lvl, opts = {}) {
   showLevelBanner(`Bitty Bitcoin Mascot — Level ${lvl}`);
   spawnConfetti(opts.confettiCount ?? 160);
 
+  // 🎵 Album-muziek even stil tijdens de intro
+  try {
+    if (
+      typeof musicPlaying !== "undefined" &&
+      musicPlaying &&
+      typeof albumTracks !== "undefined" &&
+      Array.isArray(albumTracks)
+    ) {
+      // alleen pauzeren, geen currentTime reset → hij gaat na de intro gewoon verder
+      albumTracks.forEach(t => {
+        try { t.pause(); } catch (e) {}
+      });
+      musicPausedForLevelIntro = true;
+    }
+  } catch (e) {}
+
   // 🚀 nieuw: gebruik rockets-optie (of schaal mee met level)
   const rockets = opts.rockets ?? Math.min(14, 6 + Math.floor(lvl / 2));
   if (rockets > 0) spawnFireworkRockets(rockets);
 
   if (!opts.skipFireworks) spawnFireworks(6);
 
-  try { levelUpSound?.pause?.(); levelUpSound.currentTime = 0; levelUpSound?.play?.(); } catch (e) {}
+  // eigen level-up SFX
+  try {
+    levelUpSound?.pause?.();
+    levelUpSound.currentTime = 0;
+    levelUpSound?.play?.();
+  } catch (e) {}
 }
 
 
