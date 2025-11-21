@@ -987,11 +987,18 @@ function drawConfetti() {
 function spawnFireworks(bursts = 6) {
   // gebruikt je bestaande explosions-rendering als die er is
   if (!Array.isArray(explosions)) return;
+
   for (let i = 0; i < bursts; i++) {
     const cx = canvas.width * (0.1 + Math.random() * 0.8);
     const cy = canvas.height * (0.1 + Math.random() * 0.4);
     explosions.push({ x: cx, y: cy, radius: 10, alpha: 1, color: "white" });
     explosions.push({ x: cx, y: cy, radius: 14, alpha: 1, color: "orange" });
+  }
+
+  // 🚫 Hard cap zodat explosie-lijst niet begint te laggen
+  const MAX_EXPLOSIONS = 120; // veilig & soepel
+  if (explosions.length > MAX_EXPLOSIONS) {
+    explosions.splice(0, explosions.length - MAX_EXPLOSIONS);
   }
 }
 
