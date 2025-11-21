@@ -4868,8 +4868,6 @@ function checkCoinCollision() {
   });
 }
 
-
-
 function collisionDetection() {
   // 🔧 Instelling: hoe vaak moet hij "watch out..." zeggen (1x per X hits)
   const stonefallVoiceEvery = 5; // ← verander dit getal naar wens
@@ -4888,6 +4886,10 @@ function collisionDetection() {
     };
   }
   const RWS = window.rockWarnState;
+
+  // 🚫 caps om performance strak te houden
+  const MAX_STONE_DEBRIS   = 200;
+  const MAX_POINT_POPUPS   = 80;
 
   balls.forEach(ball => {
     for (let c = 0; c < brickColumnCount; c++) {
@@ -4928,6 +4930,10 @@ function collisionDetection() {
                 alpha: 1
               });
             }
+            // cap debris
+            if (stoneDebris.length > MAX_STONE_DEBRIS) {
+              stoneDebris.splice(0, stoneDebris.length - MAX_STONE_DEBRIS);
+            }
 
             if (b.hits === 1 || b.hits === 2) {
               spawnCoin(b.x + brickWidth / 2, b.y);
@@ -4951,6 +4957,9 @@ function collisionDetection() {
                 value: "+" + earned,
                 alpha: 1
               });
+              if (pointPopups.length > MAX_POINT_POPUPS) {
+                pointPopups.splice(0, pointPopups.length - MAX_POINT_POPUPS);
+              }
             }
 
             return; // klaar met deze hit
@@ -4977,6 +4986,9 @@ function collisionDetection() {
                 value: "+" + earned,
                 alpha: 1
               });
+              if (pointPopups.length > MAX_POINT_POPUPS) {
+                pointPopups.splice(0, pointPopups.length - MAX_POINT_POPUPS);
+              }
             }
 
             return; // klaar met deze hit
@@ -4999,6 +5011,9 @@ function collisionDetection() {
               value: "+" + perHit,
               alpha: 1
             });
+            if (pointPopups.length > MAX_POINT_POPUPS) {
+              pointPopups.splice(0, pointPopups.length - MAX_POINT_POPUPS);
+            }
 
             // klein effectje
             for (let i = 0; i < 3; i++) {
@@ -5010,6 +5025,9 @@ function collisionDetection() {
                 radius: Math.random() * 1.5 + 0.5,
                 alpha: 1
               });
+            }
+            if (stoneDebris.length > MAX_STONE_DEBRIS) {
+              stoneDebris.splice(0, stoneDebris.length - MAX_STONE_DEBRIS);
             }
 
             // bij de 10e keer echt slopen +100
@@ -5028,6 +5046,9 @@ function collisionDetection() {
                 value: "+100 +",
                 alpha: 1
               });
+              if (pointPopups.length > MAX_POINT_POPUPS) {
+                pointPopups.splice(0, pointPopups.length - MAX_POINT_POPUPS);
+              }
 
               // evt. coin droppen
               spawnCoin(b.x + brickWidth / 2, b.y);
@@ -5141,11 +5162,17 @@ function collisionDetection() {
 
           b.type = "normal";
           spawnCoin(b.x, b.y);
+
+          // kleine cap op pointPopups ook hier
+          if (pointPopups.length > MAX_POINT_POPUPS) {
+            pointPopups.splice(0, pointPopups.length - MAX_POINT_POPUPS);
+          }
         } // <-- einde IF hit
       } // <-- einde for r
     } // <-- einde for c
   }); // <-- einde balls.forEach
 } // <-- einde function
+
 
 
 // === BITTY BOMB VFX (enige set, geen duplicaten!) ===
