@@ -950,7 +950,14 @@ function spawnConfetti(n = 160) {
       drot: -0.05 + Math.random() * 0.1,
     });
   }
+
+  // ⛔ hard cap: voorkom dat confetti-voorraad te groot wordt
+  const MAX_CONFETTI = 200;
+  if (confetti.length > MAX_CONFETTI) {
+    confetti.splice(0, confetti.length - MAX_CONFETTI);
+  }
 }
+
 
 function drawConfetti() {
   for (let i = confetti.length - 1; i >= 0; i--) {
