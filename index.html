@@ -193,28 +193,7 @@
       onmouseout="this.style.transform='scale(1)'"
   >
 
-  <!-- Firebase compat libraries -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCkY9v2Hh84wb1IluKFPbDsjTCJjw_P8wc",
-      authDomain: "bitty-brickshift.firebaseapp.com",
-      databaseURL: "https://bitty-brickshift-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "bitty-brickshift",
-      storageBucket: "bitty-brickshift.appspot.com",
-      messagingSenderId: "823337012487",
-      appId: "1:823337012487:web:1d217b13195f48809389a2"
-    };
 
-    firebase.initializeApp(firebaseConfig);
-    const db        = firebase.database();
-    const chatRef   = db.ref("chat");
-    const scoresRef = db.ref("scores");
-    window.chatRef   = chatRef;
-    window.scoresRef = scoresRef;
-    console.log("✅ Firebase connected!");
-  </script>
 
   <!-- ✅ CHAT SCRIPT (desktop + mobile weergeven + stickers bouwen) -->
   <script>
