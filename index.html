@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- DE ENIGE juiste viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+  <title>PointPay Breakout</title>
+
+  <!-- Preloads -->
+  <link rel="preload" href="vlaggetje1.png" as="image">
+  <link rel="preload" href="vlaggetje2.png" as="image">
+  <link rel="preload" href="signalblock2.png" as="image">
+
+  <!-- Styles -->
+<link rel="stylesheet" href="style.css?v=11">
+
+
+
+
+</head>
+
+<body>
+  <!-- ===== Chat Box (rechts, desktop) ===== -->
+  <div id="chatbox">
+    <div class="chatbox-header">
+      <button id="chatToggleBtn" class="chat-icon-btn" type="button" title="Open/dicht" aria-label="Chat openen of sluiten">▸</button>
+      <span>CHAT</span>
+      <button id="chatClearBtn" class="chat-icon-btn" type="button" title="Leeg chat" aria-label="Chat leegmaken">✕</button>
+    </div>
+
+    <!-- Sticker popup (desktop) -->
+    <div id="chat-sticker-panel" aria-label="Kies een sticker"></div>
+
+    <!-- berichtenlijst -->
+    <div id="chatMessages" aria-live="polite"></div>
+
+    <!-- invoer onderaan de chat -->
+    <form id="chatForm" autocomplete="off">
+      <input id="chatName" type="text" placeholder="Player: michael" maxlength="18" />
+      <input id="chatInput" type="text" placeholder="Schrijf een bericht..." maxlength="200" />
+      <button id="chatStickersBtn" class="chat-icon-btn" type="button" title="Kies een plaatje">📷</button>
+      <button id="chatSendBtn" type="submit" title="Stuur">▶</button>
+    </form>
+  </div>
+  <!-- ===== /Chat Box ===== -->
+
+  <!-- ===== Mobiele chat knop ===== -->
+  <button id="chat-mobile-button" type="button">
+    <span class="cmb-left">
+      <span class="cmb-dot"></span>
+      <span class="cmb-arrow">▶</span>
+    </span>
+    <span class="cmb-label">CHAT</span>
+    <span class="cmb-close">✕</span>
+  </button>
+
+  <!-- ===== popup-chat mobiel ===== -->
+  <div id="chatbox-mobile">
+    <div class="chatbox-header-mobile">
+      <span>Chat</span>
+      <button id="chatMobileClose" type="button">×</button>
+    </div>
+
+    <!-- overlay voor stickers (komt bovenop messages) -->
+    <div id="chatStickerOverlay"></div>
+
+    <!-- mobiele berichtenlijst -->
+    <div id="chatMobileMessages"></div>
+
+    <div id="chatMobileForm">
+      <input id="chatMobileInput" type="text" placeholder="Type..." />
+      <button id="chatMobileStickersBtn" type="button">📷</button>
+      <button id="chatMobileSendBtn" type="button">Send</button>
+    </div>
+  </div>
+
+  <!-- 📱 Highscore knop + paneel -->
+<div id="mobile-highscore">
+  <button id="mobileHighscoreBtn">🏆 High Scores</button>
+  <div id="mobileHighscorePanel">
+    <ol id="mobileHighscoreList"></ol>
+  </div>
+</div>
+  
+
+
+
+  <!-- 1x STICKERS definieren -->
+  <script>
+    const STICKERS = [
+      'grumpy (11).png', 'ittybittybaseball (1).png', 'Itty Bitty Flower GIF by herecomesbitcoin (1).gif',
+      'Sandwich (7).png', 'Graffiti (3).png',
+      'jack-mallers (2).png', 'Satoshi (6).png',
+      'Construction (7).png', 'Cat (4).png',
+      'Astronaut (2).png', 'girls-night-out.png',
+      'Bitcoinbahama (3).png', 'Nostrich (3).png',
+      'Queen (8).png', 'UFO (8).png', 'Coder.png',
+      'Bitcoin Blockchain GIF by herecomesbitcoin.gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (1).gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (2).gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (3).gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (4).gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin (5).gif',
+      'Bitcoin Cryptocurrency Sticker by herecomesbitcoin.gif',
+      'Cat Crypto Sticker by herecomesbitcoin.gif',
+      'Crypto Bitcoin GIF by herecomesbitcoin.gif',
+      'Crypto Bitcoin Sticker by herecomesbitcoin (3).gif',
+      'Crypto Dancing GIF by herecomesbitcoin (3).gif',
+      'Hieronymus Bosch Bitcoin Sticker by herecomesbitcoin.gif',
+      'Jack Dorsey Bitcoin Sticker by herecomesbitcoin.gif',
+      'San Francisco Dancing GIF by herecomesbitcoin.gif',
+      'BITTYbread.gif', 'bittymoney.gif', 'ufobitty.gif',
+      'fallingbitty.gif', 'bird.gif', 'btty.gif',
+      'bttyhead.gif', 'queen.gif', 'satoschi.gif'
+    ];
+  </script>
+
+<!-- ===== BONUS POWER los van chat ===== -->
+<div id="bonus-power-panel">
+  <div class="bp-header">BONUS POWER</div>
+
+  <div class="bp-row" data-type="hearts">
+    <div class="bp-icon bp-icon-heart"></div>
+    <div class="bp-tube">
+      <div class="bp-liquid" id="bp-hearts-liquid"></div>
+      <div class="bp-glass"></div>
+    </div>
+    <div class="bp-value" id="bp-hearts-value">0/10</div>
+  </div>
+
+  <div class="bp-row" data-type="stars">
+    <div class="bp-icon bp-icon-star"></div>
+    <div class="bp-tube">
+      <div class="bp-liquid" id="bp-stars-liquid"></div>
+      <div class="bp-glass"></div>
+    </div>
+    <div class="bp-value" id="bp-stars-value">0/10</div>
+  </div>
+
+  <div class="bp-row" data-type="bombs">
+    <div class="bp-icon bp-icon-bomb"></div>
+    <div class="bp-tube">
+      <div class="bp-liquid" id="bp-bombs-liquid"></div>
+      <div class="bp-glass"></div>
+    </div>
+    <div class="bp-value" id="bp-bombs-value">0/10</div>
+  </div>
+
+  <div class="bp-row" data-type="cross">
+    <div class="bp-icon bp-icon-cross"></div>
+    <div class="bp-tube">
+      <div class="bp-liquid" id="bp-cross-liquid"></div>
+      <div class="bp-glass"></div>
+    </div>
+    <div class="bp-value" id="bp-cross-value">0/3</div>
+  </div>
+
+  <!-- ===== PLAY BITTY PAC-MAN BUTTON ===== -->
+  <div id="pacman-button" class="hud-pacman-button">
+    ▶ Play Bitty Pac-Man
+  </div>
+</div>
+
+
+<img id="player-avatar-small" alt="avatar" />
+<span id="player-display">Player</span>
+<span id="scoreDisplay">0</span>
+
+  <!-- Tooltip -->
+  <div id="resetTooltip" style="
+    display: none;
+    position: fixed;
+    bottom: 100px;
+    right: 100px;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    z-index: 13000;
+    white-space: nowrap;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  ">Use when the ball is stuck — no lives will be lost.</div>
+
+  <!-- Reset-knop -->
+  <img id="resetBallBtn" 
+      src="resetball.png" 
+      alt="Reset Ball" 
+      style="
+        position: fixed;
+        bottom: 40px;
+        right: 30px;
+        width: 100px;
+        height: 100px;
+        cursor: pointer;
+        z-index: 300;
+        transition: transform 0.2s ease;
+      "
+      onmouseover="this.style.transform='scale(1.1)'"
+      onmouseout="this.style.transform='scale(1)'"
+  >
+
+
+
+  <!-- ✅ CHAT SCRIPT (desktop + mobile weergeven + stickers bouwen) -->
+  <script>
+  (() => {
+    // ====== ELEMENTEN DESKTOP ======
+    const $msgs   = document.getElementById('chatMessages');
+    const $form   = document.getElementById('chatForm');
+    const $input  = document.getElementById('chatInput');
+    const $name   = document.getElementById('chatName');
+    const $clear  = document.getElementById('chatClearBtn');
+    const stickerPanel = document.getElementById('chat-sticker-panel');
+    const stickerBtn   = document.getElementById('chatStickersBtn');
+
+    // ====== ELEMENTEN MOBIEL ======
+    const $mobileMsgs   = document.getElementById('chatMobileMessages');
+    const $mobileInput  = document.getElementById('chatMobileInput');
+    const $mobileSend   = document.getElementById('chatMobileSendBtn');
+    const $mobileStkOv  = document.getElementById('chatStickerOverlay');
+
+    const STORE_KEY = 'bb_chat_messages';
+    const LIMIT = 100;
+
+    let selectedSticker = null;
+    let currentStickerEl = null;
+
+    function detectPlayerName() {
+      let playerName = '';
+
+      const nameInput = document.querySelector('#playerNameInput, #player-name, input[name="playerName"]');
+      const display   = document.getElementById('player-display');
+
+      if (nameInput && nameInput.value.trim() !== '') {
+        playerName = nameInput.value.trim();
+      } else if (display && display.textContent.trim() !== '' && display.textContent.trim() !== 'Player') {
+        playerName = display.textContent.trim();
+      }
+
+      if (!playerName && localStorage.getItem('chatName')) {
+        playerName = localStorage.getItem('chatName');
+      }
+
+      return playerName || 'Anon';
+    }
+
+    function updateChatName() {
+      const name = detectPlayerName();
+      if ($name) {
+        $name.value = name;
+        $name.disabled = true;
+      }
+      localStorage.setItem('chatName', name);
+    }
+    updateChatName();
+    setInterval(updateChatName, 1000);
+
+    function getStore(){
+      try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+      catch(e){ return []; }
+    }
+    function setStore(arr){
+      try{ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }catch(e){}
+    }
+
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function nowTime(){
+      const d = new Date();
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function escapeHTML(s){
+      return s.replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      }[c]));
+    }
+    function linkify(s){
+      return s.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
+
+   function renderMessageInContainer(container, m){
+  if (!container) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-msg';
+
+  let html = `<div class="chat-meta">`;
+
+  // 🔸 avatar uit bericht (als die bestaat)
+  if (m.avatar) {
+    html += `<img src="${m.avatar}" class="chat-avatar" alt="avatar">`;
+  }
+
+  html += `${m.time || '--:--'} — <b>${escapeHTML(m.name || 'Anon')}</b></div>`;
+
+  if (m.text) {
+    html += `<div class="chat-text">${linkify(escapeHTML(m.text))}</div>`;
+  }
+  if (m.img) {
+    html += `<img src="${m.img}" class="chat-thumb" alt="image">`;
+  }
+
+  wrap.innerHTML = html;
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+}
+
+
+    function appendChatMessage(m){
+      renderMessageInContainer($msgs, m);
+      renderMessageInContainer($mobileMsgs, m);
+    }
+
+    function render(all){
+      if ($msgs) $msgs.innerHTML = '';
+      if ($mobileMsgs) $mobileMsgs.innerHTML = '';
+      all.forEach(appendChatMessage);
+    }
+
+    // bericht toevoegen
+function addMessage(name, text, imgData = null){
+  // 🔸 avatar ophalen uit login (globaal of localStorage)
+  const avatar =
+    (typeof window.currentPlayerAvatar !== "undefined" && window.currentPlayerAvatar) ||
+    localStorage.getItem("playerAvatar") ||
+    null;
+
+  const msg = {
+    name: name,
+    text: text,
+    img: imgData,
+    time: nowTime(),
+    avatar: avatar
+  };
+
+  // 👉 naar Firebase (online chat)
+  if (window.chatRef) {
+    window.chatRef.push(msg);
+  } else {
+    // 👉 lokale fallback
+    let all = getStore();
+    if(all.length >= LIMIT){
+      all = [{
+        name:'System',
+        text:'Chat automatisch geleegd (100 berichten).',
+        time:nowTime()
+      }];
+    }
+    all.push(msg);
+    setStore(all);
+    render(all);
+  }
+}
+
+    // beschikbaar maken voor mobiel script
+    window.addMessage = addMessage;
+    window.detectPlayerName = detectPlayerName;
+
+    // Firebase luisteraar
+    if (window.chatRef) {
+      window.chatRef.limitToLast(200).on('child_added', snap => {
+        const m = snap.val();
+        appendChatMessage(m);
+      });
+    } else {
+      render(getStore());
+    }
+
+    // desktop form
+    if ($form) {
+      $form.addEventListener('submit', e=>{
+        e.preventDefault();
+        const name = detectPlayerName();
+        const text = $input.value.trim();
+        if (!text && !selectedSticker) return;
+        addMessage(name, text, selectedSticker);
+
+        $input.value = '';
+        $input.focus();
+
+        selectedSticker = null;
+        if (currentStickerEl) {
+          currentStickerEl.classList.remove('selected');
+          currentStickerEl = null;
+        }
+        if (stickerPanel) stickerPanel.style.display = 'none';
+      });
+    }
+
+    if ($clear) {
+      $clear.addEventListener('click', ()=>{
+        setStore([]);
+        render([]);
+      });
+    }
+
+    if ($input) {
+      $input.addEventListener('keydown', e=>{
+        if(e.key === 'Enter' && !e.shiftKey){
+          e.preventDefault();
+          $form.requestSubmit();
+        }
+      });
+    }
+
+    // mobile send
+    if ($mobileSend && $mobileInput) {
+      $mobileSend.addEventListener('click', () => {
+        const name = detectPlayerName();
+        const text = $mobileInput.value.trim();
+        if (!text && !selectedSticker) return;
+        addMessage(name, text, selectedSticker);
+        $mobileInput.value = '';
+        selectedSticker = null;
+      });
+
+      $mobileInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          $mobileSend.click();
+        }
+      });
+    }
+
+    // mobile stickers vullen (maar niet togglen)
+    function buildMobileStickers(){
+      if (!$mobileStkOv) return;
+      $mobileStkOv.innerHTML = '';
+      const list = (typeof STICKERS !== 'undefined' && Array.isArray(STICKERS)) ? STICKERS : [];
+      list.forEach(src => {
+        const item = document.createElement('div');
+        item.className = 'sticker-item';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'sticker';
+        item.appendChild(img);
+
+        item.addEventListener('click', () => {
+          const name = detectPlayerName();
+          const txt = $mobileInput ? $mobileInput.value.trim() : '';
+          addMessage(name, txt, src);
+          if ($mobileInput) $mobileInput.value = '';
+          $mobileStkOv.classList.remove('show');
+        });
+
+        $mobileStkOv.appendChild(item);
+      });
+    }
+    buildMobileStickers();
+
+    // desktop sticker panel
+    if (stickerBtn && stickerPanel) {
+      const list = Array.isArray(STICKERS) ? STICKERS : [];
+      const imageGrid = document.createElement('div');
+      imageGrid.className = 'sticker-grid';
+
+      const gifGrid = document.createElement('div');
+      gifGrid.className = 'sticker-grid';
+
+      const imgTitle = document.createElement('div');
+      imgTitle.textContent = 'Stickers';
+      imgTitle.className = 'sticker-section-title';
+
+      const gifTitle = document.createElement('div');
+      gifTitle.textContent = 'GIFs';
+      gifTitle.className = 'sticker-section-title';
+
+      list.forEach(src => {
+        const item = document.createElement('div');
+        item.className = 'sticker-item';
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'sticker';
+        item.appendChild(img);
+
+        item.addEventListener('click', () => {
+          if (selectedSticker === src) {
+            selectedSticker = null;
+            item.classList.remove('selected');
+            currentStickerEl = null;
+            return;
+          }
+          selectedSticker = src;
+          if (currentStickerEl) currentStickerEl.classList.remove('selected');
+          item.classList.add('selected');
+          currentStickerEl = item;
+        });
+
+        item.addEventListener('dblclick', () => {
+          const name = detectPlayerName();
+          const text = $input ? $input.value.trim() : '';
+          addMessage(name, text, src);
+
+          if ($input) {
+            $input.value = '';
+            $input.focus();
+          }
+          selectedSticker = null;
+          if (currentStickerEl) {
+            currentStickerEl.classList.remove('selected');
+            currentStickerEl = null;
+          }
+          stickerPanel.style.display = 'none';
+        });
+
+        if (src.toLowerCase().endsWith('.gif')) {
+          gifGrid.appendChild(item);
+        } else {
+          imageGrid.appendChild(item);
+        }
+      });
+
+      stickerPanel.innerHTML = '';
+      stickerPanel.appendChild(imgTitle);
+      stickerPanel.appendChild(imageGrid);
+      stickerPanel.appendChild(gifTitle);
+      stickerPanel.appendChild(gifGrid);
+
+      stickerBtn.addEventListener('click', () => {
+        const cur = stickerPanel.style.display;
+        stickerPanel.style.display = (cur === 'block') ? 'none' : 'block';
+      });
+    }
+
+  })();
+  </script>
+
+
+  <div id="game-container">
+    <canvas id="gameCanvas" width="645" height="650"></canvas>
+<button id="login-toggle" type="button">Login</button>
+
+    <div id="time-box">
+      <span id="timeDisplay">00:00</span>
+    </div>
+
+       <!-- 🔒 LOGIN POPUP -->
+    <div id="login-overlay">
+      <div id="login-box">
+        <div class="login-header">
+          <span>Login</span>
+          <button id="login-close" type="button">✕</button>
+        </div>
+
+        <div class="login-body">
+          <label class="login-label">Name</label>
+          <input type="text" id="player-name" placeholder="Voer je naam in" />
+
+          <label class="login-label">Avatar</label>
+          <input type="file"
+                 id="player-avatar"
+                 accept="image/*" />
+        </div>
+
+        <div class="login-actions">
+          <button id="login-btn" type="button">Login</button>
+          <button id="logout-btn" type="button" style="display: none;">Logout</button>
+        </div>
+      </div>
+    </div>
+    <!-- /LOGIN POPUP -->
+
+
+
+    <img id="musicToggle" src="playmusic button.png" alt="Play Music" style="cursor: pointer; width: 180px;" />
+    <div id="highscore-overlay">
+      <ol id="highscore-list">
+        <li></li><li></li><li></li><li></li><li></li>
+        <li></li><li></li><li></li><li></li><li></li>
+      </ol>
+    </div>
+  </div>
+
+  <div id="hud">
+  <div id="livesDisplay"></div>
+  </div>
+
+  <script src="login.js"></script>
+  <script src="game.js"></script>
+
+  <script>
+  // 🌍 Eén globale highscorelijst voor ALLE apparaten
+  const DEFAULT_HIGHSCORES = [
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 },
+    { name: "—", score: 0, time: "00:00", level: 1 }
+  ];
+
+  // wordt gevuld vanuit Firebase of localStorage
+  let highscores = DEFAULT_HIGHSCORES.slice();
+
+  function sortHighscores(list) {
+    return list.sort((a, b) => {
+      const sa = Number(a.score) || 0;
+      const sb = Number(b.score) || 0;
+      if (sb === sa) {
+        // bij gelijke score: kortste tijd wint
+        return (a.time || "00:00").localeCompare(b.time || "00:00");
+      }
+      return sb - sa;
+    });
+  }
+
+  function updateHighscoreBoard() {
+    const highscoreList = document.getElementById("highscore-list");
+    if (!highscoreList) return;
+
+    highscoreList.innerHTML = "";
+    highscores.forEach((entry, index) => {
+      const levelText = entry.level ? `— Level ${entry.level}` : "";
+
+      const li = document.createElement("li");
+      li.className = "hs-entry";
+
+      if (entry.avatar) {
+        const img = document.createElement("img");
+        img.className = "hs-avatar";
+        img.src = entry.avatar;
+        img.alt = entry.name || "avatar";
+        li.appendChild(img);
+      }
+
+      const span = document.createElement("span");
+      span.textContent =
+        `${index + 1}. ${entry.name || "—"} — ${entry.score || 0} — ` +
+        `${entry.time || "00:00"} ${levelText}`;
+      li.appendChild(span);
+
+      highscoreList.appendChild(li);
+    });
+  }
+
+  function applyHighscoresFromArray(arr) {
+    if (!Array.isArray(arr) || !arr.length) {
+      highscores = DEFAULT_HIGHSCORES.slice();
+    } else {
+      highscores = sortHighscores(arr).slice(0, 10);
+    }
+    // lokaal bewaren als cache
+    localStorage.setItem("highscores", JSON.stringify(highscores));
+    updateHighscoreBoard();
+    if (typeof window.renderMobileHighscores === "function") {
+      window.renderMobileHighscores();
+    }
+  }
+
+  function loadHighscores() {
+    // ✅ eerst proberen via Firebase (gedeelde lijst)
+    if (window.scoresRef) {
+      window.scoresRef.on(
+        "value",
+        (snap) => {
+          const arr = [];
+          snap.forEach((child) => {
+            const v = child.val() || {};
+            arr.push({
+              name: v.name || "—",
+              score: v.score || 0,
+              time: v.time || "00:00",
+              level: v.level || 1,
+              avatar: v.avatar || null
+            });
+          });
+          applyHighscoresFromArray(arr);
+        },
+        (err) => {
+          console.error("❌ Fout bij laden highscores Firebase:", err);
+          // fallback: localStorage
+          const local = JSON.parse(localStorage.getItem("highscores") || "null");
+          applyHighscoresFromArray(local);
+        }
+      );
+    } else {
+      // geen Firebase → alleen localStorage
+      const local = JSON.parse(localStorage.getItem("highscores") || "null");
+      applyHighscoresFromArray(local);
+    }
+  }
+
+  // wordt door game.js aangeroepen aan het einde van een run
+  function checkAndUpdateHighscores(name, score, time, level = 1) {
+    const avatar =
+      window.currentPlayerAvatar ||
+      localStorage.getItem("playerAvatar") ||
+      null;
+
+    const entry = {
+      name: name || "—",
+      score: Number(score) || 0,
+      time: time || "00:00",
+      level: level || 1,
+      avatar: avatar,
+      created: Date.now()
+    };
+
+    if (window.scoresRef) {
+      // 🔥 push naar centrale Firebase-lijst
+      window.scoresRef.push(entry).catch((err) => {
+        console.error("❌ Kon score niet naar Firebase pushen:", err);
+        // fallback: lokaal updaten
+        highscores.push(entry);
+        applyHighscoresFromArray(highscores);
+      });
+    } else {
+      // geen Firebase → alleen lokaal
+      highscores.push(entry);
+      applyHighscoresFromArray(highscores);
+    }
+  }
+
+  window.addEventListener("load", loadHighscores);
+  window.checkAndUpdateHighscores = checkAndUpdateHighscores;
+</script>
+
+
+  <style>
+    #game-container {
+      position: relative;
+    }
+
+    #gameCanvas {
+      position: relative;
+      z-index: 99;
+    }
+
+    #bikeFlyer {
+      position: absolute;
+      left: 100%;
+      top: 100%;
+      width: 180px;
+      display: none;
+      z-index: 1;
+      pointer-events: none;
+    }
+  </style>
+  
+  <img id="bikeFlyer" src="pointpay-bike.png" style="position:absolute; display:none; width:180px;" />
+
+  <script>
+    function animateFlyer(flyerId, duration, delay) {
+      setTimeout(() => {
+        const flyer = document.getElementById(flyerId);
+        flyer.style.display = "block";
+
+        const startX = window.innerWidth + 100;
+        const endX = -200;
+        const startY = window.innerHeight + 100;
+        const endY = -150;
+        let startTime = null;
+
+        function animate(timestamp) {
+          if (!startTime) startTime = timestamp;
+          const elapsed = timestamp - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const step = elapsed / 16;
+
+          const baseX = startX + (endX - startX) * progress;
+          const baseY = startY + (endY - startY) * progress;
+
+          const wobbleX = Math.sin(step / 10) * 3;
+          const wobbleY = Math.cos(step / 15) * 3;
+
+          const x = baseX + wobbleX;
+          const y = baseY + wobbleY;
+
+          flyer.style.left = `${x}px`;
+          flyer.style.top = `${y}px`;
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            flyer.style.display = "none";
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }, delay);
+    }
+
+    animateFlyer("bikeFlyer", 20000, 1000);
+    setInterval(() => animateFlyer("bikeFlyer", 20000, 1000), 30000);
+  </script>
+
+  <!-- Muziekalbumscript -->
+  <script>
+    const albumTracks = [
+      new Audio("track1.mp3"),
+      new Audio("track2.mp3"),
+      new Audio("track3.mp3"),
+      new Audio("track4.mp3"),
+      new Audio("track5.mp3"),
+      new Audio("track6.mp3"),
+    ];
+
+    let currentTrackIndex = 0;
+    let musicPlaying = false;
+
+    albumTracks.forEach((track, index) => {
+      track.loop = false;
+
+      track.addEventListener("ended", () => {
+        currentTrackIndex = (currentTrackIndex + 1) % albumTracks.length;
+
+        albumTracks.forEach(t => {
+          t.pause();
+          t.currentTime = 0;
+        });
+
+        if (musicPlaying) {
+          albumTracks[currentTrackIndex].play();
+        }
+      });
+    });
+  </script>  
+  
+   <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const musicBtn = document.getElementById('musicToggle');
+    if (!musicBtn) return;
+
+    function updateBtnUI(playing){
+      musicBtn.title = playing ? 'Stop Music' : 'Play Music';
+      musicBtn.alt   = playing ? 'Stop Music' : 'Play Music';
+      musicBtn.src   = playing ? 'playmusic button.png' : 'playmusic button.png';
+    }
+    updateBtnUI(musicPlaying);
+
+    musicBtn.addEventListener('click', () => {
+      musicPlaying = !musicPlaying;
+
+      albumTracks.forEach(t => { t.pause(); t.currentTime = 0; });
+
+      if (musicPlaying) {
+        const p = albumTracks[currentTrackIndex].play();
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => { musicPlaying = false; updateBtnUI(false); });
+        }
+      } else {
+        currentTrackIndex = 0;
+      }
+
+      updateBtnUI(musicPlaying);
+      musicBtn.blur();
+    });
+  });
+  </script>
+  <!-- 💬 Chat open/dicht (desktop) + stickerpanel sluiten -->
+ 
+  <script>
+  (() => {
+    const chat      = document.getElementById('chatbox');
+    const toggleBtn = document.getElementById('chatToggleBtn');
+    const chatInput = document.getElementById('chatInput');
+    const stickerPanel = document.getElementById('chat-sticker-panel');
+
+    if (!chat) return;
+
+    // beginstand (ingeklapt of niet) uit localStorage
+    try {
+      if (localStorage.getItem('chatCollapsed') === '1') {
+        chat.classList.add('collapsed');
+      }
+    } catch (e) {}
+
+    // pijltje linksboven in de chat
+    toggleBtn?.addEventListener('click', () => {
+      const isCollapsed = chat.classList.toggle('collapsed');
+
+      try {
+        localStorage.setItem('chatCollapsed', isCollapsed ? '1' : '0');
+      } catch (e) {}
+
+      // 🔒 als we de chat dichtklappen: stickerpanel altijd weg
+      if (isCollapsed && stickerPanel) {
+        stickerPanel.style.display = 'none';
+      }
+
+      // als we 'm openen: naar laatste bericht scrollen
+      if (!isCollapsed) {
+        const msgs = document.getElementById('chatMessages');
+        if (msgs) {
+          msgs.scrollTop = msgs.scrollHeight;
+        }
+      }
+    });
+
+    // ESC → chat dicht + desktop-stickerpanel dicht
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') return;
+      if (document.activeElement === chatInput) return;
+      if (e.code === 'Escape') {
+        chat.classList.add('collapsed');
+        try {
+          localStorage.setItem('chatCollapsed', '1');
+        } catch (e) {}
+        if (stickerPanel) {
+          stickerPanel.style.display = 'none';
+        }
+      }
+    });
+  })();
+  </script>
+
+
+  <!-- 📱 mobiele chat open/dicht + sticker overlay -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const btn        = document.getElementById('chat-mobile-button');
+    const box        = document.getElementById('chatbox-mobile');
+    const close      = document.getElementById('chatMobileClose');
+    const overlay    = document.getElementById('chatStickerOverlay');
+    const stickerBtn = document.getElementById('chatMobileStickersBtn');
+    const mobileMsgs = document.getElementById('chatMobileMessages');
+
+    if (!box) return;
+
+    // 📱 open/dicht de mobiele chat
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const isOpen = box.classList.toggle('open');
+
+        // 👉 als mobile chat open gaat: scroll naar laatste bericht
+        if (isOpen && mobileMsgs) {
+          mobileMsgs.scrollTop = mobileMsgs.scrollHeight;
+        }
+
+        if (!isOpen && overlay) {
+          overlay.classList.remove('show');
+        }
+      });
+    }
+
+    // ❌ kruisje in de mobile chat
+    if (close) {
+      close.addEventListener('click', (e) => {
+        e.stopPropagation();
+        box.classList.remove('open');
+        if (overlay) overlay.classList.remove('show');
+      });
+    }
+
+    // 📷 knop in de mobile chat → overlay tonen/verbergen + naar onder scrollen
+    if (stickerBtn && overlay) {
+      stickerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!box.classList.contains('open')) {
+          box.classList.add('open');
+        }
+
+        // 👉 ook hier: altijd naar laatste bericht
+        if (mobileMsgs) {
+          mobileMsgs.scrollTop = mobileMsgs.scrollHeight;
+        }
+
+        overlay.classList.toggle('show');
+      });
+    }
+  });
+  </script>
+
+  <script>
+document.addEventListener('click', () => {
+  const box = document.getElementById('chatbox-mobile');
+  const overlay = document.getElementById('chatStickerOverlay');
+
+  if (!box || !overlay) return;
+
+  // Chat is zichtbaar → overlay mag blijven
+  const chatVisible =
+    box.classList.contains("open") &&
+    box.style.display !== "none";
+
+  // Chat is niet zichtbaar → overlay moet weg
+  if (!chatVisible) {
+    overlay.classList.remove('show');
+    overlay.style.display = "none";
+  }
+});
+</script>
+
+  
+
+  <!-- 📱 eenvoudige canvas-scale voor mobiel, zonder springen -->
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.innerWidth > 768) return;   // alleen mobiel
+
+    const c = document.getElementById('gameCanvas');
+    if (!c) return;
+
+    const ratio = 600 / 645;              // zelfde verhouding als jouw game
+    const vw = window.innerWidth;
+
+    const canvasWidth  = Math.min(vw * 0.84, 550);
+    const canvasHeight = canvasWidth * ratio;
+
+    c.width  = canvasWidth;               // interne resolutie
+    c.height = canvasHeight;              // interne resolutie
+
+  });
+  </script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn   = document.getElementById('mobileHighscoreBtn');
+    const panel = document.getElementById('mobileHighscorePanel');
+    const list  = document.getElementById('mobileHighscoreList');
+
+    if (!btn || !panel || !list) return;
+
+    // open/dicht klappen
+    btn.addEventListener('click', () => {
+      panel.classList.toggle('show');
+    });
+
+    function renderMobileHighscores() {
+      list.innerHTML = '';
+
+      // gebruik dezelfde globale lijst als desktop
+      let arr = Array.isArray(window.highscores) ? window.highscores : null;
+
+      // kleine fallback als global nog niet gevuld is
+      if (!arr || !arr.length) {
+        try {
+          const fromLocal = JSON.parse(localStorage.getItem('highscores') || '[]');
+          if (Array.isArray(fromLocal) && fromLocal.length) {
+            arr = fromLocal;
+          } else {
+            arr = [];
+          }
+        } catch(e) {
+          arr = [];
+        }
+      }
+
+      arr.forEach((entry, i) => {
+        const li = document.createElement('li');
+        li.className = "hs-entry";
+
+        if (entry.avatar) {
+          const img = document.createElement('img');
+          img.className = "hs-avatar";
+          img.src = entry.avatar;
+          img.alt = entry.name || 'avatar';
+          li.appendChild(img);
+        }
+
+        const span = document.createElement('span');
+        span.textContent =
+          `${i + 1}. ${entry.name || '—'} — ${entry.score || 0} (${entry.time || '00:00'})`;
+        li.appendChild(span);
+
+        list.appendChild(li);
+      });
+    }
+
+    // beschikbaar voor het andere script
+    window.renderMobileHighscores = renderMobileHighscores;
+
+    // eerste keer vullen
+    renderMobileHighscores();
+  });
+</script>
+
+  <script>
+  const pacmanBtn = document.getElementById("pacman-button");
+  if (pacmanBtn) {
+    pacmanBtn.addEventListener("click", () => {
+      window.location.href = "/pacman/";
+    });
+  }
+</script>
+
+ 
+  <script>
+  (function () {
+    var canvas = document.getElementById('gameCanvas');
+    if (!canvas) return;
+
+    function blockDefault(e) {
+      e.preventDefault();
+    }
+
+    canvas.addEventListener('touchstart', blockDefault, { passive: false });
+    canvas.addEventListener('touchend', blockDefault, { passive: false });
+    canvas.addEventListener('touchmove', blockDefault, { passive: false });
+  })();
+</script>
+
+</body>
+</html>
+
+
+
