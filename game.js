@@ -4015,22 +4015,25 @@ function saveHighscore() {
     });
   }
 
-  // ===== 2) FIREBASE =====
-  if (window.scoresRef) {
-    window.scoresRef.push({
-      name: newScore.name,
-      score: newScore.score,
-      time: newScore.time,
-      level: newScore.level,
-      avatar: newScore.avatar || null,
-      created: Date.now()
+    // ===== 2) SERVER (PHP API) =====
+  fetch('api/save_score.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newScore)
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log('[score] naar server gestuurd ✅', data);
+      // als de server een top-10 terugstuurt, kun je die gebruiken
+      if (data && Array.isArray(data.top) && typeof window.applyHighscoresFromArray === 'function') {
+        window.applyHighscoresFromArray(data.top);
+      }
     })
-    .then(() => console.log("[score] naar Firebase gestuurd ✅"))
-    .catch(err => console.error("[score] Firebase fout:", err));
-  } else {
-    console.warn("[score] geen window.scoresRef gevonden – alleen lokaal opgeslagen");
-  }
+    .catch((err) => {
+      console.error('[score] serverfout:', err);
+    });
 }
+
 
 
 
