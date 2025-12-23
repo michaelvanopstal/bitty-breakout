@@ -655,40 +655,26 @@ function addMessage(name, text, imgData = null){
     }
   }
 
-  function loadHighscores() {
-    // ✅ eerst proberen via Firebase (gedeelde lijst)
-    if (window.scoresRef) {
-      window.scoresRef.on(
-        "value",
-        (snap) => {
-          const arr = [];
-          snap.forEach((child) => {
-            const v = child.val() || {};
-            arr.push({
-              name: v.name || "—",
-              score: v.score || 0,
-              time: v.time || "00:00",
-              level: v.level || 1,
-              avatar: v.avatar || null
-            });
-          });
+   function loadHighscores() {
+    // 👉 eerst proberen via je eigen PHP-API
+    fetch('api/get_scores.php')
+      .then((res) => res.json())
+      .then((arr) => {
+        if (Array.isArray(arr) && arr.length) {
           applyHighscoresFromArray(arr);
-        },
-        (err) => {
-          console.error("❌ Fout bij laden highscores Firebase:", err);
+        } else {
           // fallback: localStorage
           const local = JSON.parse(localStorage.getItem("highscores") || "null");
           applyHighscoresFromArray(local);
         }
-      );
-    } else {
-      // geen Firebase → alleen localStorage
-      const local = JSON.parse(localStorage.getItem("highscores") || "null");
-      applyHighscoresFromArray(local);
-    }
+      })
+      .catch((err) => {
+        console.error("❌ Fout bij laden highscores van server:", err);
+        const local = JSON.parse(localStorage.getItem("highscores") || "null");
+        applyHighscoresFromArray(local);
+      });
   }
 
-  // wordt door game.js aangeroepen aan het einde van een run
   function checkAndUpdateHighscores(name, score, time, level = 1) {
     const avatar =
       window.currentPlayerAvatar ||
@@ -704,23 +690,34 @@ function addMessage(name, text, imgData = null){
       created: Date.now()
     };
 
-    if (window.scoresRef) {
-      // 🔥 push naar centrale Firebase-lijst
-      window.scoresRef.push(entry).catch((err) => {
-        console.error("❌ Kon score niet naar Firebase pushen:", err);
-        // fallback: lokaal updaten
-        highscores.push(entry);
-        applyHighscoresFromArray(highscores);
+    // 👉 lokaal alvast tonen (snelle feedback)
+    highscores.push(entry);
+    applyHighscoresFromArray(highscores);
+
+    // 👉 naar jouw PHP-API sturen
+    fetch('api/save_score.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry)
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // als de server de actuele top-10 terugstuurt, meteen updaten
+        if (data && Array.isArray(data.top)) {
+          applyHighscoresFromArray(data.top);
+        }
+      })
+      .catch((err) => {
+        console.error("❌ Kon score niet naar server sturen:", err);
       });
-    } else {
-      // geen Firebase → alleen lokaal
-      highscores.push(entry);
-      applyHighscoresFromArray(highscores);
-    }
   }
 
-  window.addEventListener("load", loadHighscores);
+
+    window.addEventListener("load", loadHighscores);
   window.checkAndUpdateHighscores = checkAndUpdateHighscores;
+  window.applyHighscoresFromArray = applyHighscoresFromArray;
+</script>
+
 </script>
 
 
