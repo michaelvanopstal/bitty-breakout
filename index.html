@@ -320,8 +320,7 @@
       all.forEach(appendChatMessage);
     }
 
-    // bericht toevoegen
-function addMessage(name, text, imgData = null){
+ function addMessage(name, text, imgData = null){
   // 🔸 avatar ophalen uit login (globaal of localStorage)
   const avatar =
     (typeof window.currentPlayerAvatar !== "undefined" && window.currentPlayerAvatar) ||
@@ -336,38 +335,59 @@ function addMessage(name, text, imgData = null){
     avatar: avatar
   };
 
-  // 👉 naar Firebase (online chat)
-  if (window.chatRef) {
-    window.chatRef.push(msg);
-  } else {
-    // 👉 lokale fallback
-    let all = getStore();
-    if(all.length >= LIMIT){
-      all = [{
-        name:'System',
-        text:'Chat automatisch geleegd (100 berichten).',
-        time:nowTime()
-      }];
-    }
-    all.push(msg);
-    setStore(all);
-    render(all);
+  // 👉 altijd lokaal beheren (snelle feedback + fallback)
+  let all = getStore();
+  if (all.length >= LIMIT) {
+    all = [{
+      name: 'System',
+      text: 'Chat automatisch geleegd (100 berichten).',
+      time: nowTime(),
+      avatar: null,
+      img: null
+    }];
   }
+  all.push(msg);
+  setStore(all);
+  render(all);
+
+  // 👉 naar jouw eigen PHP-API sturen
+  fetch('api/send_chat.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(msg)
+  }).catch(err => {
+    console.error('❌ Chat naar server sturen mislukt:', err);
+  });
 }
 
-    // beschikbaar maken voor mobiel script
-    window.addMessage = addMessage;
-    window.detectPlayerName = detectPlayerName;
+// beschikbaar maken voor mobiel script
+window.addMessage = addMessage;
+window.detectPlayerName = detectPlayerName;
 
-    // Firebase luisteraar
-    if (window.chatRef) {
-      window.chatRef.limitToLast(200).on('child_added', snap => {
-        const m = snap.val();
-        appendChatMessage(m);
-      });
-    } else {
+// 👉 Chat laden vanaf je eigen server
+function loadChatFromServer() {
+  fetch('api/get_chat.php')
+    .then(res => res.json())
+    .then(arr => {
+      if (Array.isArray(arr)) {
+        render(arr);
+        setStore(arr); // cache in localStorage als backup
+      } else {
+        render(getStore());
+      }
+    })
+    .catch(err => {
+      console.error('❌ Chat laden van server mislukt:', err);
+      // fallback: wat er lokaal staat
       render(getStore());
-    }
+    });
+}
+
+// één keer direct laden...
+loadChatFromServer();
+// ...en elke 5 seconden verversen
+setInterval(loadChatFromServer, 5000);
+
 
     // desktop form
     if ($form) {
